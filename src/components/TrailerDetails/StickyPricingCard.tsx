@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
+import { SelectRentalDatesModal } from "./SelectRentalDatesModal.tsx";
+import {
+  IdentityVerificationModal,
+  type IdentityVerificationData,
+} from "./IdentityVerificationModal.tsx";
 
 export type TrailerBookingInfo = {
   title: string;
@@ -22,21 +27,55 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [dispatcher, setDispatcher] = useState("");
+  const [showRentalDatesModal, setShowRentalDatesModal] = useState(false);
+  const [showIdentityModal, setShowIdentityModal] = useState(false);
+  const [pendingBookingState, setPendingBookingState] = useState<
+    | {
+        title: string;
+        subtitle: string;
+        image: string;
+        totalPrice: string;
+        dates: string;
+        checkIn: string;
+        checkOut: string;
+      }
+    | null
+  >(null);
 
   const handleReserve = () => {
+    setShowRentalDatesModal(true);
+  };
+
+  const handleRentalDatesNext = (pickupDate: string, returnDate: string) => {
     const dates =
-      checkIn && checkOut ? `${checkIn} – ${checkOut}` : "17-15 March 2026";
-    navigate("/request-to-book", {
+      pickupDate && returnDate
+        ? `${pickupDate} – ${returnDate}`
+        : checkIn && checkOut
+          ? `${checkIn} – ${checkOut}`
+          : "17-15 March 2026";
+    setPendingBookingState({
+      title: trailer?.title ?? "Gooseneck Trailer - Texas, USA",
+      subtitle:
+        trailer?.subtitle ??
+        "25FT Flatbed · Dual Axle · Industrial Steel Frame",
+      image: trailer?.image ?? "",
+      totalPrice: price,
+      dates,
+      checkIn: pickupDate || checkIn,
+      checkOut: returnDate || checkOut,
+    });
+    setShowIdentityModal(true);
+  };
+
+  const handleIdentityContinue = (data: IdentityVerificationData) => {
+    if (!pendingBookingState) return;
+    navigate("/liability-agreement", {
       state: {
-        title: trailer?.title ?? "Gooseneck Trailer - Texas, USA",
-        subtitle: trailer?.subtitle ?? "25FT Flatbed · Dual Axle · Industrial Steel Frame",
-        image: trailer?.image ?? "",
-        totalPrice: price,
-        dates,
-        checkIn,
-        checkOut,
+        ...pendingBookingState,
+        identityVerification: data,
       },
     });
+    setPendingBookingState(null);
   };
 
   return (
@@ -108,6 +147,18 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
           Reserve
         </button>
       </div>
+
+      <SelectRentalDatesModal
+        isOpen={showRentalDatesModal}
+        onClose={() => setShowRentalDatesModal(false)}
+        onNext={handleRentalDatesNext}
+      />
+
+      <IdentityVerificationModal
+        isOpen={showIdentityModal}
+        onClose={() => setShowIdentityModal(false)}
+        onContinue={handleIdentityContinue}
+      />
     </div>
   );
 };

@@ -31,6 +31,14 @@ const BottomBar: React.FC = () => {
               </li>
               <li>
                 <Link
+                  to="/booking"
+                  className="no-underline text-black text-[0.9rem]"
+                >
+                  Booking Screen
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/trust-safety"
                   className="no-underline text-black text-[0.9rem]"
                 >

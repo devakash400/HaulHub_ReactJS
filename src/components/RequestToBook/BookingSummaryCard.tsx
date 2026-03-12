@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import type { BookingSummary } from "./types.ts";
 
 export type BookingSummaryCardProps = {
@@ -56,12 +57,9 @@ export const BookingSummaryCard: React.FC<BookingSummaryCardProps> = ({
       {/* Cancellation */}
       <p className="text-sm text-gray-700 m-0 mb-4">
         {data.cancellationPreview}{" "}
-        <a
-          href="#"
-          className="underline text-gray-800 hover:text-[#2F5D3A]"
-        >
+        <Link to="/trust-safety" className="underline text-gray-800 hover:text-[#2F5D3A]">
           {data.policyLinkText}
-        </a>
+        </Link>
       </p>
 
       {/* Price details - no line */}
@@ -73,12 +71,12 @@ export const BookingSummaryCard: React.FC<BookingSummaryCardProps> = ({
           <span>Total USA</span>
           <span>{data.totalPrice}</span>
         </div>
-        <a
-          href="#"
+        <button
+          type="button"
           className="text-xs text-gray-600 underline hover:text-[#2F5D3A]"
         >
           Price breakdown
-        </a>
+        </button>
       </div>
     </div>
   );

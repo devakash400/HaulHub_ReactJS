@@ -9,6 +9,7 @@ export { ConfirmDeleteModal } from "./ConfirmDeleteModal.tsx";
 export { RatingSummaryCard } from "./RatingSummaryCard.tsx";
 export { FeatureIconsSection } from "./FeatureIconsSection.tsx";
 export { StickyPricingCard } from "./StickyPricingCard.tsx";
+export { SelectRentalDatesModal } from "./SelectRentalDatesModal.tsx";
 export { GuestFavouriteSection } from "./GuestFavouriteSection.tsx";
 export { ReviewsSection } from "./ReviewsSection.tsx";
 export { PolicySection } from "./PolicySection.tsx";

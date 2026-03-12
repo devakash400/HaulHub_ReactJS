@@ -96,7 +96,7 @@ const AllTrailerPhotos: React.FC = () => {
             >
               <img
                 src={photo.url || PLACEHOLDER}
-                alt={`Trailer photo ${photo.id}`}
+                alt={`Trailer ${photo.id}`}
                 className="w-full h-full object-cover rounded-xl transition-transform duration-300 ease-out hover:scale-105"
               />
             </button>
@@ -107,7 +107,7 @@ const AllTrailerPhotos: React.FC = () => {
       {modalPhoto && (
         <ImageModal
           imageUrl={modalPhoto.url || PLACEHOLDER}
-          alt={`Trailer photo ${modalPhoto.id}`}
+          alt={`Trailer ${modalPhoto.id}`}
           onClose={closeModal}
         />
       )}

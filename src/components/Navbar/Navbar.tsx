@@ -40,14 +40,8 @@ const Navbar: React.FC = () => {
         />
       </Link>
 
-      {/* Right: List Your Trailer + dropdown toggle */}
+      {/* Right: dropdown toggle */}
       <div ref={dropdownRef} className="relative flex items-center gap-3 sm:gap-5 text-[0.95rem] text-black shrink-0 min-w-0">
-        <Link
-          to="/list-trailer"
-          className="text-sm sm:text-[15px] font-medium text-inherit no-underline cursor-pointer whitespace-nowrap"
-        >
-          List Your Trailer
-        </Link>
         <button
           type="button"
           onClick={toggleDrawer}
@@ -82,17 +76,6 @@ const Navbar: React.FC = () => {
                   onClick={closeDrawer}
                 >
                   <Link
-                    to="/list-trailer"
-                    className="text-inherit no-underline cursor-pointer"
-                  >
-                    List Your Trailer
-                  </Link>
-                </li>
-                <li
-                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                  onClick={closeDrawer}
-                >
-                  <Link
                     to="/about"
                     className="text-inherit no-underline cursor-pointer"
                   >
@@ -108,6 +91,28 @@ const Navbar: React.FC = () => {
                     className="text-inherit no-underline cursor-pointer"
                   >
                     Contact
+                  </Link>
+                </li>
+                <li
+                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                  onClick={closeDrawer}
+                >
+                  <Link
+                    to="/booking"
+                    className="text-inherit no-underline cursor-pointer"
+                  >
+                    Booking Screen
+                  </Link>
+                </li>
+                <li
+                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                  onClick={closeDrawer}
+                >
+                  <Link
+                    to="/profile"
+                    className="text-inherit no-underline cursor-pointer"
+                  >
+                    Profile
                   </Link>
                 </li>
                 <li
