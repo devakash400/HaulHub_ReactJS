@@ -20,6 +20,30 @@ body {
   background-color: #F6F1E8;
 }
 
+/* Global scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #389131 #E5E7EB;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #E5E7EB;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #389131;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #2f7829;
+}
+
 #root {
   overflow-x: hidden;
   width: 100%;
