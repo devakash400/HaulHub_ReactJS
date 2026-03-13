@@ -15,6 +15,14 @@ const BottomBar: React.FC = () => {
             <ul className="list-none font-medium p-0 m-0 flex flex-col gap-1.5 text-[0.9rem] text-black">
               <li>
                 <Link
+                  to="/wishlist"
+                  className="no-underline text-black text-[0.9rem]"
+                >
+                  Wishlist
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/why-choose"
                   className="no-underline text-black text-[0.9rem]"
                 >

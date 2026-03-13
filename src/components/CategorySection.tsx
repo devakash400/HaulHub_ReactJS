@@ -1,7 +1,10 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { images } from "../assets/images/index.ts";
-import type { WishlistItem } from "./TrailerDetails/WishlistModal.tsx";
+import { RootState } from "../store/index.ts";
+import { toggleWishlistItem } from "../store/wishlistSlice.ts";
+import { WishlistLoginModal } from "./TrailerDetails/WishlistLoginModal.tsx";
 
 type CategoryItem = {
   id: string | number;
@@ -21,37 +24,35 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   items,
 }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [cardsPerRow, setCardsPerRow] = useState(1);
   const [lastClickedDirection, setLastClickedDirection] = useState<
     "left" | "right" | null
   >(null);
-  const [wishlistIds, setWishlistIds] = useState<Set<string | number>>(
-    () => new Set()
+  const wishlistItems = useSelector(
+    (state: RootState) => state.wishlist.items
   );
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+  const [wishlistIds, setWishlistIds] = useState<Set<string | number>>(() => {
+    const ids = wishlistItems.map((w) => {
+      const num = Number(w.id);
+      return Number.isNaN(num) ? w.id : num;
+    });
+    return new Set(ids);
+  });
+  const [wishlistLoginOpen, setWishlistLoginOpen] = useState(false);
 
   useEffect(() => {
-    // sync initial wishlist ids from localStorage
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("wishlistItems");
-        if (stored) {
-          const parsed = JSON.parse(stored) as WishlistItem[];
-          const normalized = Array.isArray(parsed)
-            ? parsed.map((w) => ({ ...w, id: String(w.id) }))
-            : [];
-          localStorage.setItem("wishlistItems", JSON.stringify(normalized));
-          const ids = normalized.map((w) => {
-            const num = Number(w.id);
-            return Number.isNaN(num) ? w.id : num;
-          });
-          setWishlistIds(new Set(ids));
-        }
-      } catch {
-        // ignore parse errors
-      }
-    }
+    // sync initial wishlist ids from redux
+    const ids = wishlistItems.map((w) => {
+      const num = Number(w.id);
+      return Number.isNaN(num) ? w.id : num;
+    });
+    setWishlistIds(new Set(ids));
 
     const updateCardsPerRow = () => {
       const width = window.innerWidth;
@@ -71,7 +72,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     return () => {
       window.removeEventListener("resize", updateCardsPerRow);
     };
-  }, []);
+  }, [wishlistItems]);
 
   const cardWidth = 255;
   const gap = 32; // 2rem
@@ -79,64 +80,31 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     cardsPerRow * cardWidth + (cardsPerRow - 1) * gap;
 
   const toggleWishlist = (item: CategoryItem) => {
+    if (!isAuthenticated) {
+      setWishlistLoginOpen(true);
+      return;
+    }
+
     const id = item.id;
 
     setWishlistIds((prev) => {
       const next = new Set(prev);
-
-      let current: WishlistItem[] = [];
-      if (typeof window !== "undefined") {
-        try {
-          const stored = localStorage.getItem("wishlistItems");
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) {
-              current = parsed as WishlistItem[];
-            }
-          }
-        } catch {
-          // ignore parse errors
-        }
-      }
-
-      const idString = String(id);
-      const existsInWishlist = current.some(
-        (w) => String(w.id) === idString
-      );
-
       if (next.has(id)) {
         next.delete(id);
       } else {
         next.add(id);
       }
-
-      let nextWishlist: WishlistItem[];
-      if (existsInWishlist) {
-        nextWishlist = current.filter(
-          (w) => String(w.id) !== idString
-        );
-      } else {
-        nextWishlist = [
-          ...current,
-          {
-            id: idString,
-            title: item.modelLabel,
-            subtitle: item.priceLabel,
-            imageUrl: item.image,
-          },
-        ];
-      }
-
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem("wishlistItems", JSON.stringify(nextWishlist));
-        } catch {
-          // ignore quota errors
-        }
-      }
-
       return next;
     });
+
+    dispatch(
+      toggleWishlistItem({
+        id,
+        title: item.modelLabel,
+        subtitle: item.priceLabel,
+        imageUrl: item.image,
+      })
+    );
   };
 
   const handleScroll = (direction: "left" | "right") => {
@@ -273,6 +241,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
           </div>
         </div>
       </div>
+
+      <WishlistLoginModal
+        isOpen={wishlistLoginOpen}
+        onClose={() => setWishlistLoginOpen(false)}
+        onLoginClick={() => navigate("/login")}
+      />
     </section>
   );
 };

@@ -11,9 +11,13 @@ type Review = {
 
 type ReviewsSectionProps = {
   reviews: Review[];
+  onShowAll?: () => void;
 };
 
-export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ reviews }) => {
+export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
+  reviews,
+  onShowAll,
+}) => {
   let displayReviews: Review[] = reviews.slice(0, 6);
 
   // If there are fewer than 6 reviews, repeat existing ones to fill the layout,
@@ -71,6 +75,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ reviews }) => {
       <div className="mt-6 flex justify-end">
         <button
           type="button"
+          onClick={onShowAll}
           className="bg-[#389131] text-white px-6 py-3 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
         >
           Show all reviews

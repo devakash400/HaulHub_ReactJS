@@ -8,6 +8,11 @@ import {
   LogOut,
   ChevronRight,
 } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { logout } from "../../store/authSlice.ts";
+import { logout as logoutApi } from "../../api/authApi.ts";
+import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
 
 type LeftItemKey =
   | "personal"
@@ -74,6 +79,8 @@ const initials = (name: string) => (name.trim()[0] ? name.trim()[0].toUpperCase(
 const AccountSettings: React.FC = () => {
   const navigate = useNavigate();
   const [active, setActive] = useState<LeftItemKey>("personal");
+  const dispatch = useDispatch();
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   const rightTitle = useMemo(() => {
     switch (active) {
@@ -90,9 +97,17 @@ const AccountSettings: React.FC = () => {
     }
   }, [active]);
 
-  const handleLogout = () => {
-    if (typeof window !== "undefined") localStorage.removeItem("isLoggedIn");
-    navigate("/", { replace: true });
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } finally {
+      dispatch(logout());
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("openLoginAfterLogout", "1");
+      }
+      navigate("/", { replace: true });
+      toast.success("Logged out successfully");
+    }
   };
 
   return (
@@ -163,7 +178,7 @@ const AccountSettings: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setActive("logout");
-                      handleLogout();
+                      setIsLogoutConfirmOpen(true);
                     }}
                     className="w-full px-4 py-4 flex items-center justify-between text-left bg-white hover:bg-gray-50"
                   >
@@ -355,6 +370,15 @@ const AccountSettings: React.FC = () => {
           </section>
         </div>
       </div>
+
+      <LogoutConfirmModal
+        isOpen={isLogoutConfirmOpen}
+        onCancel={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={() => {
+          setIsLogoutConfirmOpen(false);
+          void handleLogout();
+        }}
+      />
     </div>
   );
 };

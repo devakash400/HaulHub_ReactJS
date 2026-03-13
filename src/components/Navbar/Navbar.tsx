@@ -1,10 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import { images } from "../../assets/images/index.ts";
+import LoginModal from "../../pages/Auth/Login/Login.tsx";
+import { SignUpModal, SignUpData } from "../TrailerDetails/SignUpModal.tsx";
+import { RootState } from "../../store";
+import { loginSuccess, logout } from "../../store/authSlice.ts";
+import { logout as logoutApi, register } from "../../api/authApi.ts";
+import { LogoutConfirmModal } from "../Auth/LogoutConfirmModal.tsx";
 
 const Navbar: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
 
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -12,6 +28,16 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   useEffect(() => {
     setIsDrawerOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const shouldOpen = window.sessionStorage.getItem("openLoginAfterLogout");
+    if (shouldOpen === "1") {
+      window.sessionStorage.removeItem("openLoginAfterLogout");
+      setIsSignUpOpen(false);
+      setIsLoginOpen(true);
+    }
   }, [location.pathname]);
 
   useEffect(() => {
@@ -24,6 +50,20 @@ const Navbar: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isDrawerOpen]);
+
+  const handleLogout = async () => {
+    closeDrawer();
+    try {
+      await logoutApi();
+    } finally {
+      dispatch(logout());
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("openLoginAfterLogout", "1");
+      }
+      navigate("/", { replace: true });
+      toast.success("Logged out successfully");
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-20 flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#F9F8F3] border-b border-gray-200 font-sans min-w-0 w-full">
@@ -115,22 +155,103 @@ const Navbar: React.FC = () => {
                     Profile
                   </Link>
                 </li>
-                <li
-                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                  onClick={closeDrawer}
-                >
-                  <Link
-                    to="/login"
-                    className="text-inherit no-underline cursor-pointer"
+                {!isAuthenticated ? (
+                  <li
+                    className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                    onClick={() => {
+                      closeDrawer();
+                      setIsSignUpOpen(false);
+                      setIsLoginOpen(true);
+                    }}
                   >
-                    Login / Signup
-                  </Link>
-                </li>
+                    <span className="text-inherit no-underline cursor-pointer">
+                      Login / Signup
+                    </span>
+                  </li>
+                ) : (
+                  <li
+                    className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                    onClick={() => setIsLogoutConfirmOpen(true)}
+                  >
+                    <span className="text-inherit no-underline cursor-pointer">
+                      Logout
+                    </span>
+                  </li>
+                )}
               </ul>
             </div>
           </div>
         )}
       </div>
+
+      {/* Auth modals */}
+      {isLoginOpen && (
+        <LoginModal
+          isOpen={isLoginOpen && !isSignUpOpen}
+          onClose={() => setIsLoginOpen(false)}
+          onSuccess={() => {
+            setIsLoginOpen(false);
+            setIsSignUpOpen(false);
+            navigate("/");
+          }}
+          onOpenSignUp={() => {
+            setIsLoginOpen(false);
+            setIsSignUpOpen(true);
+          }}
+        />
+      )}
+      <SignUpModal
+        isOpen={isSignUpOpen}
+        onClose={() => setIsSignUpOpen(false)}
+        onSubmit={async (data: SignUpData) => {
+          try {
+            const res = await register({
+              fullName: `${data.firstName} ${data.lastName}`.trim(),
+              email: data.email,
+              password: data.password,
+            });
+
+            const fullName =
+              typeof res.user.fullName === "string"
+                ? res.user.fullName.trim()
+                : `${data.firstName} ${data.lastName}`.trim();
+            const [firstName, ...restName] = fullName
+              .split(" ")
+              .filter(Boolean);
+            const lastName =
+              restName.length > 0 ? restName.join(" ") : undefined;
+
+            dispatch(
+              loginSuccess({
+                firstName: firstName || undefined,
+                lastName,
+                email: res.user.email || data.email,
+              })
+            );
+            // eslint-disable-next-line no-console
+            console.log("register api response:", res);
+            setIsSignUpOpen(false);
+            navigate("/");
+          } catch (err: any) {
+            const message =
+              err?.response?.data?.message ||
+              err?.message ||
+              "Unable to create account. Please try again.";
+            // eslint-disable-next-line no-console
+            console.error("register api error:", err?.response?.data ?? err);
+            toast.error(message);
+          }
+        }}
+      />
+
+      <LogoutConfirmModal
+        isOpen={isLogoutConfirmOpen}
+        onCancel={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={() => {
+          setIsLogoutConfirmOpen(false);
+          void handleLogout();
+        }}
+      />
     </nav>
   );
 };

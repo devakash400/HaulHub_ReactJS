@@ -1,21 +1,42 @@
 import React, { useEffect, useMemo, useState, MouseEvent } from "react";
 import { images } from "../../../assets/images/index.ts";
 import { ArrowLeft, Eye, EyeOff, X } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../../store/authSlice.ts";
+import {
+  login as loginApi,
+  phoneLogin as phoneLoginApi,
+  checkEmail as checkEmailApi,
+  checkPhone as checkPhoneApi,
+  forgotPassword as forgotPasswordApi,
+} from "../../../api/authApi.ts";
+import { toast } from "react-toastify";
 
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onOpenSignUp?: () => void;
 };
 
 type Step = "email" | "password" | "reset" | "newPassword";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const LoginModal: React.FC<LoginModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  onOpenSignUp,
+}) => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<Step>("email");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   // Reset flow
   const [resetPhone, setResetPhone] = useState("");
@@ -25,6 +46,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpError, setOtpError] = useState<string | null>(null);
 
+  const [isForgotSubmitting, setIsForgotSubmitting] = useState(false);
+  const [forgotError, setForgotError] = useState<string | null>(null);
+  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
+
   // New password flow
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -33,6 +58,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
 
   const isEmailFilled = email.trim().length > 0;
   const isEmailValid = useMemo(() => emailRegex.test(email.trim()), [email]);
+  const isPhoneLike = useMemo(() => {
+    const digits = email.replace(/\D/g, "");
+    return !isEmailValid && digits.length >= 10;
+  }, [email, isEmailValid]);
+  const isIdentifierValid = isEmailValid || isPhoneLike;
   const isPasswordFilled = useMemo(() => password.trim().length > 0, [password]);
 
   const resetCanContinue = useMemo(() => {
@@ -78,17 +108,101 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
     else onClose();
   };
 
-  const handleEmailContinue = () => {
-    if (!isEmailFilled || !isEmailValid) return;
-    setStep("password");
+  const handleEmailContinue = async () => {
+    if (!isEmailFilled || !isIdentifierValid || isCheckingEmail) return;
+    setIsCheckingEmail(true);
+    setEmailError(null);
+    try {
+      const trimmed = email.trim();
+      if (emailRegex.test(trimmed)) {
+        const res = await checkEmailApi({ email: trimmed });
+        // eslint-disable-next-line no-console
+        console.log("check-email response:", res);
+
+        const exists =
+          res &&
+          typeof res === "object" &&
+          "data" in res &&
+          (res as any).data &&
+          typeof (res as any).data === "object" &&
+          "exists" in (res as any).data
+            ? Boolean((res as any).data.exists)
+            : false;
+
+        if (!exists) {
+          const msg = "This email is not registered. Please check or sign up.";
+          setEmailError(msg);
+          toast.error(msg);
+          return;
+        }
+      } else {
+        const res = await checkPhoneApi({ phoneNumber: trimmed });
+        // eslint-disable-next-line no-console
+        console.log("check-phone response:", res);
+
+        const exists =
+          res &&
+          typeof res === "object" &&
+          "data" in res &&
+          (res as any).data &&
+          typeof (res as any).data === "object" &&
+          "exists" in (res as any).data
+            ? Boolean((res as any).data.exists)
+            : false;
+
+        if (!exists) {
+          const msg =
+            "This phone number is not registered. Please check or sign up.";
+          setEmailError(msg);
+          toast.error(msg);
+          return;
+        }
+      }
+
+      setStep("password");
+    } catch (err) {
+      const msg = "Unable to verify. Please try again.";
+      setEmailError(msg);
+      toast.error(msg);
+    } finally {
+      setIsCheckingEmail(false);
+    }
   };
 
-  const handleLoginContinue = () => {
-    if (!isPasswordFilled) return;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("isLoggedIn", "true");
+  const handleLoginContinue = async () => {
+    if (!isPasswordFilled || isSubmitting) return;
+    setIsSubmitting(true);
+    setLoginError(null);
+    try {
+      const trimmed = email.trim();
+      const loginRes = emailRegex.test(trimmed)
+        ? await loginApi({ email: trimmed, password })
+        : await phoneLoginApi({ phoneNumber: trimmed, password });
+      // For debugging / verification in console
+      // eslint-disable-next-line no-console
+      console.log("login response:", loginRes);
+      const { user } = loginRes;
+      const fullName =
+        typeof user.fullName === "string" ? user.fullName.trim() : "";
+      const [firstName, ...restName] = fullName.split(" ").filter(Boolean);
+      const lastName = restName.length > 0 ? restName.join(" ") : undefined;
+
+      dispatch(
+        loginSuccess({
+          firstName: firstName || undefined,
+          lastName,
+          email: user.email || email,
+        })
+      );
+      toast.success("Logged in successfully");
+      onSuccess();
+    } catch (err) {
+      const msg = "Unable to login. Please check your credentials.";
+      setLoginError(msg);
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
     }
-    onSuccess();
   };
 
   const handleOpenReset = () => {
@@ -100,17 +214,45 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
     setShowOtpModal(false);
   };
 
-  const handleResetContinue = () => {
-    if (!resetCanContinue) return;
+  const handleResetContinue = async () => {
+    if (!resetCanContinue || isForgotSubmitting) return;
     setOtp("");
     setOtpError(null);
-    setShowOtpModal(true);
+    setForgotError(null);
+    setForgotSuccess(null);
+
+    const emailToUse = resetEmail.trim() || email.trim();
+    if (!emailRegex.test(emailToUse)) {
+      const msg = "Please enter a valid email address for password reset.";
+      setForgotError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    setIsForgotSubmitting(true);
+    try {
+      const res = await forgotPasswordApi({ email: emailToUse });
+      // eslint-disable-next-line no-console
+      console.log("forgot-password response:", res);
+      const msg = "Password reset link has been sent to your email.";
+      setForgotSuccess(msg);
+      toast.success(msg);
+      setShowOtpModal(true);
+    } catch (err) {
+      const msg = "Unable to send reset email. Please try again.";
+      setForgotError(msg);
+      toast.error(msg);
+    } finally {
+      setIsForgotSubmitting(false);
+    }
   };
 
   const handleVerifyOtp = () => {
     // Demo OTP validation: accept "1234" only
     if (otp.trim() !== "1234") {
-      setOtpError("Invalid OTP. Please try again");
+      const msg = "Invalid OTP. Please try again.";
+      setOtpError(msg);
+      toast.error(msg);
       return;
     }
     setShowOtpModal(false);
@@ -130,9 +272,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
   const handleNewPasswordContinue = () => {
     if (!canSetNewPassword) return;
     // After reset, go back to login + auto success for demo
-    if (typeof window !== "undefined") {
-      localStorage.setItem("isLoggedIn", "true");
-    }
+    dispatch(loginSuccess({ email }));
+    toast.success("Password reset successfully");
     onSuccess();
   };
 
@@ -166,31 +307,37 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
           {step === "email" && (
             <div>
               <label className="block text-sm font-medium text-black mb-2">
-                Email ID <span className="text-red-500">*</span>
+                Email or Phone Number <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
-                placeholder="Enter your Email"
+                placeholder="Enter your email or phone number"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
               />
-              {email.trim().length > 0 && !isEmailValid && (
-                <p className="mt-2 text-xs text-red-600">Enter a valid Email ID</p>
+              {email.trim().length > 0 && !isIdentifierValid && (
+                <p className="mt-2 text-xs text-red-600">
+                  Enter a valid email or phone number
+                </p>
               )}
 
               <button
                 type="button"
                 onClick={handleEmailContinue}
-                disabled={!isEmailFilled || !isEmailValid}
+                disabled={!isEmailFilled || !isIdentifierValid || isCheckingEmail}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  isEmailFilled && isEmailValid
+                  isEmailFilled && isIdentifierValid && !isCheckingEmail
                     ? "bg-[#389131] text-white"
                     : "bg-gray-300 text-white cursor-not-allowed"
                 }`}
               >
-                Continue
+                {isCheckingEmail ? "Checking..." : "Continue"}
               </button>
+
+              {emailError && (
+                <p className="mt-2 text-xs text-red-600">{emailError}</p>
+              )}
 
               <div className="flex items-center gap-3 my-7 text-sm text-gray-500">
                 <div className="flex-1 h-px bg-gray-200" />
@@ -231,6 +378,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
                 />
                 <span>Sign up with Apple</span>
               </button>
+
+              <p className="mt-4 text-center text-xs text-gray-700">
+                Don&apos;t have an account?{" "}
+                <button
+                  type="button"
+                  onClick={onOpenSignUp}
+                  className="text-[#389131] font-semibold underline"
+                >
+                  Sign up
+                </button>
+              </p>
             </div>
           )}
 
@@ -258,15 +416,18 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
               <button
                 type="button"
                 onClick={handleLoginContinue}
-                disabled={!isPasswordFilled}
+                disabled={!isPasswordFilled || isSubmitting}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  isPasswordFilled
+                  isPasswordFilled && !isSubmitting
                     ? "bg-[#389131] text-white"
                     : "bg-gray-300 text-white cursor-not-allowed"
                 }`}
               >
-                Continue
+                {isSubmitting ? "Logging in..." : "Continue"}
               </button>
+              {loginError && (
+                <p className="mt-3 text-xs text-red-600">{loginError}</p>
+              )}
             </div>
           )}
 
@@ -315,15 +476,22 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
               <button
                 type="button"
                 onClick={handleResetContinue}
-                disabled={!resetCanContinue}
+                disabled={!resetCanContinue || isForgotSubmitting}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  resetCanContinue
+                  resetCanContinue && !isForgotSubmitting
                     ? "bg-[#389131] text-white"
                     : "bg-gray-300 text-white cursor-not-allowed"
                 }`}
               >
-                Continue
+                {isForgotSubmitting ? "Sending..." : "Continue"}
               </button>
+
+              {forgotError && (
+                <p className="mt-2 text-xs text-red-600">{forgotError}</p>
+              )}
+              {forgotSuccess && (
+                <p className="mt-2 text-xs text-green-600">{forgotSuccess}</p>
+              )}
             </div>
           )}
 

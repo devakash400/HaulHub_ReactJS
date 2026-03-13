@@ -1,15 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, ChevronRight, Settings, User, Shield, LogOut, Pencil } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { logout } from "../../store/authSlice.ts";
+import { logout as logoutApi } from "../../api/authApi.ts";
+import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("isLoggedIn");
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } finally {
+      dispatch(logout());
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("openLoginAfterLogout", "1");
+      }
+      navigate("/", { replace: true });
+      toast.success("Logged out successfully");
     }
-    navigate("/", { replace: true });
   };
 
   return (
@@ -90,7 +103,7 @@ const Profile: React.FC = () => {
             <li>
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={() => setIsLogoutConfirmOpen(true)}
                 className="w-full py-4 flex items-center justify-between text-left"
               >
                 <span className="inline-flex items-center gap-3 text-gray-900">
@@ -102,6 +115,14 @@ const Profile: React.FC = () => {
             </li>
           </ul>
         </nav>
+        <LogoutConfirmModal
+          isOpen={isLogoutConfirmOpen}
+          onCancel={() => setIsLogoutConfirmOpen(false)}
+          onConfirm={() => {
+            setIsLogoutConfirmOpen(false);
+            void handleLogout();
+          }}
+        />
       </div>
     </div>
   );

@@ -1,11 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { ChevronDown } from "lucide-react";
+import { toast } from "react-toastify";
 import { SelectRentalDatesModal } from "./SelectRentalDatesModal.tsx";
 import {
   IdentityVerificationModal,
   type IdentityVerificationData,
 } from "./IdentityVerificationModal.tsx";
+import LoginModal from "../../pages/Auth/Login/Login.tsx";
+import {
+  SignUpModal,
+  type SignUpData,
+} from "./SignUpModal.tsx";
+import { register } from "../../api/authApi.ts";
+import { loginSuccess } from "../../store/authSlice.ts";
+import type { RootState } from "../../store";
 
 export type TrailerBookingInfo = {
   title: string;
@@ -24,11 +34,17 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   trailer,
 }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [dispatcher, setDispatcher] = useState("");
   const [showRentalDatesModal, setShowRentalDatesModal] = useState(false);
   const [showIdentityModal, setShowIdentityModal] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [pendingBookingState, setPendingBookingState] = useState<
     | {
         title: string;
@@ -43,6 +59,10 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   >(null);
 
   const handleReserve = () => {
+    if (!isAuthenticated) {
+      setIsLoginOpen(true);
+      return;
+    }
     setShowRentalDatesModal(true);
   };
 
@@ -76,6 +96,41 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       },
     });
     setPendingBookingState(null);
+  };
+
+  const handleSignUpSubmit = async (data: SignUpData) => {
+    try {
+      const res = await register({
+        fullName: `${data.firstName} ${data.lastName}`.trim(),
+        email: data.email,
+        password: data.password,
+      });
+
+      const fullName =
+        typeof res.user.fullName === "string"
+          ? res.user.fullName.trim()
+          : `${data.firstName} ${data.lastName}`.trim();
+      const [firstName, ...restName] = fullName.split(" ").filter(Boolean);
+      const lastName = restName.length > 0 ? restName.join(" ") : undefined;
+
+      dispatch(
+        loginSuccess({
+          firstName: firstName || undefined,
+          lastName,
+          email: res.user.email || data.email,
+        })
+      );
+
+      setIsSignUpOpen(false);
+      toast.success("Account created successfully");
+      setShowRentalDatesModal(true);
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error(
+        "register api error:",
+        err?.response?.data ?? err?.message ?? err
+      );
+    }
   };
 
   return (
@@ -159,6 +214,29 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
         onClose={() => setShowIdentityModal(false)}
         onContinue={handleIdentityContinue}
       />
+
+      {isLoginOpen && !isSignUpOpen && (
+        <LoginModal
+          isOpen={isLoginOpen}
+          onClose={() => setIsLoginOpen(false)}
+          onSuccess={() => {
+            setIsLoginOpen(false);
+            setShowRentalDatesModal(true);
+          }}
+          onOpenSignUp={() => {
+            setIsLoginOpen(false);
+            setIsSignUpOpen(true);
+          }}
+        />
+      )}
+
+      {isSignUpOpen && (
+        <SignUpModal
+          isOpen={isSignUpOpen}
+          onClose={() => setIsSignUpOpen(false)}
+          onSubmit={handleSignUpSubmit}
+        />
+      )}
     </div>
   );
 };

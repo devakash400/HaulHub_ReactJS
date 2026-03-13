@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { getTrailerById, getTrailerTypeLabel } from "../../../assets/data/trailers.ts";
 import {
   TrailerTitleSection,
@@ -15,10 +16,15 @@ import {
   WishlistModal,
   WishlistItem,
 } from "../../../components/TrailerDetails/index.ts";
+import { RootState } from "../../../store";
 
 const Trailer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const trailer = id ? getTrailerById(Number(id)) : undefined;
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [wishlistLoginOpen, setWishlistLoginOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
@@ -66,11 +72,7 @@ const Trailer: React.FC = () => {
   };
 
   const handleSaveClick = () => {
-    const isLoggedIn =
-      typeof window !== "undefined" &&
-      localStorage.getItem("isLoggedIn") === "true";
-
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       setWishlistLoginOpen(true);
     } else {
       const current = readWishlistFromStorage();
@@ -146,9 +148,7 @@ const Trailer: React.FC = () => {
           isOpen={wishlistLoginOpen}
           onClose={() => setWishlistLoginOpen(false)}
           onLoginClick={() => {
-            if (typeof window !== "undefined") {
-              localStorage.setItem("isLoggedIn", "true");
-            }
+            navigate("/login");
           }}
         />
 
@@ -209,17 +209,26 @@ const Trailer: React.FC = () => {
     {/* bottom section  */}
     
         <div className="mt-8 space-y-8">
-        <GuestFavouriteSection
-              rating={trailer.guestFavouriteRating}
-              title="Guest Favourite"
-              description={trailer.guestFavouriteDescription}
-              metrics={trailer.metrics}
-              ratingBreakdown={trailer.ratingBreakdown}
-            />
-        <ReviewsSection reviews={trailer.reviews} />
+          <GuestFavouriteSection
+            rating={trailer.guestFavouriteRating}
+            title="Guest Favourite"
+            description={trailer.guestFavouriteDescription}
+            metrics={trailer.metrics}
+            ratingBreakdown={trailer.ratingBreakdown}
+          />
 
-        <PolicySection />
+          <ReviewsSection
+            reviews={trailer.reviews}
+            onShowAll={() => {
+              if (!isAuthenticated) {
+                navigate("/login");
+              } else if (id) {
+                navigate(`/trailer/${id}/reviews`);
+              }
+            }}
+          />
 
+          <PolicySection />
         </div>
       </div>
     </div>
