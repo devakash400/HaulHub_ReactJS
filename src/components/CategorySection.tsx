@@ -138,7 +138,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               {title}
             </h2>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-[2px]">
               <button
                 type="button"
                 onClick={() => handleScroll("left")}

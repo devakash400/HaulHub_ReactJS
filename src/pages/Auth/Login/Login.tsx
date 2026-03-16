@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, MouseEvent } from "react";
 import { images } from "../../../assets/images/index.ts";
-import { ArrowLeft, Eye, EyeOff, X } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
+import { ModalHeader } from "../../../components/ModalHeader.tsx";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../store/authSlice.ts";
 import {
@@ -23,6 +24,23 @@ type Step = "email" | "password" | "reset" | "newPassword";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+type CountryOption = {
+  code: string;
+  name: string;
+  dialCode: string;
+  flag: string;
+};
+
+const COUNTRY_OPTIONS: CountryOption[] = [
+  { code: "US", name: "United States", dialCode: "+1", flag: "🇺🇸" },
+  { code: "CA", name: "Canada", dialCode: "+1", flag: "🇨🇦" },
+  { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "🇬🇧" },
+  { code: "IN", name: "India", dialCode: "+91", flag: "🇮🇳" },
+  { code: "AU", name: "Australia", dialCode: "+61", flag: "🇦🇺" },
+  { code: "DE", name: "Germany", dialCode: "+49", flag: "🇩🇪" },
+  { code: "FR", name: "France", dialCode: "+33", flag: "🇫🇷" },
+];
+
 const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
@@ -31,6 +49,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
+  const [usePhoneOnly, setUsePhoneOnly] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
+    COUNTRY_OPTIONS[0]
+  );
   const [step, setStep] = useState<Step>("email");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,9 +82,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const isEmailValid = useMemo(() => emailRegex.test(email.trim()), [email]);
   const isPhoneLike = useMemo(() => {
     const digits = email.replace(/\D/g, "");
-    return !isEmailValid && digits.length >= 10;
-  }, [email, isEmailValid]);
-  const isIdentifierValid = isEmailValid || isPhoneLike;
+    return digits.length >= 10;
+  }, [email]);
+  const isIdentifierValid = usePhoneOnly ? isPhoneLike : isEmailValid || isPhoneLike;
   const isPasswordFilled = useMemo(() => password.trim().length > 0, [password]);
 
   const resetCanContinue = useMemo(() => {
@@ -114,7 +136,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setEmailError(null);
     try {
       const trimmed = email.trim();
-      if (emailRegex.test(trimmed)) {
+
+      if (!usePhoneOnly && emailRegex.test(trimmed)) {
         const res = await checkEmailApi({ email: trimmed });
         // eslint-disable-next-line no-console
         console.log("check-email response:", res);
@@ -136,7 +159,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
           return;
         }
       } else {
-        const res = await checkPhoneApi({ phoneNumber: trimmed });
+        const digits = trimmed.replace(/\D/g, "");
+        const phoneWithCode = `${selectedCountry.dialCode}${digits}`;
+        const res = await checkPhoneApi({ phoneNumber: phoneWithCode });
         // eslint-disable-next-line no-console
         console.log("check-phone response:", res);
 
@@ -175,9 +200,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setLoginError(null);
     try {
       const trimmed = email.trim();
-      const loginRes = emailRegex.test(trimmed)
-        ? await loginApi({ email: trimmed, password })
-        : await phoneLoginApi({ phoneNumber: trimmed, password });
+
+      let loginRes;
+      if (!usePhoneOnly && emailRegex.test(trimmed)) {
+        loginRes = await loginApi({ email: trimmed, password });
+      } else {
+        const digits = trimmed.replace(/\D/g, "");
+        const phoneWithCode = `${selectedCountry.dialCode}${digits}`;
+        loginRes = await phoneLoginApi({ phoneNumber: phoneWithCode, password });
+      }
       // For debugging / verification in console
       // eslint-disable-next-line no-console
       console.log("login response:", loginRes);
@@ -281,44 +312,75 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/45"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/45 px-4"
       onClick={handleOverlayClick}
     >
       <div
-        className="w-full max-w-[820px] bg-white rounded-[18px] shadow-[0_20px_40px_rgba(15,23,42,0.25)] relative font-sans overflow-hidden"
+        className="w-full max-w-[820px] max-h-[90vh] bg-white rounded-[18px] shadow-[0_20px_40px_rgba(15,23,42,0.25)] relative font-sans flex flex-col overflow-hidden"
         onClick={handleModalClick}
       >
-        {/* Header */}
-        <div className="px-6 sm:px-8 py-6 border-b border-gray-200 relative">
-          <button
-            type="button"
-            onClick={goBack}
-            aria-label="Back"
-            className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-gray-100 text-gray-900 inline-flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5" aria-hidden />
-          </button>
-          <h2 className="text-center m-0 text-2xl font-semibold text-black">
-            {step === "reset" ? "Reset Password" : "Login"}
-          </h2>
-        </div>
+        <ModalHeader
+          title={
+            step === "email"
+              ? "Login"
+              : step === "password"
+                ? "Password"
+                : step === "reset"
+                  ? "Reset Password"
+                  : "New Password"
+          }
+          onClose={goBack}
+          variant="back"
+        />
 
-        <div className="px-6 sm:px-10 py-8">
+        <div className="px-6 sm:px-10 py-8 flex-1 overflow-y-auto">
           {step === "email" && (
             <div>
               <label className="block text-sm font-medium text-black mb-2">
-                Email or Phone Number <span className="text-red-500">*</span>
+                {usePhoneOnly ? "Phone Number" : "Email ID"}{" "}
+                <span className="text-red-500">*</span>
               </label>
-              <input
-                type="email"
-                placeholder="Enter your email or phone number"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
-              />
+              {usePhoneOnly ? (
+                <div className="w-full border border-gray-400 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white">
+                  <select
+                    className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-1 max-w-[32%] sm:max-w-[28%]"
+                    value={selectedCountry.code}
+                    onChange={(e) => {
+                      const next = COUNTRY_OPTIONS.find(
+                        (c) => c.code === e.target.value
+                      );
+                      if (next) setSelectedCountry(next);
+                    }}
+                  >
+                    {COUNTRY_OPTIONS.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.flag} {country.dialCode}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="h-5 w-px bg-gray-300 flex-shrink-0" />
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="flex-1 border-none outline-none text-sm px-1 py-0 bg-transparent"
+                  />
+                </div>
+              ) : (
+                <input
+                  type="email"
+                  placeholder="Enter your Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
+                />
+              )}
               {email.trim().length > 0 && !isIdentifierValid && (
                 <p className="mt-2 text-xs text-red-600">
-                  Enter a valid email or phone number
+                  {usePhoneOnly
+                    ? "Enter a valid phone number"
+                    : "Enter a valid email or phone number"}
                 </p>
               )}
 
@@ -348,13 +410,19 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="button"
                 className="w-full px-4 py-3 rounded-md border border-gray-200 bg-white flex items-center justify-center gap-2 text-sm mb-3"
+                onClick={() => {
+                  setUsePhoneOnly((prev) => !prev);
+                  setEmail("");
+                }}
               >
                 <img
                   src={images.Phone}
                   alt="Phone"
                   className="w-[18px] h-[18px] object-contain"
                 />
-                <span>Login with Phone Number</span>
+                <span>
+                  {usePhoneOnly ? "Login with Email" : "Login with Phone Number"}
+                </span>
               </button>
               <button
                 type="button"
@@ -577,17 +645,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
               className="w-full max-w-[380px] bg-white rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(15,23,42,0.25)]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-[#389131] text-white px-5 py-4 relative">
-                <h3 className="text-center text-lg font-semibold m-0">Enter OTP</h3>
-                <button
-                  type="button"
-                  onClick={() => setShowOtpModal(false)}
-                  className="absolute right-3 top-3 h-8 w-8 rounded-full bg-white/10 inline-flex items-center justify-center"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5" aria-hidden />
-                </button>
-              </div>
+              <ModalHeader
+                title="Enter OTP"
+                onClose={() => setShowOtpModal(false)}
+                variant="close"
+              />
               <div className="px-5 py-5">
                 <p className="text-center text-sm text-gray-700">
                   Please enter the OTP sent to

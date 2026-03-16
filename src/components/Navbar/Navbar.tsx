@@ -116,6 +116,18 @@ const Navbar: React.FC = () => {
                   onClick={closeDrawer}
                 >
                   <Link
+                    to="/account-settings"
+                    state={{ section: "notifications" }}
+                    className="text-inherit no-underline cursor-pointer"
+                  >
+                    Notifications
+                  </Link>
+                </li>
+                <li
+                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                  onClick={closeDrawer}
+                >
+                  <Link
                     to="/about"
                     className="text-inherit no-underline cursor-pointer"
                   >

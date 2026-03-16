@@ -1,5 +1,4 @@
-
-
+/// <reference path="./images.d.ts" />
 // Images
 import logo from './appLogo.png';
 import appStore from './appStore.png';
@@ -11,7 +10,8 @@ import ArrowRight from './arrowup.png';
 import Google from './google.png';
 import Phone from './phone.png';
 import Apple from './apple.png';
-import Cross from './cross.png'
+import Cross from './cross.png';
+import ModalLogo from './modallogo.png';
 
 // Export them all
 export const images = {
@@ -25,5 +25,6 @@ export const images = {
   Google,
   Phone,
   Apple,
-  Cross
+  Cross,
+  ModalLogo
 };

@@ -1,59 +1,44 @@
-import React from "react";
-import { useParams, Navigate, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, Star } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { useParams, Navigate } from "react-router-dom";
+import { Star } from "lucide-react";
 import { getTrailerById } from "../../../assets/data/trailers.ts";
 
 const TrailerReviews: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const trailerId = id ? Number(id) : NaN;
   const trailer = Number.isNaN(trailerId) ? undefined : getTrailerById(trailerId);
-  const navigate = useNavigate();
+
+  const allReviews = trailer?.reviews ?? [];
+  const pageSize = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(allReviews.length / pageSize));
+
+  const paginatedReviews = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return allReviews.slice(start, start + pageSize);
+  }, [currentPage, pageSize, allReviews]);
 
   if (!trailer) {
     return <Navigate to="/" replace />;
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F6ED] w-full min-w-0 overflow-x-hidden">
+    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Header */}
         <header className="flex items-center justify-between mb-6">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            aria-label="Back"
-            className="h-9 w-9 rounded-full bg-white text-gray-900 flex items-center justify-center shadow-sm border border-gray-200"
-          >
-            <ArrowLeft className="w-4 h-4" aria-hidden />
-          </button>
           <h1 className="text-base sm:text-lg font-semibold text-gray-900">
             All Review
           </h1>
-          <button
-            type="button"
-            className="h-9 w-9 rounded-full bg-white text-gray-900 flex items-center justify-center shadow-sm border border-gray-200"
-            aria-label="Search reviews"
-          >
-            <Search className="w-4 h-4" aria-hidden />
-          </button>
+          <p className="text-xs sm:text-sm text-gray-600">
+            {allReviews.length} reviews
+          </p>
         </header>
 
-        {/* Rating badge */}
-        <section className="flex flex-col items-center text-center mb-8">
-          <div className="w-40 h-40 rounded-full border-[10px] border-[#F4D56A] flex items-center justify-center bg-[#FFF9E6] shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
-            <span className="text-4xl font-semibold text-gray-900">
-              {trailer.guestFavouriteRating.toFixed(2)}
-            </span>
-          </div>
-          <p className="mt-4 text-lg font-semibold text-gray-900">
-            Guest Favourite
-          </p>
-        </section>
-
         {/* Reviews list */}
-        <section className="space-y-6 pb-8">
-          {trailer.reviews.map((review, index) => (
-            <article key={`${review.name}-${index}`} className="border-b border-gray-200 pb-6 last:border-b-0">
+        <section className="space-y-6 pb-6">
+          {paginatedReviews.map((review, index) => (
+            <article key={`${review.name}-${index + (currentPage - 1) * pageSize}`} className="border-b border-gray-200 pb-6 last:border-b-0">
               <div className="flex items-center gap-3 mb-1">
                 <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700 overflow-hidden">
                   {review.avatar ? (
@@ -91,6 +76,58 @@ const TrailerReviews: React.FC = () => {
             </article>
           ))}
         </section>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 pt-2 pb-4">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-full text-sm font-medium border ${
+                currentPage === 1
+                  ? "border-gray-200 text-gray-400 bg-gray-100 cursor-not-allowed"
+                  : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+              }`}
+            >
+              Previous
+            </button>
+
+            <div className="flex items-center gap-1 text-sm text-gray-700">
+              {Array.from({ length: totalPages }).map((_, idx) => {
+                const page = idx + 1;
+                const isActive = page === currentPage;
+                return (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-7 h-7 rounded-full text-xs font-medium flex items-center justify-center ${
+                      isActive
+                        ? "bg-[#389131] text-white"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-full text-sm font-medium border ${
+                currentPage === totalPages
+                  ? "border-gray-200 text-gray-400 bg-gray-100 cursor-not-allowed"
+                  : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

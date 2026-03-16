@@ -14,8 +14,8 @@ const Container: React.FC = () => {
         />
 
         {/* Search bar overlay */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(90%,720px)] flex items-center justify-center px-3">
-          <div className="flex h-[64px] w-full max-w-[720px] items-center rounded-3xl bg-white px-4 shadow-[0_18px_35px_rgba(15,23,42,0.25)]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[620px] sm:max-w-[720px] px-4 flex items-center justify-center">
+          <div className="flex h-[56px] w-full items-center rounded-3xl bg-white px-4 shadow-[0_18px_35px_rgba(15,23,42,0.25)]">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#929191] mr-3">
               <Search className="w-5 h-5 text-white" />
             </div>

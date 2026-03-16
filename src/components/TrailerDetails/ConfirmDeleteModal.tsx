@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import { lockScroll } from "../../utils/scrollLock.ts";
+import { ModalHeader } from "../ModalHeader.tsx";
 
 export interface ConfirmDeleteModalProps {
   isOpen: boolean;
@@ -58,15 +59,16 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
       aria-labelledby="confirm-delete-title"
     >
       <div
-        className="w-full max-w-xs sm:max-w-sm rounded-xl bg-white shadow-lg px-5 py-4 text-center"
+        className="w-full max-w-xs sm:max-w-sm rounded-2xl bg-white shadow-lg overflow-hidden"
         onClick={handleInnerClick}
       >
-        <h2
-          id="confirm-delete-title"
-          className="mb-2 text-[15px] font-semibold text-gray-900"
-        >
-          {title}
-        </h2>
+        <ModalHeader
+          title={title}
+          onClose={onCancel}
+          variant="close"
+          titleId="confirm-delete-title"
+        />
+        <div className="px-5 py-4 text-center">
         <p className="mb-4 text-[13px] text-gray-600">{message}</p>
 
         <div className="mt-3 flex items-center justify-end gap-3 text-sm font-semibold">
@@ -86,6 +88,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
           >
             {confirmText}
           </button>
+        </div>
         </div>
       </div>
     </div>

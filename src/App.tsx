@@ -18,10 +18,10 @@ import RequestToBookPage from "./pages/RequestToBookPage.tsx";
 import BookingScreen from "./pages/BookingScreen/BookingScreen.tsx";
 import LiabilityAgreement from "./pages/LiabilityAgreement/LiabilityAgreement.tsx";
 import PaymentReceipt from "./pages/PaymentReceipt/PaymentReceipt.tsx";
-import EditProfile from "./pages/EditProfile/EditProfile.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
 import AccountSettings from "./pages/AccountSettings/AccountSettings.tsx";
 import Wishlist from "./pages/Wishlist/Wishlist.tsx";
+import Notifications from "./pages/Notifications/Notifications.tsx";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -35,8 +35,8 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/account-settings" element={<AccountSettings />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/about" element={<About />} />

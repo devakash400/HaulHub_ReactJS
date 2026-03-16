@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { ConfirmDeleteModal } from "./ConfirmDeleteModal.tsx";
 import { lockScroll } from "../../utils/scrollLock.ts";
+import { ModalHeader } from "../ModalHeader.tsx";
 
 export interface WishlistItem {
   id: string;
@@ -91,40 +92,27 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
       aria-labelledby="wishlist-modal-title"
     >
       <div
-        className="relative w-full max-w-[520px] bg-white rounded-2xl shadow-lg"
+        className="relative w-full max-w-[520px] bg-white rounded-2xl shadow-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-200">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors shrink-0"
-            aria-label="Close wishlist"
-          >
-            <span className="text-xl leading-none">&#215;</span>
-          </button>
-
-          <h2
-            id="wishlist-modal-title"
-            className="absolute left-1/2 -translate-x-1/2 text-xl sm:text-2xl font-semibold text-gray-900"
-          >
-            Wishlist
-          </h2>
-
-          <div className="w-10 flex items-center justify-end shrink-0">
-            {hasItems && (
+        <ModalHeader
+          title="Wishlist"
+          onClose={onClose}
+          variant="close"
+          titleId="wishlist-modal-title"
+          rightSlot={
+            hasItems ? (
               <button
                 type="button"
                 onClick={openConfirmForAll}
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-white/15 text-white hover:bg-white/25 transition-colors"
                 aria-label="Clear all wishlist items"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
-            )}
-          </div>
-        </div>
+            ) : undefined
+          }
+        />
 
         {/* Body */}
         <div className="px-5 sm:px-6 py-5 max-h-[70vh] overflow-y-auto">

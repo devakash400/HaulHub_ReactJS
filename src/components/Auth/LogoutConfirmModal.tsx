@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import { lockScroll } from "../../utils/scrollLock.ts";
+import { ModalHeader } from "../ModalHeader.tsx";
 
 export interface LogoutConfirmModalProps {
   isOpen: boolean;
@@ -50,15 +51,16 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
       aria-labelledby="logout-confirm-title"
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white shadow-xl px-6 py-6 sm:px-8 sm:py-7"
+        className="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden"
         onClick={handleInnerClick}
       >
-        <h2
-          id="logout-confirm-title"
-          className="mb-2 text-lg sm:text-xl font-semibold text-gray-900"
-        >
-          Sign out of your account?
-        </h2>
+        <ModalHeader
+          title="Sign out of your account?"
+          onClose={onCancel}
+          variant="close"
+          titleId="logout-confirm-title"
+        />
+        <div className="px-6 py-6 sm:px-8 sm:py-7">
         <p className="mb-4 text-sm text-gray-600">
           You&apos;ll be logged out of HaulHub on this device. You can keep
           browsing trailers, but you&apos;ll need to log in again to manage
@@ -80,6 +82,7 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
           >
             Log out
           </button>
+        </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { lockScroll } from "../../utils/scrollLock.ts";
+import { ModalHeader } from "../ModalHeader.tsx";
 
 export interface SelectRentalDatesModalProps {
   isOpen: boolean;
@@ -57,16 +58,16 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
       aria-labelledby="select-rental-dates-title"
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-6"
+        className="relative w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2
-          id="select-rental-dates-title"
-          className="text-xl font-semibold text-gray-900 text-center mb-5"
-        >
-          Select Rental Dates
-        </h2>
-
+        <ModalHeader
+          title="Select Rental Dates"
+          onClose={onClose}
+          variant="close"
+          titleId="select-rental-dates-title"
+        />
+        <div className="p-6">
         <div className="space-y-4 mb-6">
           <div>
             <label
@@ -115,6 +116,7 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
         >
           Next
         </button>
+        </div>
       </div>
     </div>
   );

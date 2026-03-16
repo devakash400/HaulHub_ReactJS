@@ -9,6 +9,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { lockScroll } from "../../utils/scrollLock.ts";
+import { ModalHeader } from "../ModalHeader.tsx";
 
 type MethodKey = "driving_licence" | "passport" | "identity_card";
 
@@ -214,16 +215,18 @@ export const IdentityVerificationModal: React.FC<
         className="relative w-full max-w-2xl bg-white rounded-2xl shadow-lg max-h-[85vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 sm:p-8 overflow-y-auto max-h-[85vh]">
-          <h2
-            id="identity-verification-title"
-            className="text-xl sm:text-2xl font-semibold text-gray-900 text-center"
-          >
-            {step === "method"
+        <ModalHeader
+          title={
+            step === "method"
               ? "Which Method Would You Like To Use?"
-              : "Verify your Identity"}
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 text-center">
+              : "Verify your Identity"
+          }
+          onClose={onClose}
+          variant="close"
+          titleId="identity-verification-title"
+        />
+        <div className="p-6 sm:p-8 overflow-y-auto max-h-[85vh]">
+          <p className="text-sm text-gray-600 text-center">
             {step === "method"
               ? "We’ll use this to verify your identity and won’t share it with other trailer."
               : "Complete the details below to continue."}

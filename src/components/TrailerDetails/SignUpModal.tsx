@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { X } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { lockScroll } from "../../utils/scrollLock.ts";
+import { ModalHeader } from "../ModalHeader.tsx";
 
 export type SignUpData = {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  gender: string;
   email: string;
   password: string;
   phoneNumber: string;
@@ -21,6 +23,23 @@ export interface SignUpModalProps {
 const onlyAlphabetsRegex = /^[A-Za-z\s]+$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+type CountryOption = {
+  code: string;
+  name: string;
+  dialCode: string;
+  flag: string;
+};
+
+const COUNTRY_OPTIONS: CountryOption[] = [
+  { code: "US", name: "United States", dialCode: "+1", flag: "🇺🇸" },
+  { code: "CA", name: "Canada", dialCode: "+1", flag: "🇨🇦" },
+  { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "🇬🇧" },
+  { code: "IN", name: "India", dialCode: "+91", flag: "🇮🇳" },
+  { code: "AU", name: "Australia", dialCode: "+61", flag: "🇦🇺" },
+  { code: "DE", name: "Germany", dialCode: "+49", flag: "🇩🇪" },
+  { code: "FR", name: "France", dialCode: "+33", flag: "🇫🇷" },
+];
+
 export const SignUpModal: React.FC<SignUpModalProps> = ({
   isOpen,
   onClose,
@@ -29,9 +48,13 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
+    COUNTRY_OPTIONS[0]
+  );
   const [agreed, setAgreed] = useState(false);
 
   const [firstNameTouched, setFirstNameTouched] = useState(false);
@@ -39,6 +62,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [phoneTouched, setPhoneTouched] = useState(false);
+  const [genderTouched, setGenderTouched] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -46,15 +71,18 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setFirstName("");
     setLastName("");
     setDateOfBirth("");
+    setGender("");
     setEmail("");
     setPassword("");
     setPhoneNumber("");
+    setSelectedCountry(COUNTRY_OPTIONS[0]);
     setAgreed(false);
     setFirstNameTouched(false);
     setLastNameTouched(false);
     setEmailTouched(false);
     setPasswordTouched(false);
     setPhoneTouched(false);
+    setGenderTouched(false);
   }, [isOpen]);
 
   useEffect(() => {
@@ -98,6 +126,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     isFirstNameValid &&
     isLastNameValid &&
     dateOfBirth.trim().length > 0 &&
+    gender.trim().length > 0 &&
     isEmailValid &&
     isPasswordValid &&
     isPhoneValid &&
@@ -108,13 +137,18 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
+    const fullPhone =
+      normalizedDigits.length > 0
+        ? `${selectedCountry.dialCode}${normalizedDigits}`
+        : phoneNumber.trim();
     onSubmit({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       dateOfBirth: dateOfBirth.trim(),
+      gender: gender.trim(),
       email: email.trim(),
       password,
-      phoneNumber: phoneNumber.trim(),
+      phoneNumber: fullPhone,
       agreedToTerms: agreed,
     });
   };
@@ -128,29 +162,21 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-hidden border-4 border-[#389131]"
+        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <form
           className="relative flex flex-col max-h-[90vh]"
           onSubmit={handleSubmit}
         >
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute left-4 top-4 text-gray-700 hover:text-black"
-            aria-label="Close sign up"
-          >
-            <X className="w-6 h-6" aria-hidden />
-          </button>
+          <ModalHeader
+            title="Sign Up"
+            onClose={onClose}
+            variant="close"
+            titleId="sign-up-title"
+          />
 
-          <div className="px-6 pt-10 pb-6 sm:px-10 sm:pt-12 sm:pb-8 overflow-y-auto">
-            <h2
-              id="sign-up-title"
-              className="text-2xl sm:text-3xl font-semibold text-center text-gray-900"
-            >
-              Sign Up
-            </h2>
+          <div className="px-6 pt-6 pb-4 sm:px-10 sm:pt-6 sm:pb-6 overflow-y-auto">
 
             <div className="mt-8 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -192,16 +218,38 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of birth
-                </label>
-                <input
-                  type="date"
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date of birth
+                  </label>
+                  <input
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gender
+                  </label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    onBlur={() => setGenderTouched(true)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                  >
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                  {genderTouched && gender.trim().length === 0 && (
+                    <p className="mt-1 text-xs text-red-600">Please select gender</p>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -229,13 +277,27 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={() => setPasswordTouched(true)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() => setPasswordTouched(true)}
+                    className="w-full border border-gray-300 rounded-lg px-3 pr-10 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" aria-hidden />
+                    ) : (
+                      <Eye className="w-5 h-5" aria-hidden />
+                    )}
+                  </button>
+                </div>
                 {passwordTouched && (
                   <ul className="mt-2 space-y-0.5 text-xs">
                     <li
@@ -285,17 +347,31 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Phone Number
                 </label>
-                <div className="flex gap-2">
-                  <div className="flex items-center px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-700">
-                    +1
-                  </div>
+                <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 flex items-center gap-2 bg-white">
+                  <select
+                    className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-2"
+                    value={selectedCountry.code}
+                    onChange={(e) => {
+                      const next = COUNTRY_OPTIONS.find(
+                        (c) => c.code === e.target.value
+                      );
+                      if (next) setSelectedCountry(next);
+                    }}
+                  >
+                    {COUNTRY_OPTIONS.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.flag} {country.dialCode}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="h-5 w-px bg-gray-300" />
                   <input
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     onBlur={() => setPhoneTouched(true)}
-                    placeholder="**********"
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                    placeholder="Phone Number"
+                    className="flex-1 border-none outline-none text-sm px-1 py-0 bg-transparent"
                   />
                 </div>
                 {phoneTouched && !isPhoneValid && (
@@ -305,7 +381,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 )}
               </div>
 
-              <div className="flex items-start gap-3 mt-2">
+              <div className="flex items-start gap-3 mt-2 pb-4">
                 <input
                   id="signup-agree"
                   type="checkbox"
@@ -344,7 +420,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
             </div>
           </div>
 
-          <div className="px-6 pb-6 sm:px-10 sm:pb-8">
+          <div className="px-6 pb-6 sm:px-10 sm:pb-8 border-t border-gray-200">
             <button
               type="submit"
               disabled={!isFormValid}

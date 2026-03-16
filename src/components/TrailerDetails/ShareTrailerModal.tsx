@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import copylinkIcon from "../../assets/icons/copylink.png";
+import { ModalHeader } from "../ModalHeader.tsx";
 
 export interface ShareTrailerModalProps {
   isOpen: boolean;
@@ -65,28 +66,16 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
       aria-labelledby="share-modal-title"
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-2xl shadow-lg"
+        className="relative w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 pt-8">
-          {/* Header: title centered, close on same line */}
-          <div className="relative flex items-center justify-center mb-4">
-            <h2
-              id="share-modal-title"
-              className="text-xl sm:text-2xl font-semibold text-gray-900 text-center"
-            >
-              Share This Trailer
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute right-0 top-1/2 -translate-y-1/2 text-bold hover:text-gray-600 text-3xl leading-none"
-              aria-label="Close"
-            >
-              &#215;
-            </button>
-          </div>
-
+        <ModalHeader
+          title="Share This Trailer"
+          onClose={onClose}
+          variant="close"
+          titleId="share-modal-title"
+        />
+        <div className="p-6">
           {/* Trailer info: image left, text right */}
           <div className="flex gap-4 mb-6">
             <img
