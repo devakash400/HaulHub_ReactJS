@@ -12,6 +12,8 @@ import Phone from './phone.png';
 import Apple from './apple.png';
 import Cross from './cross.png';
 import ModalLogo from './modallogo.png';
+import Instagram from "./instagram.png";
+import Facebook from "./facebook.png"
 
 // Export them all
 export const images = {
@@ -26,5 +28,7 @@ export const images = {
   Phone,
   Apple,
   Cross,
-  ModalLogo
+  ModalLogo,
+  Instagram,
+  Facebook
 };

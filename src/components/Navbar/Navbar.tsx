@@ -71,38 +71,42 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-20 flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#F9F8F3] border-b border-gray-200 font-sans min-w-0 w-full">
-      {/* Left: Logo */}
-      <Link
-        to="/"
-        onClick={closeDrawer}
-        className="inline-flex items-center shrink-0 text-inherit no-underline cursor-pointer"
-      >
-        <img
-          src={images.logo}
-          alt="HaulHub logo"
-          className="h-10 sm:h-[50px] object-contain"
-        />
-      </Link>
+    <nav className="sticky top-0 z-20 bg-[#F9F8F3] border-b border-gray-200 font-sans min-w-0 w-full">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 min-w-0 w-full">
+        {/* Left: Logo */}
+        <Link
+          to="/"
+          onClick={closeDrawer}
+          className="inline-flex items-center shrink-0 text-inherit no-underline cursor-pointer"
+        >
+          <img
+            src={images.logo}
+            alt="HaulHub logo"
+            className="h-10 sm:h-[50px] object-contain"
+          />
+        </Link>
 
-      {/* Center: Search bar (Home only) */}
-      {location.pathname === "/" && (
-        <div className="hidden sm:flex flex-1 items-center justify-center px-4 min-w-0">
-          <div className="flex h-[46px] w-full max-w-[640px] items-center rounded-xl bg-white px-4 border border-gray-200 shadow-sm">
-            <input
-              type="text"
-              placeholder="Search here..."
-              className="flex-1 border-none bg-transparent text-[0.95rem] text-gray-700 placeholder:text-gray-400 outline-none"
-            />
-            <div className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#389131]">
-              <Search className="w-5 h-5 text-white" aria-hidden />
+        {/* Center: Search bar (Home only, desktop/tablet) */}
+        {location.pathname === "/" && (
+          <div className="hidden sm:flex flex-1 items-center justify-center px-4 min-w-0">
+            <div className="flex h-[46px] w-full max-w-[640px] items-center rounded-xl bg-white px-4 border border-gray-200 shadow-sm">
+              <input
+                type="text"
+                placeholder="Search here..."
+                className="flex-1 border-none bg-transparent text-[0.95rem] text-gray-700 placeholder:text-gray-400 outline-none"
+              />
+              <div className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#389131]">
+                <Search className="w-5 h-5 text-white" aria-hidden />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Right: dropdown toggle */}
-      <div ref={dropdownRef} className="relative flex items-center gap-3 sm:gap-5 text-[0.95rem] text-black shrink-0 min-w-0">
+        {/* Right: dropdown toggle */}
+        <div
+          ref={dropdownRef}
+          className="relative flex items-center gap-3 sm:gap-5 text-[0.95rem] text-black shrink-0 min-w-0"
+        >
         <button
           type="button"
           onClick={toggleDrawer}
@@ -320,7 +324,24 @@ const Navbar: React.FC = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
+
+      {/* Mobile search bar (Home only) */}
+      {location.pathname === "/" && (
+        <div className="sm:hidden px-4 pb-3">
+          <div className="flex h-[44px] w-full items-center rounded-xl bg-white px-4 border border-gray-200 shadow-sm">
+            <input
+              type="text"
+              placeholder="Search here..."
+              className="flex-1 border-none bg-transparent text-[0.95rem] text-gray-700 placeholder:text-gray-400 outline-none"
+            />
+            <div className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#389131]">
+              <Search className="w-5 h-5 text-white" aria-hidden />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Auth modals */}
       {isLoginOpen && (

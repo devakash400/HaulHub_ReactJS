@@ -193,44 +193,26 @@ const BottomBar: React.FC = () => {
             aria-label="Facebook"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1877F2] text-white no-underline"
+            className="inline-flex h-9 w-9 items-center justify-center no-underline"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.88 3.77-3.88 1.09 0 2.23.2 2.23.2v2.46h-1.25c-1.23 0-1.62.76-1.62 1.54V12h2.76l-.44 2.89h-2.32v6.99A10 10 0 0 0 22 12z" />
-            </svg>
+            <img
+              src={images.Facebook}
+              alt="Facebook"
+              className="h-9 w-9 object-contain"
+            />
           </a>
           <a
             href="https://www.instagram.com"
             aria-label="Instagram"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full no-underline"
-            style={{
-              background:
-                "radial-gradient(circle at 30% 30%, #FEDA75 0%, #FA7E1E 30%, #D62976 55%, #962FBF 75%, #4F5BD5 100%)",
-            }}
+            className="inline-flex h-9 w-9 items-center justify-center no-underline"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="5" ry="5" />
-              <path d="M16 11.37a4 4 0 1 1-7.5 1.7 4 4 0 0 1 7.5-1.7z" />
-              <line x1="17.5" y1="6.5" x2="17.5" y2="6.5" />
-            </svg>
+            <img
+              src={images.Instagram}
+              alt="Instagram"
+              className="h-9 w-9 object-contain"
+            />
           </a>
           </div>
         </div>
