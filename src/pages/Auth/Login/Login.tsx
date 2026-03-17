@@ -77,14 +77,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showNewPwd, setShowNewPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const [showLoginPwd, setShowLoginPwd] = useState(false);
 
   const isEmailFilled = email.trim().length > 0;
   const isEmailValid = useMemo(() => emailRegex.test(email.trim()), [email]);
   const isPhoneLike = useMemo(() => {
     const digits = email.replace(/\D/g, "");
-    return digits.length >= 10;
+    return digits.length === 10;
   }, [email]);
-  const isIdentifierValid = usePhoneOnly ? isPhoneLike : isEmailValid || isPhoneLike;
+  // In email mode, only email is allowed; in phone mode, only a 10‑digit phone is allowed
+  const isIdentifierValid = usePhoneOnly ? isPhoneLike : isEmailValid;
   const isPasswordFilled = useMemo(() => password.trim().length > 0, [password]);
 
   const resetCanContinue = useMemo(() => {
@@ -137,7 +139,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
     try {
       const trimmed = email.trim();
 
-      if (!usePhoneOnly && emailRegex.test(trimmed)) {
+      if (!usePhoneOnly) {
+        // Email-only path
         const res = await checkEmailApi({ email: trimmed });
         // eslint-disable-next-line no-console
         console.log("check-email response:", res);
@@ -159,6 +162,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
           return;
         }
       } else {
+        // Phone-only path
         const digits = trimmed.replace(/\D/g, "");
         const phoneWithCode = `${selectedCountry.dialCode}${digits}`;
         const res = await checkPhoneApi({ phoneNumber: phoneWithCode });
@@ -228,7 +232,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
       toast.success("Logged in successfully");
       onSuccess();
     } catch (err) {
-      const msg = "Unable to login. Please check your credentials.";
+      const msg = "Enter a Correct Password.";
       setLoginError(msg);
       toast.error(msg);
     } finally {
@@ -300,6 +304,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
     return newPassword.length >= 6 && passwordsMatch;
   }, [newPassword, passwordsMatch]);
 
+  const isOtpValid = useMemo(() => otp.trim().length === 6, [otp]);
+
   const handleNewPasswordContinue = () => {
     if (!canSetNewPassword) return;
     // After reset, go back to login + auto success for demo
@@ -343,7 +349,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               {usePhoneOnly ? (
                 <div className="w-full border border-gray-400 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white">
                   <select
-                    className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-1 max-w-[32%] sm:max-w-[28%]"
+                    className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-1 max-w-[40%] sm:max-w-[32%]"
                     value={selectedCountry.code}
                     onChange={(e) => {
                       const next = COUNTRY_OPTIONS.find(
@@ -364,6 +370,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     placeholder="Phone Number"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    maxLength={10}
                     className="flex-1 border-none outline-none text-sm px-1 py-0 bg-transparent"
                   />
                 </div>
@@ -379,8 +386,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
               {email.trim().length > 0 && !isIdentifierValid && (
                 <p className="mt-2 text-xs text-red-600">
                   {usePhoneOnly
-                    ? "Enter a valid phone number"
-                    : "Enter a valid email or phone number"}
+                    ? "Phone number must be exactly 10 digits"
+                    : "Enter a valid Email ID"}
                 </p>
               )}
 
@@ -465,17 +472,35 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <label className="block text-sm font-medium text-black mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
-              />
+              <div className="relative">
+                <input
+                  type={showLoginPwd ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-gray-400 rounded-lg px-4 pr-10 py-3 text-sm outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPwd((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                  aria-label={showLoginPwd ? "Hide password" : "Show password"}
+                >
+                  {showLoginPwd ? (
+                    <Eye className="w-5 h-5" aria-hidden />
+                  ) : (
+                    <EyeOff className="w-5 h-5" aria-hidden />
+                  )}
+                </button>
+              </div>
+              {loginError && (
+                <p className="mt-2 text-xs text-red-600">{loginError}</p>
+              )}
+
               <div className="flex justify-end mt-2">
                 <button
                   type="button"
                   onClick={handleOpenReset}
-                  className="text-xs font-semibold text-[#389131]"
+                  className="text-xs font-semibold text-[#389131] underline"
                 >
                   Forget Password
                 </button>
@@ -493,9 +518,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
               >
                 {isSubmitting ? "Logging in..." : "Continue"}
               </button>
-              {loginError && (
-                <p className="mt-3 text-xs text-red-600">{loginError}</p>
-              )}
             </div>
           )}
 
@@ -663,19 +685,35 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <input
                   value={otp}
                   onChange={(e) => {
-                    setOtp(e.target.value);
+                    const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setOtp(onlyDigits);
                     setOtpError(null);
                   }}
                   placeholder="Enter OTP"
+                  maxLength={6}
                   className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
                 />
 
-                <div className="mt-2 flex justify-end text-xs text-gray-600">
-                  Didn&apos;t get Code{" "}
-                  <span className="ml-1 font-semibold">
-                    {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
-                    {String(otpSeconds % 60).padStart(2, "0")}
+                <div className="mt-2 flex justify-between items-center text-xs text-gray-600">
+                  <span>
+                    Didn&apos;t get Code{" "}
+                    <span className="ml-1 font-semibold">
+                      {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
+                      {String(otpSeconds % 60).padStart(2, "0")}
+                    </span>
                   </span>
+                  {otpSeconds === 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowOtpModal(false);
+                        void handleResetContinue();
+                      }}
+                      className="ml-3 text-[#389131] font-semibold"
+                    >
+                      Resend
+                    </button>
+                  )}
                 </div>
 
                 {otpError && (
@@ -690,8 +728,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <button
                   type="button"
                   onClick={handleVerifyOtp}
+                  disabled={!isOtpValid}
                   className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                    otpError ? "bg-[#389131] text-white" : "bg-gray-300 text-white"
+                    isOtpValid
+                      ? "bg-[#389131] text-white"
+                      : "bg-gray-300 text-white cursor-not-allowed"
                   }`}
                 >
                   Verify

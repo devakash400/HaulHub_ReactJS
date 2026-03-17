@@ -59,14 +59,14 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center px-3 py-6 sm:p-4 bg-black/50"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="share-modal-title"
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden"
+        className="relative w-full max-w-sm sm:max-w-md bg-white rounded-2xl shadow-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -75,19 +75,19 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
           variant="close"
           titleId="share-modal-title"
         />
-        <div className="p-6">
+        <div className="px-4 py-5 sm:p-6">
           {/* Trailer info: image left, text right */}
-          <div className="flex gap-4 mb-6">
+          <div className="flex gap-3 sm:gap-4 mb-4 sm:mb-6">
             <img
               src={trailerImage}
               alt=""
-              className="w-20 h-20 shrink-0 rounded-lg object-cover"
+              className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-lg object-cover"
             />
             <div className="min-w-0 flex-1">
-              <p className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+              <p className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                 {trailerTitle}
               </p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                 {trailerDescription}
               </p>
             </div>

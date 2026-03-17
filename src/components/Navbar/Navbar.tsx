@@ -116,8 +116,7 @@ const Navbar: React.FC = () => {
                   onClick={closeDrawer}
                 >
                   <Link
-                    to="/account-settings"
-                    state={{ section: "notifications" }}
+                    to="/notifications"
                     className="text-inherit no-underline cursor-pointer"
                   >
                     Notifications
@@ -243,6 +242,7 @@ const Navbar: React.FC = () => {
             // eslint-disable-next-line no-console
             console.log("register api response:", res);
             setIsSignUpOpen(false);
+            toast.success("Account created successfully");
             navigate("/");
           } catch (err: any) {
             const message =

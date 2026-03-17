@@ -56,11 +56,11 @@ const Wishlist: React.FC = () => {
         </header>
 
         {hasItems ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {items.map((item) => (
               <article
                 key={item.id}
-                className="flex flex-col rounded-2xl border border-gray-200 shadow-sm overflow-hidden bg-white"
+                className="flex flex-col rounded-2xl border border-[#D2C7B3] bg-[#F7F1E4] overflow-hidden shadow-sm"
               >
                 <button
                   type="button"
@@ -70,7 +70,7 @@ const Wishlist: React.FC = () => {
                   <img
                     src={item.imageUrl}
                     alt={item.title}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-56 object-cover"
                   />
                   <button
                     type="button"
@@ -78,7 +78,7 @@ const Wishlist: React.FC = () => {
                       e.stopPropagation();
                       handleToggleItem(item);
                     }}
-                    className="absolute top-3 right-3 flex items-center justify-center w-9 h-9 rounded-full bg-white/90 shadow-md hover:bg-white transition-colors"
+                    className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-md hover:bg-white/90 transition-colors"
                     aria-label="Remove from wishlist"
                   >
                     <img
@@ -93,23 +93,24 @@ const Wishlist: React.FC = () => {
                   </button>
                 </button>
 
-                <div className="px-4 py-3 flex-1 flex flex-col">
-                  <h2 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2">
+                <div className="px-4 py-3 flex-1 flex flex-col items-center text-center">
+                  <h2 className="text-sm sm:text-base font-semibold text-gray-900">
                     {item.title}
                   </h2>
                   {item.subtitle && (
-                    <p className="mt-1 text-xs sm:text-sm text-gray-600 line-clamp-2">
+                    <p className="mt-1 text-[11px] sm:text-xs text-gray-700">
                       {item.subtitle}
                     </p>
                   )}
 
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <Link
-                      to={`/trailer/${item.id}`}
-                      className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-[#389131] text-white text-sm font-medium hover:bg-[#2f7829] transition-colors"
+                  <div className="mt-2 w-full flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleItem(item)}
+                      className="text-xs font-medium text-[#389131] underline"
                     >
-                      View details
-                    </Link>
+                      Remove
+                    </button>
                   </div>
                 </div>
               </article>

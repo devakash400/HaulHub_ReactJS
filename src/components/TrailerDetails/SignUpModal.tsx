@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import { ModalHeader } from "../ModalHeader.tsx";
 
@@ -120,7 +120,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     passwordHasSpecial;
 
   const normalizedDigits = phoneNumber.replace(/\D/g, "");
-  const isPhoneValid = normalizedDigits.length >= 10;
+  const isPhoneValid = normalizedDigits.length === 10;
 
   const isFormValid =
     isFirstNameValid &&
@@ -218,27 +218,28 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of birth
-                  </label>
-                  <input
-                    type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Gender
-                  </label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date of birth
+                </label>
+                <input
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gender
+                </label>
+                <div className="relative">
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
                     onBlur={() => setGenderTouched(true)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 pr-9 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent appearance-none"
                   >
                     <option value="">Select gender</option>
                     <option value="Male">Male</option>
@@ -246,10 +247,13 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     <option value="Other">Other</option>
                     <option value="Prefer not to say">Prefer not to say</option>
                   </select>
-                  {genderTouched && gender.trim().length === 0 && (
-                    <p className="mt-1 text-xs text-red-600">Please select gender</p>
-                  )}
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                    <ChevronDown className="w-4 h-4" aria-hidden />
+                  </span>
                 </div>
+                {genderTouched && gender.trim().length === 0 && (
+                  <p className="mt-1 text-xs text-red-600">Please select gender</p>
+                )}
               </div>
 
               <div>
@@ -347,9 +351,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Phone Number
                 </label>
-                <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 flex items-center gap-2 bg-white">
+                <div className="w-full border border-gray-300 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white">
                   <select
-                    className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-2"
+                    className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-1 max-w-[40%] sm:max-w-[32%]"
                     value={selectedCountry.code}
                     onChange={(e) => {
                       const next = COUNTRY_OPTIONS.find(
@@ -364,57 +368,63 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       </option>
                     ))}
                   </select>
-                  <div className="h-5 w-px bg-gray-300" />
+                  <div className="h-5 w-px bg-gray-300 flex-shrink-0" />
                   <input
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     onBlur={() => setPhoneTouched(true)}
                     placeholder="Phone Number"
+                    maxLength={10}
                     className="flex-1 border-none outline-none text-sm px-1 py-0 bg-transparent"
                   />
                 </div>
                 {phoneTouched && !isPhoneValid && (
                   <p className="mt-1 text-xs text-red-600">
-                    Enter at least 10 digits number
+                    Phone number must be exactly 10 digits
                   </p>
                 )}
               </div>
 
-              <div className="flex items-start gap-3 mt-2 pb-4">
+              <div className="flex items-start gap-2 mt-2 pb-4 px-0.5">
                 <input
                   id="signup-agree"
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-[#389131] focus:ring-[#389131]"
+                  className="mt-0.5 h-4 w-4 rounded border-[#389131] bg-white accent-[#389131] focus:ring-[#389131] flex-shrink-0"
                 />
                 <label
                   htmlFor="signup-agree"
-                  className="text-xs sm:text-sm text-gray-700"
+                  className="text-[11px] sm:text-xs leading-relaxed text-gray-700 break-words"
                 >
-                  By selecting Agree and continue, I agree to HaulHub{" "}
+                  <span className="block sm:inline">
+                    By selecting Agree and continue, I agree to HaulHub{" "}
+                  </span>
                   <button
                     type="button"
-                    className="underline text-[#389131]"
+                    className="underline text-[#389131] block sm:inline"
                   >
                     Terms of service
                   </button>
-                  ,{" "}
+                  <span className="hidden sm:inline">, </span>
                   <button
                     type="button"
-                    className="underline text-[#389131]"
+                    className="underline text-[#389131] block sm:inline mt-0.5 sm:mt-0"
                   >
                     Payments Terms of Service and Anti -Discrimination Policy
                   </button>
-                  , and acknowledge the{" "}
+                  <span className="hidden sm:inline">, and acknowledge the </span>
+                  <span className="block sm:hidden mt-0.5">
+                    , and acknowledge the
+                  </span>{" "}
                   <button
                     type="button"
-                    className="underline text-[#389131]"
+                    className="underline text-[#389131] block sm:inline mt-0.5 sm:mt-0"
                   >
                     Privacy Policy
                   </button>
-                  .
+                  <span>.</span>
                 </label>
               </div>
             </div>
