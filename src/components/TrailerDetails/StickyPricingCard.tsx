@@ -14,7 +14,7 @@ import {
   type SignUpData,
 } from "./SignUpModal.tsx";
 import { register } from "../../api/authApi.ts";
-import { loginSuccess } from "../../store/authSlice.ts";
+import { signUpSuccess } from "../../store/authSlice.ts";
 import type { RootState } from "../../store";
 
 export type TrailerBookingInfo = {
@@ -114,16 +114,23 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       const lastName = restName.length > 0 ? restName.join(" ") : undefined;
 
       dispatch(
-        loginSuccess({
-          firstName: firstName || undefined,
-          lastName,
-          email: res.user.email || data.email,
+        signUpSuccess({
+          user: {
+            firstName: firstName || undefined,
+            lastName,
+            email: res.user.email || data.email,
+          },
+          trailor: data.trailor,
         })
       );
 
       setIsSignUpOpen(false);
       toast.success("Account created successfully");
-      setShowRentalDatesModal(true);
+      if (data.trailor === "Owner") {
+        navigate("/");
+      } else {
+        setShowRentalDatesModal(true);
+      }
     } catch (err: any) {
       // eslint-disable-next-line no-console
       console.error(

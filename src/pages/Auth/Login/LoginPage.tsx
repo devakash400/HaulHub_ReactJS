@@ -8,7 +8,7 @@ import {
   SignUpData,
 } from "../../../components/TrailerDetails/SignUpModal.tsx";
 import { register } from "../../../api/authApi.ts";
-import { loginSuccess } from "../../../store/authSlice.ts";
+import { signUpSuccess } from "../../../store/authSlice.ts";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -48,10 +48,13 @@ const LoginPage: React.FC = () => {
                 restName.length > 0 ? restName.join(" ") : undefined;
 
               dispatch(
-                loginSuccess({
-                  firstName: firstName || undefined,
-                  lastName,
-                  email: res.user.email || data.email,
+                signUpSuccess({
+                  user: {
+                    firstName: firstName || undefined,
+                    lastName,
+                    email: res.user.email || data.email,
+                  },
+                  trailor: data.trailor,
                 })
               );
 

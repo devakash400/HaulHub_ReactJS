@@ -22,6 +22,9 @@ import Profile from "./pages/Profile/Profile.tsx";
 import AccountSettings from "./pages/AccountSettings/AccountSettings.tsx";
 import Wishlist from "./pages/Wishlist/Wishlist.tsx";
 import Notifications from "./pages/Notifications/Notifications.tsx";
+import TrailorCondition from "./pages/TrailorCondition/TrailorCondition.tsx";
+import TrailorConditionAfter from "./pages/TrailorCondition/TrailorConditionAfter.tsx";
+import Return from "./pages/Return/Return.tsx";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -42,6 +45,9 @@ const App: React.FC = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/list-trailer" element={<ListTrailer />} />
+        <Route path="/trailor-condition" element={<TrailorCondition />} />
+        <Route path="/trailor-condition-after" element={<TrailorConditionAfter />} />
+        <Route path="/return" element={<Return />} />
         <Route path="/trailer/:id" element={<Trailer />} />
         <Route path="/trailer/:id/photos" element={<AllTrailerPhotos />} />
         <Route path="/trailer/:id/reviews" element={<TrailerReviews />} />

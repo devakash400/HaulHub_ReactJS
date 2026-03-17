@@ -10,6 +10,7 @@ export type SignUpData = {
   gender: string;
   email: string;
   password: string;
+  trailor: string;
   phoneNumber: string;
   agreedToTerms: boolean;
 };
@@ -51,6 +52,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [trailor, setTrailor] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
     COUNTRY_OPTIONS[0]
@@ -74,6 +76,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setGender("");
     setEmail("");
     setPassword("");
+    setTrailor("");
     setPhoneNumber("");
     setSelectedCountry(COUNTRY_OPTIONS[0]);
     setAgreed(false);
@@ -129,6 +132,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     gender.trim().length > 0 &&
     isEmailValid &&
     isPasswordValid &&
+    trailor.trim().length > 0 &&
     isPhoneValid &&
     agreed;
 
@@ -148,6 +152,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
       gender: gender.trim(),
       email: email.trim(),
       password,
+      trailor: trailor.trim(),
       phoneNumber: fullPhone,
       agreedToTerms: agreed,
     });
@@ -245,7 +250,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
-                    <option value="Prefer not to say">Prefer not to say</option>
+
                   </select>
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
                     <ChevronDown className="w-4 h-4" aria-hidden />
@@ -266,11 +271,10 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => setEmailTouched(true)}
                   placeholder="dem@gmail.com"
-                  className={`w-full border rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent ${
-                    emailTouched && !isEmailValid
+                  className={`w-full border rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent ${emailTouched && !isEmailValid
                       ? "border-red-400"
                       : "border-gray-300"
-                  }`}
+                    }`}
                 />
                 {emailTouched && !isEmailValid && (
                   <p className="mt-1 text-xs text-red-600">Enter valid email</p>
@@ -296,9 +300,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
-                      <EyeOff className="w-5 h-5" aria-hidden />
-                    ) : (
                       <Eye className="w-5 h-5" aria-hidden />
+                    ) : (
+                      <EyeOff className="w-5 h-5" aria-hidden />
                     )}
                   </button>
                 </div>
@@ -345,6 +349,27 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     </li>
                   </ul>
                 )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Trailor
+                </label>
+                <div className="relative">
+                  <select
+                    value={trailor}
+                    onChange={(e) => setTrailor(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 pr-9 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent appearance-none"
+                  >
+                    <option value="">Select option</option>
+                    <option value="Renter">Renter</option>
+                    <option value="Owner">Owner</option>
+
+                  </select>
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                    <ChevronDown className="w-4 h-4" aria-hidden />
+                  </span>
+                </div>
               </div>
 
               <div>
@@ -435,11 +460,10 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
               type="submit"
               disabled={!isFormValid}
               aria-disabled={!isFormValid}
-              className={`w-full py-3.5 text-sm sm:text-base font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${
-                isFormValid
+              className={`w-full py-3.5 text-sm sm:text-base font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${isFormValid
                   ? "bg-[#389131] text-white hover:opacity-90"
                   : "bg-[#389131]/60 text-white cursor-not-allowed"
-              }`}
+                }`}
             >
               Agree and Continue
             </button>

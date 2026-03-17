@@ -11,6 +11,7 @@ import {
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { logout } from "../../store/authSlice.ts";
+import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
 
@@ -24,6 +25,7 @@ const Profile: React.FC = () => {
       await logoutApi();
     } finally {
       dispatch(logout());
+      dispatch(clearWishlist());
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem("openLoginAfterLogout", "1");
       }

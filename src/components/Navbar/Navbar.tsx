@@ -6,7 +6,8 @@ import { images } from "../../assets/images/index.ts";
 import LoginModal from "../../pages/Auth/Login/Login.tsx";
 import { SignUpModal, SignUpData } from "../TrailerDetails/SignUpModal.tsx";
 import { RootState } from "../../store";
-import { loginSuccess, logout } from "../../store/authSlice.ts";
+import { logout, signUpSuccess } from "../../store/authSlice.ts";
+import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi, register } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../Auth/LogoutConfirmModal.tsx";
 
@@ -21,6 +22,8 @@ const Navbar: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
+  const user = useSelector((state: RootState) => state.auth.user);
+  const isOwner = user?.trailor === "Owner" && isAuthenticated;
 
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -57,6 +60,7 @@ const Navbar: React.FC = () => {
       await logoutApi();
     } finally {
       dispatch(logout());
+      dispatch(clearWishlist());
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem("openLoginAfterLogout", "1");
       }
@@ -100,94 +104,211 @@ const Navbar: React.FC = () => {
           <div className="absolute top-11 right-0 z-30 min-w-[180px] rounded-lg bg-white py-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
             <div className="p-0">
               <ul className="m-0 list-none p-0 text-[0.9rem] text-black font-normal">
-                <li
-                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                  onClick={closeDrawer}
-                >
-                  <Link
-                    to="/"
-                    className="text-inherit no-underline cursor-pointer"
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li
-                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                  onClick={closeDrawer}
-                >
-                  <Link
-                    to="/notifications"
-                    className="text-inherit no-underline cursor-pointer"
-                  >
-                    Notifications
-                  </Link>
-                </li>
-                <li
-                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                  onClick={closeDrawer}
-                >
-                  <Link
-                    to="/about"
-                    className="text-inherit no-underline cursor-pointer"
-                  >
-                    About
-                  </Link>
-                </li>
-                <li
-                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                  onClick={closeDrawer}
-                >
-                  <Link
-                    to="/contact"
-                    className="text-inherit no-underline cursor-pointer"
-                  >
-                    Contact
-                  </Link>
-                </li>
-                <li
-                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                  onClick={closeDrawer}
-                >
-                  <Link
-                    to="/booking"
-                    className="text-inherit no-underline cursor-pointer"
-                  >
-                    Booking Screen
-                  </Link>
-                </li>
-                <li
-                  className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                  onClick={closeDrawer}
-                >
-                  <Link
-                    to="/profile"
-                    className="text-inherit no-underline cursor-pointer"
-                  >
-                    Profile
-                  </Link>
-                </li>
-                {!isAuthenticated ? (
-                  <li
-                    className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                    onClick={() => {
-                      closeDrawer();
-                      setIsSignUpOpen(false);
-                      setIsLoginOpen(true);
-                    }}
-                  >
-                    <span className="text-inherit no-underline cursor-pointer">
-                      Login / Signup
-                    </span>
-                  </li>
+                {/* Owner menu: Home, Book your Trailor, Notification, Contact, Profile, Logout */}
+                {isOwner ? (
+                  <>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Home
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/list-trailer"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Book your Trailor
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/notifications"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Notification
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/trailor-condition"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Trailor Condition Before
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/trailor-condition-after"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Trailor Condition After
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/return"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Return
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/contact"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Contact
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/profile"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={() => setIsLogoutConfirmOpen(true)}
+                    >
+                      <span className="text-inherit no-underline cursor-pointer">
+                        Logout
+                      </span>
+                    </li>
+                  </>
                 ) : (
-                  <li
-                    className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                    onClick={() => setIsLogoutConfirmOpen(true)}
-                  >
-                    <span className="text-inherit no-underline cursor-pointer">
-                      Logout
-                    </span>
-                  </li>
+                  <>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Home
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/list-trailer"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Book your Trailor
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/notifications"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Notification
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      onClick={closeDrawer}
+                    >
+                      <Link
+                        to="/contact"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Contact
+                      </Link>
+                    </li>
+                    {!isAuthenticated ? (
+                      <li
+                        className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                        onClick={() => {
+                          closeDrawer();
+                          setIsSignUpOpen(false);
+                          setIsLoginOpen(true);
+                        }}
+                      >
+                        <span className="text-inherit no-underline cursor-pointer">
+                          Login / Signup
+                        </span>
+                      </li>
+                    ) : (
+                      <>
+                        <li
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                          onClick={closeDrawer}
+                        >
+                          <Link
+                            to="/about"
+                            className="text-inherit no-underline cursor-pointer"
+                          >
+                            About
+                          </Link>
+                        </li>
+                        <li
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                          onClick={closeDrawer}
+                        >
+                          <Link
+                            to="/booking"
+                            className="text-inherit no-underline cursor-pointer"
+                          >
+                            Booking Screen
+                          </Link>
+                        </li>
+                        <li
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                          onClick={closeDrawer}
+                        >
+                          <Link
+                            to="/profile"
+                            className="text-inherit no-underline cursor-pointer"
+                          >
+                            Profile
+                          </Link>
+                        </li>
+                        <li
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                          onClick={() => setIsLogoutConfirmOpen(true)}
+                        >
+                          <span className="text-inherit no-underline cursor-pointer">
+                            Logout
+                          </span>
+                        </li>
+                      </>
+                    )}
+                  </>
                 )}
               </ul>
             </div>
@@ -233,10 +354,13 @@ const Navbar: React.FC = () => {
               restName.length > 0 ? restName.join(" ") : undefined;
 
             dispatch(
-              loginSuccess({
-                firstName: firstName || undefined,
-                lastName,
-                email: res.user.email || data.email,
+              signUpSuccess({
+                user: {
+                  firstName: firstName || undefined,
+                  lastName,
+                  email: res.user.email || data.email,
+                },
+                trailor: data.trailor,
               })
             );
             // eslint-disable-next-line no-console

@@ -13,4 +13,5 @@ export { SelectRentalDatesModal } from "./SelectRentalDatesModal.tsx";
 export { GuestFavouriteSection } from "./GuestFavouriteSection.tsx";
 export { ReviewsSection } from "./ReviewsSection.tsx";
 export { PolicySection } from "./PolicySection.tsx";
+export { RateTrailerModal } from "./RateTrailerModal.tsx";
 

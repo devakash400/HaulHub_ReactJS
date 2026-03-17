@@ -222,11 +222,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
       const [firstName, ...restName] = fullName.split(" ").filter(Boolean);
       const lastName = restName.length > 0 ? restName.join(" ") : undefined;
 
+      const trailorFromApi = (user as { trailor?: string }).trailor;
       dispatch(
         loginSuccess({
           firstName: firstName || undefined,
           lastName,
           email: user.email || email,
+          trailor: trailorFromApi,
         })
       );
       toast.success("Logged in successfully");
