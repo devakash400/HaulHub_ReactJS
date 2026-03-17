@@ -75,6 +75,7 @@ export const IdentityVerificationModal: React.FC<
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState<"US" | "CA">("US");
   const [idDocument, setIdDocument] = useState<File | null>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement | null>(null);
   const idDocumentInputRef = useRef<HTMLInputElement | null>(null);
@@ -101,6 +102,11 @@ export const IdentityVerificationModal: React.FC<
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
   }, [email]);
 
+  const isPhoneValid = useMemo(() => {
+    const digitsOnly = phoneNumber.replace(/\D/g, "");
+    return digitsOnly.length === 10;
+  }, [phoneNumber]);
+
   const missingDetailsFields = useMemo(() => {
     const missing: string[] = [];
     if (!firstName.trim()) missing.push("First name");
@@ -109,6 +115,7 @@ export const IdentityVerificationModal: React.FC<
     if (!email.trim()) missing.push("Email");
     else if (!isEmailValid) missing.push("Valid email");
     if (!phoneNumber.trim()) missing.push("Phone number");
+    else if (!isPhoneValid) missing.push("Valid 10-digit phone number");
     if (!idDocument) missing.push("ID document");
     return missing;
   }, [firstName, lastName, dateOfBirth, email, isEmailValid, phoneNumber, idDocument]);
@@ -121,6 +128,7 @@ export const IdentityVerificationModal: React.FC<
       !email.trim() ||
       !isEmailValid ||
       !phoneNumber.trim() ||
+      !isPhoneValid ||
       !idDocument
     );
   }, [
@@ -130,6 +138,7 @@ export const IdentityVerificationModal: React.FC<
     email,
     isEmailValid,
     phoneNumber,
+    isPhoneValid,
     idDocument,
   ]);
 
@@ -212,7 +221,7 @@ export const IdentityVerificationModal: React.FC<
       aria-labelledby="identity-verification-title"
     >
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-lg max-h-[85vh] overflow-hidden"
+        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-lg max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -225,7 +234,7 @@ export const IdentityVerificationModal: React.FC<
           variant="close"
           titleId="identity-verification-title"
         />
-        <div className="p-6 sm:p-8 overflow-y-auto max-h-[85vh]">
+        <div className="p-6 sm:p-8 overflow-y-auto flex-1">
           <p className="text-sm text-gray-600 text-center">
             {step === "method"
               ? "We’ll use this to verify your identity and won’t share it with other trailer."
@@ -412,13 +421,25 @@ export const IdentityVerificationModal: React.FC<
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Phone Number
                 </label>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+1 Enter your phone number"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-                />
+                <div className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm flex items-center gap-2">
+                  <span className="text-sm">🇺🇸</span>
+                  <span className="text-gray-600">+1</span>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => {
+                      const digitsOnly = e.target.value.replace(/\D/g, "");
+                      setPhoneNumber(digitsOnly.slice(0, 10));
+                    }}
+                    placeholder="Enter 10-digit phone number"
+                    className="flex-1 outline-none text-gray-900 placeholder:text-gray-400"
+                  />
+                </div>
+                {phoneNumber.trim() && !isPhoneValid && (
+                  <p className="mt-1 text-xs text-red-600">
+                    Phone number must be 10 digits.
+                  </p>
+                )}
               </div>
 
               <div>

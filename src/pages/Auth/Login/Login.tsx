@@ -504,7 +504,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   onClick={handleOpenReset}
                   className="text-xs font-semibold text-[#389131] underline"
                 >
-                  Forget Password
+                  Forgot Password
                 </button>
               </div>
 

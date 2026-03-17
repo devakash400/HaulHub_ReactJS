@@ -26,18 +26,26 @@ const policies = [
 
 export const PolicySection: React.FC = () => {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
-      {policies.map(({ icon, title, description }) => (
-        <div key={title}>
-          <img
-            src={icon}
-            alt={title}
-            className="w-8 h-8 text-gray-800 mb-4 object-contain"
-          />
-          <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-2">{title}</h3>
-          <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+    <section className="w-full py-8">
+      <div className="max-w-[1120px] mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          {policies.map(({ icon, title, description }) => (
+            <div key={title} className="flex flex-col items-start">
+              <img
+                src={icon}
+                alt={title}
+                className="w-8 h-8 mb-4 object-contain"
+              />
+              <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-2">
+                {title}
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {description}
+              </p>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </section>
   );
 };

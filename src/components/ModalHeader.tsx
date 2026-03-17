@@ -20,7 +20,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
   titleId,
 }) => {
   return (
-    <div className="relative flex items-center justify-between px-3 sm:px-5 py-3 bg-[#389131] text-white rounded-t-2xl sm:rounded-t-2xl">
+    <div className="flex items-center gap-3 px-3 sm:px-5 py-3 bg-[#389131] text-white rounded-t-2xl sm:rounded-t-2xl">
       <button
         type="button"
         onClick={onClose}
@@ -39,7 +39,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
       </button>
       <h2
         id={titleId}
-        className="absolute left-1/2 -translate-x-1/2 text-xl sm:text-2xl font-semibold text-white m-0"
+        className="flex-1 text-center text-lg sm:text-2xl font-semibold text-white m-0 leading-tight px-2"
       >
         {title}
       </h2>

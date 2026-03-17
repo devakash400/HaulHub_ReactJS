@@ -1,8 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { images } from "../../assets/images/index.ts";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 
 const BottomBar: React.FC = () => {
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+  const user = useSelector((state: RootState) => state.auth.user);
+  const isOwner = user?.trailor === "Owner" && isAuthenticated;
+  const year = new Date().getFullYear();
+
   return (
     <footer className="bg-background border-t border-gray-200 py-8 px-4 sm:px-6 font-sans w-full overflow-x-hidden">
       <div className="max-w-[1120px] mx-auto flex flex-wrap items-start justify-between gap-8 min-w-0 w-full">
@@ -29,14 +38,16 @@ const BottomBar: React.FC = () => {
                   Why Choose HaulHub
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/list-trailer"
-                  className="no-underline text-black text-[0.9rem]"
-                >
-                  List Trailer
-                </Link>
-              </li>
+              {isOwner && (
+                <li>
+                  <Link
+                    to="/list-trailer"
+                    className="no-underline text-black text-[0.9rem]"
+                  >
+                    List Trailer
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link
                   to="/booking"
@@ -69,14 +80,16 @@ const BottomBar: React.FC = () => {
               Company
             </h3>
             <ul className="list-none font-medium p-0 m-0 flex flex-col gap-1.5 text-[0.9rem] text-black">
-              <li>
-                <Link
-                  to="/list-trailer"
-                  className="no-underline text-black text-[0.9rem]"
-                >
-                  List Trailer
-                </Link>
-              </li>
+              {isOwner && (
+                <li>
+                  <Link
+                    to="/list-trailer"
+                    className="no-underline text-black text-[0.9rem]"
+                  >
+                    List Trailer
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link
                   to="/how-it-works"
@@ -147,6 +160,78 @@ const BottomBar: React.FC = () => {
                 <span className="text-[1rem]">Google Play</span>
               </span>
             </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom strip */}
+      <div className="max-w-[1120px] mx-auto mt-8 pt-5 border-t border-gray-200 text-[0.95rem] text-gray-700">
+        <div className="flex flex-col items-center gap-4 sm:grid sm:grid-cols-3 sm:items-center">
+          {/* Left spacer (keeps center truly centered on desktop) */}
+          <div className="hidden sm:block" />
+
+          {/* Center copyright */}
+          <p className="m-0 text-center">
+            © {year} HaulHub,{" "}
+            <Link to="/trust-safety" className="text-gray-700 hover:underline">
+              Privacy
+            </Link>{" "}
+            <Link to="/trust-safety" className="text-gray-700 hover:underline">
+              Terms
+            </Link>{" "}
+            &amp;{" "}
+            <Link to="/about" className="text-gray-700 hover:underline">
+              Company Details
+            </Link>
+          </p>
+
+          {/* Right socials */}
+          <div className="flex items-center justify-center gap-3 sm:justify-end">
+          <span className="text-gray-700 font-medium">Join us</span>
+          <a
+            href="https://www.facebook.com"
+            aria-label="Facebook"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1877F2] text-white no-underline"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.88 3.77-3.88 1.09 0 2.23.2 2.23.2v2.46h-1.25c-1.23 0-1.62.76-1.62 1.54V12h2.76l-.44 2.89h-2.32v6.99A10 10 0 0 0 22 12z" />
+            </svg>
+          </a>
+          <a
+            href="https://www.instagram.com"
+            aria-label="Instagram"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full no-underline"
+            style={{
+              background:
+                "radial-gradient(circle at 30% 30%, #FEDA75 0%, #FA7E1E 30%, #D62976 55%, #962FBF 75%, #4F5BD5 100%)",
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="5" ry="5" />
+              <path d="M16 11.37a4 4 0 1 1-7.5 1.7 4 4 0 0 1 7.5-1.7z" />
+              <line x1="17.5" y1="6.5" x2="17.5" y2="6.5" />
+            </svg>
+          </a>
           </div>
         </div>
       </div>

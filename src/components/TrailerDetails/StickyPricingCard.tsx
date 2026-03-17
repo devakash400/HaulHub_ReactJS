@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ChevronDown } from "lucide-react";
 import { toast } from "react-toastify";
 import { SelectRentalDatesModal } from "./SelectRentalDatesModal.tsx";
 import {
@@ -164,11 +163,11 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 Check-in
               </p>
               <input
-                type="text"
+                type="date"
                 value={checkIn}
                 onChange={(e) => setCheckIn(e.target.value)}
                 placeholder="Add date"
-                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none"
+                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none accent-[#389131] [&::-webkit-calendar-picker-indicator]:scale-150 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
             </div>
             <div className="px-4 pt-3 pb-2.5">
@@ -176,11 +175,11 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 Checkout
               </p>
               <input
-                type="text"
+                type="date"
                 value={checkOut}
                 onChange={(e) => setCheckOut(e.target.value)}
                 placeholder="Add date"
-                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none"
+                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none accent-[#389131] [&::-webkit-calendar-picker-indicator]:scale-150 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
             </div>
           </div>
@@ -190,14 +189,13 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 Estimated dispatch:
               </p>
               <input
-                type="text"
+                type="time"
                 value={dispatcher}
                 onChange={(e) => setDispatcher(e.target.value)}
                 placeholder="Add Time"
-                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none"
+                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none accent-[#389131] [&::-webkit-calendar-picker-indicator]:scale-150 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
             </div>
-            <ChevronDown className="w-4 h-4 text-black" aria-hidden />
           </div>
         </div>
 

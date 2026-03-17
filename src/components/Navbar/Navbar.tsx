@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { Search } from "lucide-react";
 import { images } from "../../assets/images/index.ts";
 import LoginModal from "../../pages/Auth/Login/Login.tsx";
 import { SignUpModal, SignUpData } from "../TrailerDetails/SignUpModal.tsx";
@@ -83,6 +84,22 @@ const Navbar: React.FC = () => {
           className="h-10 sm:h-[50px] object-contain"
         />
       </Link>
+
+      {/* Center: Search bar (Home only) */}
+      {location.pathname === "/" && (
+        <div className="hidden sm:flex flex-1 items-center justify-center px-4 min-w-0">
+          <div className="flex h-[46px] w-full max-w-[640px] items-center rounded-xl bg-white px-4 border border-gray-200 shadow-sm">
+            <input
+              type="text"
+              placeholder="Search here..."
+              className="flex-1 border-none bg-transparent text-[0.95rem] text-gray-700 placeholder:text-gray-400 outline-none"
+            />
+            <div className="ml-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#389131]">
+              <Search className="w-5 h-5 text-white" aria-hidden />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Right: dropdown toggle */}
       <div ref={dropdownRef} className="relative flex items-center gap-3 sm:gap-5 text-[0.95rem] text-black shrink-0 min-w-0">
@@ -215,17 +232,6 @@ const Navbar: React.FC = () => {
                         className="text-inherit no-underline cursor-pointer"
                       >
                         Home
-                      </Link>
-                    </li>
-                    <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
-                      onClick={closeDrawer}
-                    >
-                      <Link
-                        to="/list-trailer"
-                        className="text-inherit no-underline cursor-pointer"
-                      >
-                        Book your Trailor
                       </Link>
                     </li>
                     <li

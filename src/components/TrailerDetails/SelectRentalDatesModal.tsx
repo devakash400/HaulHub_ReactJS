@@ -78,10 +78,9 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
             </label>
             <input
               id="pickup-date"
-              type="text"
+              type="date"
               value={pickupDate}
               onChange={(e) => setPickupDate(e.target.value)}
-              placeholder="DD/MM/YY"
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
             />
           </div>
@@ -94,10 +93,10 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
             </label>
             <input
               id="return-date"
-              type="text"
+              type="date"
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
-              placeholder="DD/MM/YY"
+              min={pickupDate || undefined}
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
             />
           </div>
