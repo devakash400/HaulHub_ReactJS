@@ -1,24 +1,36 @@
 import React from "react";
 import { ThumbsUp, Lock, Check } from "lucide-react";
+import fallbackImage from "../../assets/images/modallogo.png";
 
 const About: React.FC = () => {
+  const handleImgError: React.ReactEventHandler<HTMLImageElement> = (e) => {
+    const img = e.currentTarget;
+    if (img.src === fallbackImage) return;
+    img.onerror = null;
+    img.src = fallbackImage;
+  };
+
   const gridImages = [
-    "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=400&h=300&fit=crop&sat=-20",
-    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=400&h=300&fit=crop&brightness=0.9",
-    "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=400&h=300&fit=crop&sat=-10",
+    "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=600&h=450&q=80",
+    "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=600&h=450&q=80",
+    "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=600&h=450&q=80&sat=-20",
+    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&h=450&q=80",
+    "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=600&h=450&q=80&brightness=0.9",
+    "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=600&h=450&q=80&sat=-10",
   ];
 
   return (
     <main className="min-h-screen w-full min-w-0 overflow-x-hidden bg-[#F6F1E8] font-sans">
       {/* Hero image - full viewport width, no sidebars */}
-      <section className="relative w-full min-h-[60vh] overflow-hidden">
+      <section className="relative w-full h-[260px] overflow-hidden bg-[#F6F1E8] sm:h-auto sm:min-h-[60vh]">
         <img
-          src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1200&h=500&fit=crop"
+          src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1600&h=700&q=80"
           alt="Flatbed trailer and truck at construction site"
-          className="h-full min-h-[60vh] w-full object-cover object-center"
+          loading="eager"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={handleImgError}
+          className="h-full w-full object-cover object-center sm:min-h-[60vh]"
         />
       </section>
 
@@ -61,7 +73,11 @@ const About: React.FC = () => {
                   key={i}
                   src={src}
                   alt={`Trailer and truck ${i + 1}`}
-                  className="aspect-[4/3] w-full rounded-lg object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                  onError={handleImgError}
+                  className="aspect-[4/3] w-full rounded-lg bg-neutral-200 object-cover shadow-sm"
                 />
               ))}
             </div>

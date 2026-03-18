@@ -13,7 +13,8 @@ import Apple from './apple.png';
 import Cross from './cross.png';
 import ModalLogo from './modallogo.png';
 import Instagram from "./instagram.png";
-import Facebook from "./facebook.png"
+import Facebook from "./facebook.png";
+import Contact from "./contact.png";
 
 // Export them all
 export const images = {
@@ -30,5 +31,6 @@ export const images = {
   Cross,
   ModalLogo,
   Instagram,
-  Facebook
+  Facebook,
+  Contact,
 };

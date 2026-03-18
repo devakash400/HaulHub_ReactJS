@@ -82,11 +82,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const isEmailFilled = email.trim().length > 0;
   const isEmailValid = useMemo(() => emailRegex.test(email.trim()), [email]);
   const isPhoneLike = useMemo(() => {
-    const digits = email.replace(/\D/g, "");
+  const digits = email.replace(/\D/g, "");
     return digits.length === 10;
   }, [email]);
   // In email mode, only email is allowed; in phone mode, only a 10‑digit phone is allowed
   const isIdentifierValid = usePhoneOnly ? isPhoneLike : isEmailValid;
+  const showIdentifierFormatError = useMemo(() => {
+    return isEmailFilled && !isIdentifierValid;
+  }, [isEmailFilled, isIdentifierValid]);
   const isPasswordFilled = useMemo(() => password.trim().length > 0, [password]);
 
   const resetCanContinue = useMemo(() => {
@@ -147,11 +150,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
         const exists =
           res &&
-          typeof res === "object" &&
-          "data" in res &&
-          (res as any).data &&
-          typeof (res as any).data === "object" &&
-          "exists" in (res as any).data
+            typeof res === "object" &&
+            "data" in res &&
+            (res as any).data &&
+            typeof (res as any).data === "object" &&
+            "exists" in (res as any).data
             ? Boolean((res as any).data.exists)
             : false;
 
@@ -171,11 +174,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
         const exists =
           res &&
-          typeof res === "object" &&
-          "data" in res &&
-          (res as any).data &&
-          typeof (res as any).data === "object" &&
-          "exists" in (res as any).data
+            typeof res === "object" &&
+            "data" in res &&
+            (res as any).data &&
+            typeof (res as any).data === "object" &&
+            "exists" in (res as any).data
             ? Boolean((res as any).data.exists)
             : false;
 
@@ -371,7 +374,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     type="tel"
                     placeholder="Phone Number"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError(null);
+                    }}
                     maxLength={10}
                     className="flex-1 border-none outline-none text-sm px-1 py-0 bg-transparent"
                   />
@@ -381,11 +387,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   type="email"
                   placeholder="Enter your Email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setEmailError(null);
+                  }}
                   className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
                 />
               )}
-              {email.trim().length > 0 && !isIdentifierValid && (
+              {showIdentifierFormatError && (
                 <p className="mt-2 text-xs text-red-600">
                   {usePhoneOnly
                     ? "Phone number must be exactly 10 digits"
@@ -393,20 +402,20 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 </p>
               )}
 
+
               <button
                 type="button"
                 onClick={handleEmailContinue}
                 disabled={!isEmailFilled || !isIdentifierValid || isCheckingEmail}
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  isEmailFilled && isIdentifierValid && !isCheckingEmail
+                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${isEmailFilled && isIdentifierValid && !isCheckingEmail
                     ? "bg-[#389131] text-white"
                     : "bg-gray-300 text-white cursor-not-allowed"
-                }`}
+                  }`}
               >
                 {isCheckingEmail ? "Checking..." : "Continue"}
               </button>
 
-              {emailError && (
+              {emailError && !showIdentifierFormatError && (
                 <p className="mt-2 text-xs text-red-600">{emailError}</p>
               )}
 
@@ -422,6 +431,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 onClick={() => {
                   setUsePhoneOnly((prev) => !prev);
                   setEmail("");
+                  setEmailError(null);
                 }}
               >
                 <img
@@ -512,11 +522,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 type="button"
                 onClick={handleLoginContinue}
                 disabled={!isPasswordFilled || isSubmitting}
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  isPasswordFilled && !isSubmitting
+                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${isPasswordFilled && !isSubmitting
                     ? "bg-[#389131] text-white"
                     : "bg-gray-300 text-white cursor-not-allowed"
-                }`}
+                  }`}
               >
                 {isSubmitting ? "Logging in..." : "Continue"}
               </button>
@@ -569,11 +578,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 type="button"
                 onClick={handleResetContinue}
                 disabled={!resetCanContinue || isForgotSubmitting}
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  resetCanContinue && !isForgotSubmitting
+                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${resetCanContinue && !isForgotSubmitting
                     ? "bg-[#389131] text-white"
                     : "bg-gray-300 text-white cursor-not-allowed"
-                }`}
+                  }`}
               >
                 {isForgotSubmitting ? "Sending..." : "Continue"}
               </button>
@@ -645,11 +653,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 type="button"
                 onClick={handleNewPasswordContinue}
                 disabled={!canSetNewPassword}
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  canSetNewPassword
+                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${canSetNewPassword
                     ? "bg-[#389131] text-white"
                     : "bg-gray-300 text-white cursor-not-allowed"
-                }`}
+                  }`}
               >
                 Continue
               </button>
@@ -731,11 +738,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   type="button"
                   onClick={handleVerifyOtp}
                   disabled={!isOtpValid}
-                  className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                    isOtpValid
+                  className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${isOtpValid
                       ? "bg-[#389131] text-white"
                       : "bg-gray-300 text-white cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   Verify
                 </button>

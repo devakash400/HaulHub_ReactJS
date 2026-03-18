@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import { images } from "../../assets/images/index.ts";
 
 const SERVICE_OPTIONS = [
   "Trailer Rental",
@@ -44,21 +45,21 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen w-full min-w-0 overflow-x-hidden bg-[#F6F1E8] font-sans">
-      <div className="mx-auto max-w-[1120px] px-4 py-10 sm:px-6 sm:py-14">
+    <main className="min-h-screen w-full min-w-0 overflow-x-hidden bg-[#F6F1E8] font-sans px-4 py-10 sm:px-6 sm:py-14">
+      <div className="mx-auto max-w-[1120px]">
         {/* Two columns: image left, form right */}
         <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-10">
           {/* Left: Trailer image */}
-          <div className="w-full lg:w-[45%] lg:min-w-0 shrink-0">
+          <div className="w-full lg:w-[45%] lg:min-w-0 shrink-0 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5">
             <img
-              src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&h=600&fit=crop"
+              src={images.Contact}
               alt="Dump trailer at dealership"
-              className="h-full min-h-[280px] w-full rounded-xl object-cover object-center sm:min-h-[360px]"
+              className="h-[300px] w-full object-cover object-center sm:h-[420px] lg:h-full"
             />
           </div>
 
           {/* Right: Contact form */}
-          <div className="flex flex-1 flex-col lg:min-w-0">
+          <div className="flex flex-1 flex-col lg:min-w-0 rounded-xl bg-white p-6 shadow-lg ring-1 ring-black/5 sm:p-8">
             <h1 className="mb-6 text-3xl font-bold tracking-tight text-[#389131] sm:text-4xl">
               Contact Us
             </h1>

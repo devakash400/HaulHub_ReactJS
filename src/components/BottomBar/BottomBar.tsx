@@ -172,7 +172,7 @@ const BottomBar: React.FC = () => {
 
           {/* Center copyright */}
           <p className="m-0 text-center">
-            © {year} HaulHub,{" "}
+            @ {year} HaulHub,{" "}
             <Link to="/trust-safety" className="text-gray-700 hover:underline">
               Privacy
             </Link>{" "}
