@@ -80,9 +80,9 @@ const AccountSettings: React.FC = () => {
   const [isEditingLegalName, setIsEditingLegalName] = useState(false);
   const [firstNameOnId, setFirstNameOnId] = useState("Demo");
   const [surnameOnId, setSurnameOnId] = useState("Demo");
-  const [preferredFirstName, setPreferredFirstName] = useState("demo");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [emailValue, setEmailValue] = useState("Demo@gmail.com");
+  const [preferredFirstName] = useState("demo");
+  const [phoneNumber] = useState("");
+  const [emailValue] = useState("Demo@gmail.com");
 
   const rightTitle = useMemo(() => {
     switch (active) {

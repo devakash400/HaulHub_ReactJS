@@ -1,17 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ChevronDown,
-  CreditCard,
-  IdCard,
-  Car,
-  Upload,
-  FileText,
-  RotateCw,
-} from "lucide-react";
+import { CreditCard, IdCard, Car, Upload, FileText, RotateCw } from "lucide-react";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import { ModalHeader } from "../ModalHeader.tsx";
 
-type MethodKey = "driving_licence" | "passport" | "identity_card";
+type MethodKey =
+  | "driving_licence"
+  | "passport"
+  | "liability_document"
+  | "digital_signature";
 
 export type IdentityVerificationData = {
   issuingCountryRegion: string;
@@ -24,6 +20,8 @@ export type IdentityVerificationData = {
   email: string;
   phoneNumber: string;
   idDocument?: File | null;
+  /** Optional uploaded digital signature image */
+  digitalSignatureFile?: File | null;
 };
 
 export interface IdentityVerificationModalProps {
@@ -47,9 +45,14 @@ const METHOD_META: Record<
     placeholder: "Enter Passport",
     icon: CreditCard,
   },
-  identity_card: {
-    label: "Identify card",
-    placeholder: "Enter Identify card",
+  liability_document: {
+    label: "Liability Document",
+    placeholder: "Enter Liability Document",
+    icon: IdCard,
+  },
+  digital_signature: {
+    label: "Digital Signature",
+    placeholder: "Sign below",
     icon: IdCard,
   },
 };
@@ -67,7 +70,8 @@ export const IdentityVerificationModal: React.FC<
   >({
     driving_licence: "",
     passport: "",
-    identity_card: "",
+    liability_document: "",
+    digital_signature: "",
   });
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [firstName, setFirstName] = useState("");
@@ -75,10 +79,18 @@ export const IdentityVerificationModal: React.FC<
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [phoneCountry, setPhoneCountry] = useState<"US" | "CA">("US");
   const [idDocument, setIdDocument] = useState<File | null>(null);
+  const [methodFiles, setMethodFiles] = useState<Record<MethodKey, File | null>>({
+    driving_licence: null,
+    passport: null,
+    liability_document: null,
+    digital_signature: null,
+  });
   const profilePhotoInputRef = useRef<HTMLInputElement | null>(null);
   const idDocumentInputRef = useRef<HTMLInputElement | null>(null);
+  const methodFileInputRef = useRef<HTMLInputElement | null>(null);
+  const digitalSignatureInputRef = useRef<HTMLInputElement | null>(null);
+  const [digitalSignaturePreviewUrl, setDigitalSignaturePreviewUrl] = useState<string | null>(null);
 
   const isIOS = useMemo(() => {
     if (typeof navigator === "undefined") return false;
@@ -91,10 +103,9 @@ export const IdentityVerificationModal: React.FC<
     return isIOS ? "image/*" : "image/*,application/pdf,.pdf";
   }, [isIOS]);
 
-  const activeNumber = documentNumbers[openMethod];
   const isMethodContinueDisabled = useMemo(() => {
-    return !issuingCountryRegion.trim() || !activeNumber.trim();
-  }, [issuingCountryRegion, activeNumber]);
+    return !issuingCountryRegion.trim();
+  }, [issuingCountryRegion]);
 
   const isEmailValid = useMemo(() => {
     const trimmed = email.trim();
@@ -118,7 +129,16 @@ export const IdentityVerificationModal: React.FC<
     else if (!isPhoneValid) missing.push("Valid 10-digit phone number");
     if (!idDocument) missing.push("ID document");
     return missing;
-  }, [firstName, lastName, dateOfBirth, email, isEmailValid, phoneNumber, idDocument]);
+  }, [
+    firstName,
+    lastName,
+    dateOfBirth,
+    email,
+    isEmailValid,
+    phoneNumber,
+    isPhoneValid,
+    idDocument,
+  ]);
 
   const isDetailsContinueDisabled = useMemo(() => {
     return (
@@ -167,7 +187,8 @@ export const IdentityVerificationModal: React.FC<
     setDocumentNumbers({
       driving_licence: "",
       passport: "",
-      identity_card: "",
+      liability_document: "",
+      digital_signature: "",
     });
     setProfilePhoto(null);
     setFirstName("");
@@ -176,7 +197,81 @@ export const IdentityVerificationModal: React.FC<
     setEmail("");
     setPhoneNumber("");
     setIdDocument(null);
+    setMethodFiles({
+      driving_licence: null,
+      passport: null,
+      liability_document: null,
+      digital_signature: null,
+    });
+    setDigitalSignaturePreviewUrl(null);
   }, [isOpen, defaultIssuingCountryRegion]);
+
+  const handleMethodFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    if (file) {
+      setMethodFiles((prev) => ({
+        ...prev,
+        [openMethod]: file,
+      }));
+    }
+    // Reset input so selecting the same file again still triggers change
+    event.target.value = "";
+  };
+
+  const handleOpenCurrentPdf = () => {
+    const file = methodFiles[openMethod];
+    if (!file || typeof window === "undefined") return;
+    const url = URL.createObjectURL(file);
+    window.open(url, "_blank", "noopener");
+    // Revoke after a short delay to give the browser time to load it
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  };
+
+  const handleDownloadCurrentPdf = () => {
+    const file = methodFiles[openMethod];
+    if (!file || typeof window === "undefined" || typeof document === "undefined")
+      return;
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = file.name || "document.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDigitalSignatureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    setMethodFiles((prev) => ({
+      ...prev,
+      digital_signature: file,
+    }));
+
+    if (digitalSignaturePreviewUrl) {
+      URL.revokeObjectURL(digitalSignaturePreviewUrl);
+    }
+
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setDigitalSignaturePreviewUrl(url);
+    } else {
+      setDigitalSignaturePreviewUrl(null);
+    }
+
+    event.target.value = "";
+  };
+
+  const clearDigitalSignature = () => {
+    setMethodFiles((prev) => ({
+      ...prev,
+      digital_signature: null,
+    }));
+    if (digitalSignaturePreviewUrl) {
+      URL.revokeObjectURL(digitalSignaturePreviewUrl);
+    }
+    setDigitalSignaturePreviewUrl(null);
+  };
 
   const handleMethodContinue = () => {
     if (isMethodContinueDisabled) return;
@@ -196,6 +291,7 @@ export const IdentityVerificationModal: React.FC<
       email: email.trim(),
       phoneNumber: phoneNumber.trim(),
       idDocument,
+      digitalSignatureFile: methodFiles.digital_signature ?? null,
     });
     onClose();
   };
@@ -256,55 +352,121 @@ export const IdentityVerificationModal: React.FC<
                 />
               </div>
 
+              <input
+                ref={methodFileInputRef}
+                type="file"
+                accept="image/*,application/pdf,.pdf"
+                className="hidden"
+                onChange={handleMethodFileChange}
+              />
+              <input
+                ref={digitalSignatureInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleDigitalSignatureChange}
+              />
+
               <div className="space-y-3">
                 {(Object.keys(METHOD_META) as MethodKey[]).map((key) => {
                   const meta = METHOD_META[key];
                   const Icon = meta.icon;
-                  const isOpenMethod = openMethod === key;
+                  const isActive = openMethod === key;
                   return (
-                    <div key={key} className="border border-gray-200 rounded-xl">
-                      <button
-                        type="button"
-                        onClick={() => setOpenMethod(key)}
-                        className="w-full flex items-center justify-between gap-3 px-4 py-4"
-                        aria-expanded={isOpenMethod}
-                      >
-                        <span className="flex items-center gap-3">
-                          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-50 border border-gray-200">
-                            <Icon className="w-5 h-5 text-gray-800" aria-hidden />
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setOpenMethod(key)}
+                      className={`w-full rounded-xl border px-4 py-3 text-left transition-colors ${
+                        isActive
+                          ? "border-[#389131] bg-green-50"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-700">
+                            <Icon className="h-5 w-5" aria-hidden />
                           </span>
-                          <span className="text-sm sm:text-base font-medium text-gray-900">
+                          <p className="text-sm font-medium text-gray-900">
                             {meta.label}
-                          </span>
-                        </span>
-                        <ChevronDown
-                          className={`w-5 h-5 text-gray-700 transition-transform ${
-                            isOpenMethod ? "rotate-180" : ""
-                          }`}
-                          aria-hidden
-                        />
-                      </button>
-
-                      {isOpenMethod && (
-                        <div className="px-4 pb-4">
-                          <input
-                            type="text"
-                            value={documentNumbers[key]}
-                            onChange={(e) =>
-                              setDocumentNumbers((prev) => ({
-                                ...prev,
-                                [key]: e.target.value,
-                              }))
-                            }
-                            placeholder={meta.placeholder}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-                          />
+                          </p>
                         </div>
-                      )}
-                    </div>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setOpenMethod(key);
+                            if (key === "digital_signature") {
+                              digitalSignatureInputRef.current?.click();
+                            } else {
+                              methodFileInputRef.current?.click();
+                            }
+                          }}
+                          className="inline-flex items-center justify-center rounded-full p-1.5 hover:bg-gray-100"
+                          aria-label={`Upload ${meta.label} file`}
+                        >
+                          <Upload className="h-5 w-5 text-gray-500" aria-hidden />
+                        </button>
+                      </div>
+                    </button>
                   );
                 })}
               </div>
+
+              {methodFiles[openMethod] && (
+                <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleOpenCurrentPdf}
+                    className="w-full sm:w-auto border border-gray-800 text-gray-900 rounded-lg px-6 py-2.5 text-sm font-medium bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    Open PDF
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDownloadCurrentPdf}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white bg-[#389131] hover:bg-[#2f7a29] transition-colors"
+                  >
+                    <Upload className="h-4 w-4 text-white" aria-hidden />
+                    <span>Download PDF</span>
+                  </button>
+                </div>
+              )}
+
+              {openMethod === "digital_signature" && (
+                <div className="mt-4 rounded-lg border border-gray-200 bg-white px-4 py-3 space-y-3">
+                  <p className="text-sm text-gray-700">
+                    Upload a photo of your signature.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => digitalSignatureInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    <Upload className="h-4 w-4" aria-hidden />
+                    <span>Upload Signature Image</span>
+                  </button>
+                  {digitalSignaturePreviewUrl && (
+                    <div className="mt-2 flex flex-col gap-2">
+                      <div className="border border-dashed border-gray-300 rounded-lg overflow-hidden bg-white">
+                        <img
+                          src={digitalSignaturePreviewUrl}
+                          alt="Digital signature preview"
+                          className="w-full max-h-32 object-contain"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearDigitalSignature}
+                        className="self-start text-xs font-medium text-gray-600 hover:text-gray-900"
+                      >
+                        Remove signature
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <button
                 type="button"

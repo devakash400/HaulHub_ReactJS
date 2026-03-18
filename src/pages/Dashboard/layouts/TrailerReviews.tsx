@@ -8,9 +8,10 @@ const TrailerReviews: React.FC = () => {
   const trailerId = id ? Number(id) : NaN;
   const trailer = Number.isNaN(trailerId) ? undefined : getTrailerById(trailerId);
 
-  const allReviews = trailer?.reviews ?? [];
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1);
+
+  const allReviews = useMemo(() => trailer?.reviews ?? [], [trailer?.reviews]);
   const totalPages = Math.max(1, Math.ceil(allReviews.length / pageSize));
 
   const paginatedReviews = useMemo(() => {

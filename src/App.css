@@ -36,3 +36,17 @@
     transform: rotate(360deg);
   }
 }
+
+/* Home hero slide left <-> right animation */
+.slide-lr {
+  animation: slide-lr 10s ease-in-out infinite alternate;
+}
+
+@keyframes slide-lr {
+  from {
+    transform: translateX(-12px);
+  }
+  to {
+    transform: translateX(12px);
+  }
+}

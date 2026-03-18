@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, MouseEvent } from "react";
 import { images } from "../../../assets/images/index.ts";
-import { Eye, EyeOff, X } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { ModalHeader } from "../../../components/ModalHeader.tsx";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../store/authSlice.ts";
