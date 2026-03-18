@@ -28,7 +28,7 @@ const Home: React.FC = () => {
       {isOwnerWithNoTrailers ? (
         /* Empty state below container - no trailer listings shown */
         <div className="flex flex-col items-center justify-center px-6 py-16 sm:py-24 text-center">
-          <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-200 border-l-0">
+          <div className="relative w-full rounded-xl bg-white shadow-lg border border-gray-200 border-l-0 sm:w-[70%] sm:max-w-[920px]">
             <div className="flex flex-col items-center justify-center px-6 py-12 sm:py-16 text-center">
               <p className="text-lg font-semibold text-gray-900 mb-2">
                 You haven&apos;t added any trailers yet.

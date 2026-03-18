@@ -459,16 +459,13 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                           setSelectedDimensionPreset("");
                         }}
                         onBlur={() => handleBlur("length")}
-                        placeholder="12"
+                        placeholder={`12 ${dimensionUnit}`}
                         className={`flex-1 min-w-0 rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#389131]/20 ${
                           touched.length && errors.length
                             ? "border-red-500"
                             : "border-gray-300"
                         }`}
                       />
-                      <span className="flex-shrink-0 text-sm text-gray-500">
-                        {dimensionUnit}
-                      </span>
                     </div>
                     <div className="min-h-5">
                       {touched.length && errors.length && (
@@ -489,16 +486,13 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                           setSelectedDimensionPreset("");
                         }}
                         onBlur={() => handleBlur("width")}
-                        placeholder="6"
+                        placeholder={`6 ${dimensionUnit}`}
                         className={`flex-1 min-w-0 rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#389131]/20 ${
                           touched.width && errors.width
                             ? "border-red-500"
                             : "border-gray-300"
                         }`}
                       />
-                      <span className="flex-shrink-0 text-sm text-gray-500">
-                        {dimensionUnit}
-                      </span>
                     </div>
                     <div className="min-h-5">
                       {touched.width && errors.width && (
@@ -507,8 +501,8 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-center">
-                  <div className="flex flex-col w-full max-w-[calc(50%-0.5rem)]">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col">
                     <label className="mb-1.5 block text-left text-sm font-medium text-neutral-800">
                       Height
                     </label>
@@ -521,16 +515,13 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                           setSelectedDimensionPreset("");
                         }}
                         onBlur={() => handleBlur("height")}
-                        placeholder="5"
+                        placeholder={`5 ${dimensionUnit}`}
                         className={`flex-1 min-w-0 rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#389131]/20 ${
                           touched.height && errors.height
                             ? "border-red-500"
                             : "border-gray-300"
                         }`}
                       />
-                      <span className="flex-shrink-0 text-sm text-gray-500">
-                        {dimensionUnit}
-                      </span>
                     </div>
                     <div className="min-h-5">
                       {touched.height && errors.height && (
@@ -538,6 +529,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                       )}
                     </div>
                   </div>
+                  <div className="hidden sm:block" />
                 </div>
               </div>
             </div>

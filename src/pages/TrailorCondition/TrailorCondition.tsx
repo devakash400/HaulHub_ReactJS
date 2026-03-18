@@ -98,33 +98,34 @@ const TrailorCondition: React.FC = () => {
   return (
     <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-white font-sans">
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200/80 shadow-sm">
-        <div className="mx-auto max-w-[640px] px-4 py-4 sm:px-6">
-          <h1 className="text-xl font-semibold tracking-tight text-[#389131] sm:text-2xl">
-            Trailor Condition Before
+        <div className="mx-auto max-w-[1120px] px-4 py-4 sm:px-6">
+          <h1 className="text-center text-xl font-semibold tracking-tight text-[#389131] sm:text-2xl">
+            Trailor Condition (Before)
           </h1>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[640px] px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 sm:py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Booking details */}
-          <section className="rounded-xl border border-gray-200/80 bg-white p-6 shadow-sm">
-            <div className="space-y-3 text-sm">
-              <div>
-                <span className="text-gray-500">Booking ID:</span>{" "}
-                <span className="font-medium text-gray-900">{bookingId}</span>
-              </div>
-              <div>
-                <span className="text-gray-500">Trailor Name:</span>{" "}
-                <span className="font-medium text-gray-900">{trailorName}</span>
-              </div>
-              <div>
-                <span className="text-gray-500">Pickup Date:</span>{" "}
-                <span className="font-medium text-gray-900">{pickupDate}</span>
-              </div>
-              <div>
-                <span className="text-gray-500">Renter Name:</span>{" "}
-                <span className="font-medium text-gray-900">{renterName}</span>
+          <section className="space-y-3">
+            <p className="m-0 text-[1.05rem] font-semibold text-black">
+              Booking ID: <span className="font-normal">{bookingId}</span>
+            </p>
+            <div className="rounded-md border border-gray-300 bg-white p-5">
+              <div className="space-y-6 text-[1.05rem] text-black">
+                <div>
+                  <span className="font-semibold">Trailor Name :</span>{" "}
+                  <span className="font-normal">{trailorName}</span>
+                </div>
+                <div>
+                  <span className="font-semibold">Pickup Date :</span>{" "}
+                  <span className="font-normal">{pickupDate}</span>
+                </div>
+                <div>
+                  <span className="font-semibold">Renter Name :</span>{" "}
+                  <span className="font-normal">{renterName}</span>
+                </div>
               </div>
             </div>
           </section>
@@ -194,8 +195,22 @@ const TrailorCondition: React.FC = () => {
                     type="checkbox"
                     checked={checklist[item.id] ?? false}
                     onChange={() => toggleCheck(item.id)}
-                    className="h-4 w-4 rounded border-gray-300 text-[#389131] focus:ring-[#389131]"
+                    className="peer sr-only"
                   />
+                  <span className="flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white peer-checked:border-[#389131] peer-checked:bg-[#389131] peer-checked:text-white peer-checked:[&_svg]:opacity-100 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#389131]/30">
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="h-3 w-3 opacity-0"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M4.5 10.5l3.5 3.5L15.5 6.5" />
+                    </svg>
+                  </span>
                   <span className="text-sm text-gray-800">{item.label}</span>
                 </label>
               ))}

@@ -77,17 +77,17 @@ const Container: React.FC = () => {
           type="button"
           onClick={goPrev}
           aria-label="Previous slide"
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 sm:h-10 sm:w-10"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
         <button
           type="button"
           onClick={goNext}
           aria-label="Next slide"
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 sm:h-10 sm:w-10"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
 
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-2">

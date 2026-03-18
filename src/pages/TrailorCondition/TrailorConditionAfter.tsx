@@ -116,7 +116,7 @@ const TrailorConditionAfter: React.FC = () => {
   return (
     <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-white font-sans">
       <header className="sticky top-0 z-40 border-b border-gray-200/80 bg-white shadow-sm">
-        <div className="mx-auto max-w-[640px] px-4 py-4 sm:px-6">
+        <div className="mx-auto max-w-[1120px] px-4 py-4 sm:px-6">
           <p className="mb-1 text-left text-sm text-gray-500">
             Booking ID: <span className="font-medium text-gray-900">{bookingId}</span>
           </p>
@@ -126,7 +126,7 @@ const TrailorConditionAfter: React.FC = () => {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[640px] px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 sm:py-8">
         {isSubmitted ? (
           <>
             {/* Completion view - Inspection Summary, Damage Note, Price, Done */}
@@ -188,8 +188,8 @@ const TrailorConditionAfter: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
           {/* Before Vs After Comparison */}
           <section className="rounded-xl border border-gray-200/80 bg-white p-4 shadow-sm">
-            <div className="flex items-stretch gap-3">
-              <div className="flex flex-1 flex-col">
+            <div className="flex items-stretch justify-center gap-6">
+              <div className="flex w-full max-w-[320px] flex-col">
                 <div className="aspect-[4/3] overflow-hidden rounded-lg bg-gray-100">
                   {beforePhoto ? (
                     <img
@@ -221,7 +221,7 @@ const TrailorConditionAfter: React.FC = () => {
               <div className="flex shrink-0 items-center">
                 <ArrowLeftRight className="h-8 w-8 text-[#389131]" />
               </div>
-              <div className="flex flex-1 flex-col">
+              <div className="flex w-full max-w-[320px] flex-col">
                 <div className="aspect-[4/3] overflow-hidden rounded-lg bg-gray-100">
                   {afterPhoto ? (
                     <img
@@ -261,10 +261,10 @@ const TrailorConditionAfter: React.FC = () => {
             <h2 className="mb-4 text-base font-semibold text-gray-900">
               Upload Return Photos:
             </h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 justify-items-center gap-4 sm:grid-cols-2">
               {RETURN_PHOTOS.map(({ id, label }) => (
-                <div key={id} className="flex flex-col">
-                  <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
+                <div key={id} className="flex w-full max-w-[320px] flex-col">
+                  <div className="aspect-[4/3] overflow-hidden rounded-lg bg-gray-100">
                     {returnPhotos[id] ? (
                       <img
                         src={returnPhotos[id]}
@@ -314,8 +314,22 @@ const TrailorConditionAfter: React.FC = () => {
                     type="checkbox"
                     checked={inspection[option.id] ?? false}
                     onChange={() => toggleInspection(option.id)}
-                    className="h-4 w-4 rounded border-gray-300 text-[#389131] focus:ring-[#389131]"
+                    className="peer sr-only"
                   />
+                  <span className="flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white peer-checked:border-[#389131] peer-checked:bg-[#389131] peer-checked:text-white peer-checked:[&_svg]:opacity-100 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#389131]/30">
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="h-3 w-3 opacity-0"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M4.5 10.5l3.5 3.5L15.5 6.5" />
+                    </svg>
+                  </span>
                   <span className="text-sm text-gray-800">{option.label}</span>
                 </label>
               ))}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { images } from "../../assets/images/index.ts";
 import LoginModal from "../../pages/Auth/Login/Login.tsx";
 import { SignUpModal, SignUpData } from "../TrailerDetails/SignUpModal.tsx";
@@ -71,7 +71,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-20 bg-[#F9F8F3] border-b border-gray-200 font-sans min-w-0 w-full">
+    <nav className="sticky top-0 z-50 bg-[#F9F8F3] border-b border-gray-200 font-sans min-w-0 w-full">
       <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 min-w-0 w-full">
         {/* Left: Logo */}
         <Link
@@ -111,18 +111,14 @@ const Navbar: React.FC = () => {
           type="button"
           onClick={toggleDrawer}
           aria-label="Toggle navigation dropdown"
-          className="inline-flex items-center justify-center px-3 py-1 rounded-full border-0 bg-[#F9F8F3] cursor-pointer"
+          className="inline-flex items-center justify-center rounded-full border-0 bg-[#F9F8F3] cursor-pointer p-2"
         >
-          <span className="inline-flex flex-col gap-[3px]">
-            <span className="w-4 h-[2px] rounded-full bg-black" />
-            <span className="w-4 h-[2px] rounded-full bg-black" />
-            <span className="w-4 h-[2px] rounded-full bg-black" />
-          </span>
+          <Menu className="h-5 w-5 text-black" aria-hidden />
         </button>
 
         {/* Dropdown menu */}
         {isDrawerOpen && (
-          <div className="absolute top-11 right-0 z-30 min-w-[180px] rounded-lg bg-white py-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
+          <div className="absolute top-11 right-0 z-[60] min-w-[180px] rounded-lg bg-white py-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
             <div className="p-0">
               <ul className="m-0 list-none p-0 text-[0.9rem] text-black font-normal">
                 {/* Owner menu: Home, Book your Trailor, Notification, Contact, Profile, Logout */}

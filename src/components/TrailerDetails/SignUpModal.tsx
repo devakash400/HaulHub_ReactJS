@@ -230,7 +230,19 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 <input
                   type="date"
                   value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  min="1900-01-01"
+                  max="9999-12-31"
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (!v) {
+                      setDateOfBirth("");
+                      return;
+                    }
+                    const [y, m, d] = v.split("-");
+                    if (!y || !m || !d) return;
+                    const year = y.slice(0, 4);
+                    setDateOfBirth(`${year}-${m}-${d}`);
+                  }}
                   className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
                 />
               </div>
@@ -291,6 +303,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onBlur={() => setPasswordTouched(true)}
+                    placeholder="Enter your password"
                     className="w-full border border-gray-300 rounded-lg px-3 pr-10 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
                   />
                   <button
@@ -306,7 +319,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     )}
                   </button>
                 </div>
-                {passwordTouched && (
+                {passwordTouched && password.trim().length > 0 && (
                   <ul className="mt-2 space-y-0.5 text-xs">
                     <li
                       className={

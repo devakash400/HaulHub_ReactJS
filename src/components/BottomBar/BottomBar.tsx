@@ -187,7 +187,7 @@ const BottomBar: React.FC = () => {
 
           {/* Right socials */}
           <div className="flex items-center justify-center gap-3 sm:justify-end">
-          <span className="text-gray-700 font-medium">Join us</span>
+          <span className="text-gray-700 font-medium">Join Us</span>
           <a
             href="https://www.facebook.com"
             aria-label="Facebook"
