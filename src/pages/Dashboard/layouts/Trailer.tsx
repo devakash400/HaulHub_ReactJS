@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getTrailerById, getTrailerTypeLabel } from "../../../assets/data/trailers.ts";
@@ -18,6 +18,66 @@ import {
 } from "../../../components/TrailerDetails/index.ts";
 import { RootState } from "../../../store";
 
+type RevealSectionProps = {
+  children: React.ReactNode;
+  delayMs?: number;
+  variant?: "default" | "soft";
+};
+
+const RevealSection: React.FC<RevealSectionProps> = ({
+  children,
+  delayMs = 0,
+  variant = "default",
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
+  useEffect(() => {
+    const target = sectionRef.current;
+    if (!target || typeof IntersectionObserver === "undefined" || reduceMotion) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -70px 0px" }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={sectionRef}
+      className={`will-change-transform transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
+        isVisible
+          ? "opacity-100 translate-y-0 scale-100 blur-0"
+          : variant === "soft"
+            ? "opacity-0 translate-y-3 scale-[0.995] blur-[1px]"
+            : "opacity-0 translate-y-5 scale-[0.99] blur-[1px]"
+      }`}
+      style={{ transitionDelay: `${delayMs}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
+
 const Trailer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const trailer = id ? getTrailerById(Number(id)) : undefined;
@@ -28,6 +88,7 @@ const Trailer: React.FC = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [wishlistLoginOpen, setWishlistLoginOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [heroParallaxY, setHeroParallaxY] = useState(0);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -43,6 +104,44 @@ const Trailer: React.FC = () => {
       return [];
     }
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let rafId = 0;
+    const updateParallax = () => {
+      const y = window.scrollY;
+      setHeroParallaxY(Math.max(-14, y * -0.04));
+      rafId = 0;
+    };
+
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(updateParallax);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const previousRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+
+    window.scrollTo(0, 0);
+    const rafId = window.requestAnimationFrame(() => window.scrollTo(0, 0));
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.history.scrollRestoration = previousRestoration;
+    };
+  }, [id]);
 
   if (!trailer) {
     return <Navigate to="/" replace />;
@@ -82,14 +181,14 @@ const Trailer: React.FC = () => {
       const next: WishlistItem[] = exists
         ? current
         : [
-            ...current,
-            {
-              id: trailerId,
-              title: trailer.title,
-              subtitle: trailer.specs,
-              imageUrl: trailer.images[0] ?? "",
-            },
-          ];
+          ...current,
+          {
+            id: trailerId,
+            title: trailer.title,
+            subtitle: trailer.specs,
+            imageUrl: trailer.images[0] ?? "",
+          },
+        ];
 
       if (typeof window !== "undefined") {
         localStorage.setItem("wishlistItems", JSON.stringify(next));
@@ -125,7 +224,7 @@ const Trailer: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background w-full min-w-0 overflow-x-hidden">
+    <div className="min-h-screen bg-background w-full min-w-0 overflow-x-hidden scroll-smooth">
       <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-5 lg:py-5 w-full min-w-0">
         <TrailerTitleSection
           title={trailer.title}
@@ -160,26 +259,39 @@ const Trailer: React.FC = () => {
           onClearAll={handleClearAll}
         />
 
-        <TrailerImageGallery images={trailer.images} trailerId={trailer.id} />
+        <RevealSection variant="soft">
+          <div
+            style={{ transform: `translateY(${heroParallaxY}px)` }}
+            className="will-change-transform transition-transform duration-300 ease-out"
+          >
+            <TrailerImageGallery images={trailer.images} trailerId={trailer.id} />
+          </div>
+        </RevealSection>
 
-        <div className="mb-3">
+        <RevealSection delayMs={80} variant="soft">
+          <div className="mb-3">
           <p className="text-base sm:text-lg font-medium text-gray-900">
             {locationText}
           </p>
           <p className="text-sm text-gray-600">
             {trailer.specs}
           </p>
-        </div>
+          </div>
+        </RevealSection>
 
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-2 space-y-8">
-            <RatingSummaryCard
-              rating={trailer.rating}
-              description={trailer.ratingDescription}
-              reviewCount={trailer.reviewCount}
-            />
+            <RevealSection variant="soft">
+              <RatingSummaryCard
+                rating={trailer.rating}
+                description={trailer.ratingDescription}
+                reviewCount={trailer.reviewCount}
+              />
+            </RevealSection>
 
-            <FeatureIconsSection features={trailer.features} />
+            <RevealSection delayMs={100} variant="soft">
+              <FeatureIconsSection features={trailer.features} />
+            </RevealSection>
 
             {/* <GuestFavouriteSection
               rating={trailer.guestFavouriteRating}
@@ -194,41 +306,51 @@ const Trailer: React.FC = () => {
           </div>
 
           <div className="lg:col-span-1 mt-8 lg:mt-0">
-            <StickyPricingCard
-              price={trailer.price}
-              trailer={{
-                title: locationText,
-                subtitle: trailer.specs,
-                image: trailer.images[0] ?? "",
-                price: trailer.price,
-              }}
-            />
+            <RevealSection delayMs={140} variant="soft">
+              <StickyPricingCard
+                price={trailer.price}
+                trailer={{
+                  title: locationText,
+                  subtitle: trailer.specs,
+                  image: trailer.images[0] ?? "",
+                  price: trailer.price,
+                }}
+              />
+            </RevealSection>
           </div>
         </div>
 
-    {/* bottom section  */}
-    
-        <div className="mt-8 space-y-8">
-          <GuestFavouriteSection
-            rating={trailer.guestFavouriteRating}
-            title="Guest Favourite"
-            description={trailer.guestFavouriteDescription}
-            metrics={trailer.metrics}
-            ratingBreakdown={trailer.ratingBreakdown}
-          />
+        {/* bottom section  */}
 
-          <ReviewsSection
-            reviews={trailer.reviews}
-            onShowAll={() => {
-              if (!isAuthenticated) {
-                navigate("/login");
-              } else if (id) {
-                navigate(`/trailer/${id}/reviews`);
-              }
-            }}
-          />
+        <div className="mt-4 space-y-4">
+          <RevealSection variant="soft">
+            <GuestFavouriteSection
+              rating={trailer.guestFavouriteRating}
+              title="Guest Favourite"
+              description={trailer.guestFavouriteDescription}
+              metrics={trailer.metrics}
+              ratingBreakdown={trailer.ratingBreakdown}
+            />
+          </RevealSection>
 
-          <PolicySection />
+          <RevealSection delayMs={100} variant="soft">
+            <ReviewsSection
+              reviews={trailer.reviews}
+              onShowAll={() => {
+                if (!isAuthenticated) {
+                  navigate("/login");
+                } else if (id) {
+                  navigate(`/trailer/${id}/reviews`);
+                }
+              }}
+            />
+          </RevealSection>
+
+          <RevealSection delayMs={140} variant="soft">
+            <PolicySection />
+          </RevealSection>
+
+
         </div>
       </div>
     </div>

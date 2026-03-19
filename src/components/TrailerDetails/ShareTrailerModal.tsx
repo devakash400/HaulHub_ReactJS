@@ -59,7 +59,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-3 py-6 sm:p-4 bg-black/50"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center px-3 py-6 sm:p-4 bg-black/50"
       onClick={onClose}
       role="dialog"
       aria-modal="true"

@@ -126,12 +126,12 @@ const BottomBar: React.FC = () => {
             className="h-[52px] object-contain"
           />
 
-          <div className="flex flex-row flex-wrap justify-center gap-3 mt-1">
+          <div className="flex flex-row flex-nowrap justify-center gap-2 sm:gap-3 mt-1 w-full sm:w-auto">
             <a
               href="https://www.apple.com/app-store/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-[0.2rem] py-[0.1rem] rounded-[2px] bg-black text-[#f9fafb] no-underline w-[160px] h-[55px]"
+              className="inline-flex items-center justify-center gap-2.5 px-[0.2rem] py-[0.1rem] rounded-[2px] bg-black text-[#f9fafb] no-underline w-[calc(50%-0.25rem)] sm:w-[160px] h-[55px]"
             >
               <img
                 src={images.appStore}
@@ -148,7 +148,7 @@ const BottomBar: React.FC = () => {
               href="https://play.google.com/store"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-[0.2rem] py-[0.1rem] rounded-[2px] bg-black text-[#f9fafb] no-underline w-[160px] h-[55px]"
+              className="inline-flex items-center justify-center gap-2.5 px-[0.2rem] py-[0.1rem] rounded-[2px] bg-black text-[#f9fafb] no-underline w-[calc(50%-0.25rem)] sm:w-[160px] h-[55px]"
             >
               <img
                 src={images.googlePlay}
@@ -222,3 +222,4 @@ const BottomBar: React.FC = () => {
 };
 
 export default BottomBar;
+

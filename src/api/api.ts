@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 
 const BASE_URL =
-  "https://ff3f-2401-4900-1c6a-c98c-e1e2-ec85-dc01-9901.ngrok-free.app";
+ "https://4afe-2401-4900-8fe3-e4c2-7d0c-73e5-3d7f-16bf.ngrok-free.app"
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;

@@ -67,7 +67,7 @@ const Container: React.FC = () => {
               <img
                 src={slide.src}
                 alt={slide.alt}
-                className="w-full h-full object-contain block"
+                className="w-full h-full object-cover sm:object-contain block"
               />
             </div>
           ))}

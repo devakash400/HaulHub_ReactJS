@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CreditCard, IdCard, Car, Upload, FileText, RotateCw } from "lucide-react";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import { ModalHeader } from "../ModalHeader.tsx";
@@ -308,9 +309,9 @@ export const IdentityVerificationModal: React.FC<
 
   if (!isOpen) return null;
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -686,5 +687,8 @@ export const IdentityVerificationModal: React.FC<
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return modal;
+  return createPortal(modal, document.body);
 };
 

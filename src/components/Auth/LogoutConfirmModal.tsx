@@ -44,7 +44,7 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
       onClick={handleOverlayClick}
       role="dialog"
       aria-modal="true"

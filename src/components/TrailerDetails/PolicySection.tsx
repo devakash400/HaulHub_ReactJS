@@ -26,7 +26,7 @@ const policies = [
 
 export const PolicySection: React.FC = () => {
   return (
-    <section className="w-full py-8">
+    <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-white py-3 md:py-4 shadow-[0_6px_18px_rgba(15,23,42,0.12)]">
       <div className="max-w-[1120px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           {policies.map(({ icon, title, description }) => (

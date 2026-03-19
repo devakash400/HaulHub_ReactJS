@@ -31,35 +31,42 @@ const App: React.FC = () => {
   const hideNavFooter =
     location.pathname === "/request-to-book" ||
     location.pathname === "/liability-agreement";
+  const contentTopPadding = hideNavFooter
+    ? ""
+    : location.pathname === "/"
+      ? "pt-[124px] sm:pt-[76px]"
+      : "pt-[76px]";
 
   return (
     <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden min-w-0">
       {!hideNavFooter && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/account-settings" element={<AccountSettings />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/list-trailer" element={<ListTrailer />} />
-        <Route path="/trailor-condition" element={<TrailorCondition />} />
-        <Route path="/trailor-condition-after" element={<TrailorConditionAfter />} />
-        <Route path="/return" element={<Return />} />
-        <Route path="/trailer/:id" element={<Trailer />} />
-        <Route path="/trailer/:id/photos" element={<AllTrailerPhotos />} />
-        <Route path="/trailer/:id/reviews" element={<TrailerReviews />} />
-        <Route path="/request-to-book" element={<RequestToBookPage />} />
-        <Route path="/liability-agreement" element={<LiabilityAgreement />} />
-        <Route path="/payment-receipt" element={<PaymentReceipt />} />
-        <Route path="/booking" element={<BookingScreen />} />
-        <Route path="/why-choose" element={<WhyChooseHaulHub />} />
-        <Route path="/trust-safety" element={<TrustSafety />} />
-        <Route path="/get-help" element={<GetHelp />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-      </Routes>
+      <main className={contentTopPadding}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/account-settings" element={<AccountSettings />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/list-trailer" element={<ListTrailer />} />
+          <Route path="/trailor-condition" element={<TrailorCondition />} />
+          <Route path="/trailor-condition-after" element={<TrailorConditionAfter />} />
+          <Route path="/return" element={<Return />} />
+          <Route path="/trailer/:id" element={<Trailer />} />
+          <Route path="/trailer/:id/photos" element={<AllTrailerPhotos />} />
+          <Route path="/trailer/:id/reviews" element={<TrailerReviews />} />
+          <Route path="/request-to-book" element={<RequestToBookPage />} />
+          <Route path="/liability-agreement" element={<LiabilityAgreement />} />
+          <Route path="/payment-receipt" element={<PaymentReceipt />} />
+          <Route path="/booking" element={<BookingScreen />} />
+          <Route path="/why-choose" element={<WhyChooseHaulHub />} />
+          <Route path="/trust-safety" element={<TrustSafety />} />
+          <Route path="/get-help" element={<GetHelp />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+        </Routes>
+      </main>
       {!hideNavFooter && <BottomBar />}
     </div>
   );

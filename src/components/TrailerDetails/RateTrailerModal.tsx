@@ -49,7 +49,7 @@ export const RateTrailerModal: React.FC<RateTrailerModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 bg-black/50"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center px-4 py-6 bg-black/50"
       onClick={onClose}
       role="dialog"
       aria-modal="true"

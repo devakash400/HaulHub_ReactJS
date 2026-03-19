@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { images } from "../../../assets/images/index.ts";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Smartphone } from "lucide-react";
 import { ModalHeader } from "../../../components/ModalHeader.tsx";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../store/authSlice.ts";
@@ -113,6 +114,22 @@ const LoginModal: React.FC<LoginModalProps> = ({
     }, 1000);
     return () => window.clearInterval(id);
   }, [showOtpModal]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!isOpen) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousBodyTouchAction = document.body.style.touchAction;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.style.touchAction = previousBodyTouchAction;
+    };
+  }, [isOpen]);
 
   const handleOverlayClick = () => {
     onClose();
@@ -321,13 +338,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/45 px-4"
+      className="modal-overlay fixed inset-0 z-[80] flex items-center justify-center bg-black/45 px-4"
       onClick={handleOverlayClick}
     >
       <div
-        className="w-full max-w-[820px] max-h-[90vh] bg-white rounded-[18px] shadow-[0_20px_40px_rgba(15,23,42,0.25)] relative font-sans flex flex-col overflow-hidden"
+        className="w-full max-w-[680px] max-h-[90vh] bg-white rounded-[18px] shadow-[0_20px_40px_rgba(15,23,42,0.25)] relative font-sans flex flex-col overflow-hidden"
         onClick={handleModalClick}
       >
         <ModalHeader
@@ -341,7 +358,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   : "New Password"
           }
           onClose={goBack}
-          variant="back"
+          variant="close"
         />
 
         <div className="px-6 sm:px-10 py-8 flex-1 overflow-y-auto">
@@ -401,6 +418,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     : "Enter a valid Email ID"}
                 </p>
               )}
+              {emailError && !showIdentifierFormatError && (
+                <p className="mt-2 text-xs text-red-600">{emailError}</p>
+              )}
 
 
               <button
@@ -415,10 +435,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 {isCheckingEmail ? "Checking..." : "Continue"}
               </button>
 
-              {emailError && !showIdentifierFormatError && (
-                <p className="mt-2 text-xs text-red-600">{emailError}</p>
-              )}
-
               <div className="flex items-center gap-3 my-7 text-sm text-gray-500">
                 <div className="flex-1 h-px bg-gray-200" />
                 <span>Or</span>
@@ -427,46 +443,46 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
               <button
                 type="button"
-                className="w-full px-4 py-3 rounded-md border border-gray-200 bg-white flex items-center justify-center gap-2 text-sm mb-3"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3"
+              >
+                <img
+                  src={images.Google}
+                  alt="Google"
+                  className="w-[22px] h-[22px] object-contain"
+                />
+                <span>Continue with Google</span>
+              </button>
+              <button
+                type="button"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3"
+              >
+                <img
+                  src={images.Apple}
+                  alt="Apple"
+                  className="w-[22px] h-[22px] object-contain"
+                />
+                <span>Continue with Apple</span>
+              </button>
+              <button
+                type="button"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm flex items-center justify-center gap-3"
                 onClick={() => {
                   setUsePhoneOnly((prev) => !prev);
                   setEmail("");
                   setEmailError(null);
                 }}
               >
-                <img
-                  src={images.Phone}
-                  alt="Phone"
-                  className="w-[18px] h-[18px] object-contain"
-                />
+                {usePhoneOnly ? (
+                  <Mail className="w-[22px] h-[22px] text-black" aria-hidden />
+                ) : (
+                  <Smartphone className="w-[22px] h-[22px] text-black" aria-hidden />
+                )}
                 <span>
-                  {usePhoneOnly ? "Login with Email" : "Login with Phone Number"}
+                  {usePhoneOnly ? "Continue with Email" : "Continue with Phone"}
                 </span>
               </button>
-              <button
-                type="button"
-                className="w-full px-4 py-3 rounded-md border border-gray-200 bg-white flex items-center justify-center gap-2 text-sm mb-3"
-              >
-                <img
-                  src={images.Google}
-                  alt="Google"
-                  className="w-[18px] h-[18px] object-contain"
-                />
-                <span>Sign up with Google</span>
-              </button>
-              <button
-                type="button"
-                className="w-full px-4 py-3 rounded-md border border-gray-200 bg-white flex items-center justify-center gap-2 text-sm"
-              >
-                <img
-                  src={images.Apple}
-                  alt="Apple"
-                  className="w-[18px] h-[18px] object-contain"
-                />
-                <span>Sign up with Apple</span>
-              </button>
 
-              <p className="mt-4 text-center text-xs text-gray-700">
+              <p className="mt-8 text-center text-sm text-gray-800">
                 Don&apos;t have an account?{" "}
                 <button
                   type="button"
@@ -475,6 +491,18 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 >
                   Sign up
                 </button>
+              </p>
+
+              <p className="mt-4 text-center text-xs sm:text-sm text-gray-800">
+                You agree with{" "}
+                <button type="button" className="text-[#389131] font-semibold">
+                  Terms &amp; Conditions
+                </button>{" "}
+                and{" "}
+                <button type="button" className="text-[#389131] font-semibold">
+                  Privacy Policy
+                </button>
+                .
               </p>
             </div>
           )}
@@ -488,6 +516,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <input
                   type={showLoginPwd ? "text" : "password"}
                   value={password}
+                  placeholder="Enter Password"
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-gray-400 rounded-lg px-4 pr-10 py-3 text-sm outline-none"
                 />
@@ -667,7 +696,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         {/* OTP Modal */}
         {showOtpModal && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+            className="modal-overlay fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4"
             onClick={() => setShowOtpModal(false)}
             role="dialog"
             aria-modal="true"
@@ -752,6 +781,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return modal;
+  return createPortal(modal, document.body);
 };
 
 export default LoginModal;

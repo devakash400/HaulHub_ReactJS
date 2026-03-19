@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import { ModalHeader } from "../ModalHeader.tsx";
 
@@ -37,9 +38,9 @@ export const WishlistLoginModal: React.FC<WishlistLoginModalProps> = ({
     onLoginClick();
   };
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -76,4 +77,7 @@ export const WishlistLoginModal: React.FC<WishlistLoginModalProps> = ({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return modal;
+  return createPortal(modal, document.body);
 };

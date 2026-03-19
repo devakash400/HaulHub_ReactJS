@@ -28,9 +28,6 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [cardsPerRow, setCardsPerRow] = useState(1);
-  const [lastClickedDirection, setLastClickedDirection] = useState<
-    "left" | "right" | null
-  >(null);
   const wishlistItems = useSelector(
     (state: RootState) => state.wishlist.items
   );
@@ -45,6 +42,10 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     return new Set(ids);
   });
   const [wishlistLoginOpen, setWishlistLoginOpen] = useState(false);
+  const [isSectionVisible, setIsSectionVisible] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     // sync initial wishlist ids from redux
@@ -62,7 +63,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
       } else if (width >= 768) {
         setCardsPerRow(3); // Tablet
       } else {
-        setCardsPerRow(1); // Phone (auto)
+        setCardsPerRow(2); // Phone: 2 cards per row
       }
     };
 
@@ -74,10 +75,53 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     };
   }, [wishlistItems]);
 
+  useEffect(() => {
+    const target = sectionRef.current;
+    if (!target || typeof IntersectionObserver === "undefined") {
+      setIsSectionVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsSectionVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const updateScrollButtons = () => {
+      const maxScrollLeft = container.scrollWidth - container.clientWidth;
+      const epsilon = 2;
+      setCanScrollLeft(container.scrollLeft > epsilon);
+      setCanScrollRight(container.scrollLeft < maxScrollLeft - epsilon);
+    };
+
+    updateScrollButtons();
+    container.addEventListener("scroll", updateScrollButtons, { passive: true });
+    window.addEventListener("resize", updateScrollButtons);
+
+    return () => {
+      container.removeEventListener("scroll", updateScrollButtons);
+      window.removeEventListener("resize", updateScrollButtons);
+    };
+  }, [items.length, cardsPerRow]);
+
   const cardWidth = 255;
   const gap = 32; // 2rem
   const sectionContentWidth =
     cardsPerRow * cardWidth + (cardsPerRow - 1) * gap;
+  const isMobileCompact = cardsPerRow === 2;
 
   const toggleWishlist = (item: CategoryItem) => {
     if (!isAuthenticated) {
@@ -108,7 +152,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   };
 
   const handleScroll = (direction: "left" | "right") => {
-    setLastClickedDirection(direction);
+    if ((direction === "left" && !canScrollLeft) || (direction === "right" && !canScrollRight)) {
+      return;
+    }
     const container = scrollContainerRef.current;
     if (!container) return;
 
@@ -127,27 +173,33 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   };
 
   return (
-    <section className="w-full min-w-0 pt-6 bg-white self-center overflow-x-hidden">
+    <section
+      ref={sectionRef}
+      className={`w-full min-w-0 pt-6 bg-white self-center overflow-x-hidden transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
+        isSectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+      }`}
+    >
       <div className="max-w-full mx-auto px-4 box-border w-full min-w-0">
         <div
           className="mx-auto"
-          style={{ maxWidth: `${sectionContentWidth}px` }}
+          style={{ maxWidth: isMobileCompact ? "100%" : `${sectionContentWidth}px` }}
         >
           <header className="flex items-center justify-between mb-4">
             <h2 className="m-0 text-[1.15rem] font-semibold text-[#389131]">
               {title}
             </h2>
 
-            <div className="flex items-center gap-[2px]">
+            <div className={`items-center gap-[2px] ${isMobileCompact ? "hidden" : "flex"}`}>
               <button
                 type="button"
                 onClick={() => handleScroll("left")}
                 aria-label="Scroll left"
-                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-colors ${
-                  lastClickedDirection === "left"
-                    ? "bg-gray-200"
-                    : "bg-white active:bg-gray-200"
-                }`}
+                disabled={!canScrollLeft}
+                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  !canScrollLeft
+                    ? "opacity-40 cursor-not-allowed hover:scale-100 active:scale-100"
+                    : ""
+                } bg-white active:bg-gray-200`}
               >
                 <img
                   src={images.ArrowRight}
@@ -159,11 +211,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 type="button"
                 onClick={() => handleScroll("right")}
                 aria-label="Scroll right"
-                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-colors ${
-                  lastClickedDirection === "right"
-                    ? "bg-gray-200"
-                    : "bg-white active:bg-gray-200"
-                }`}
+                disabled={!canScrollRight}
+                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  !canScrollRight
+                    ? "opacity-40 cursor-not-allowed hover:scale-100 active:scale-100"
+                    : ""
+                } bg-white active:bg-gray-200`}
               >
                 <img
                   src={images.ArrowRight}
@@ -176,26 +229,37 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
           <div
             ref={scrollContainerRef}
-            className="flex gap-8 overflow-x-auto pb-6 scroll-smooth"
+            className={
+              isMobileCompact
+                ? "flex gap-3 overflow-x-auto pb-4 scroll-smooth"
+                : "flex gap-8 overflow-x-auto pb-6 scroll-smooth"
+            }
             style={{
               msOverflowStyle: "none",
               scrollbarWidth: "none",
             }}
           >
-            {items.map((item) => {
+            {items.map((item, index) => {
               const isWishlisted = wishlistIds.has(item.id);
 
               return (
                 <article
                   key={item.id}
                   onClick={() => navigate(`/trailer/${item.id}`)}
-                  className="w-[250px] min-w-[250px] max-w-[250px] bg-white rounded-[16px] shadow-[0_10px_25px_rgba(15,23,42,0.1)] overflow-hidden shrink-0 cursor-pointer"
+                  className={`group ${
+                    isMobileCompact
+                      ? "w-[45vw] min-w-[45vw] max-w-[45vw] shrink-0"
+                      : "w-[250px] min-w-[250px] max-w-[250px] shrink-0"
+                  } bg-white rounded-[16px] shadow-[0_10px_25px_rgba(15,23,42,0.1)] overflow-hidden cursor-pointer transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_16px_34px_rgba(15,23,42,0.16)] ${
+                    isSectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                  }`}
+                  style={{ transitionDelay: `${Math.min(index * 70, 360)}ms` }}
                 >
-                  <div className="relative w-full h-[250px] overflow-hidden">
+                  <div className={`relative w-full overflow-hidden ${isMobileCompact ? "h-[120px]" : "h-[250px]"}`}>
                     <img
                       src={item.image}
                       alt={item.modelLabel}
-                      className="w-full h-full object-cover block"
+                      className="w-full h-full object-cover block transition-transform duration-700 group-hover:scale-[1.04]"
                     />
 
                     {item.badgeLabel && (
@@ -227,11 +291,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     </button>
                   </div>
 
-                  <div className="px-[0.9rem] pt-[0.85rem] pb-4 flex flex-col gap-1">
-                    <p className="m-0 text-[0.85rem] font-bold text-black">
+                  <div className={`px-[0.6rem] pt-[0.55rem] pb-2.5 flex flex-col gap-0.5 ${isMobileCompact ? "min-h-[56px]" : ""}`}>
+                    <p className={`m-0 font-bold text-black ${isMobileCompact ? "text-[0.66rem]" : "text-[0.85rem]"}`}>
                       {item.modelLabel}
                     </p>
-                    <p className="m-0 text-[0.9rem] text-gray-500">
+                    <p className={`m-0 text-gray-500 ${isMobileCompact ? "text-[0.64rem]" : "text-[0.9rem]"}`}>
                       {item.priceLabel}
                     </p>
                   </div>
