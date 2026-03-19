@@ -79,7 +79,7 @@ const Contact: React.FC = () => {
                   placeholder="Enter your Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-neutral-800 placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-neutral-800 shadow-[0_1px_2px_rgba(0,0,0,0.08)] placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
                 />
               </div>
 
@@ -97,7 +97,7 @@ const Contact: React.FC = () => {
                   placeholder="Enter your Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-neutral-800 placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-neutral-800 shadow-[0_1px_2px_rgba(0,0,0,0.08)] placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
                 />
               </div>
 
@@ -112,7 +112,7 @@ const Contact: React.FC = () => {
                     setServiceOpen(!serviceOpen);
                     setBudgetOpen(false);
                   }}
-                  className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-neutral-800 placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
+                  className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-neutral-800 shadow-[0_1px_2px_rgba(0,0,0,0.08)] placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
                 >
                   <span className={serviceType ? "text-neutral-800" : "text-gray-500"}>
                     {serviceType || "Select Service type"}
@@ -153,7 +153,7 @@ const Contact: React.FC = () => {
                     setBudgetOpen(!budgetOpen);
                     setServiceOpen(false);
                   }}
-                  className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-neutral-800 placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
+                  className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-neutral-800 shadow-[0_1px_2px_rgba(0,0,0,0.08)] placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
                 >
                   <span className={budget ? "text-neutral-800" : "text-gray-500"}>
                     {budget || "Select project budget"}
@@ -197,7 +197,7 @@ const Contact: React.FC = () => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={4}
-                  className="w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-neutral-800 placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
+                  className="w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-neutral-800 shadow-[0_1px_2px_rgba(0,0,0,0.08)] placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
                 />
               </div>
 
