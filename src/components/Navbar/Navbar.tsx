@@ -65,13 +65,23 @@ const Navbar: React.FC = () => {
       return;
     }
 
+    const readScrollY = () =>
+      window.scrollY ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
+
     const onScroll = () => {
-      const currentScrollY = window.scrollY;
-      setIsSearchCompact(currentScrollY > 40);
+      setIsSearchCompact(readScrollY() > 20);
     };
 
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    document.addEventListener("scroll", onScroll, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("scroll", onScroll, true);
+    };
   }, [location.pathname]);
 
   useEffect(() => {
@@ -128,21 +138,32 @@ const Navbar: React.FC = () => {
 
         {/* Center: Search bar (Home only, desktop/tablet) */}
         {location.pathname === "/" && (
-          <div
-            className={`hidden sm:flex flex-1 items-center justify-center px-4 min-w-0 transition-all duration-300 ease-out ${
-              isSearchCompact
-                ? "translate-y-[-2px] scale-[0.98]"
-                : "translate-y-0 scale-100"
-            }`}
-          >
-            <div className="flex h-[46px] w-full max-w-[640px] items-center rounded-xl bg-white px-4 border border-gray-200 shadow-sm">
+          <div className="hidden min-w-0 flex-1 items-center justify-center px-4 sm:flex">
+            <div
+              className={`flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                isSearchCompact
+                  ? "h-[38px] w-[min(100%,460px)] px-4"
+                  : "h-[48px] w-[min(100%,640px)] px-5"
+              }`}
+            >
               <input
                 type="text"
                 placeholder="Search here..."
-                className="flex-1 border-none bg-transparent text-[0.95rem] text-gray-700 placeholder:text-gray-400 outline-none"
+                className={`min-w-0 flex-1 border-none bg-transparent text-gray-700 placeholder:text-gray-400 outline-none transition-[font-size] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                  isSearchCompact ? "text-[0.875rem]" : "text-[0.95rem]"
+                }`}
               />
-              <div className="ml-3 flex h-9 w-9 shrink-0 self-center items-center justify-center rounded-full bg-[#389131]">
-                <Search className="w-5 h-5 text-white" aria-hidden />
+              <div
+                className={`flex shrink-0 items-center justify-center rounded-full bg-[#389131] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                  isSearchCompact ? "ml-2.5 h-8 w-8" : "ml-3 h-9 w-9"
+                }`}
+              >
+                <Search
+                  className={`text-white transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                    isSearchCompact ? "h-4 w-4" : "h-5 w-5"
+                  }`}
+                  aria-hidden
+                />
               </div>
             </div>
           </div>
@@ -407,23 +428,42 @@ const Navbar: React.FC = () => {
       {/* Mobile search bar (Home only) */}
       {location.pathname === "/" && (
         <div
-          className={`sm:hidden overflow-hidden transition-all duration-300 ease-out ${
-            isSearchCompact
-              ? "max-h-24 opacity-100 -translate-y-1"
-              : "max-h-24 opacity-100 translate-y-0"
+          className={`overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none sm:hidden ${
+            isSearchCompact ? "max-h-[48px]" : "max-h-[90px]"
           }`}
         >
-          <div className="px-4 pb-2">
-          <div className="flex h-[36px] w-full items-center rounded-lg bg-white px-3 border border-gray-200 shadow-sm">
-            <input
-              type="text"
-              placeholder="Search here..."
-              className="flex-1 border-none bg-transparent text-[0.78rem] text-gray-700 placeholder:text-gray-400 outline-none"
-            />
-            <div className="ml-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#389131]">
-              <Search className="w-4 h-4 text-white" aria-hidden />
+          <div
+            className={`transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              isSearchCompact ? "px-3 pb-1" : "px-4 pb-2"
+            }`}
+          >
+            <div
+              className={`mx-auto flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                isSearchCompact
+                  ? "h-[32px] w-[min(100%,400px)] px-3"
+                  : "h-[38px] w-[min(100%,560px)] px-3.5"
+              }`}
+            >
+              <input
+                type="text"
+                placeholder="Search here..."
+                className={`min-w-0 flex-1 border-none bg-transparent text-gray-700 placeholder:text-gray-400 outline-none transition-[font-size] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                  isSearchCompact ? "text-[0.74rem]" : "text-[0.8rem]"
+                }`}
+              />
+              <div
+                className={`flex items-center justify-center rounded-full bg-[#389131] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                  isSearchCompact ? "ml-2 h-6 w-6" : "ml-2 h-7 w-7"
+                }`}
+              >
+                <Search
+                  className={`text-white transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                    isSearchCompact ? "h-3.5 w-3.5" : "h-4 w-4"
+                  }`}
+                  aria-hidden
+                />
+              </div>
             </div>
-          </div>
           </div>
         </div>
       )}
