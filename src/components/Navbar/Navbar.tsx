@@ -12,6 +12,17 @@ import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi, register } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../Auth/LogoutConfirmModal.tsx";
 
+function profileInitial(user: { firstName?: string; lastName?: string; email?: string } | null): string {
+  if (!user) return "U";
+  const first = user.firstName?.trim();
+  if (first) return first.charAt(0).toUpperCase();
+  const last = user.lastName?.trim();
+  if (last) return last.charAt(0).toUpperCase();
+  const email = user.email?.trim();
+  if (email) return email.charAt(0).toUpperCase();
+  return "U";
+}
+
 const Navbar: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -174,18 +185,54 @@ const Navbar: React.FC = () => {
           ref={dropdownRef}
           className="relative flex items-center gap-3 sm:gap-5 text-[0.95rem] text-black shrink-0 min-w-0"
         >
-        <button
-          type="button"
-          onClick={toggleDrawer}
-          aria-label="Toggle navigation dropdown"
-          className="inline-flex items-center justify-center rounded-full border-0 bg-[#F9F8F3] cursor-pointer p-2"
-        >
-          <Menu className="h-5 w-5 text-black" aria-hidden />
-        </button>
+        {isAuthenticated ? (
+          <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
+            <Link
+              to="/list-trailer"
+              onClick={closeDrawer}
+              className="hidden shrink-0 text-[0.95rem] font-medium text-neutral-900 no-underline hover:opacity-75 sm:inline"
+            >
+              List your trailer
+            </Link>
+            <Link
+              to="/profile"
+              onClick={closeDrawer}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-800 text-[0.9rem] font-semibold text-white no-underline hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#389131]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F9F8F3]"
+              aria-label={
+                user?.firstName
+                  ? `Profile: ${user.firstName}`
+                  : user?.email
+                    ? `Profile: ${user.email}`
+                    : "Profile"
+              }
+            >
+              {profileInitial(user)}
+            </Link>
+            <button
+              type="button"
+              onClick={toggleDrawer}
+              aria-label="Open menu"
+              aria-expanded={isDrawerOpen}
+              aria-haspopup="true"
+              className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-neutral-100 text-neutral-900 transition-colors hover:bg-neutral-200/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#389131]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F9F8F3]"
+            >
+              <Menu className="h-5 w-5" aria-hidden />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={toggleDrawer}
+            aria-label="Toggle navigation dropdown"
+            className="inline-flex cursor-pointer items-center justify-center rounded-full border-0 bg-[#F9F8F3] p-2"
+          >
+            <Menu className="h-5 w-5 text-black" aria-hidden />
+          </button>
+        )}
 
         {/* Dropdown menu */}
         {isDrawerOpen && (
-          <div className="absolute top-11 right-0 z-[60] min-w-[180px] rounded-lg bg-white py-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
+          <div className="absolute right-0 top-full z-[60] mt-2 min-w-[180px] rounded-lg bg-white py-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
             <div className="p-0">
               <ul className="m-0 list-none p-0 text-[0.9rem] text-black font-normal">
                 {/* Trailer page menu override */}
