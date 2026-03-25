@@ -32,9 +32,14 @@ const LoginPage: React.FC = () => {
           onSubmit={async (data: SignUpData) => {
             try {
               const res = await register({
-                fullName: `${data.firstName} ${data.lastName}`.trim(),
+                firstName: data.firstName,
+                lastName: data.lastName,
                 email: data.email,
+                phoneNumber: data.phoneNumber,
                 password: data.password,
+                trailor: data.trailor,
+                gender: data.gender,
+                dateOfBirth: data.dateOfBirth,
               });
 
               const fullName =
@@ -46,6 +51,11 @@ const LoginPage: React.FC = () => {
                 .filter(Boolean);
               const lastName =
                 restName.length > 0 ? restName.join(" ") : undefined;
+              const trailorFromApi = (res.user as { trailor?: string | string[] })
+                .trailor;
+              const normalizedTrailor = Array.isArray(trailorFromApi)
+                ? trailorFromApi[0]
+                : trailorFromApi;
 
               dispatch(
                 signUpSuccess({
@@ -53,8 +63,11 @@ const LoginPage: React.FC = () => {
                     firstName: firstName || undefined,
                     lastName,
                     email: res.user.email || data.email,
+                    trailor: normalizedTrailor || data.trailor,
                   },
-                  trailor: data.trailor,
+                  accessToken: res.accessToken,
+                  refreshToken: res.refreshToken,
+                  userType: normalizedTrailor || data.trailor,
                 })
               );
 

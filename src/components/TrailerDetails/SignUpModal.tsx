@@ -66,6 +66,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [genderTouched, setGenderTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const todayIso = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     if (!isOpen) return;
@@ -129,6 +130,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     isFirstNameValid &&
     isLastNameValid &&
     dateOfBirth.trim().length > 0 &&
+    dateOfBirth <= todayIso &&
     gender.trim().length > 0 &&
     isEmailValid &&
     isPasswordValid &&
@@ -194,7 +196,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     onBlur={() => setFirstNameTouched(true)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                     placeholder="demo"
                   />
                   {firstNameTouched && !isFirstNameValid && (
@@ -212,7 +214,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     onBlur={() => setLastNameTouched(true)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                     placeholder="demo"
                   />
                   {lastNameTouched && !isLastNameValid && (
@@ -231,11 +233,15 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   type="date"
                   value={dateOfBirth}
                   min="1900-01-01"
-                  max="9999-12-31"
+                  max={todayIso}
                   onChange={(e) => {
                     const v = e.target.value;
                     if (!v) {
                       setDateOfBirth("");
+                      return;
+                    }
+                    if (v > todayIso) {
+                      setDateOfBirth(todayIso);
                       return;
                     }
                     const [y, m, d] = v.split("-");
@@ -243,7 +249,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     const year = y.slice(0, 4);
                     setDateOfBirth(`${year}-${m}-${d}`);
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
               </div>
 
@@ -256,7 +262,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
                     onBlur={() => setGenderTouched(true)}
-                    className="w-full border border-gray-300 rounded-lg px-3 pr-9 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent appearance-none"
+                    className="w-full border border-gray-300 rounded-lg px-3 pr-9 py-3 text-sm text-gray-900 bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
                   >
                     <option value="">Select gender</option>
                     <option value="Male">Male</option>
@@ -283,7 +289,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => setEmailTouched(true)}
                   placeholder="dem@gmail.com"
-                  className={`w-full border rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent ${emailTouched && !isEmailValid
+                  className={`w-full border rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 ${emailTouched && !isEmailValid
                       ? "border-red-400"
                       : "border-gray-300"
                     }`}
@@ -304,7 +310,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     onChange={(e) => setPassword(e.target.value)}
                     onBlur={() => setPasswordTouched(true)}
                     placeholder="Enter your password"
-                    className="w-full border border-gray-300 rounded-lg px-3 pr-10 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 pr-10 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   />
                   <button
                     type="button"
@@ -366,13 +372,13 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Trailor
+                  Choose Your Category
                 </label>
                 <div className="relative">
                   <select
                     value={trailor}
                     onChange={(e) => setTrailor(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 pr-9 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent appearance-none"
+                    className="w-full border border-gray-300 rounded-lg px-3 pr-9 py-3 text-sm text-gray-900 bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
                   >
                     <option value="">Select option</option>
                     <option value="Renter">Renter</option>
@@ -389,7 +395,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Phone Number
                 </label>
-                <div className="w-full border border-gray-300 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white">
+                <div className="w-full border border-gray-300 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/15">
                   <select
                     className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-1 max-w-[40%] sm:max-w-[32%]"
                     value={selectedCountry.code}

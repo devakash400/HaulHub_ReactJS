@@ -16,6 +16,7 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
 }) => {
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
+  const todayIso = new Date().toISOString().split("T")[0];
   const isNextDisabled = !pickupDate.trim() || !returnDate.trim();
 
   const handleEscape = useCallback(
@@ -41,6 +42,13 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
       setReturnDate("");
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!returnDate) return;
+    if (returnDate < pickupDate) {
+      setReturnDate("");
+    }
+  }, [pickupDate, returnDate]);
 
   const handleNext = () => {
     if (isNextDisabled) return;
@@ -82,6 +90,7 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
               type="date"
               value={pickupDate}
               onChange={(e) => setPickupDate(e.target.value)}
+              min={todayIso}
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
             />
           </div>
@@ -97,7 +106,7 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
               type="date"
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
-              min={pickupDate || undefined}
+              min={pickupDate || todayIso}
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
             />
           </div>

@@ -14,6 +14,7 @@ const Container: React.FC = () => {
   const [index, setIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const goTo = useCallback((i: number) => {
     setIndex((prev) => {
@@ -54,6 +55,8 @@ const Container: React.FC = () => {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
       >
         <div
           className="flex h-full w-full transition-transform duration-500 ease-out"
@@ -77,7 +80,9 @@ const Container: React.FC = () => {
           type="button"
           onClick={goPrev}
           aria-label="Previous slide"
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 sm:h-10 sm:w-10"
+          className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-all duration-300 hover:bg-black/70 sm:h-10 sm:w-10 ${
+            isPaused ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         >
           <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
@@ -85,7 +90,9 @@ const Container: React.FC = () => {
           type="button"
           onClick={goNext}
           aria-label="Next slide"
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 sm:h-10 sm:w-10"
+          className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-all duration-300 hover:bg-black/70 sm:h-10 sm:w-10 ${
+            isPaused ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         >
           <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>

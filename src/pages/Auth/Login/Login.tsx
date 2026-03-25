@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { images } from "../../../assets/images/index.ts";
-import { Eye, EyeOff, Mail, Smartphone } from "lucide-react";
+import { Eye, EyeOff, Mail, Smartphone, ChevronDown } from "lucide-react";
 import { ModalHeader } from "../../../components/ModalHeader.tsx";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../store/authSlice.ts";
@@ -42,6 +42,21 @@ const COUNTRY_OPTIONS: CountryOption[] = [
   { code: "FR", name: "France", dialCode: "+33", flag: "🇫🇷" },
 ];
 
+const getApiErrorMessage = (err: any): string | null => {
+  const data = err?.response?.data;
+  if (!data) return null;
+  if (typeof data === "string") return data;
+  if (typeof data?.message === "string") return data.message;
+  if (typeof data?.error === "string") return data.error;
+  if (Array.isArray(data?.errors) && typeof data.errors[0]?.message === "string") {
+    return data.errors[0].message;
+  }
+  if (Array.isArray(data?.errors) && typeof data.errors[0]?.msg === "string") {
+    return data.errors[0].msg;
+  }
+  return null;
+};
+
 const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
@@ -56,6 +71,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   );
   const [step, setStep] = useState<Step>("email");
   const [password, setPassword] = useState("");
+  const [loginTrailor, setLoginTrailor] = useState<"Renter" | "Owner">("Renter");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -118,6 +134,12 @@ const LoginModal: React.FC<LoginModalProps> = ({
   useEffect(() => {
     if (typeof document === "undefined") return;
     if (!isOpen) return;
+
+    // When modal opens, clear transient auth errors from any previous attempt
+    setLoginError(null);
+    setEmailError(null);
+    setPassword("");
+    setIsSubmitting(false);
 
     const previousBodyOverflow = document.body.style.overflow;
     const previousBodyTouchAction = document.body.style.touchAction;
@@ -208,6 +230,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         }
       }
 
+      setLoginError(null);
       setStep("password");
     } catch (err) {
       const msg = "Unable to verify. Please try again.";
@@ -227,35 +250,77 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
       let loginRes;
       if (!usePhoneOnly && emailRegex.test(trimmed)) {
-        loginRes = await loginApi({ email: trimmed, password });
+        loginRes = await loginApi({
+          email: trimmed,
+          password,
+          trailor: loginTrailor,
+        });
       } else {
         const digits = trimmed.replace(/\D/g, "");
         const phoneWithCode = `${selectedCountry.dialCode}${digits}`;
-        loginRes = await phoneLoginApi({ phoneNumber: phoneWithCode, password });
+        loginRes = await phoneLoginApi({
+          phoneNumber: phoneWithCode,
+          password,
+          trailor: loginTrailor,
+        });
       }
       // For debugging / verification in console
       // eslint-disable-next-line no-console
       console.log("login response:", loginRes);
       const { user } = loginRes;
+      const userWithShape = user as {
+        firstName?: string;
+        lastName?: string;
+        fullName?: string;
+        email?: string;
+        phoneNumber?: string | string[];
+        gender?: string;
+        dateOfBirth?: string;
+        trailor?: string | string[];
+      };
       const fullName =
-        typeof user.fullName === "string" ? user.fullName.trim() : "";
-      const [firstName, ...restName] = fullName.split(" ").filter(Boolean);
-      const lastName = restName.length > 0 ? restName.join(" ") : undefined;
-
-      const trailorFromApi = (user as { trailor?: string }).trailor;
+        typeof userWithShape.fullName === "string"
+          ? userWithShape.fullName.trim()
+          : "";
+      const [firstFromFullName, ...restName] = fullName.split(" ").filter(Boolean);
+      const normalizedTrailor = Array.isArray(userWithShape.trailor)
+        ? userWithShape.trailor[0]
+        : userWithShape.trailor;
+      const normalizedPhone = Array.isArray(userWithShape.phoneNumber)
+        ? userWithShape.phoneNumber[0]
+        : userWithShape.phoneNumber;
       dispatch(
         loginSuccess({
-          firstName: firstName || undefined,
-          lastName,
-          email: user.email || email,
-          trailor: trailorFromApi,
+          user: {
+            firstName: userWithShape.firstName || firstFromFullName || undefined,
+            lastName:
+              userWithShape.lastName ||
+              (restName.length > 0 ? restName.join(" ") : undefined),
+            email: userWithShape.email || email,
+            phoneNumber: normalizedPhone,
+            gender: userWithShape.gender,
+            dateOfBirth: userWithShape.dateOfBirth,
+            trailor: normalizedTrailor,
+          },
+          accessToken: loginRes.accessToken,
+          refreshToken: loginRes.refreshToken,
+          userType: normalizedTrailor,
         })
       );
       toast.success("Logged in successfully");
       onSuccess();
-    } catch (err) {
-      const msg = "Enter a Correct Password.";
-      setLoginError(msg);
+    } catch (err: any) {
+      const msg =
+        getApiErrorMessage(err) ||
+        err?.message ||
+        "Unable to login. Please try again.";
+      // eslint-disable-next-line no-console
+      console.error("login error:", err?.response?.data ?? err);
+      const toastOnly =
+        typeof msg === "string" &&
+        (msg.toLowerCase().includes("not registered as") ||
+          msg.toLowerCase().includes("registered as"));
+      setLoginError(toastOnly ? null : msg);
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -330,8 +395,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
   const handleNewPasswordContinue = () => {
     if (!canSetNewPassword) return;
-    // After reset, go back to login + auto success for demo
-    dispatch(loginSuccess({ email }));
     toast.success("Password reset successfully");
     onSuccess();
   };
@@ -369,7 +432,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <span className="text-red-500">*</span>
               </label>
               {usePhoneOnly ? (
-                <div className="w-full border border-gray-400 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white">
+                <div className="w-full border border-gray-400 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/15">
                   <select
                     className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-1 max-w-[40%] sm:max-w-[32%]"
                     value={selectedCountry.code}
@@ -408,7 +471,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     setEmail(e.target.value);
                     setEmailError(null);
                   }}
-                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
+                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
               )}
               {showIdentifierFormatError && (
@@ -422,6 +485,28 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <p className="mt-2 text-xs text-red-600">{emailError}</p>
               )}
 
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-black mb-2">
+                  Trailer Type
+                </label>
+                <div className="relative">
+                  <select
+                    value={loginTrailor}
+                    onChange={(e) => {
+                      setLoginTrailor(e.target.value as "Renter" | "Owner");
+                      setLoginError(null);
+                    }}
+                    className="w-full border border-gray-400 rounded-lg px-4 pr-10 py-3 text-sm bg-white appearance-none focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                  >
+                    <option value="Renter">Renter</option>
+                    <option value="Owner">Owner</option>
+                  </select>
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                    <ChevronDown className="w-4 h-4" aria-hidden />
+                  </span>
+                </div>
+              </div>
+
 
               <button
                 type="button"
@@ -429,7 +514,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 disabled={!isEmailFilled || !isIdentifierValid || isCheckingEmail}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${isEmailFilled && isIdentifierValid && !isCheckingEmail
                     ? "bg-[#389131] text-white"
-                    : "bg-gray-300 text-white cursor-not-allowed"
+                    : "bg-[#389131]/60 text-white cursor-not-allowed"
                   }`}
               >
                 {isCheckingEmail ? "Checking..." : "Continue"}
@@ -443,7 +528,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
               <button
                 type="button"
-                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3 transition-colors hover:border-[#389131]"
               >
                 <img
                   src={images.Google}
@@ -454,7 +539,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </button>
               <button
                 type="button"
-                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3 transition-colors hover:border-[#389131]"
               >
                 <img
                   src={images.Apple}
@@ -465,7 +550,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </button>
               <button
                 type="button"
-                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm flex items-center justify-center gap-3"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm flex items-center justify-center gap-3 transition-colors hover:border-[#389131]"
                 onClick={() => {
                   setUsePhoneOnly((prev) => !prev);
                   setEmail("");
@@ -517,8 +602,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   type={showLoginPwd ? "text" : "password"}
                   value={password}
                   placeholder="Enter Password"
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-gray-400 rounded-lg px-4 pr-10 py-3 text-sm outline-none"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setLoginError(null);
+                  }}
+                  className="w-full border border-gray-400 rounded-lg px-4 pr-10 py-3 text-sm focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
                 <button
                   type="button"
@@ -533,6 +621,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   )}
                 </button>
               </div>
+
               {loginError && (
                 <p className="mt-2 text-xs text-red-600">{loginError}</p>
               )}
@@ -553,7 +642,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 disabled={!isPasswordFilled || isSubmitting}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${isPasswordFilled && !isSubmitting
                     ? "bg-[#389131] text-white"
-                    : "bg-gray-300 text-white cursor-not-allowed"
+                    : "bg-[#389131]/60 text-white cursor-not-allowed"
                   }`}
               >
                 {isSubmitting ? "Logging in..." : "Continue"}
@@ -573,14 +662,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <label className="block text-sm font-medium text-black mb-2">
                   Phone Number <span className="text-red-500">*</span>
                 </label>
-                <div className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                <div className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2 focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/15">
                   <span className="text-sm">🇺🇸</span>
                   <span className="text-gray-600">+1</span>
                   <input
                     value={resetPhone}
                     onChange={(e) => setResetPhone(e.target.value)}
                     placeholder="Phone Number"
-                    className="flex-1 outline-none"
+                    className="flex-1 outline-none bg-transparent"
                   />
                 </div>
               </div>
@@ -599,7 +688,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   placeholder="Enter Email ID"
-                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
+                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
               </div>
 
@@ -609,7 +698,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 disabled={!resetCanContinue || isForgotSubmitting}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${resetCanContinue && !isForgotSubmitting
                     ? "bg-[#389131] text-white"
-                    : "bg-gray-300 text-white cursor-not-allowed"
+                    : "bg-[#389131]/60 text-white cursor-not-allowed"
                   }`}
               >
                 {isForgotSubmitting ? "Sending..." : "Continue"}
@@ -634,7 +723,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   type={showNewPwd ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none pr-10"
+                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
                 <button
                   type="button"
@@ -658,7 +747,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   type={showConfirmPwd ? "text" : "password"}
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none pr-10"
+                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
                 <button
                   type="button"
@@ -684,7 +773,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 disabled={!canSetNewPassword}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${canSetNewPassword
                     ? "bg-[#389131] text-white"
-                    : "bg-gray-300 text-white cursor-not-allowed"
+                    : "bg-[#389131]/60 text-white cursor-not-allowed"
                   }`}
               >
                 Continue
@@ -729,7 +818,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   }}
                   placeholder="Enter OTP"
                   maxLength={6}
-                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm outline-none"
+                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
 
                 <div className="mt-2 flex justify-between items-center text-xs text-gray-600">
@@ -769,7 +858,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   disabled={!isOtpValid}
                   className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${isOtpValid
                       ? "bg-[#389131] text-white"
-                      : "bg-gray-300 text-white cursor-not-allowed"
+                      : "bg-[#389131]/60 text-white cursor-not-allowed"
                     }`}
                 >
                   Verify

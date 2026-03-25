@@ -36,7 +36,9 @@ const Navbar: React.FC = () => {
     (state: RootState) => state.auth.isAuthenticated
   );
   const user = useSelector((state: RootState) => state.auth.user);
-  const isOwner = user?.trailor === "Owner" && isAuthenticated;
+  const userType = useSelector((state: RootState) => state.auth.userType);
+  const isOwner =
+    (user?.trailor === "Owner" || userType === "Owner") && isAuthenticated;
 
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -132,7 +134,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F9F8F3] border-b border-gray-200 font-sans min-w-0 w-screen">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F9F8F3] border-b border-gray-200 font-sans min-w-0 w-full">
       <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 min-w-0 w-full">
         {/* Left: Logo */}
         <Link
@@ -151,7 +153,7 @@ const Navbar: React.FC = () => {
         {location.pathname === "/" && (
           <div className="hidden min-w-0 flex-1 items-center justify-center px-4 sm:flex">
             <div
-              className={`flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              className={`flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_26px_rgba(56,145,49,0.22)] motion-reduce:transition-none ${
                 isSearchCompact
                   ? "h-[38px] w-[min(100%,460px)] px-4"
                   : "h-[48px] w-[min(100%,640px)] px-5"
@@ -187,13 +189,6 @@ const Navbar: React.FC = () => {
         >
         {isAuthenticated ? (
           <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
-            <Link
-              to="/list-trailer"
-              onClick={closeDrawer}
-              className="hidden shrink-0 text-[0.95rem] font-medium text-neutral-900 no-underline hover:opacity-75 sm:inline"
-            >
-              List your trailer
-            </Link>
             <Link
               to="/profile"
               onClick={closeDrawer}
@@ -239,7 +234,7 @@ const Navbar: React.FC = () => {
                 {isTrailerScreen ? (
                   <>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -250,15 +245,15 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={() => handleProtectedDrawerNavigate("/booking")}
                     >
                       <span className="text-inherit no-underline cursor-pointer">
-                        Booking Screen
+                      Your Booked Trailers
                       </span>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -269,7 +264,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={() => handleProtectedDrawerNavigate("/profile")}
                     >
                       <span className="text-inherit no-underline cursor-pointer">
@@ -277,7 +272,7 @@ const Navbar: React.FC = () => {
                       </span>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={() => {
                         if (!isAuthenticated) {
                           closeDrawer();
@@ -296,7 +291,7 @@ const Navbar: React.FC = () => {
                 ) : isOwner ? (
                   <>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -307,7 +302,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -318,7 +313,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -329,7 +324,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -340,7 +335,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -351,7 +346,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -362,7 +357,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -373,7 +368,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={() => setIsLogoutConfirmOpen(true)}
                     >
                       <span className="text-inherit no-underline cursor-pointer">
@@ -384,7 +379,7 @@ const Navbar: React.FC = () => {
                 ) : (
                   <>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -395,7 +390,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
@@ -407,7 +402,7 @@ const Navbar: React.FC = () => {
                     </li>
                     {!isAuthenticated ? (
                       <li
-                        className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                        className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                         onClick={() => {
                           closeDrawer();
                           setIsSignUpOpen(false);
@@ -421,7 +416,7 @@ const Navbar: React.FC = () => {
                     ) : (
                       <>
                         <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                           onClick={handleDrawerLinkRowClick}
                         >
                           <Link
@@ -432,18 +427,18 @@ const Navbar: React.FC = () => {
                           </Link>
                         </li>
                         <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                           onClick={handleDrawerLinkRowClick}
                         >
                           <Link
                             to="/booking"
                             className="text-inherit no-underline cursor-pointer"
                           >
-                            Booking Screen
+                           Your Booked Trailers
                           </Link>
                         </li>
                         <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                           onClick={handleDrawerLinkRowClick}
                         >
                           <Link
@@ -454,7 +449,7 @@ const Navbar: React.FC = () => {
                           </Link>
                         </li>
                         <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap hover:bg-gray-100"
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                           onClick={() => setIsLogoutConfirmOpen(true)}
                         >
                           <span className="text-inherit no-underline cursor-pointer">
@@ -485,7 +480,7 @@ const Navbar: React.FC = () => {
             }`}
           >
             <div
-              className={`mx-auto flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              className={`mx-auto flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_22px_rgba(56,145,49,0.2)] motion-reduce:transition-none ${
                 isSearchCompact
                   ? "h-[32px] w-[min(100%,400px)] px-3"
                   : "h-[38px] w-[min(100%,560px)] px-3.5"
@@ -537,9 +532,14 @@ const Navbar: React.FC = () => {
         onSubmit={async (data: SignUpData) => {
           try {
             const res = await register({
-              fullName: `${data.firstName} ${data.lastName}`.trim(),
+              firstName: data.firstName,
+              lastName: data.lastName,
               email: data.email,
+              phoneNumber: data.phoneNumber,
               password: data.password,
+              trailor: data.trailor,
+              gender: data.gender,
+              dateOfBirth: data.dateOfBirth,
             });
 
             const fullName =
@@ -551,6 +551,11 @@ const Navbar: React.FC = () => {
               .filter(Boolean);
             const lastName =
               restName.length > 0 ? restName.join(" ") : undefined;
+            const trailorFromApi = (res.user as { trailor?: string | string[] })
+              .trailor;
+            const normalizedTrailor = Array.isArray(trailorFromApi)
+              ? trailorFromApi[0]
+              : trailorFromApi;
 
             dispatch(
               signUpSuccess({
@@ -558,8 +563,11 @@ const Navbar: React.FC = () => {
                   firstName: firstName || undefined,
                   lastName,
                   email: res.user.email || data.email,
+                  trailor: normalizedTrailor || data.trailor,
                 },
-                trailor: data.trailor,
+                accessToken: res.accessToken,
+                refreshToken: res.refreshToken,
+                userType: normalizedTrailor || data.trailor,
               })
             );
             // eslint-disable-next-line no-console

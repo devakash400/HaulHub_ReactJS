@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
-import { ChevronLeft, Share2 } from "lucide-react";
+import { ChevronLeft, Heart, Share2 } from "lucide-react";
 import { getTrailerById, getTrailerTypeLabel } from "../../../assets/data/trailers.ts";
 import { images as assetImages } from "../../../assets/images/index.ts";
 import { ImageModal, ShareTrailerModal, WishlistLoginModal } from "../../../components/TrailerDetails/index.ts";
@@ -60,7 +60,7 @@ const AllTrailerPhotos: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShareModalOpen(true)}
-                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:underline"
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
                 aria-label="Share"
               >
                 <Share2 className="w-4 h-4" />
@@ -69,14 +69,10 @@ const AllTrailerPhotos: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setWishlistModalOpen(true)}
-                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:underline"
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
                 aria-label="Save"
               >
-                <img
-                  src={assetImages.Wishlist}
-                  alt=""
-                  className="w-4 h-4 object-contain"
-                />
+                <Heart className="h-4 w-4 fill-current" />
                 <span>Save</span>
               </button>
             </div>

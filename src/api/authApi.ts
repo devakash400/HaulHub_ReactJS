@@ -3,17 +3,24 @@ import api, { setTokens, clearTokens } from "./api.ts";
 export type LoginPayload = {
   email: string;
   password: string;
+  trailor: "Renter" | "Owner";
 };
 
 export type PhoneLoginPayload = {
   phoneNumber: string;
   password: string;
+  trailor: "Renter" | "Owner";
 };
 
 export type RegisterPayload = {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  phoneNumber: string;
   password: string;
+  trailor: string;
+  gender: string;
+  dateOfBirth: string;
 };
 
 export type ForgotPasswordPayload = {
@@ -68,7 +75,7 @@ export type LoginResponse = {
 };
 
 export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
-  const res = await api.post<BackendLoginResponse>("/api/auth/login", payload);
+  const res = await api.post<BackendLoginResponse>("/api/auth/login/email", payload);
   const {
     success,
     data: { accessToken, refreshToken, expiresIn, user },
@@ -88,7 +95,7 @@ export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
 export const phoneLogin = async (
   payload: PhoneLoginPayload
 ): Promise<LoginResponse> => {
-  const res = await api.post<BackendLoginResponse>("/api/auth/login", payload);
+  const res = await api.post<BackendLoginResponse>("/api/auth/login/phone", payload);
   const {
     success,
     data: { accessToken, refreshToken, expiresIn, user },
@@ -108,13 +115,7 @@ export const phoneLogin = async (
 export const register = async (
   payload: RegisterPayload
 ): Promise<LoginResponse> => {
-  // Backend expects only fullName, email, password (like Postman example)
-  const { fullName, email, password } = payload;
-  const res = await api.post<BackendLoginResponse>("/api/auth/register", {
-    fullName,
-    email,
-    password,
-  });
+  const res = await api.post<BackendLoginResponse>("/api/auth/register", payload);
 
   const {
     success,

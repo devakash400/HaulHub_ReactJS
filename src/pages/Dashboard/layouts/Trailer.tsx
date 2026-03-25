@@ -59,7 +59,7 @@ const RevealSection: React.FC<RevealSectionProps> = ({
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <div

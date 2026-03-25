@@ -1,6 +1,5 @@
 import React from "react";
-import { Share2 } from "lucide-react";
-import { images } from "../../assets/images/index.ts";
+import { Heart, Share2 } from "lucide-react";
 
 type TrailerTitleSectionProps = {
   title: string;
@@ -26,25 +25,21 @@ export const TrailerTitleSection: React.FC<TrailerTitleSectionProps> = ({
         <button
           type="button"
           onClick={onShareClick}
-          className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:underline"
+          className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
           aria-label="Share"
         >
           <Share2 className="w-4 h-4" />
           <span>Share</span>
         </button>
-<button
-        type="button"
-        onClick={onSaveClick}
-        className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:underline"
-        aria-label="Save"
-      >
-        <img
-          src={images.Wishlist}
-          alt=""
-          className="w-4 h-4 object-contain"
-        />
-        <span>Save</span>
-      </button>
+        <button
+          type="button"
+          onClick={onSaveClick}
+          className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
+          aria-label="Save"
+        >
+          <Heart className="h-4 w-4 fill-current" />
+          <span>Save</span>
+        </button>
       </div>
     </section>
   );

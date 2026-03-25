@@ -52,12 +52,14 @@ const RevealBlock: React.FC<RevealBlockProps> = ({ children, delayMs = 0 }) => {
 const Home: React.FC = () => {
   const [addTrailerOpen, setAddTrailerOpen] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
+  const userType = useSelector((state: RootState) => state.auth.userType);
   const ownerTrailersCount = useSelector(
     (state: RootState) => state.auth.ownerTrailersCount
   );
 
   const isOwnerWithNoTrailers =
-    user?.trailor === "Owner" && ownerTrailersCount === 0;
+    (user?.trailor === "Owner" || userType === "Owner") &&
+    ownerTrailersCount === 0;
 
   const gooseneckItems = getGooseneckListItems();
   const bumperPullItems = getBumperPullListItems();

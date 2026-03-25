@@ -9,7 +9,9 @@ const BottomBar: React.FC = () => {
     (state: RootState) => state.auth.isAuthenticated
   );
   const user = useSelector((state: RootState) => state.auth.user);
-  const isOwner = user?.trailor === "Owner" && isAuthenticated;
+  const userType = useSelector((state: RootState) => state.auth.userType);
+  const isOwner =
+    (user?.trailor === "Owner" || userType === "Owner") && isAuthenticated;
   const year = new Date().getFullYear();
 
   return (
@@ -25,7 +27,7 @@ const BottomBar: React.FC = () => {
               <li>
                 <Link
                   to="/wishlist"
-                  className="no-underline text-black text-[0.9rem]"
+                  className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                 >
                   Wishlist
                 </Link>
@@ -33,7 +35,7 @@ const BottomBar: React.FC = () => {
               <li>
                 <Link
                   to="/why-choose"
-                  className="no-underline text-black text-[0.9rem]"
+                  className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                 >
                   Why Choose HaulHub
                 </Link>
@@ -42,7 +44,7 @@ const BottomBar: React.FC = () => {
                 <li>
                   <Link
                     to="/list-trailer"
-                    className="no-underline text-black text-[0.9rem]"
+                    className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                   >
                     List Trailer
                   </Link>
@@ -51,15 +53,15 @@ const BottomBar: React.FC = () => {
               <li>
                 <Link
                   to="/booking"
-                  className="no-underline text-black text-[0.9rem]"
+                  className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                 >
-                  Booking Screen
+                  Your Booked Trailers
                 </Link>
               </li>
               <li>
                 <Link
                   to="/trust-safety"
-                  className="no-underline text-black text-[0.9rem]"
+                  className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                 >
                   Trust &amp; Safety
                 </Link>
@@ -67,7 +69,7 @@ const BottomBar: React.FC = () => {
               <li>
                 <Link
                   to="/get-help"
-                  className="no-underline text-black text-[0.9rem]"
+                  className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                 >
                   Get Help
                 </Link>
@@ -84,7 +86,7 @@ const BottomBar: React.FC = () => {
                 <li>
                   <Link
                     to="/list-trailer"
-                    className="no-underline text-black text-[0.9rem]"
+                    className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                   >
                     List Trailer
                   </Link>
@@ -93,7 +95,7 @@ const BottomBar: React.FC = () => {
               <li>
                 <Link
                   to="/how-it-works"
-                  className="no-underline text-black text-[0.9rem]"
+                  className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                 >
                   How it works
                 </Link>
@@ -101,7 +103,7 @@ const BottomBar: React.FC = () => {
               <li>
                 <Link
                   to="/about"
-                  className="no-underline text-black text-[0.9rem]"
+                  className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                 >
                   About US
                 </Link>
@@ -109,7 +111,7 @@ const BottomBar: React.FC = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="no-underline text-black text-[0.9rem]"
+                  className="no-underline text-black text-[0.9rem] transition-colors hover:text-[#389131]"
                 >
                   Contact Us
                 </Link>
@@ -173,14 +175,14 @@ const BottomBar: React.FC = () => {
           {/* Center copyright */}
           <p className="m-0 text-center">
             @ {year} HaulHub,{" "}
-            <Link to="/trust-safety" className="text-gray-700 hover:underline">
+            <Link to="/trust-safety" className="text-gray-700 transition-colors hover:text-[#389131] hover:underline">
               Privacy
             </Link>{" "}
-            <Link to="/trust-safety" className="text-gray-700 hover:underline">
+            <Link to="/trust-safety" className="text-gray-700 transition-colors hover:text-[#389131] hover:underline">
               Terms
             </Link>{" "}
             &amp;{" "}
-            <Link to="/about" className="text-gray-700 hover:underline">
+            <Link to="/about" className="text-gray-700 transition-colors hover:text-[#389131] hover:underline">
               Company Details
             </Link>
           </p>

@@ -86,7 +86,7 @@ const BookingScreen: React.FC = () => {
       <main className="flex-1 min-h-0 min-w-0 overflow-y-auto max-w-3xl mx-auto w-full px-4 sm:px-6 py-4">
         {/* Page title */}
         <h1 className="text-xl sm:text-2xl font-bold text-black text-center mb-4 mt-2">
-          Booking Screen
+        Your Booked Trailers
         </h1>
 
         {/* Filter button */}
@@ -95,7 +95,7 @@ const BookingScreen: React.FC = () => {
             <button
               type="button"
               onClick={() => setFilterOpen((o) => !o)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-800 text-sm font-medium hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-800 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-[#389131]"
             >
               {FILTER_LABELS[filterStatus]}
               <ChevronDown
@@ -109,7 +109,7 @@ const BookingScreen: React.FC = () => {
                     key={status}
                     type="button"
                     onClick={() => handleFilterSelect(status)}
-                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
+                    className={`block w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 hover:text-[#389131] ${
                       filterStatus === status ? "bg-gray-100 font-medium text-gray-900" : "text-gray-700"
                     }`}
                   >
