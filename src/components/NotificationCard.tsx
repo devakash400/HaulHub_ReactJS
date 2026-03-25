@@ -1,21 +1,27 @@
 import React from "react";
 
 type NotificationCardProps = {
+  id: number;
   imageUrl: string;
   title: string;
   model: string;
   price: string;
   rating: number;
   reviewsCount: number;
+  onAccept: (id: number) => void;
+  onReject: (id: number) => void;
 };
 
 const NotificationCard: React.FC<NotificationCardProps> = ({
+  id,
   imageUrl,
   title,
   model,
   price,
   rating,
   reviewsCount,
+  onAccept,
+  onReject,
 }) => {
   return (
     <div className="w-full rounded-2xl border border-gray-300 bg-white shadow-sm px-4 py-4 flex flex-col gap-4">
@@ -46,12 +52,14 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           <div className="mt-4 flex gap-3">
             <button
               type="button"
+              onClick={() => onReject(id)}
               className="flex-1 rounded-lg border border-gray-400 bg-white py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 transition-colors"
             >
               Reject
             </button>
             <button
               type="button"
+              onClick={() => onAccept(id)}
               className="flex-1 rounded-lg bg-[#389131] py-2 text-sm font-semibold text-white hover:bg-[#2f7a29] transition-colors"
             >
               Accept

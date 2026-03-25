@@ -4,11 +4,16 @@ import { images } from "../../assets/images/index.ts";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store";
+import { toast } from "react-toastify";
 
 const Notifications: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
+  const user = useSelector((state: RootState) => state.auth.user);
+  const userType = useSelector((state: RootState) => state.auth.userType);
+  const isOwner =
+    isAuthenticated && (user?.trailor === "Owner" || userType === "Owner");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +34,34 @@ const Notifications: React.FC = () => {
     },
   ];
 
+  const handleAccept = (id: number) => {
+    const selected = notifications.find((n) => n.id === id);
+    if (!selected) return;
+
+    if (isOwner) {
+      navigate("/trailor-condition", {
+        state: {
+          bookingId: `#TR-2026-${String(id).padStart(5, "0")}`,
+          trailorName: selected.title,
+          renterName: "Renter",
+          pickupDate: "12 March 2026",
+        },
+      });
+      return;
+    }
+
+    // Renter flow: after accept, renter sees Done/Return summary screen.
+    navigate("/return", {
+      state: {
+        bookingId: `#TR-2026-${String(id).padStart(5, "0")}`,
+      },
+    });
+  };
+
+  const handleReject = () => {
+    toast.info("Booking request rejected");
+  };
+
   return (
     <div className="min-h-screen flex justify-center bg-[#F9F8F3] px-4 py-10">
       {/* 80% width main container, near top instead of perfectly centered */}
@@ -41,12 +74,15 @@ const Notifications: React.FC = () => {
           {notifications.map((n) => (
             <NotificationCard
               key={n.id}
+              id={n.id}
               imageUrl={n.image}
               title={n.title}
               model={n.model}
               price={n.price}
               rating={n.rating}
               reviewsCount={n.reviews}
+              onAccept={handleAccept}
+              onReject={handleReject}
             />
           ))}
 

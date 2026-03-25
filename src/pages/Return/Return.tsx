@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { RateTrailerModal } from "../../components/TrailerDetails/RateTrailerModal.tsx";
 import { images } from "../../assets/images/index.ts";
@@ -14,8 +14,11 @@ const TRAILER_DESCRIPTION =
 
 const Return: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = (location.state ?? {}) as { bookingId?: string };
   const [rateModalOpen, setRateModalOpen] = useState(true);
   const damageNote = "Small Scratch On The Left Side Panel.";
+  const bookingId = state.bookingId ?? "#TR-2026-45821";
 
   const handleRateSubmit = (rating: number) => {
     if (rating > 0) {
@@ -31,6 +34,9 @@ const Return: React.FC = () => {
     <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-gray-100 font-sans">
       <main className="mx-auto max-w-[640px] px-4 py-6 sm:px-6 sm:py-8">
         <div className="space-y-0 overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-lg">
+          <div className="border-b border-gray-200/80 px-4 py-3 text-sm text-gray-600 sm:px-6">
+            Booking ID: <span className="font-semibold text-gray-900">{bookingId}</span>
+          </div>
           {/* Trailer header: image, description, model, base price */}
           <div className="relative">
             <div className="h-48 sm:h-56 w-full overflow-hidden bg-gray-200">
@@ -92,13 +98,28 @@ const Return: React.FC = () => {
 
           {/* Done button */}
           <div className="border-t border-gray-200/80 p-4 sm:p-6">
-            <button
-              type="button"
-              onClick={() => setRateModalOpen(true)}
-              className="w-full rounded-lg bg-[#389131] py-3.5 text-base font-semibold text-white transition-colors hover:bg-[#2d7326] focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
-            >
-              Done
-            </button>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => setRateModalOpen(true)}
+                className="w-full rounded-lg bg-[#389131] py-3.5 text-base font-semibold text-white transition-colors hover:bg-[#2d7326] focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
+              >
+                Done
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/trailor-condition-after", {
+                    state: {
+                      bookingId,
+                    },
+                  })
+                }
+                className="w-full rounded-lg border border-[#389131] bg-white py-3.5 text-base font-semibold text-[#389131] transition-colors hover:bg-[#389131]/5"
+              >
+                Report Image Issue
+              </button>
+            </div>
           </div>
         </div>
         <RateTrailerModal
