@@ -306,55 +306,19 @@ const Navbar: React.FC = () => {
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
-                        to="/list-trailer"
+                        to="/notifications"
                         className="text-inherit no-underline cursor-pointer"
                       >
-                        Book your Trailor
+                        Notification
                       </Link>
                     </li>
                     <li
                       className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                      onClick={handleDrawerLinkRowClick}
+                      onClick={() => handleProtectedDrawerNavigate("/booking")}
                     >
-                      <Link
-                        to="/trailor-condition"
-                        className="text-inherit no-underline cursor-pointer"
-                      >
-                        Trailor Condition Before
-                      </Link>
-                    </li>
-                    <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                      onClick={handleDrawerLinkRowClick}
-                    >
-                      <Link
-                        to="/trailor-condition-after"
-                        className="text-inherit no-underline cursor-pointer"
-                      >
-                        Trailor Condition After
-                      </Link>
-                    </li>
-                    <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                      onClick={handleDrawerLinkRowClick}
-                    >
-                      <Link
-                        to="/return"
-                        className="text-inherit no-underline cursor-pointer"
-                      >
-                        Return
-                      </Link>
-                    </li>
-                    <li
-                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                      onClick={handleDrawerLinkRowClick}
-                    >
-                      <Link
-                        to="/contact"
-                        className="text-inherit no-underline cursor-pointer"
-                      >
-                        Contact
-                      </Link>
+                      <span className="text-inherit no-underline cursor-pointer">
+                        Booked Trailor
+                      </span>
                     </li>
                     <li
                       className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
@@ -372,7 +336,7 @@ const Navbar: React.FC = () => {
                       onClick={() => setIsLogoutConfirmOpen(true)}
                     >
                       <span className="text-inherit no-underline cursor-pointer">
-                        Logout
+                        Log Out
                       </span>
                     </li>
                   </>

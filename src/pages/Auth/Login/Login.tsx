@@ -528,7 +528,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
               <button
                 type="button"
-                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3 transition-colors hover:border-[#389131]"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
               >
                 <img
                   src={images.Google}
@@ -539,7 +539,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </button>
               <button
                 type="button"
-                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3 transition-colors hover:border-[#389131]"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
               >
                 <img
                   src={images.Apple}
@@ -550,7 +550,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </button>
               <button
                 type="button"
-                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm flex items-center justify-center gap-3 transition-colors hover:border-[#389131]"
+                className="w-full px-4 py-3.5 rounded-lg border border-black bg-white text-sm flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
                 onClick={() => {
                   setUsePhoneOnly((prev) => !prev);
                   setEmail("");
@@ -572,7 +572,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <button
                   type="button"
                   onClick={onOpenSignUp}
-                  className="text-[#389131] font-semibold underline"
+                  className="text-[#389131] font-semibold underline cursor-pointer"
                 >
                   Sign up
                 </button>
@@ -580,11 +580,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
               <p className="mt-4 text-center text-xs sm:text-sm text-gray-800">
                 You agree with{" "}
-                <button type="button" className="text-[#389131] font-semibold">
+                <button type="button" className="text-[#389131] font-semibold cursor-pointer">
                   Terms &amp; Conditions
                 </button>{" "}
                 and{" "}
-                <button type="button" className="text-[#389131] font-semibold">
+                <button type="button" className="text-[#389131] font-semibold cursor-pointer">
                   Privacy Policy
                 </button>
                 .

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import { ChevronDown, Upload } from "lucide-react";
 import { ModalHeader } from "../ModalHeader.tsx";
@@ -233,7 +234,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
   const inputError =
     "border-red-500 focus:border-red-500 focus:ring-red-500/20";
 
-  return (
+  const modal = (
     <div
       className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       role="dialog"
@@ -309,7 +310,12 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                         onClick={() => {
                           setTrailerType(opt);
                           setTypeOpen(false);
-                          handleBlur("trailerType");
+                          setTouched((prev) => ({ ...prev, trailerType: true }));
+                          setErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.trailerType;
+                            return next;
+                          });
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-neutral-800 hover:bg-gray-100"
                       >
@@ -378,7 +384,12 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                         onClick={() => {
                           setHitchType(opt);
                           setHitchOpen(false);
-                          handleBlur("hitchType");
+                          setTouched((prev) => ({ ...prev, hitchType: true }));
+                          setErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.hitchType;
+                            return next;
+                          });
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-neutral-800 hover:bg-gray-100"
                       >
@@ -655,4 +666,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return modal;
+  return createPortal(modal, document.body);
 };
