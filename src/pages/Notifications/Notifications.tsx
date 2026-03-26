@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
 import NotificationCard from "../../components/NotificationCard.tsx";
-import { images } from "../../assets/images/index.ts";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store";
 import { toast } from "react-toastify";
+import {
+  acceptOwnerRequest,
+  rejectOwnerRequest,
+} from "../../store/notificationSlice.ts";
 
 const Notifications: React.FC = () => {
   const isAuthenticated = useSelector(
@@ -14,6 +17,13 @@ const Notifications: React.FC = () => {
   const userType = useSelector((state: RootState) => state.auth.userType);
   const isOwner =
     isAuthenticated && (user?.trailor === "Owner" || userType === "Owner");
+  const ownerRequests = useSelector(
+    (state: RootState) => state.notifications.ownerRequests
+  );
+  const renterNotifications = useSelector(
+    (state: RootState) => state.notifications.renterNotifications
+  );
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,35 +32,24 @@ const Notifications: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Gooseneck Trailer",
-      model: "FMAX208",
-      price: "$21,435",
-      rating: 4.9,
-      reviews: 593,
-      image: images.Container,
-    },
-  ];
-
   const handleAccept = (id: number) => {
-    const selected = notifications.find((n) => n.id === id);
+    const selected = ownerRequests.find((n) => n.id === id);
     if (!selected) return;
 
     if (isOwner) {
+      dispatch(acceptOwnerRequest(id));
       navigate("/trailor-condition", {
         state: {
           bookingId: `#TR-2026-${String(id).padStart(5, "0")}`,
-          trailorName: selected.title,
-          renterName: "Renter",
-          pickupDate: "12 March 2026",
+          trailorName: selected.trailerTitle,
+          renterName: selected.renterName,
+          pickupDate: selected.pickupDate,
         },
       });
+      toast.success("Order accepted. Renter has been notified.");
       return;
     }
 
-    // Renter flow: after accept, renter sees Done/Return summary screen.
     navigate("/return", {
       state: {
         bookingId: `#TR-2026-${String(id).padStart(5, "0")}`,
@@ -58,8 +57,10 @@ const Notifications: React.FC = () => {
     });
   };
 
-  const handleReject = () => {
-    toast.info("Booking request rejected");
+  const handleReject = (id: number) => {
+    if (!isOwner) return;
+    dispatch(rejectOwnerRequest(id));
+    toast.info("Order rejected. Renter has been notified.");
   };
 
   return (
@@ -70,28 +71,108 @@ const Notifications: React.FC = () => {
           Notifications
         </h1>
 
-        <div className="space-y-4">
-          {notifications.map((n) => (
-            <NotificationCard
-              key={n.id}
-              id={n.id}
-              imageUrl={n.image}
-              title={n.title}
-              model={n.model}
-              price={n.price}
-              rating={n.rating}
-              reviewsCount={n.reviews}
-              onAccept={handleAccept}
-              onReject={handleReject}
-            />
-          ))}
+        {isOwner ? (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-gray-200 bg-[#F9F8F3] px-4 py-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-800">Order Status</p>
+              <span
+                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                  ownerRequests.length > 0
+                    ? "bg-[#E7F6E6] text-[#2F7A29]"
+                    : "bg-[#FDECEC] text-[#B42318]"
+                }`}
+              >
+                {ownerRequests.length > 0
+                  ? `Order Available (${ownerRequests.length})`
+                  : "No Order Available"}
+              </span>
+            </div>
 
-          {notifications.length === 0 && (
-            <p className="text-center text-sm text-gray-500">
-              No notifications right now.
-            </p>
-          )}
-        </div>
+            {ownerRequests.map((n) => (
+              <NotificationCard
+                key={n.id}
+                id={n.id}
+                imageUrl={n.image}
+                title={n.trailerTitle}
+                model={n.trailerModel}
+                price={n.price}
+                rating={n.rating}
+                reviewsCount={n.reviews}
+                onAccept={handleAccept}
+                onReject={handleReject}
+              />
+            ))}
+
+            {ownerRequests.length === 0 && (
+              <p className="text-center text-sm text-gray-500">
+                No notifications right now.
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {renterNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-5 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-base font-semibold text-gray-900">
+                      Owner {notification.status.toLowerCase()} your order
+                    </p>
+                    <p className="mt-1 text-sm text-gray-700">
+                      Your booking request for {notification.trailerTitle} (Model{" "}
+                      {notification.trailerModel}) has been{" "}
+                      {notification.status.toLowerCase()}.
+                    </p>
+                    <p className="mt-2 text-xs font-medium text-gray-500">
+                      Booking ID: {notification.bookingId}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                      notification.status === "Accepted"
+                        ? "bg-[#E7F6E6] text-[#2F7A29]"
+                        : "bg-[#FDECEC] text-[#B42318]"
+                    }`}
+                  >
+                    {notification.status}
+                  </span>
+                </div>
+
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        notification.status === "Accepted"
+                          ? "/booking"
+                          : "/notifications"
+                      )
+                    }
+                    className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                      notification.status === "Accepted"
+                        ? "bg-[#389131] hover:bg-[#2f7a29]"
+                        : "bg-[#475467] hover:bg-[#344054]"
+                    }`}
+                  >
+                    {notification.status === "Accepted"
+                      ? "View booking details"
+                      : "View request status"}
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {renterNotifications.length === 0 && (
+              <p className="text-center text-sm text-gray-500">
+                No notifications right now.
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

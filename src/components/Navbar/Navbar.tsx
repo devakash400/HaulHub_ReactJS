@@ -257,6 +257,17 @@ const Navbar: React.FC = () => {
                       onClick={handleDrawerLinkRowClick}
                     >
                       <Link
+                        to="/notifications"
+                        className="text-inherit no-underline cursor-pointer"
+                      >
+                        Notification
+                      </Link>
+                    </li>
+                    <li
+                      className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                      onClick={handleDrawerLinkRowClick}
+                    >
+                      <Link
                         to="/contact"
                         className="text-inherit no-underline cursor-pointer"
                       >
@@ -379,6 +390,17 @@ const Navbar: React.FC = () => {
                       </li>
                     ) : (
                       <>
+                        <li
+                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                          onClick={handleDrawerLinkRowClick}
+                        >
+                          <Link
+                            to="/notifications"
+                            className="text-inherit no-underline cursor-pointer"
+                          >
+                            Notification
+                          </Link>
+                        </li>
                         <li
                           className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                           onClick={handleDrawerLinkRowClick}

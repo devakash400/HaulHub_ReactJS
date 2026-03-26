@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Container from "./Container.tsx";
 import { CategorySection } from "../../components/CategorySection.tsx";
@@ -50,6 +51,7 @@ const RevealBlock: React.FC<RevealBlockProps> = ({ children, delayMs = 0 }) => {
 };
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const [addTrailerOpen, setAddTrailerOpen] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
   const userType = useSelector((state: RootState) => state.auth.userType);
@@ -60,11 +62,17 @@ const Home: React.FC = () => {
   const isOwnerWithNoTrailers =
     (user?.trailor === "Owner" || userType === "Owner") &&
     ownerTrailersCount === 0;
+  const isOwnerWithTrailers =
+    (user?.trailor === "Owner" || userType === "Owner") &&
+    ownerTrailersCount > 0;
 
   const gooseneckItems = getGooseneckListItems();
   const bumperPullItems = getBumperPullListItems();
   const flatbedItems = getFlatbedListItems();
   const carHaulersItems = getCarHaulersListItems();
+  const ownerTrailerCards = gooseneckItems;
+  const isBookedTrailer = (truckId: number) => truckId % 3 === 2;
+  const visibleOwnerTrailers = ownerTrailerCards.slice(0, 4);
 
   return (
     <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
@@ -93,11 +101,77 @@ const Home: React.FC = () => {
                 </button>
               </div>
             </div>
-            <AddTrailerModal
-              isOpen={addTrailerOpen}
-              onClose={() => setAddTrailerOpen(false)}
-              onSuccess={() => setAddTrailerOpen(false)}
-            />
+          </div>
+        </RevealBlock>
+      ) : isOwnerWithTrailers ? (
+        <RevealBlock delayMs={120}>
+          <div className="w-full px-4 pb-6 pt-1">
+            <div className="w-full">
+              <div className="mb-3 flex items-center justify-between px-3 py-2">
+                <p className="text-2xl font-bold tracking-tight text-[#1F2937]">
+                  Your Trailers
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/owner/view-more-trucks")}
+                  className="rounded-md border border-[#8CCB85] bg-[#EAF7E8] px-3 py-1 text-xs font-semibold text-[#2F7A29] hover:bg-[#DDF2DA] transition-colors"
+                >
+                  View More
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pb-3 sm:grid-cols-3 lg:grid-cols-5">
+                <button
+                  type="button"
+                  onClick={() => setAddTrailerOpen(true)}
+                  className="h-[190px] w-full rounded-lg border border-gray-300 bg-[#F8F8F8] shadow-sm flex items-center justify-center"
+                >
+                  <span className="rounded-md bg-[#389131] px-4 py-2 text-white font-semibold text-sm">
+                    Add Trailor
+                  </span>
+                </button>
+
+                {visibleOwnerTrailers.map((item) => (
+                  <div
+                    key={item.id}
+                    className="w-full cursor-pointer"
+                    onClick={() =>
+                      navigate(`/owner/truck/${item.id}`, {
+                        state: { isBooked: isBookedTrailer(Number(item.id)) },
+                      })
+                    }
+                  >
+                    <div className="aspect-[4/3] w-full overflow-hidden rounded-md border border-gray-200 bg-white">
+                      <img
+                        src={item.image}
+                        alt={item.modelLabel}
+                        className="h-full w-full object-cover object-center"
+                      />
+                    </div>
+                    <p className="mt-1 text-[14px] font-semibold leading-tight text-black">
+                      Gooseneck Trailor
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-gray-700 leading-tight">
+                      <span className="text-[#F59E0B]">★</span> 4.9 Model : FMAX208
+                    </p>
+                    <p className="mt-0.5 text-[12px] font-semibold leading-tight text-black">
+                      {item.priceLabel}
+                    </p>
+                    <div className="mt-1">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-[2px] text-[9px] font-medium ${
+                          isBookedTrailer(Number(item.id))
+                            ? "bg-gray-200 text-gray-700"
+                            : "bg-[#E7F6E6] text-[#2F7A29]"
+                        }`}
+                      >
+                        {isBookedTrailer(Number(item.id)) ? "Booked" : "Available"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </RevealBlock>
       ) : (
@@ -119,6 +193,12 @@ const Home: React.FC = () => {
           </RevealBlock>
         </>
       )}
+
+      <AddTrailerModal
+        isOpen={addTrailerOpen}
+        onClose={() => setAddTrailerOpen(false)}
+        onSuccess={() => setAddTrailerOpen(false)}
+      />
     </div>
   );
 };

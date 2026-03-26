@@ -25,6 +25,8 @@ import Notifications from "./pages/Notifications/Notifications.tsx";
 import TrailorCondition from "./pages/TrailorCondition/TrailorCondition.tsx";
 import TrailorConditionAfter from "./pages/TrailorCondition/TrailorConditionAfter.tsx";
 import Return from "./pages/Return/Return.tsx";
+import OwnerTruckDescription from "./pages/OwnerTruckDescription/OwnerTruckDescription.tsx";
+import OwnerViewMoreTrucks from "./pages/OwnerViewMoreTrucks/OwnerViewMoreTrucks.tsx";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -54,6 +56,8 @@ const App: React.FC = () => {
           <Route path="/trailor-condition" element={<TrailorCondition />} />
           <Route path="/trailor-condition-after" element={<TrailorConditionAfter />} />
           <Route path="/return" element={<Return />} />
+          <Route path="/owner/truck/:id" element={<OwnerTruckDescription />} />
+          <Route path="/owner/view-more-trucks" element={<OwnerViewMoreTrucks />} />
           <Route path="/trailer/:id" element={<Trailer />} />
           <Route path="/trailer/:id/photos" element={<AllTrailerPhotos />} />
           <Route path="/trailer/:id/reviews" element={<TrailerReviews />} />
