@@ -55,7 +55,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [trailor, setTrailor] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
-    COUNTRY_OPTIONS[0]
+    COUNTRY_OPTIONS[3],
   );
   const [agreed, setAgreed] = useState(false);
 
@@ -79,7 +79,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setPassword("");
     setTrailor("");
     setPhoneNumber("");
-    setSelectedCountry(COUNTRY_OPTIONS[0]);
+    setSelectedCountry(COUNTRY_OPTIONS[3]);
     setAgreed(false);
     setFirstNameTouched(false);
     setLastNameTouched(false);
@@ -113,7 +113,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const passwordHasLowercase = /[a-z]/.test(password);
   const passwordHasNumber = /[0-9]/.test(password);
   const passwordHasSpecial = /[!@#$%^&*(),.?":{}|<>_\-\\[\];'/`~+]/.test(
-    password
+    password,
   );
 
   const isPasswordValid =
@@ -184,7 +184,6 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
           />
 
           <div className="px-6 pt-6 pb-4 sm:px-10 sm:pt-6 sm:pb-6 overflow-y-auto">
-
             <div className="mt-8 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -268,14 +267,15 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
-
                   </select>
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
                     <ChevronDown className="w-4 h-4" aria-hidden />
                   </span>
                 </div>
                 {genderTouched && gender.trim().length === 0 && (
-                  <p className="mt-1 text-xs text-red-600">Please select gender</p>
+                  <p className="mt-1 text-xs text-red-600">
+                    Please select gender
+                  </p>
                 )}
               </div>
 
@@ -289,10 +289,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => setEmailTouched(true)}
                   placeholder="dem@gmail.com"
-                  className={`w-full border rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 ${emailTouched && !isEmailValid
+                  className={`w-full border rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 ${
+                    emailTouched && !isEmailValid
                       ? "border-red-400"
                       : "border-gray-300"
-                    }`}
+                  }`}
                 />
                 {emailTouched && !isEmailValid && (
                   <p className="mt-1 text-xs text-red-600">Enter valid email</p>
@@ -316,7 +317,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
                     {showPassword ? (
                       <Eye className="w-5 h-5" aria-hidden />
@@ -336,18 +339,14 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     </li>
                     <li
                       className={
-                        passwordHasUppercase
-                          ? "text-green-600"
-                          : "text-red-600"
+                        passwordHasUppercase ? "text-green-600" : "text-red-600"
                       }
                     >
                       • Uppercase letters (A-Z)
                     </li>
                     <li
                       className={
-                        passwordHasLowercase
-                          ? "text-green-600"
-                          : "text-red-600"
+                        passwordHasLowercase ? "text-green-600" : "text-red-600"
                       }
                     >
                       • Lowercase letters (a-z)
@@ -383,7 +382,6 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     <option value="">Select option</option>
                     <option value="Renter">Renter</option>
                     <option value="Owner">Owner</option>
-
                   </select>
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
                     <ChevronDown className="w-4 h-4" aria-hidden />
@@ -401,7 +399,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     value={selectedCountry.code}
                     onChange={(e) => {
                       const next = COUNTRY_OPTIONS.find(
-                        (c) => c.code === e.target.value
+                        (c) => c.code === e.target.value,
                       );
                       if (next) setSelectedCountry(next);
                     }}
@@ -458,7 +456,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   >
                     Payments Terms of Service and Anti -Discrimination Policy
                   </button>
-                  <span className="hidden sm:inline">, and acknowledge the </span>
+                  <span className="hidden sm:inline">
+                    , and acknowledge the{" "}
+                  </span>
                   <span className="block sm:hidden mt-0.5">
                     , and acknowledge the
                   </span>{" "}
@@ -479,10 +479,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
               type="submit"
               disabled={!isFormValid}
               aria-disabled={!isFormValid}
-              className={`w-full py-3.5 text-sm sm:text-base font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${isFormValid
+              className={`w-full py-3.5 text-sm sm:text-base font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${
+                isFormValid
                   ? "bg-[#389131] text-white hover:opacity-90"
                   : "bg-[#389131]/60 text-white cursor-not-allowed"
-                }`}
+              }`}
             >
               Agree and Continue
             </button>
@@ -492,4 +493,3 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     </div>
   );
 };
-

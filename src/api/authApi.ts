@@ -13,8 +13,7 @@ export type PhoneLoginPayload = {
 };
 
 export type RegisterPayload = {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   phoneNumber: string;
   password: string;
@@ -75,7 +74,7 @@ export type LoginResponse = {
 };
 
 export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
-  const res = await api.post<BackendLoginResponse>("/api/auth/login/email", payload);
+  const res = await api.post<BackendLoginResponse>("/api/auth/login", payload);
   const {
     success,
     data: { accessToken, refreshToken, expiresIn, user },

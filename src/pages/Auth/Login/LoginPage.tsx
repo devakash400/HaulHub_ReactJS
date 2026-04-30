@@ -32,8 +32,7 @@ const LoginPage: React.FC = () => {
           onSubmit={async (data: SignUpData) => {
             try {
               const res = await register({
-                firstName: data.firstName,
-                lastName: data.lastName,
+                fullName: `${data.firstName} ${data.lastName}`.trim(),
                 email: data.email,
                 phoneNumber: data.phoneNumber,
                 password: data.password,
@@ -51,8 +50,9 @@ const LoginPage: React.FC = () => {
                 .filter(Boolean);
               const lastName =
                 restName.length > 0 ? restName.join(" ") : undefined;
-              const trailorFromApi = (res.user as { trailor?: string | string[] })
-                .trailor;
+              const trailorFromApi = (
+                res.user as { trailor?: string | string[] }
+              ).trailor;
               const normalizedTrailor = Array.isArray(trailorFromApi)
                 ? trailorFromApi[0]
                 : trailorFromApi;
@@ -68,7 +68,7 @@ const LoginPage: React.FC = () => {
                   accessToken: res.accessToken,
                   refreshToken: res.refreshToken,
                   userType: normalizedTrailor || data.trailor,
-                })
+                }),
               );
 
               // eslint-disable-next-line no-console
