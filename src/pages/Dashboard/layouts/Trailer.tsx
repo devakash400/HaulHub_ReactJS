@@ -1,7 +1,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { getTrailerById, getTrailerTypeLabel } from "../../../assets/data/trailers.ts";
+import {
+  getTrailerById,
+  getTrailerTypeLabel,
+} from "../../../assets/data/trailers.ts";
 import {
   TrailerTitleSection,
   TrailerImageGallery,
@@ -34,15 +37,24 @@ const RevealSection: React.FC<RevealSectionProps> = ({
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
       return;
     }
-    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    setReduceMotion(
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    );
   }, []);
 
   useEffect(() => {
     const target = sectionRef.current;
-    if (!target || typeof IntersectionObserver === "undefined" || reduceMotion) {
+    if (
+      !target ||
+      typeof IntersectionObserver === "undefined" ||
+      reduceMotion
+    ) {
       setIsVisible(true);
       return;
     }
@@ -54,7 +66,7 @@ const RevealSection: React.FC<RevealSectionProps> = ({
           observer.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -70px 0px" }
+      { threshold: 0.12, rootMargin: "0px 0px -70px 0px" },
     );
 
     observer.observe(target);
@@ -83,7 +95,7 @@ const Trailer: React.FC = () => {
   const trailer = id ? getTrailerById(Number(id)) : undefined;
   const navigate = useNavigate();
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+    (state: RootState) => state.auth.isAuthenticated,
   );
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [wishlistLoginOpen, setWishlistLoginOpen] = useState(false);
@@ -181,14 +193,14 @@ const Trailer: React.FC = () => {
       const next: WishlistItem[] = exists
         ? current
         : [
-          ...current,
-          {
-            id: trailerId,
-            title: trailer.title,
-            subtitle: trailer.specs,
-            imageUrl: trailer.images[0] ?? "",
-          },
-        ];
+            ...current,
+            {
+              id: trailerId,
+              title: trailer.title,
+              subtitle: trailer.specs,
+              imageUrl: trailer.images[0] ?? "",
+            },
+          ];
 
       if (typeof window !== "undefined") {
         localStorage.setItem("wishlistItems", JSON.stringify(next));
@@ -201,9 +213,7 @@ const Trailer: React.FC = () => {
 
   const handleRemoveItem = (itemId: string) => {
     setWishlistItems((prev) => {
-      const next = prev.filter(
-        (item) => String(item.id) !== String(itemId)
-      );
+      const next = prev.filter((item) => String(item.id) !== String(itemId));
       if (typeof window !== "undefined") {
         localStorage.setItem("wishlistItems", JSON.stringify(next));
       }
@@ -224,7 +234,7 @@ const Trailer: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background w-full min-w-0 overflow-x-hidden scroll-smooth">
+    <div className="min-h-screen bg-[#ffffff] w-full min-w-0 overflow-x-hidden scroll-smooth">
       <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-5 lg:py-5 w-full min-w-0">
         <TrailerTitleSection
           title={trailer.title}
@@ -264,18 +274,27 @@ const Trailer: React.FC = () => {
             style={{ transform: `translateY(${heroParallaxY}px)` }}
             className="will-change-transform transition-transform duration-300 ease-out"
           >
-            <TrailerImageGallery images={trailer.images} trailerId={trailer.id} />
+            <TrailerImageGallery
+              images={trailer.images}
+              trailerId={trailer.id}
+            />
           </div>
         </RevealSection>
 
         <RevealSection delayMs={80} variant="soft">
-          <div className="mb-3">
-          <p className="text-base sm:text-lg font-medium text-gray-900">
-            {locationText}
-          </p>
-          <p className="text-sm text-gray-600">
-            {trailer.specs}
-          </p>
+          <div className="mb-4 space-y-[10px]">
+            <p
+              className="font-medium text-black text-[30px] leading-[100%] tracking-[0%]"
+              style={{ fontFamily: "Lexend", verticalAlign: "middle" }}
+            >
+              {locationText}
+            </p>
+            <p
+              className="text-[19px] font-normal leading-[100%] tracking-[0%] text-black"
+              style={{ fontFamily: "Lexend", verticalAlign: "middle" }}
+            >
+              {trailer.specs}
+            </p>
           </div>
         </RevealSection>
 
@@ -349,8 +368,6 @@ const Trailer: React.FC = () => {
           <RevealSection delayMs={140} variant="soft">
             <PolicySection />
           </RevealSection>
-
-
         </div>
       </div>
     </div>

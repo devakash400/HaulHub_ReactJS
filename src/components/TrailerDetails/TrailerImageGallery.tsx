@@ -25,26 +25,26 @@ export const TrailerImageGallery: React.FC<TrailerImageGalleryProps> = ({
 
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
-      <div className="relative overflow-hidden rounded-2xl">
+      <div className="relative overflow-hidden">
         <img
           src={mainImage}
           alt="Main trailer"
-          className="w-full h-[300px] lg:h-[420px] object-cover rounded-2xl"
+          className="w-full h-[300px] lg:h-[414px] object-cover"
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
         {gridImages.map((src, i) => (
-          <div key={i} className="relative overflow-hidden rounded-2xl">
+          <div key={i} className="relative overflow-hidden">
             <img
               src={src}
               alt={`Trailer view ${i + 2}`}
-              className="w-full h-[200px] object-cover rounded-2xl"
+              className="w-full h-[200px] object-cover "
             />
             {i === 3 && trailerId != null && (
               <button
                 type="button"
                 onClick={() => navigate(`/trailer/${trailerId}/photos`)}
-                className="absolute border border-black bottom-2 right-2 sm:bottom-4 sm:right-4 bg-white text-xs sm:text-sm px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl shadow-md font-medium text-gray-800 hover:bg-gray-50 transition-colors flex items-center gap-1.5 sm:gap-2"
+                className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 bg-white text-xs sm:text-sm px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl shadow-md font-medium text-gray-800 hover:bg-gray-50 transition-colors flex items-center gap-1.5 sm:gap-2"
               >
                 <img
                   src={showAllPhotosIcon}
@@ -61,4 +61,3 @@ export const TrailerImageGallery: React.FC<TrailerImageGalleryProps> = ({
     </section>
   );
 };
-

@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Info, ShieldAlert, Receipt, LogOut, ChevronRight } from "lucide-react";
+import {
+  User,
+  Info,
+  ShieldAlert,
+  Receipt,
+  LogOut,
+  ChevronRight,
+} from "lucide-react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { logout } from "../../store/authSlice.ts";
@@ -69,7 +76,8 @@ const statusMeta: Record<TxStatus, { label: string; className: string }> = {
   Canceled: { label: "Canceled", className: "text-red-600" },
 };
 
-const initials = (name: string) => (name.trim()[0] ? name.trim()[0].toUpperCase() : "?");
+const initials = (name: string) =>
+  name.trim()[0] ? name.trim()[0].toUpperCase() : "?";
 
 const AccountSettings: React.FC = () => {
   const navigate = useNavigate();
@@ -120,7 +128,9 @@ const AccountSettings: React.FC = () => {
       <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
         <div className="grid grid-cols-2 gap-10 items-start">
           <aside>
-            <h1 className="text-lg font-semibold text-gray-900">Account Settings</h1>
+            <h1 className="text-lg font-semibold text-gray-900">
+              Account Settings
+            </h1>
 
             <nav className="mt-5">
               <ul className="m-0 p-0 list-none divide-y divide-gray-200 border border-gray-200 rounded-md overflow-hidden">
@@ -132,9 +142,14 @@ const AccountSettings: React.FC = () => {
                   >
                     <span className="inline-flex items-center gap-3">
                       <User className="w-5 h-5 text-gray-700" aria-hidden />
-                      <span className="text-sm text-gray-900">Personal information</span>
+                      <span className="text-sm text-gray-900">
+                        Personal information
+                      </span>
                     </span>
-                    <ChevronRight className="w-5 h-5 text-gray-500" aria-hidden />
+                    <ChevronRight
+                      className="w-5 h-5 text-gray-500"
+                      aria-hidden
+                    />
                   </button>
                 </li>
                 <li>
@@ -147,7 +162,10 @@ const AccountSettings: React.FC = () => {
                       <Info className="w-5 h-5 text-gray-700" aria-hidden />
                       <span className="text-sm text-gray-900">About US</span>
                     </span>
-                    <ChevronRight className="w-5 h-5 text-gray-500" aria-hidden />
+                    <ChevronRight
+                      className="w-5 h-5 text-gray-500"
+                      aria-hidden
+                    />
                   </button>
                 </li>
                 <li>
@@ -157,10 +175,18 @@ const AccountSettings: React.FC = () => {
                     className="w-full px-4 py-4 flex items-center justify-between text-left bg-white hover:bg-gray-50"
                   >
                     <span className="inline-flex items-center gap-3">
-                      <ShieldAlert className="w-5 h-5 text-gray-700" aria-hidden />
-                      <span className="text-sm text-gray-900">Privacy Policy</span>
+                      <ShieldAlert
+                        className="w-5 h-5 text-gray-700"
+                        aria-hidden
+                      />
+                      <span className="text-sm text-gray-900">
+                        Privacy Policy
+                      </span>
                     </span>
-                    <ChevronRight className="w-5 h-5 text-gray-500" aria-hidden />
+                    <ChevronRight
+                      className="w-5 h-5 text-gray-500"
+                      aria-hidden
+                    />
                   </button>
                 </li>
                 <li>
@@ -175,7 +201,10 @@ const AccountSettings: React.FC = () => {
                         Transaction history
                       </span>
                     </span>
-                    <ChevronRight className="w-5 h-5 text-gray-500" aria-hidden />
+                    <ChevronRight
+                      className="w-5 h-5 text-gray-500"
+                      aria-hidden
+                    />
                   </button>
                 </li>
                 <li>
@@ -186,9 +215,14 @@ const AccountSettings: React.FC = () => {
                   >
                     <span className="inline-flex items-center gap-3">
                       <Receipt className="w-5 h-5 text-gray-700" aria-hidden />
-                      <span className="text-sm text-gray-900">Notifications</span>
+                      <span className="text-sm text-gray-900">
+                        Notifications
+                      </span>
                     </span>
-                    <ChevronRight className="w-5 h-5 text-gray-500" aria-hidden />
+                    <ChevronRight
+                      className="w-5 h-5 text-gray-500"
+                      aria-hidden
+                    />
                   </button>
                 </li>
                 <li>
@@ -204,7 +238,10 @@ const AccountSettings: React.FC = () => {
                       <LogOut className="w-5 h-5 text-gray-700" aria-hidden />
                       <span className="text-sm text-gray-900">Log out</span>
                     </span>
-                    <ChevronRight className="w-5 h-5 text-gray-500" aria-hidden />
+                    <ChevronRight
+                      className="w-5 h-5 text-gray-500"
+                      aria-hidden
+                    />
                   </button>
                 </li>
               </ul>
@@ -212,7 +249,9 @@ const AccountSettings: React.FC = () => {
           </aside>
 
           <section className="min-w-0">
-            <h2 className="text-lg font-semibold text-gray-900">{rightTitle}</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {rightTitle}
+            </h2>
 
             {active === "personal" ? (
               <div className="mt-6 space-y-3 max-w-md">
@@ -220,7 +259,9 @@ const AccountSettings: React.FC = () => {
                 {!isEditingLegalName && (
                   <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">Legal name</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        Legal name
+                      </p>
                       <p className="mt-0.5 text-sm text-gray-700 truncate">
                         {legalName}
                       </p>
@@ -229,7 +270,9 @@ const AccountSettings: React.FC = () => {
                       type="button"
                       onClick={() => {
                         setFirstNameOnId(legalName.split(" ")[0] || "");
-                        setSurnameOnId(legalName.split(" ").slice(1).join(" ") || "");
+                        setSurnameOnId(
+                          legalName.split(" ").slice(1).join(" ") || "",
+                        );
                         setIsEditingLegalName(true);
                       }}
                       className="text-sm font-semibold text-[#389131] underline"
@@ -262,7 +305,9 @@ const AccountSettings: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="border border-gray-300 rounded-md px-3 py-2">
-                        <p className="text-xs text-gray-600">First name on ID</p>
+                        <p className="text-xs text-gray-600">
+                          First name on ID
+                        </p>
                         <input
                           type="text"
                           value={firstNameOnId}
@@ -315,7 +360,9 @@ const AccountSettings: React.FC = () => {
 
                 <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3 opacity-60">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">Phone number</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      Phone number
+                    </p>
                     <p className="mt-0.5 text-sm text-gray-600">
                       {phoneNumber || "Provide phone number"}
                     </p>
@@ -439,10 +486,14 @@ const AccountSettings: React.FC = () => {
                         <p className="text-sm font-semibold text-gray-900">
                           $ {tx.amount.toFixed(2)}
                         </p>
-                        <p className={`text-[11px] font-semibold ${meta.className}`}>
+                        <p
+                          className={`text-[11px] font-semibold ${meta.className}`}
+                        >
                           {meta.label}
                         </p>
-                        <p className="text-[10px] text-gray-600 mt-1">{tx.at}</p>
+                        <p className="text-[10px] text-gray-600 mt-1">
+                          {tx.at}
+                        </p>
                       </div>
                     </div>
                   );
@@ -468,7 +519,9 @@ const AccountSettings: React.FC = () => {
                       </p>
                       <p className="text-xs text-gray-700 mt-1">$ 21,435.3</p>
                       <p className="mt-1 text-xs text-gray-700 flex items-center gap-1">
-                        <span className="text-[#F4B000] text-base leading-none">★</span>
+                        <span className="text-[#F4B000] text-base leading-none">
+                          ★
+                        </span>
                         <span>
                           4.9 (593){" "}
                           <span className="font-medium">Guest Favourite</span>
@@ -493,14 +546,16 @@ const AccountSettings: React.FC = () => {
                 </div>
 
                 <p className="text-xs text-gray-500">
-                  This is a demo notification card. You can hook it up to your real
-                  booking or request notifications later.
+                  This is a demo notification card. You can hook it up to your
+                  real booking or request notifications later.
                 </p>
               </div>
             ) : (
               <div className="mt-5 text-sm text-gray-600">
                 {active === "about" && <p>About US content goes here.</p>}
-                {active === "privacy" && <p>Privacy Policy content goes here.</p>}
+                {active === "privacy" && (
+                  <p>Privacy Policy content goes here.</p>
+                )}
               </div>
             )}
           </section>
@@ -520,4 +575,3 @@ const AccountSettings: React.FC = () => {
 };
 
 export default AccountSettings;
-

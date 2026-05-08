@@ -8,10 +8,7 @@ import {
   type IdentityVerificationData,
 } from "./IdentityVerificationModal.tsx";
 import LoginModal from "../../pages/Auth/Login/Login.tsx";
-import {
-  SignUpModal,
-  type SignUpData,
-} from "./SignUpModal.tsx";
+import { SignUpModal, type SignUpData } from "./SignUpModal.tsx";
 import { register } from "../../api/authApi.ts";
 import { signUpSuccess } from "../../store/authSlice.ts";
 import type { RootState } from "../../store";
@@ -35,7 +32,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+    (state: RootState) => state.auth.isAuthenticated,
   );
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -44,18 +41,15 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   const [showIdentityModal, setShowIdentityModal] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
-  const [pendingBookingState, setPendingBookingState] = useState<
-    | {
-        title: string;
-        subtitle: string;
-        image: string;
-        totalPrice: string;
-        dates: string;
-        checkIn: string;
-        checkOut: string;
-      }
-    | null
-  >(null);
+  const [pendingBookingState, setPendingBookingState] = useState<{
+    title: string;
+    subtitle: string;
+    image: string;
+    totalPrice: string;
+    dates: string;
+    checkIn: string;
+    checkOut: string;
+  } | null>(null);
 
   const handleReserve = () => {
     if (!isAuthenticated) {
@@ -116,7 +110,8 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
           : `${data.firstName} ${data.lastName}`.trim();
       const [firstName, ...restName] = fullName.split(" ").filter(Boolean);
       const lastName = restName.length > 0 ? restName.join(" ") : undefined;
-      const trailorFromApi = (res.user as { trailor?: string | string[] }).trailor;
+      const trailorFromApi = (res.user as { trailor?: string | string[] })
+        .trailor;
       const normalizedTrailor = Array.isArray(trailorFromApi)
         ? trailorFromApi[0]
         : trailorFromApi;
@@ -132,7 +127,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
           accessToken: res.accessToken,
           refreshToken: res.refreshToken,
           userType: normalizedTrailor || data.trailor,
-        })
+        }),
       );
 
       setIsSignUpOpen(false);
@@ -146,117 +141,250 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       // eslint-disable-next-line no-console
       console.error(
         "register api error:",
-        err?.response?.data ?? err?.message ?? err
+        err?.response?.data ?? err?.message ?? err,
       );
     }
   };
 
   return (
-    <div className="w-full min-w-0 self-start">
-      <div className="bg-white rounded-2xl border border-gray-300 shadow-soft-lg p-5 space-y-5">
-        <div className="border border-gray-300 rounded py-3 text-center text-sm text-black text-large tracking-wide">
+    <div className="w-full min-w-0 self-start flex justify-center">
+      <div
+        className="
+      w-full max-w-[403px]
+      bg-[#F8F8F8]
+      border border-[#D7D7D7]
+      rounded-[14px]
+      shadow-[0px_2px_8px_rgba(0,0,0,0.12)]
+      p-[14px]
+    "
+      >
+        {/* Top Tag */}
+        <div
+          className="
+    w-full h-[46px]
+    border border-[#D8D8D8]
+    rounded-[4px]
+    bg-[#FAFAFA]
+    flex items-center justify-center
+    text-center
+    text-black
+    font-light
+    leading-[100%]
+  "
+          style={{
+            fontFamily: "Lexend",
+            fontSize: "16px",
+            fontStyle: "normal",
+            letterSpacing: "0%",
+            verticalAlign: "middle",
+          }}
+        >
           Frequently Ordered
         </div>
-        <div>
-          <p className="text-xl sm:text-2xl font-semibold text-gray-900">
-            <span className="inline-block border-b-2 border-primary pb-0.5">
+
+        {/* Price */}
+        <div className="mt-5 flex items-end gap-2">
+          <h2
+            className="text-black font-normal leading-[100%]"
+            style={{
+              fontFamily: "Lexend",
+              fontSize: "27px",
+              fontStyle: "normal",
+              letterSpacing: "0%",
+              verticalAlign: "middle",
+            }}
+          >
+            <span className="border-b-2 border-[#E65C4F] pb-[2px]">
               {price}
             </span>
-            <span className="ml-2 text-sm   font-medium font-bold ">
-              per unit
-            </span>
-          </p>
+          </h2>
+
+          <span
+            className="mb-[2px] text-black font-normal leading-[100%]"
+            style={{
+              fontFamily: "Lexend",
+              fontSize: "20px",
+              fontStyle: "normal",
+              letterSpacing: "0%",
+              verticalAlign: "middle",
+            }}
+          >
+            per unit
+          </span>
         </div>
 
-        <div className="mt-3 border border-gray-300 rounded-xl overflow-hidden bg-white">
-          <div className="grid grid-cols-2 divide-x divide-gray-300">
-            <div className="px-4 pt-3 pb-2.5">
-              <p className="text-[10px] font-bold tracking-wide  uppercase">
+        {/* Date Section */}
+        <div className="mt-5 border-t border-[#D9D9D9] border-b border-[#D9D9D9]">
+          <div className="grid grid-cols-2">
+            {/* Check In */}
+            <div className="relative px-4 py-4 border-r border-[#D9D9D9]">
+              <p
+                className="uppercase text-black font-normal leading-[100%]"
+                style={{
+                  fontFamily: "Lexend",
+                  fontSize: "12px",
+                  fontStyle: "normal",
+                  letterSpacing: "0%",
+                  verticalAlign: "middle",
+                }}
+              >
                 Check-in
               </p>
+
               <input
                 type="date"
                 value={checkIn}
                 onChange={(e) => setCheckIn(e.target.value)}
-                placeholder="Add date"
-                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none accent-[#389131] [&::-webkit-calendar-picker-indicator]:scale-150 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                className="
+              mt-1 w-full
+              bg-transparent
+              text-[14px]
+              text-[#8C8C8C]
+              focus:outline-none
+              appearance-none
+              [&::-webkit-calendar-picker-indicator]:opacity-100
+              [&::-webkit-calendar-picker-indicator]:cursor-pointer
+            "
               />
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="absolute right-4 top-[34px] w-5 h-5 text-black pointer-events-none"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
             </div>
-            <div className="px-4 pt-3 pb-2.5">
-              <p className="text-[10px] font-bold tracking-wide  uppercase">
-                Checkout
+
+            {/* Check Out */}
+            <div className="relative px-4 py-4">
+              <p
+                className="uppercase text-black font-normal leading-[100%]"
+                style={{
+                  fontFamily: "Lexend",
+                  fontSize: "12px",
+                  fontStyle: "normal",
+                  letterSpacing: "0%",
+                  verticalAlign: "middle",
+                }}
+              >
+                Check-Out
               </p>
+
               <input
                 type="date"
                 value={checkOut}
                 onChange={(e) => setCheckOut(e.target.value)}
-                placeholder="Add date"
-                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none accent-[#389131] [&::-webkit-calendar-picker-indicator]:scale-150 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                className="
+              mt-1 w-full
+              bg-transparent
+              text-[14px]
+              text-[#8C8C8C]
+              focus:outline-none
+              appearance-none
+              [&::-webkit-calendar-picker-indicator]:opacity-100
+              [&::-webkit-calendar-picker-indicator]:cursor-pointer
+            "
               />
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="absolute right-4 top-[34px] w-5 h-5 text-black pointer-events-none"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
             </div>
           </div>
-          <div className="border-t border-gray-300 px-4 py-3 flex items-center justify-between gap-3">
-            <div className="flex-1">
-              <p className="text-[10px] font-bold tracking-wide  uppercase">
-                Estimated dispatch:
-              </p>
-              <input
-                type="time"
-                value={dispatcher}
-                onChange={(e) => setDispatcher(e.target.value)}
-                placeholder="Add Time"
-                className="mt-1 w-full bg-transparent text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none accent-[#389131] [&::-webkit-calendar-picker-indicator]:scale-150 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+
+          {/* Dispatch */}
+          <div className="relative px-4 py-4 border-t border-[#D9D9D9]">
+            <p
+              className="uppercase text-black font-normal leading-[100%]"
+              style={{
+                fontFamily: "Lexend",
+                fontSize: "12px",
+                fontStyle: "normal",
+                letterSpacing: "0%",
+                verticalAlign: "middle",
+              }}
+            >
+              Estimated Dispatch:
+            </p>
+
+            <input
+              type="time"
+              value={dispatcher}
+              onChange={(e) => setDispatcher(e.target.value)}
+              className="
+            mt-1 w-full
+            bg-transparent
+            text-[14px]
+            text-[#8C8C8C]
+            focus:outline-none
+            appearance-none
+            [&::-webkit-calendar-picker-indicator]:opacity-100
+            [&::-webkit-calendar-picker-indicator]:cursor-pointer
+          "
+            />
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute right-4 top-[36px] w-5 h-5 text-black pointer-events-none"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
-            </div>
+            </svg>
           </div>
         </div>
 
+        {/* Button */}
         <button
           type="button"
           onClick={handleReserve}
-          className="mt-4 w-full bg-[#389131] text-white py-3 text-sm font-semibold tracking-wide shadow-soft-lg hover:opacity-90 transition-colors "
+          className="w-full h-[53px] flex items-center justify-center text-white hover:opacity-90 transition"
+          style={{
+            background: "#389131",
+            paddingTop: "12px",
+            paddingRight: "98px",
+            paddingBottom: "12px",
+            paddingLeft: "98px",
+            gap: "10px",
+            fontFamily: "Lexend",
+            fontWeight: 500,
+            fontSize: "22px",
+            fontStyle: "normal",
+            lineHeight: "100%",
+            letterSpacing: "0%",
+            verticalAlign: "middle",
+          }}
         >
-          Reserve
+          <span>Reserve</span>
         </button>
       </div>
-
-      <SelectRentalDatesModal
-        isOpen={showRentalDatesModal}
-        onClose={() => setShowRentalDatesModal(false)}
-        onNext={handleRentalDatesNext}
-      />
-
-      <IdentityVerificationModal
-        isOpen={showIdentityModal}
-        onClose={() => setShowIdentityModal(false)}
-        onContinue={handleIdentityContinue}
-      />
-
-      {isLoginOpen && !isSignUpOpen && (
-        <LoginModal
-          isOpen={isLoginOpen}
-          onClose={() => setIsLoginOpen(false)}
-          onSuccess={() => {
-            setIsLoginOpen(false);
-            setShowRentalDatesModal(true);
-          }}
-          onOpenSignUp={() => {
-            setIsLoginOpen(false);
-            setIsSignUpOpen(true);
-          }}
-        />
-      )}
-
-      {isSignUpOpen && (
-        <SignUpModal
-          isOpen={isSignUpOpen}
-          onClose={() => setIsSignUpOpen(false)}
-          onSubmit={handleSignUpSubmit}
-        />
-      )}
     </div>
   );
 };
 
 export default StickyPricingCard;
-

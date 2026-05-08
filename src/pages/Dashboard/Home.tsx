@@ -3,7 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Container from "./Container.tsx";
 import { CategorySection } from "../../components/CategorySection.tsx";
-import { getGooseneckListItems, getBumperPullListItems, getFlatbedListItems, getCarHaulersListItems } from "../../assets/data/trailers.ts";
+import {
+  getGooseneckListItems,
+  getBumperPullListItems,
+  getFlatbedListItems,
+  getCarHaulersListItems,
+} from "../../assets/data/trailers.ts";
 import { RootState } from "../../store";
 import { AddTrailerModal } from "../../components/TrailerDetails/AddTrailerModal.tsx";
 
@@ -30,7 +35,7 @@ const RevealBlock: React.FC<RevealBlockProps> = ({ children, delayMs = 0 }) => {
           observer.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
     );
 
     observer.observe(target);
@@ -41,7 +46,9 @@ const RevealBlock: React.FC<RevealBlockProps> = ({ children, delayMs = 0 }) => {
     <div
       ref={blockRef}
       className={`will-change-transform transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
-        visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-5 scale-[0.99]"
+        visible
+          ? "opacity-100 translate-y-0 scale-100"
+          : "opacity-0 translate-y-5 scale-[0.99]"
       }`}
       style={{ transitionDelay: `${delayMs}ms` }}
     >
@@ -56,7 +63,7 @@ const Home: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const userType = useSelector((state: RootState) => state.auth.userType);
   const ownerTrailersCount = useSelector(
-    (state: RootState) => state.auth.ownerTrailersCount
+    (state: RootState) => state.auth.ownerTrailersCount,
   );
 
   const isOwnerWithNoTrailers =
@@ -90,7 +97,8 @@ const Home: React.FC = () => {
                   You haven&apos;t added any trailers yet.
                 </p>
                 <p className="text-base text-gray-700 mb-6 max-w-sm leading-relaxed">
-                  Start by adding your first trailer so renters can view and book it.
+                  Start by adding your first trailer so renters can view and
+                  book it.
                 </p>
                 <button
                   type="button"
@@ -152,7 +160,8 @@ const Home: React.FC = () => {
                       Gooseneck Trailor
                     </p>
                     <p className="mt-0.5 text-[11px] text-gray-700 leading-tight">
-                      <span className="text-[#F59E0B]">★</span> 4.9 Model : FMAX208
+                      <span className="text-[#F59E0B]">★</span> 4.9 Model :
+                      FMAX208
                     </p>
                     <p className="mt-0.5 text-[12px] font-semibold leading-tight text-black">
                       {item.priceLabel}
@@ -165,7 +174,9 @@ const Home: React.FC = () => {
                             : "bg-[#E7F6E6] text-[#2F7A29]"
                         }`}
                       >
-                        {isBookedTrailer(Number(item.id)) ? "Booked" : "Available"}
+                        {isBookedTrailer(Number(item.id))
+                          ? "Booked"
+                          : "Available"}
                       </span>
                     </div>
                   </div>
@@ -177,11 +188,17 @@ const Home: React.FC = () => {
       ) : (
         <>
           <RevealBlock delayMs={80}>
-            <CategorySection title="Gooseneck Trailers" items={gooseneckItems} />
+            <CategorySection
+              title="Gooseneck Trailers"
+              items={gooseneckItems}
+            />
           </RevealBlock>
 
           <RevealBlock delayMs={120}>
-            <CategorySection title="Bumper Pull Trailers" items={bumperPullItems} />
+            <CategorySection
+              title="Bumper Pull Trailers"
+              items={bumperPullItems}
+            />
           </RevealBlock>
 
           <RevealBlock delayMs={160}>

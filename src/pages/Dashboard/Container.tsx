@@ -35,8 +35,10 @@ const Container: React.FC = () => {
   }, []);
 
   const minSwipeDistance = 50;
-  const onTouchStart = (e: React.TouchEvent) => setTouchStart(e.targetTouches[0].clientX);
-  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchStart = (e: React.TouchEvent) =>
+    setTouchStart(e.targetTouches[0].clientX);
+  const onTouchMove = (e: React.TouchEvent) =>
+    setTouchEnd(e.targetTouches[0].clientX);
   const onTouchEnd = () => {
     if (touchStart == null || touchEnd == null) return;
     const diff = touchStart - touchEnd;
@@ -51,7 +53,7 @@ const Container: React.FC = () => {
   return (
     <main className="w-full min-w-0 m-0 p-0 font-sans overflow-x-hidden">
       <section
-        className="relative w-full min-w-0 overflow-hidden rounded-none shadow-none mb-0 flex items-center justify-center bg-white sm:bg-black h-[220px] sm:h-[380px] lg:h-[560px]"
+        className="relative w-full min-w-0 overflow-hidden rounded-none shadow-none mb-0 flex items-center justify-center bg-white h-[592px]"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -70,7 +72,7 @@ const Container: React.FC = () => {
               <img
                 src={slide.src}
                 alt={slide.alt}
-                className="w-full h-full object-cover sm:object-contain block"
+                className="w-full h-full object-cover block"
               />
             </div>
           ))}
@@ -80,7 +82,7 @@ const Container: React.FC = () => {
           type="button"
           onClick={goPrev}
           aria-label="Previous slide"
-          className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-all duration-300 hover:bg-black/70 sm:h-10 sm:w-10 ${
+          className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center text-[#9B989E] transition-all duration-300 ${
             isPaused ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
@@ -90,7 +92,7 @@ const Container: React.FC = () => {
           type="button"
           onClick={goNext}
           aria-label="Next slide"
-          className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-all duration-300 hover:bg-black/70 sm:h-10 sm:w-10 ${
+          className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center text-[#9B989E] transition-all duration-300 ${
             isPaused ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
@@ -105,7 +107,9 @@ const Container: React.FC = () => {
               onClick={() => setIndex(i)}
               aria-label={`Go to slide ${i + 1}`}
               className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                i === index ? "bg-[#389131] scale-125" : "bg-white/50 hover:bg-white/70"
+                i === index
+                  ? "bg-[#389131] scale-125"
+                  : "bg-white/50 hover:bg-white/70"
               }`}
             />
           ))}

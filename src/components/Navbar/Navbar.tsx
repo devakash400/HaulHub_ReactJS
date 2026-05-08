@@ -142,7 +142,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F9F8F3] border-b border-gray-200 font-sans min-w-0 w-full">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F6F3E9] border-b border-gray-200 font-sans min-w-0 w-full">
       <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 min-w-0 w-full">
         {/* Left: Logo */}
         <Link
@@ -153,7 +153,7 @@ const Navbar: React.FC = () => {
           <img
             src={images.logo}
             alt="HaulHub logo"
-            className="h-10 sm:h-[50px] object-contain"
+            className="h-10 sm:h-[57px] object-contain"
           />
         </Link>
 
@@ -161,28 +161,38 @@ const Navbar: React.FC = () => {
         {location.pathname === "/" && (
           <div className="hidden min-w-0 flex-1 items-center justify-center px-4 sm:flex">
             <div
-              className={`flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_26px_rgba(56,145,49,0.22)] motion-reduce:transition-none ${
-                isSearchCompact
-                  ? "h-[38px] w-[min(100%,460px)] px-4"
-                  : "h-[48px] w-[min(100%,640px)] px-5"
-              }`}
+              className={`flex items-center 
+    border border-gray-200 
+    bg-[#FEFEFE] 
+    shadow-sm 
+    transition-all duration-300 
+    ease-[cubic-bezier(0.22,1,0.36,1)] 
+    hover:border-[#389131]/40 
+    hover:shadow-[0_10px_26px_rgba(56,145,49,0.22)]
+    motion-reduce:transition-none
+    w-[549px] h-[73px] rounded-[21px] px-5`}
             >
               <input
                 type="text"
                 placeholder="Search here..."
-                className={`min-w-0 flex-1 border-none bg-transparent text-gray-700 placeholder:text-gray-400 outline-none transition-[font-size] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-                  isSearchCompact ? "text-[0.875rem]" : "text-[0.95rem]"
-                }`}
+                className={`min-w-0 flex-1 border-none bg-transparent 
+    font-[Lexend] font-normal
+    text-[23px] leading-[100%] tracking-normal
+    text-[#929191] placeholder:text-[#929191]
+    outline-none
+    transition-[font-size] duration-300 
+    ease-[cubic-bezier(0.22,1,0.36,1)] 
+    motion-reduce:transition-none
+    ${isSearchCompact ? "text-[18px]" : "text-[23px]"}
+  `}
               />
               <div
-                className={`flex shrink-0 items-center justify-center rounded-full bg-[#389131] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-                  isSearchCompact ? "ml-2.5 h-8 w-8" : "ml-3 h-9 w-9"
-                }`}
+                className="flex shrink-0 items-center justify-center 
+  rounded-full bg-[#389131]
+  h-[51px] w-[51px]"
               >
                 <Search
-                  className={`text-white transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-                    isSearchCompact ? "h-4 w-4" : "h-5 w-5"
-                  }`}
+                  className="text-white h-[23.3px] w-[23.3px]"
                   aria-hidden
                 />
               </div>
@@ -193,7 +203,8 @@ const Navbar: React.FC = () => {
         {/* Right: dropdown toggle */}
         <div
           ref={dropdownRef}
-          className="relative flex items-center gap-3 sm:gap-5 text-[0.95rem] text-black shrink-0 min-w-0"
+          className="relative flex items-center gap-3 sm:gap-5 
+          text-[0.95rem] text-black shrink-0 min-w-0"
         >
           {isAuthenticated ? (
             <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
@@ -235,9 +246,9 @@ const Navbar: React.FC = () => {
 
           {/* Dropdown menu */}
           {isDrawerOpen && (
-            <div className="absolute right-0 top-full z-[60] mt-2 min-w-[180px] rounded-lg bg-white py-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
+            <div className="absolute right-0 top-full z-[60] mt-2 w-[161px] rounded-lg bg-white py-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
               <div className="p-0">
-                <ul className="m-0 list-none p-0 text-[0.9rem] text-black font-normal">
+                <ul className="m-0 list-none p-0 text-[14px] text-black font-medium leading-none font-[Inter]">
                   {/* Trailer page menu override */}
                   {isTrailerScreen ? (
                     <>
@@ -307,7 +318,7 @@ const Navbar: React.FC = () => {
                         }}
                       >
                         <span className="text-inherit no-underline cursor-pointer">
-                          Logout
+                          Login / Sign Up
                         </span>
                       </li>
                     </>
@@ -365,6 +376,63 @@ const Navbar: React.FC = () => {
                         </span>
                       </li>
                     </>
+                  ) : !isAuthenticated ? (
+                    <>
+                      <li
+                        className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
+                        onClick={handleDrawerLinkRowClick}
+                      >
+                        <Link
+                          to="/"
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                        >
+                          Home
+                        </Link>
+                      </li>
+                      <li
+                        className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
+                        onClick={() =>
+                          handleProtectedDrawerNavigate("/booking")
+                        }
+                      >
+                        <span className="text-inherit no-underline cursor-pointer block w-full">
+                          Booked Trailor
+                        </span>
+                      </li>
+                      <li
+                        className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
+                        onClick={handleDrawerLinkRowClick}
+                      >
+                        <Link
+                          to="/contact"
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                        >
+                          Contact
+                        </Link>
+                      </li>
+                      <li
+                        className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
+                        onClick={() =>
+                          handleProtectedDrawerNavigate("/profile")
+                        }
+                      >
+                        <span className="text-inherit no-underline cursor-pointer block w-full">
+                          Profile
+                        </span>
+                      </li>
+                      <li
+                        className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
+                        onClick={() => {
+                          closeDrawer();
+                          setIsSignUpOpen(false);
+                          setIsLoginOpen(true);
+                        }}
+                      >
+                        <span className="text-inherit no-underline cursor-pointer block w-full">
+                          Login / Sign Up
+                        </span>
+                      </li>
+                    </>
                   ) : (
                     <>
                       <li
@@ -373,7 +441,7 @@ const Navbar: React.FC = () => {
                       >
                         <Link
                           to="/"
-                          className="text-inherit no-underline cursor-pointer"
+                          className="text-inherit no-underline cursor-pointer block w-full"
                         >
                           Home
                         </Link>
@@ -384,80 +452,63 @@ const Navbar: React.FC = () => {
                       >
                         <Link
                           to="/contact"
-                          className="text-inherit no-underline cursor-pointer"
+                          className="text-inherit no-underline cursor-pointer block w-full"
                         >
                           Contact
                         </Link>
                       </li>
-                      {!isAuthenticated ? (
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={() => {
-                            closeDrawer();
-                            setIsSignUpOpen(false);
-                            setIsLoginOpen(true);
-                          }}
+                      <li
+                        className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                        onClick={handleDrawerLinkRowClick}
+                      >
+                        <Link
+                          to="/notifications"
+                          className="text-inherit no-underline cursor-pointer block w-full"
                         >
-                          <span className="text-inherit no-underline cursor-pointer">
-                            Login / Signup
-                          </span>
-                        </li>
-                      ) : (
-                        <>
-                          <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                            onClick={handleDrawerLinkRowClick}
-                          >
-                            <Link
-                              to="/notifications"
-                              className="text-inherit no-underline cursor-pointer"
-                            >
-                              Notification
-                            </Link>
-                          </li>
-                          <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                            onClick={handleDrawerLinkRowClick}
-                          >
-                            <Link
-                              to="/about"
-                              className="text-inherit no-underline cursor-pointer"
-                            >
-                              About
-                            </Link>
-                          </li>
-                          <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                            onClick={handleDrawerLinkRowClick}
-                          >
-                            <Link
-                              to="/booking"
-                              className="text-inherit no-underline cursor-pointer"
-                            >
-                              Your Booked Trailers
-                            </Link>
-                          </li>
-                          <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                            onClick={handleDrawerLinkRowClick}
-                          >
-                            <Link
-                              to="/profile"
-                              className="text-inherit no-underline cursor-pointer"
-                            >
-                              Profile
-                            </Link>
-                          </li>
-                          <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                            onClick={() => setIsLogoutConfirmOpen(true)}
-                          >
-                            <span className="text-inherit no-underline cursor-pointer">
-                              Logout
-                            </span>
-                          </li>
-                        </>
-                      )}
+                          Notification
+                        </Link>
+                      </li>
+                      <li
+                        className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                        onClick={handleDrawerLinkRowClick}
+                      >
+                        <Link
+                          to="/about"
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                        >
+                          About
+                        </Link>
+                      </li>
+                      <li
+                        className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                        onClick={handleDrawerLinkRowClick}
+                      >
+                        <Link
+                          to="/booking"
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                        >
+                          Your Booked Trailers
+                        </Link>
+                      </li>
+                      <li
+                        className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                        onClick={handleDrawerLinkRowClick}
+                      >
+                        <Link
+                          to="/profile"
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                        >
+                          Profile
+                        </Link>
+                      </li>
+                      <li
+                        className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                        onClick={() => setIsLogoutConfirmOpen(true)}
+                      >
+                        <span className="text-inherit no-underline cursor-pointer block w-full">
+                          Logout
+                        </span>
+                      </li>
                     </>
                   )}
                 </ul>

@@ -4,7 +4,7 @@ import overallRatingIcon from "../../assets/icons/Overall rating.png";
 import clientCoordinationIcon from "../../assets/icons/Client Coordination.png";
 import structuralIntegrityIcon from "../../assets/icons/Structural Integrity.png";
 import accessibilityIcon from "../../assets/icons/Accessibility.png";
-import CostefficiencyIcon  from "../../assets/icons/Cost Efficiency .png";
+import CostefficiencyIcon from "../../assets/icons/Cost Efficiency .png";
 
 import {
   BarChart3,
@@ -68,7 +68,7 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
           observer.disconnect();
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     observer.observe(target);
@@ -106,55 +106,90 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
     { label: "Overall rating", score: rating, icon: "communication" as const },
     ...metrics,
   ];
-  const iconByLabel: Record<string, React.ComponentType<{ className?: string }>> =
-    {
-      "Overall rating": BarChart3,
-      "Client Coordination": Users,
-      "Structural Integrity": Building2,
-      "Cost Efficiency": DollarSign,
-      Accessibility: Accessibility,
-    };
+  const iconByLabel: Record<
+    string,
+    React.ComponentType<{ className?: string }>
+  > = {
+    "Overall rating": BarChart3,
+    "Client Coordination": Users,
+    "Structural Integrity": Building2,
+    "Cost Efficiency": DollarSign,
+    Accessibility: Accessibility,
+  };
 
   return (
     <section ref={sectionRef} className="text-center space-y-3">
-      <div className="w-40 h-40 mx-auto relative flex items-center justify-center">
+      <div className="mx-auto relative flex items-center justify-center w-[242px] h-[242px]">
         <img
           src={guestFavouriteIcon}
           alt="Guest favourite rating wreath"
-          className={`w-full h-full object-contain transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
-            isInView ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-75 -rotate-6"
-          }`}
+          className={`w-full h-full object-contain transition-all 
+      duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
+        isInView
+          ? "opacity-100 scale-100 rotate-0"
+          : "opacity-0 scale-75 -rotate-6"
+      }`}
         />
+
         <span
-          className={`absolute text-4xl font-bold text-gray-900 transition-all duration-700 delay-150 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
+          className={`absolute text-black transition-all duration-700 delay-150 ${
             isInView ? "opacity-100 scale-100" : "opacity-0 scale-75"
           }`}
+          style={{
+            fontFamily: "Lexend",
+            fontWeight: 400,
+            fontSize: "74px",
+            fontStyle: "normal",
+            lineHeight: "100%",
+            letterSpacing: "0%",
+            verticalAlign: "middle",
+          }}
         >
           {animatedScore(rating)}
         </span>
       </div>
       <h2
-        className={`text-xl sm:text-2xl font-semibold text-gray-900 transition-all duration-700 delay-200 ${
+        className={`text-center text-black transition-all duration-700 delay-200 ${
           isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         }`}
+        style={{
+          fontFamily: "Lexend",
+          fontWeight: 500,
+          fontSize: "32px",
+          fontStyle: "normal",
+          lineHeight: "100%",
+          letterSpacing: "0%",
+          verticalAlign: "middle",
+        }}
       >
         {title}
       </h2>
       <p
-        className={`max-w-2xl mx-auto text-sm text-gray-600 leading-relaxed transition-all duration-700 delay-300 ${
+        className={`max-w-2xl mx-auto text-center text-black transition-all duration-700 delay-300 ${
           isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         }`}
+        style={{
+          fontFamily: "Lexend",
+          fontWeight: 400,
+          fontSize: "19px",
+          fontStyle: "normal",
+          lineHeight: "100%",
+          letterSpacing: "0%",
+          verticalAlign: "middle",
+        }}
       >
         {description}
       </p>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-5">
+      {/* <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-5">
         {allMetrics.slice(0, 5).map((m) => {
           const isOverallRating = m.label === "Overall rating";
           const showRatingBars =
             isOverallRating &&
             ratingBreakdown &&
             Object.keys(ratingBreakdown).length > 0;
-          const pngIcon = showRatingBars ? undefined : metricPngIconByLabel[m.label];
+          const pngIcon = showRatingBars
+            ? undefined
+            : metricPngIconByLabel[m.label];
           const Icon =
             iconByLabel[m.label] || iconMap[m.icon as keyof typeof iconMap];
           const maxCount = showRatingBars
@@ -164,9 +199,13 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
             <div
               key={m.label}
               className={`bg-background rounded-xl border border-gray-200 p-4 shadow-sm text-center transition-all duration-700 ${
-                isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+                isInView
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-3"
               }`}
-              style={{ transitionDelay: `${60 * (allMetrics.indexOf(m) + 1)}ms` }}
+              style={{
+                transitionDelay: `${60 * (allMetrics.indexOf(m) + 1)}ms`,
+              }}
             >
               <p className="text-xs font-bold text-gray-700 mb-1 capitalize">
                 {m.label}
@@ -211,8 +250,7 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
             </div>
           );
         })}
-      </div>
+      </div> */}
     </section>
   );
 };
-

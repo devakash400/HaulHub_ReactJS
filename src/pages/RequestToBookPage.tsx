@@ -12,7 +12,8 @@ const defaultBookingSummary: BookingSummary = {
   image: images.Catimg,
   dates: "17-15 March 2026",
   totalPrice: "$21,993.50",
-  cancellationPreview: "Cancel before check-in on 2 March for a partial refund.",
+  cancellationPreview:
+    "Cancel before check-in on 2 March for a partial refund.",
   policyLinkText: "Fully Policy",
 };
 

@@ -70,7 +70,6 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
-
     setFirstName("");
     setLastName("");
     setDateOfBirth("");
@@ -371,7 +370,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Choose Your Category
+                  Choose Your Categoryss
                 </label>
                 <div className="relative">
                   <select

@@ -13,25 +13,75 @@ export const RatingSummaryCard: React.FC<RatingSummaryCardProps> = ({
   reviewCount,
 }) => {
   return (
-    <article className="bg-[#F6F1E8] rounded-2xl border border-black px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-      <div className="flex flex-col items-center gap-1 shrink-0">
-        <p className="text-base sm:text-lg font-bold text-gray-900 leading-none">{rating}</p>
-        <div className="flex text-yellow-400">
+    <article
+      className="
+        w-full max-w-[682px] min-h-[82px]
+        bg-white border border-[#8D8D8D] rounded-[10px]
+        flex items-center justify-between
+        px-[22px] py-[14px] gap-7
+        box-border
+      "
+    >
+      {/* Left */}
+      <div className="flex flex-col items-center shrink-0">
+        <p
+          className="m-0 text-center font-normal leading-[100%] text-black"
+          style={{
+            fontFamily: "Lexend",
+            fontSize: "24px",
+            fontStyle: "normal",
+            letterSpacing: "0%",
+            verticalAlign: "middle",
+          }}
+        >
+          {rating}
+        </p>
+        <div className="flex items-center gap-[2px] mt-[6px]">
           {[1, 2, 3, 4, 5].map((i) => (
-            <Star key={i} className="w-4 h-4 fill-current" aria-hidden />
+            <Star
+              key={i}
+              className="w-[15px] h-[15px] text-[#FFC107] fill-[#FFC107]"
+            />
           ))}
         </div>
       </div>
 
-      <p className="flex-1 text-xs sm:text-sm text-center sm:text-left min-w-0 w-full sm:w-auto">
+      {/* Center */}
+      <p
+        className="
+    flex-1 max-w-[360px]
+    m-0
+    text-center
+    text-[14px] font-normal leading-[100%]
+    text-[#1D1D1D]
+  "
+        style={{
+          fontFamily: "Lexend",
+          fontStyle: "normal",
+          letterSpacing: "0%",
+          verticalAlign: "middle",
+        }}
+      >
         {description}
       </p>
 
-      <div className="flex flex-col items-center gap-1 shrink-0">
-        <p className="text-base sm:text-lg font-semibold text-gray-900 leading-none">{reviewCount}</p>
-        <p className="text-xs font-bold leading-none">Reviews</p>
+      {/* Right */}
+      <div className="flex flex-col items-center shrink-0">
+        <p
+          className="m-0 text-center align-middle font-normal leading-[100%] tracking-[0%] text-[#111111]"
+          style={{
+            fontFamily: "Lexend",
+            fontSize: "24px",
+            fontStyle: "normal",
+          }}
+        >
+          {reviewCount}
+        </p>
+
+        <p className="mt-1 text-[16px] font-semibold leading-none text-[#444444]">
+          Reviews
+        </p>
       </div>
     </article>
   );
 };
-

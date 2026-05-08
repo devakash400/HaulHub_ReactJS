@@ -28,11 +28,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [cardsPerRow, setCardsPerRow] = useState(1);
-  const wishlistItems = useSelector(
-    (state: RootState) => state.wishlist.items
-  );
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.items);
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+    (state: RootState) => state.auth.isAuthenticated,
   );
   const [wishlistIds, setWishlistIds] = useState<Set<string | number>>(() => {
     const ids = wishlistItems.map((w) => {
@@ -89,7 +87,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
           observer.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
     );
 
     observer.observe(target);
@@ -108,7 +106,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     };
 
     updateScrollButtons();
-    container.addEventListener("scroll", updateScrollButtons, { passive: true });
+    container.addEventListener("scroll", updateScrollButtons, {
+      passive: true,
+    });
     window.addEventListener("resize", updateScrollButtons);
 
     return () => {
@@ -117,10 +117,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     };
   }, [items.length, cardsPerRow]);
 
-  const cardWidth = 255;
+  const cardWidth = 288;
   const gap = 32; // 2rem
-  const sectionContentWidth =
-    cardsPerRow * cardWidth + (cardsPerRow - 1) * gap;
+  const sectionContentWidth = cardsPerRow * cardWidth + (cardsPerRow - 1) * gap;
   const isMobileCompact = cardsPerRow === 2;
 
   const toggleWishlist = (item: CategoryItem) => {
@@ -147,21 +146,23 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         title: item.modelLabel,
         subtitle: item.priceLabel,
         imageUrl: item.image,
-      })
+      }),
     );
   };
 
   const handleScroll = (direction: "left" | "right") => {
-    if ((direction === "left" && !canScrollLeft) || (direction === "right" && !canScrollRight)) {
+    if (
+      (direction === "left" && !canScrollLeft) ||
+      (direction === "right" && !canScrollRight)
+    ) {
       return;
     }
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const cardWidth = container.firstElementChild
-      ? (container.firstElementChild as HTMLElement).offsetWidth + 32
-      : 282; // 250 card + ~32 gap (2rem)
-    const scrollAmount = cardWidth; // slide by exactly one card
+    const scrollAmount = container.firstElementChild
+      ? (container.firstElementChild as HTMLElement).offsetWidth + gap
+      : cardWidth + gap; // slide by exactly one card
 
     container.scrollTo({
       left:
@@ -176,20 +177,26 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     <section
       ref={sectionRef}
       className={`w-full min-w-0 pt-6 bg-white self-center overflow-x-hidden transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
-        isSectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+        isSectionVisible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-3"
       }`}
     >
-      <div className="max-w-full mx-auto px-4 box-border w-full min-w-0">
+      <div className="max-w-full box-border w-full min-w-0">
         <div
           className="mx-auto"
-          style={{ maxWidth: isMobileCompact ? "100%" : `${sectionContentWidth}px` }}
+          style={{
+            maxWidth: isMobileCompact ? "100%" : `${sectionContentWidth}px`,
+          }}
         >
           <header className="flex items-center justify-between mb-4">
-            <h2 className="m-0 text-[1.15rem] font-semibold text-[#389131]">
+            <h2 className="m-0 font-['Lexend'] font-semibold text-[30px] leading-[100%] text-[#389131]">
               {title}
             </h2>
 
-            <div className={`items-center gap-[2px] ${isMobileCompact ? "hidden" : "flex"}`}>
+            <div
+              className={`items-center gap-[2px] ${isMobileCompact ? "hidden" : "flex"}`}
+            >
               <button
                 type="button"
                 onClick={() => handleScroll("left")}
@@ -246,56 +253,47 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 <article
                   key={item.id}
                   onClick={() => navigate(`/trailer/${item.id}`)}
-                  className={`group ${
-                    isMobileCompact
-                      ? "w-[45vw] min-w-[45vw] max-w-[45vw] shrink-0"
-                      : "w-[250px] min-w-[250px] max-w-[250px] shrink-0"
-                  } bg-white rounded-[16px] shadow-[0_10px_25px_rgba(15,23,42,0.1)] overflow-hidden cursor-pointer transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_16px_34px_rgba(15,23,42,0.16)] ${
-                    isSectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                  }`}
-                  style={{ transitionDelay: `${Math.min(index * 70, 360)}ms` }}
+                  className="group w-[288px] shrink-0 cursor-pointer"
                 >
-                  <div className={`relative w-full overflow-hidden ${isMobileCompact ? "h-[120px]" : "h-[250px]"}`}>
+                  {/* IMAGE BOX */}
+                  <div className="relative w-full h-[283px] rounded-[18px] overflow-hidden">
                     <img
                       src={item.image}
                       alt={item.modelLabel}
-                      className="w-full h-full object-cover block transition-transform duration-700 group-hover:scale-[1.04]"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                     />
 
+                    {/* BADGE */}
                     {item.badgeLabel && (
-                      <span className="absolute top-3 left-3 px-2 py-1 rounded-full bg-white text-[0.7rem] text-gray-900 shadow-[0_6px_12px_rgba(15,23,42,0.22)]">
+                      <span className="absolute top-3 left-3 px-3 py-1 rounded-[9px] bg-white text-[11px] font-medium text-black shadow">
                         {item.badgeLabel}
                       </span>
                     )}
 
+                    {/* WISHLIST */}
                     <button
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
                         toggleWishlist(item);
                       }}
-                      aria-label="Save to favourites"
-                      className="absolute top-3 right-3 w-7 h-7 rounded-full border-0 bg-white/90 flex items-center justify-center cursor-pointer p-0"
+                      className="absolute top-3 right-3 w-8 h-8 rounded-full  flex items-center justify-center"
                     >
                       <img
                         src={images.Wishlist}
                         alt="Wishlist"
-                        className="w-[18px] h-[18px] object-contain"
-                        style={{
-                          // keep the red tint when wishlisted
-                          filter: isWishlisted
-                            ? "invert(25%) sepia(93%) saturate(7480%) hue-rotate(357deg) brightness(99%) contrast(115%)"
-                            : "none",
-                        }}
+                        className="w-[18px] h-[18px]"
                       />
                     </button>
                   </div>
 
-                  <div className={`px-[0.6rem] pt-[0.55rem] pb-2.5 flex flex-col gap-0.5 ${isMobileCompact ? "min-h-[56px]" : ""}`}>
-                    <p className={`m-0 font-bold text-black ${isMobileCompact ? "text-[0.66rem]" : "text-[0.85rem]"}`}>
+                  {/* TEXT BELOW IMAGE */}
+                  <div className="pt-2 px-1">
+                    <p className="text-black font-bold text-[16px] leading-tight">
                       {item.modelLabel}
                     </p>
-                    <p className={`m-0 text-gray-500 ${isMobileCompact ? "text-[0.64rem]" : "text-[0.9rem]"}`}>
+
+                    <p className="text-[#9CA3AF] font-semibold text-[15px] mt-1">
                       {item.priceLabel}
                     </p>
                   </div>
@@ -314,4 +312,3 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     </section>
   );
 };
-
