@@ -6,7 +6,9 @@ import { getTrailerById } from "../../../assets/data/trailers.ts";
 const TrailerReviews: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const trailerId = id ? Number(id) : NaN;
-  const trailer = Number.isNaN(trailerId) ? undefined : getTrailerById(trailerId);
+  const trailer = Number.isNaN(trailerId)
+    ? undefined
+    : getTrailerById(trailerId);
 
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,7 +41,10 @@ const TrailerReviews: React.FC = () => {
         {/* Reviews list */}
         <section className="space-y-6 pb-6">
           {paginatedReviews.map((review, index) => (
-            <article key={`${review.name}-${index + (currentPage - 1) * pageSize}`} className="border-b border-gray-200 pb-6 last:border-b-0">
+            <article
+              key={`${review.name}-${index + (currentPage - 1) * pageSize}`}
+              className="border-b border-gray-200 pb-6 last:border-b-0"
+            >
               <div className="flex items-center gap-3 mb-1">
                 <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700 overflow-hidden">
                   {review.avatar ? (
@@ -85,11 +90,16 @@ const TrailerReviews: React.FC = () => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-full text-sm font-medium border ${
+              className={`px-3 py-1 rounded-full text-sm font-medium border text-gray-700 ${
                 currentPage === 1
-                  ? "border-gray-200 text-gray-400 bg-gray-100 cursor-not-allowed"
-                  : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                  ? "cursor-not-allowed"
+                  : "bg-white hover:bg-gray-50"
               }`}
+              style={{
+                borderColor: currentPage === 1 ? "#929191" : "#d1d5db",
+                color: currentPage === 1 ? "#929191" : undefined,
+                backgroundColor: currentPage === 1 ? "#f5f5f5" : undefined,
+              }}
             >
               Previous
             </button>
@@ -119,11 +129,17 @@ const TrailerReviews: React.FC = () => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded-full text-sm font-medium border ${
+              className={`px-3 py-1 rounded-full text-sm font-medium border text-gray-700 ${
                 currentPage === totalPages
-                  ? "border-gray-200 text-gray-400 bg-gray-100 cursor-not-allowed"
-                  : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                  ? "cursor-not-allowed"
+                  : "bg-white hover:bg-gray-50"
               }`}
+              style={{
+                borderColor: currentPage === totalPages ? "#929191" : "#d1d5db",
+                color: currentPage === totalPages ? "#929191" : undefined,
+                backgroundColor:
+                  currentPage === totalPages ? "#f5f5f5" : undefined,
+              }}
             >
               Next
             </button>
@@ -135,4 +151,3 @@ const TrailerReviews: React.FC = () => {
 };
 
 export default TrailerReviews;
-

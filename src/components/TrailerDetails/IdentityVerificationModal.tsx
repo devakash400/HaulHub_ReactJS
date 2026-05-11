@@ -1,6 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
-import { CreditCard, IdCard, Car, Upload, FileText, RotateCw } from "lucide-react";
+import {
+  CreditCard,
+  IdCard,
+  Car,
+  Upload,
+  FileText,
+  RotateCw,
+} from "lucide-react";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import { ModalHeader } from "../ModalHeader.tsx";
 
@@ -34,7 +47,11 @@ export interface IdentityVerificationModalProps {
 
 const METHOD_META: Record<
   MethodKey,
-  { label: string; placeholder: string; icon: React.ComponentType<{ className?: string }> }
+  {
+    label: string;
+    placeholder: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }
 > = {
   driving_licence: {
     label: "Driving licence",
@@ -63,7 +80,7 @@ export const IdentityVerificationModal: React.FC<
 > = ({ isOpen, onClose, onContinue, defaultIssuingCountryRegion = "USA" }) => {
   const [step, setStep] = useState<"method" | "details">("method");
   const [issuingCountryRegion, setIssuingCountryRegion] = useState(
-    defaultIssuingCountryRegion
+    defaultIssuingCountryRegion,
   );
   const [openMethod, setOpenMethod] = useState<MethodKey>("driving_licence");
   const [documentNumbers, setDocumentNumbers] = useState<
@@ -81,7 +98,9 @@ export const IdentityVerificationModal: React.FC<
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [idDocument, setIdDocument] = useState<File | null>(null);
-  const [methodFiles, setMethodFiles] = useState<Record<MethodKey, File | null>>({
+  const [methodFiles, setMethodFiles] = useState<
+    Record<MethodKey, File | null>
+  >({
     driving_licence: null,
     passport: null,
     liability_document: null,
@@ -91,7 +110,9 @@ export const IdentityVerificationModal: React.FC<
   const idDocumentInputRef = useRef<HTMLInputElement | null>(null);
   const methodFileInputRef = useRef<HTMLInputElement | null>(null);
   const digitalSignatureInputRef = useRef<HTMLInputElement | null>(null);
-  const [digitalSignaturePreviewUrl, setDigitalSignaturePreviewUrl] = useState<string | null>(null);
+  const [digitalSignaturePreviewUrl, setDigitalSignaturePreviewUrl] = useState<
+    string | null
+  >(null);
 
   const isIOS = useMemo(() => {
     if (typeof navigator === "undefined") return false;
@@ -167,7 +188,7 @@ export const IdentityVerificationModal: React.FC<
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
@@ -207,7 +228,9 @@ export const IdentityVerificationModal: React.FC<
     setDigitalSignaturePreviewUrl(null);
   }, [isOpen, defaultIssuingCountryRegion]);
 
-  const handleMethodFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMethodFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0] ?? null;
     if (file) {
       setMethodFiles((prev) => ({
@@ -230,7 +253,11 @@ export const IdentityVerificationModal: React.FC<
 
   const handleDownloadCurrentPdf = () => {
     const file = methodFiles[openMethod];
-    if (!file || typeof window === "undefined" || typeof document === "undefined")
+    if (
+      !file ||
+      typeof window === "undefined" ||
+      typeof document === "undefined"
+    )
       return;
     const url = URL.createObjectURL(file);
     const link = document.createElement("a");
@@ -242,7 +269,9 @@ export const IdentityVerificationModal: React.FC<
     URL.revokeObjectURL(url);
   };
 
-  const handleDigitalSignatureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDigitalSignatureChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0] ?? null;
     setMethodFiles((prev) => ({
       ...prev,
@@ -339,350 +368,364 @@ export const IdentityVerificationModal: React.FC<
           </p>
 
           <div className="mt-6 space-y-4">
-          {step === "method" ? (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Issuing country/region
-                </label>
+            {step === "method" ? (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Issuing country/region
+                  </label>
+                  <input
+                    type="text"
+                    value={issuingCountryRegion}
+                    onChange={(e) => setIssuingCountryRegion(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                  />
+                </div>
+
                 <input
-                  type="text"
-                  value={issuingCountryRegion}
-                  onChange={(e) => setIssuingCountryRegion(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                  ref={methodFileInputRef}
+                  type="file"
+                  accept="image/*,application/pdf,.pdf"
+                  className="hidden"
+                  onChange={handleMethodFileChange}
                 />
-              </div>
+                <input
+                  ref={digitalSignatureInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleDigitalSignatureChange}
+                />
 
-              <input
-                ref={methodFileInputRef}
-                type="file"
-                accept="image/*,application/pdf,.pdf"
-                className="hidden"
-                onChange={handleMethodFileChange}
-              />
-              <input
-                ref={digitalSignatureInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleDigitalSignatureChange}
-              />
+                <div className="space-y-3">
+                  {(Object.keys(METHOD_META) as MethodKey[]).map((key) => {
+                    const meta = METHOD_META[key];
+                    const Icon = meta.icon;
+                    const isActive = openMethod === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setOpenMethod(key)}
+                        className={`w-full rounded-xl border px-4 py-3 text-left transition-colors ${
+                          isActive
+                            ? "border-[#389131] bg-green-50"
+                            : "border-gray-200 bg-white hover:border-gray-300"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-700">
+                              <Icon className="h-5 w-5" aria-hidden />
+                            </span>
+                            <p className="text-sm font-medium text-gray-900">
+                              {meta.label}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setOpenMethod(key);
+                              if (key === "digital_signature") {
+                                digitalSignatureInputRef.current?.click();
+                              } else {
+                                methodFileInputRef.current?.click();
+                              }
+                            }}
+                            className="inline-flex items-center justify-center rounded-full p-1.5 hover:bg-gray-100"
+                            aria-label={`Upload ${meta.label} file`}
+                          >
+                            <Upload
+                              className="h-5 w-5 text-gray-500"
+                              aria-hidden
+                            />
+                          </button>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
 
-              <div className="space-y-3">
-                {(Object.keys(METHOD_META) as MethodKey[]).map((key) => {
-                  const meta = METHOD_META[key];
-                  const Icon = meta.icon;
-                  const isActive = openMethod === key;
-                  return (
+                {methodFiles[openMethod] && (
+                  <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <button
-                      key={key}
                       type="button"
-                      onClick={() => setOpenMethod(key)}
-                      className={`w-full rounded-xl border px-4 py-3 text-left transition-colors ${
-                        isActive
-                          ? "border-[#389131] bg-green-50"
-                          : "border-gray-200 bg-white hover:border-gray-300"
-                      }`}
+                      onClick={handleOpenCurrentPdf}
+                      className="w-full sm:w-auto border border-gray-800 text-gray-900 rounded-lg px-6 py-2.5 text-sm font-medium bg-white hover:bg-gray-50 transition-colors"
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-700">
-                            <Icon className="h-5 w-5" aria-hidden />
-                          </span>
-                          <p className="text-sm font-medium text-gray-900">
-                            {meta.label}
-                          </p>
+                      Open PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadCurrentPdf}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white bg-[#389131] hover:bg-[#2f7a29] transition-colors"
+                    >
+                      <Upload className="h-4 w-4 text-white" aria-hidden />
+                      <span>Download PDF</span>
+                    </button>
+                  </div>
+                )}
+
+                {openMethod === "digital_signature" && (
+                  <div className="mt-4 rounded-lg border border-gray-200 bg-white px-4 py-3 space-y-3">
+                    <p className="text-sm text-gray-700">
+                      Upload a photo of your signature.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => digitalSignatureInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      <Upload className="h-4 w-4" aria-hidden />
+                      <span>Upload Signature Image</span>
+                    </button>
+                    {digitalSignaturePreviewUrl && (
+                      <div className="mt-2 flex flex-col gap-2">
+                        <div className="border border-dashed border-gray-300 rounded-lg overflow-hidden bg-white">
+                          <img
+                            src={digitalSignaturePreviewUrl}
+                            alt="Digital signature preview"
+                            className="w-full max-h-32 object-contain"
+                          />
                         </div>
                         <button
                           type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setOpenMethod(key);
-                            if (key === "digital_signature") {
-                              digitalSignatureInputRef.current?.click();
-                            } else {
-                              methodFileInputRef.current?.click();
-                            }
-                          }}
-                          className="inline-flex items-center justify-center rounded-full p-1.5 hover:bg-gray-100"
-                          aria-label={`Upload ${meta.label} file`}
+                          onClick={clearDigitalSignature}
+                          className="self-start text-xs font-medium text-gray-600 hover:text-gray-900"
                         >
-                          <Upload className="h-5 w-5 text-gray-500" aria-hidden />
+                          Remove signature
                         </button>
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
+                    )}
+                  </div>
+                )}
 
-              {methodFiles[openMethod] && (
-                <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleOpenCurrentPdf}
-                    className="w-full sm:w-auto border border-gray-800 text-gray-900 rounded-lg px-6 py-2.5 text-sm font-medium bg-white hover:bg-gray-50 transition-colors"
-                  >
-                    Open PDF
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDownloadCurrentPdf}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white bg-[#389131] hover:bg-[#2f7a29] transition-colors"
-                  >
-                    <Upload className="h-4 w-4 text-white" aria-hidden />
-                    <span>Download PDF</span>
-                  </button>
-                </div>
-              )}
-
-              {openMethod === "digital_signature" && (
-                <div className="mt-4 rounded-lg border border-gray-200 bg-white px-4 py-3 space-y-3">
-                  <p className="text-sm text-gray-700">
-                    Upload a photo of your signature.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => digitalSignatureInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    <Upload className="h-4 w-4" aria-hidden />
-                    <span>Upload Signature Image</span>
-                  </button>
-                  {digitalSignaturePreviewUrl && (
-                    <div className="mt-2 flex flex-col gap-2">
-                      <div className="border border-dashed border-gray-300 rounded-lg overflow-hidden bg-white">
-                        <img
-                          src={digitalSignaturePreviewUrl}
-                          alt="Digital signature preview"
-                          className="w-full max-h-32 object-contain"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={clearDigitalSignature}
-                        className="self-start text-xs font-medium text-gray-600 hover:text-gray-900"
-                      >
-                        Remove signature
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <button
-                type="button"
-                onClick={handleMethodContinue}
-                disabled={isMethodContinueDisabled}
-                aria-disabled={isMethodContinueDisabled}
-                className={`w-full mt-2 py-3.5 text-sm font-semibold rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${
-                  isMethodContinueDisabled
-                    ? "bg-[#389131]/60 text-white cursor-not-allowed"
-                    : "bg-[#389131] text-white hover:opacity-90"
-                }`}
-              >
-                Continue
-              </button>
-            </>
-          ) : (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Profile Picture
-                </label>
-                <input
-                  ref={profilePhotoInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple={false}
-                  className="hidden"
-                  onChange={(e) => setProfilePhoto(e.target.files?.[0] ?? null)}
-                />
                 <button
                   type="button"
-                  onClick={() => profilePhotoInputRef.current?.click()}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  onClick={handleMethodContinue}
+                  disabled={isMethodContinueDisabled}
+                  aria-disabled={isMethodContinueDisabled}
+                  className={`w-full mt-2 py-3.5 text-sm font-semibold rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 text-white`}
+                  style={{
+                    backgroundColor: isMethodContinueDisabled
+                      ? "#929191"
+                      : "#389131",
+                    cursor: isMethodContinueDisabled
+                      ? "not-allowed"
+                      : "pointer",
+                  }}
                 >
-                  <Upload className="w-5 h-5" aria-hidden />
-                  <span className="truncate">
-                    {profilePhoto ? profilePhoto.name : "Upload Photo"}
-                  </span>
+                  Continue
                 </button>
-                {profilePhoto && (
-                  <button
-                    type="button"
-                    onClick={clearProfilePhoto}
-                    className="mt-2 text-xs font-medium text-gray-600 hover:text-gray-900"
-                  >
-                    Remove photo
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              </>
+            ) : (
+              <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    First Name
+                    Profile Picture
                   </label>
                   <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Enter your first name"
+                    ref={profilePhotoInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple={false}
+                    className="hidden"
+                    onChange={(e) =>
+                      setProfilePhoto(e.target.files?.[0] ?? null)
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() => profilePhotoInputRef.current?.click()}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Upload className="w-5 h-5" aria-hidden />
+                    <span className="truncate">
+                      {profilePhoto ? profilePhoto.name : "Upload Photo"}
+                    </span>
+                  </button>
+                  {profilePhoto && (
+                    <button
+                      type="button"
+                      onClick={clearProfilePhoto}
+                      className="mt-2 text-xs font-medium text-gray-600 hover:text-gray-900"
+                    >
+                      Remove photo
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Enter your first name"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Enter your last name"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Last Name
+                    Email
                   </label>
                   <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Enter your last name"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  aria-invalid={email.trim().length > 0 && !isEmailValid}
-                  className={`w-full border rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent ${
-                    email.trim().length > 0 && !isEmailValid
-                      ? "border-red-400"
-                      : "border-gray-300"
-                  }`}
-                />
-                {email.trim().length > 0 && !isEmailValid && (
-                  <p className="mt-1 text-xs text-red-600">
-                    Please enter a valid email address.
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <div className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm flex items-center gap-2">
-                  <span className="text-sm">🇺🇸</span>
-                  <span className="text-gray-600">+1</span>
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => {
-                      const digitsOnly = e.target.value.replace(/\D/g, "");
-                      setPhoneNumber(digitsOnly.slice(0, 10));
-                    }}
-                    placeholder="Enter 10-digit phone number"
-                    className="flex-1 outline-none text-gray-900 placeholder:text-gray-400"
-                  />
-                </div>
-                {phoneNumber.trim() && !isPhoneValid && (
-                  <p className="mt-1 text-xs text-red-600">
-                    Phone number must be 10 digits.
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Upload ID Document
-                </label>
-                <input
-                  ref={idDocumentInputRef}
-                  type="file"
-                  accept={idDocumentAccept}
-                  multiple={false}
-                  className="hidden"
-                  onChange={(e) => setIdDocument(e.target.files?.[0] ?? null)}
-                />
-                <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => idDocumentInputRef.current?.click()}
-                    className="flex-1 text-left text-sm text-gray-600 truncate"
-                  >
-                    {idDocument ? (
-                      <span className="inline-flex items-center gap-2 text-gray-800">
-                        <FileText className="w-4 h-4" aria-hidden />
-                        <span className="truncate">{idDocument.name}</span>
-                      </span>
-                    ) : (
-                      "Passport/ Driver’s License / National ID"
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => idDocumentInputRef.current?.click()}
-                    className="shrink-0 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    <FileText className="w-4 h-4" aria-hidden />
-                    Choose File
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={clearIdDocument}
-                    disabled={!idDocument}
-                    aria-disabled={!idDocument}
-                    className={`shrink-0 inline-flex items-center justify-center rounded-md px-2 py-2 transition-colors ${
-                      idDocument
-                        ? "text-gray-700 hover:bg-gray-50"
-                        : "text-gray-300 cursor-not-allowed"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    aria-invalid={email.trim().length > 0 && !isEmailValid}
+                    className={`w-full border rounded-lg px-3 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent ${
+                      email.trim().length > 0 && !isEmailValid
+                        ? "border-red-400"
+                        : "border-gray-300"
                     }`}
-                    title="Clear file"
-                  >
-                    <RotateCw className="w-5 h-5" aria-hidden />
-                  </button>
+                  />
+                  {email.trim().length > 0 && !isEmailValid && (
+                    <p className="mt-1 text-xs text-red-600">
+                      Please enter a valid email address.
+                    </p>
+                  )}
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleDetailsContinue}
-                disabled={isDetailsContinueDisabled}
-                aria-disabled={isDetailsContinueDisabled}
-                className={`w-full mt-2 py-3.5 text-sm font-semibold rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${
-                  isDetailsContinueDisabled
-                    ? "bg-[#389131]/60 text-white cursor-not-allowed"
-                    : "bg-[#389131] text-white hover:opacity-90"
-                }`}
-              >
-                Continue
-              </button>
-              {isDetailsContinueDisabled && missingDetailsFields.length > 0 && (
-                <p className="mt-2 text-xs text-gray-600">
-                  Missing:{" "}
-                  <span className="font-medium text-gray-800">
-                    {missingDetailsFields.join(", ")}
-                  </span>
-                </p>
-              )}
-            </>
-          )}
-        </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <div className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm flex items-center gap-2">
+                    <span className="text-sm">🇺🇸</span>
+                    <span className="text-gray-600">+1</span>
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        const digitsOnly = e.target.value.replace(/\D/g, "");
+                        setPhoneNumber(digitsOnly.slice(0, 10));
+                      }}
+                      placeholder="Enter 10-digit phone number"
+                      className="flex-1 outline-none text-gray-900 placeholder:text-gray-400"
+                    />
+                  </div>
+                  {phoneNumber.trim() && !isPhoneValid && (
+                    <p className="mt-1 text-xs text-red-600">
+                      Phone number must be 10 digits.
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload ID Document
+                  </label>
+                  <input
+                    ref={idDocumentInputRef}
+                    type="file"
+                    accept={idDocumentAccept}
+                    multiple={false}
+                    className="hidden"
+                    onChange={(e) => setIdDocument(e.target.files?.[0] ?? null)}
+                  />
+                  <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => idDocumentInputRef.current?.click()}
+                      className="flex-1 text-left text-sm text-gray-600 truncate"
+                    >
+                      {idDocument ? (
+                        <span className="inline-flex items-center gap-2 text-gray-800">
+                          <FileText className="w-4 h-4" aria-hidden />
+                          <span className="truncate">{idDocument.name}</span>
+                        </span>
+                      ) : (
+                        "Passport/ Driver’s License / National ID"
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => idDocumentInputRef.current?.click()}
+                      className="shrink-0 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      <FileText className="w-4 h-4" aria-hidden />
+                      Choose File
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={clearIdDocument}
+                      disabled={!idDocument}
+                      aria-disabled={!idDocument}
+                      className={`shrink-0 inline-flex items-center justify-center rounded-md px-2 py-2 transition-colors ${
+                        idDocument
+                          ? "text-gray-700 hover:bg-gray-50"
+                          : "text-gray-300 cursor-not-allowed"
+                      }`}
+                      title="Clear file"
+                    >
+                      <RotateCw className="w-5 h-5" aria-hidden />
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleDetailsContinue}
+                  disabled={isDetailsContinueDisabled}
+                  aria-disabled={isDetailsContinueDisabled}
+                  className={`w-full mt-2 py-3.5 text-sm font-semibold rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 text-white`}
+                  style={{
+                    backgroundColor: isDetailsContinueDisabled
+                      ? "#929191"
+                      : "#389131",
+                    cursor: isDetailsContinueDisabled
+                      ? "not-allowed"
+                      : "pointer",
+                  }}
+                >
+                  Continue
+                </button>
+                {isDetailsContinueDisabled &&
+                  missingDetailsFields.length > 0 && (
+                    <p className="mt-2 text-xs text-gray-600">
+                      Missing:{" "}
+                      <span className="font-medium text-gray-800">
+                        {missingDetailsFields.join(", ")}
+                      </span>
+                    </p>
+                  )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -691,4 +734,3 @@ export const IdentityVerificationModal: React.FC<
   if (typeof document === "undefined") return modal;
   return createPortal(modal, document.body);
 };
-

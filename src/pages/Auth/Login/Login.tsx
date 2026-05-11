@@ -5,6 +5,7 @@ import { Eye, EyeOff, Mail, Smartphone, ChevronDown } from "lucide-react";
 import { ModalHeader } from "../../../components/ModalHeader.tsx";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../store/authSlice.ts";
+import backButton from "../../../assets/images/Back button.png";
 import {
   login as loginApi,
   phoneLogin as phoneLoginApi,
@@ -30,16 +31,59 @@ type CountryOption = {
   name: string;
   dialCode: string;
   flag: string;
+  flagUrl: string;
 };
 
 const COUNTRY_OPTIONS: CountryOption[] = [
-  { code: "US", name: "United States", dialCode: "+1", flag: "🇺🇸" },
-  { code: "CA", name: "Canada", dialCode: "+1", flag: "🇨🇦" },
-  { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "🇬🇧" },
-  { code: "IN", name: "India", dialCode: "+91", flag: "🇮🇳" },
-  { code: "AU", name: "Australia", dialCode: "+61", flag: "🇦🇺" },
-  { code: "DE", name: "Germany", dialCode: "+49", flag: "🇩🇪" },
-  { code: "FR", name: "France", dialCode: "+33", flag: "🇫🇷" },
+  {
+    code: "US",
+    name: "United States",
+    dialCode: "+1",
+    flag: "🇺🇸",
+    flagUrl: "https://flagcdn.com/w20/us.png",
+  },
+  {
+    code: "CA",
+    name: "Canada",
+    dialCode: "+1",
+    flag: "🇨🇦",
+    flagUrl: "https://flagcdn.com/w20/ca.png",
+  },
+  {
+    code: "GB",
+    name: "United Kingdom",
+    dialCode: "+44",
+    flag: "🇬🇧",
+    flagUrl: "https://flagcdn.com/w20/gb.png",
+  },
+  {
+    code: "IN",
+    name: "India",
+    dialCode: "+91",
+    flag: "🇮🇳",
+    flagUrl: "https://flagcdn.com/w20/in.png",
+  },
+  {
+    code: "AU",
+    name: "Australia",
+    dialCode: "+61",
+    flag: "🇦🇺",
+    flagUrl: "https://flagcdn.com/w20/au.png",
+  },
+  {
+    code: "DE",
+    name: "Germany",
+    dialCode: "+49",
+    flag: "🇩🇪",
+    flagUrl: "https://flagcdn.com/w20/de.png",
+  },
+  {
+    code: "FR",
+    name: "France",
+    dialCode: "+33",
+    flag: "🇫🇷",
+    flagUrl: "https://flagcdn.com/w20/fr.png",
+  },
 ];
 
 const getApiErrorMessage = (err: any): string | null => {
@@ -382,8 +426,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   const handleVerifyOtp = () => {
-    // Demo OTP validation: accept "1234" only
-    if (otp.trim() !== "1234") {
+    // Demo OTP validation: accept "123456" only
+    if (otp.trim() !== "123456") {
       const msg = "Invalid OTP. Please try again.";
       setOtpError(msg);
       toast.error(msg);
@@ -445,22 +489,33 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </label>
               {usePhoneOnly ? (
                 <div className="w-full border border-gray-400 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/15">
-                  <select
-                    className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-1 max-w-[40%] sm:max-w-[32%]"
-                    value={selectedCountry.code}
-                    onChange={(e) => {
-                      const next = COUNTRY_OPTIONS.find(
-                        (c) => c.code === e.target.value,
-                      );
-                      if (next) setSelectedCountry(next);
-                    }}
-                  >
-                    {COUNTRY_OPTIONS.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.flag} {country.dialCode}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative flex items-center min-w-[95px] gap-2">
+                    <img
+                      src={selectedCountry.flagUrl}
+                      alt={selectedCountry.name}
+                      className="h-4 w-6 rounded-sm object-cover"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {selectedCountry.dialCode}
+                    </span>
+                    <ChevronDown className="pointer-events-none h-4 w-4 text-gray-500" />
+                    <select
+                      className="absolute inset-0 opacity-0"
+                      value={selectedCountry.code}
+                      onChange={(e) => {
+                        const next = COUNTRY_OPTIONS.find(
+                          (c) => c.code === e.target.value,
+                        );
+                        if (next) setSelectedCountry(next);
+                      }}
+                    >
+                      {COUNTRY_OPTIONS.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name} {country.dialCode}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="h-5 w-px bg-gray-300 flex-shrink-0" />
                   <input
                     type="tel"
@@ -551,8 +606,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
                   isEmailFilled && isIdentifierValid && !isCheckingEmail
                     ? "bg-[#389131] text-white"
-                    : "bg-[#389131]/60 text-white cursor-not-allowed"
+                    : "text-white cursor-not-allowed"
                 }`}
+                style={{
+                  backgroundColor:
+                    isEmailFilled && isIdentifierValid && !isCheckingEmail
+                      ? "#389131"
+                      : "#929191",
+                }}
               >
                 {isCheckingEmail ? "Checking..." : "Continue"}
               </button>
@@ -698,113 +759,276 @@ const LoginModal: React.FC<LoginModalProps> = ({
           )}
 
           {step === "password" && (
-            <div>
-              <label className="block text-sm font-medium text-black mb-2">
+            <div className="flex flex-col min-h-[359px]">
+              {/* Back Button */}
+              <button
+                type="button"
+                onClick={() => setStep("email")}
+                className="flex items-center gap-2 mb-5"
+              >
+                <img
+                  src={backButton}
+                  alt="Back"
+                  className="w-[5px] h-[10px] opacity-100 border-transparent object-contain"
+                />
+
+                <span className="text-sm text-gray-500">Back</span>
+              </button>
+              {/* Password Label */}
+              <label
+                className="block mb-2 text-black"
+                style={{
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                  fontSize: "17px",
+                  lineHeight: "100%",
+                  letterSpacing: "0%",
+                  color: "#000000",
+                }}
+              >
                 Password
               </label>
-              <div className="relative">
-                <input
-                  type={showLoginPwd ? "text" : "password"}
-                  value={password}
-                  placeholder="Enter Password"
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setLoginError(null);
-                  }}
-                  className="w-full border border-gray-400 rounded-lg px-4 pr-10 py-3 text-sm focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowLoginPwd((v) => !v)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-                  aria-label={showLoginPwd ? "Hide password" : "Show password"}
-                >
-                  {showLoginPwd ? (
-                    <Eye className="w-5 h-5" aria-hidden />
-                  ) : (
-                    <EyeOff className="w-5 h-5" aria-hidden />
-                  )}
-                </button>
-              </div>
-
+              {/* Password Input */}
+              <input
+                type="password"
+                value={password}
+                placeholder="Enter your Password"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setLoginError(null);
+                }}
+                className="rounded-[5px] border border-black px-4 focus:outline-none focus:ring-0 placeholder:text-[#9B989E]"
+                style={{
+                  height: "40px",
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                }}
+              />
+              {/* Error */}
               {loginError && (
                 <p className="mt-2 text-xs text-red-600">{loginError}</p>
               )}
+              {/* Forgot Password */}
 
-              <div className="flex justify-end mt-2">
+              <div className="flex justify-end mt-3">
                 <button
                   type="button"
                   onClick={handleOpenReset}
-                  className="text-xs font-semibold text-[#389131] underline"
+                  className="text-[#389131]"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 500,
+                    fontSize: "12px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                  }}
                 >
-                  Forgot Password
+                  Forgot Password?
                 </button>
               </div>
-
+              {/* Continue Button */}
               <button
                 type="button"
                 onClick={handleLoginContinue}
                 disabled={!isPasswordFilled || isSubmitting}
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  isPasswordFilled && !isSubmitting
-                    ? "bg-[#389131] text-white"
-                    : "bg-[#389131]/60 text-white cursor-not-allowed"
-                }`}
+                className={`w-full mt-6 py-3 rounded-md text-sm font-semibold transition-all text-white`}
+                style={{
+                  backgroundColor:
+                    isPasswordFilled && !isSubmitting ? "#389131" : "#929191",
+                  cursor:
+                    isPasswordFilled && !isSubmitting
+                      ? "pointer"
+                      : "not-allowed",
+                }}
               >
                 {isSubmitting ? "Logging in..." : "Continue"}
               </button>
+              {/* Bottom Terms */}
+              <div
+                className="mt-auto pt-24 text-center text-black"
+                style={{
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                  fontSize: "10px",
+                  lineHeight: "100%",
+                  letterSpacing: "0%",
+                  color: "#000000",
+                }}
+              >
+                You agree with{" "}
+                <span
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecorationStyle: "solid",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Terms & Conditions{"  "}
+                </span>
+                and{"  "}
+                <span
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecorationStyle: "solid",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Privacy Policy
+                </span>
+              </div>
             </div>
           )}
-
           {step === "reset" && (
             <div>
-              <p className="text-center text-sm text-gray-800 leading-6">
+              <button
+                type="button"
+                onClick={() => setStep("email")}
+                className="flex items-center gap-2 mb-5"
+              >
+                <img
+                  src={backButton}
+                  alt="Back"
+                  className="w-[5px] h-[10px] opacity-100 border-transparent object-contain"
+                />
+
+                <span className="text-sm text-gray-500">Back</span>
+              </button>
+              <p
+                className="text-center text-black"
+                style={{
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                  fontSize: "16px",
+                  lineHeight: "100%",
+                  letterSpacing: "0%",
+                  color: "#000000",
+                }}
+              >
                 Please Enter your Phone Number or
                 <br />
-                Email ID yor previously logged in
+                Email ID you previously logged in
               </p>
 
               <div className="mt-6">
-                <label className="block text-sm font-medium text-black mb-2">
+                <label
+                  className="block mb-2 text-black"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 400,
+                    fontSize: "17px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    color: "#000000",
+                  }}
+                >
                   Phone Number <span className="text-red-500">*</span>
                 </label>
-                <div className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2 focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/15">
-                  <span className="text-sm">🇺🇸</span>
-                  <span className="text-gray-600">+1</span>
+                <div
+                  className="flex items-center gap-2 px-3"
+                  style={{
+                    height: "40px",
+                    border: "1px solid #000000",
+                    borderRadius: "5px",
+                    fontFamily: "Lexend",
+                  }}
+                >
+                  <div className="relative flex items-center min-w-[95px] gap-2">
+                    <img
+                      src={selectedCountry.flagUrl}
+                      alt={selectedCountry.name}
+                      className="h-4 w-6 rounded-sm object-cover"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {selectedCountry.dialCode}
+                    </span>
+                    <ChevronDown className="pointer-events-none h-4 w-4 text-gray-500" />
+                    <select
+                      className="absolute inset-0 opacity-0"
+                      value={selectedCountry.code}
+                      onChange={(e) => {
+                        const next = COUNTRY_OPTIONS.find(
+                          (country) => country.code === e.target.value,
+                        );
+                        if (next) setSelectedCountry(next);
+                      }}
+                    >
+                      {COUNTRY_OPTIONS.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name} {country.dialCode}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="h-5 w-px bg-gray-300 flex-shrink-0" />
                   <input
                     value={resetPhone}
                     onChange={(e) => setResetPhone(e.target.value)}
                     placeholder="Phone Number"
-                    className="flex-1 outline-none bg-transparent"
+                    className="flex-1 outline-none bg-transparent text-sm"
+                    style={{
+                      fontFamily: "Lexend",
+                      fontWeight: 400,
+                    }}
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-4 my-6 text-sm text-gray-500">
                 <div className="flex-1 h-px bg-gray-200" />
-                <span>Or</span>
+                <span
+                  style={{
+                    fontFamily: "Inter",
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    lineHeight: "20px",
+                    letterSpacing: "0%",
+                    verticalAlign: "middle",
+                    color: "#000000",
+                  }}
+                >
+                  Or
+                </span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
 
               <div>
                 <label
-                  className="block text-black mb-2"
+                  className="block mb-2 text-black"
                   style={{
                     fontFamily: "Lexend",
                     fontWeight: 400,
-                    fontSize: "14px",
-                    fontStyle: "normal",
+                    fontSize: "17px",
                     lineHeight: "100%",
                     letterSpacing: "0%",
+                    color: "#000000",
                   }}
                 >
-                  Email ID <span className="text-red-500">*</span>
+                  Email ID<span className="text-red-500">*</span>
                 </label>
+
                 <input
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   placeholder="Enter Email ID"
-                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                  className="w-full rounded-[5px] border border-black px-4 outline-none focus:outline-none focus:ring-0"
+                  style={{
+                    height: "40px",
+                    fontFamily: "Lexend",
+                    fontWeight: 400,
+                    fontSize: "17px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                  }}
                 />
               </div>
 
@@ -812,13 +1036,19 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 type="button"
                 onClick={handleResetContinue}
                 disabled={!resetCanContinue || isForgotSubmitting}
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  resetCanContinue && !isForgotSubmitting
-                    ? "bg-[#389131] text-white"
-                    : "bg-[#389131]/60 text-white cursor-not-allowed"
-                }`}
+                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white`}
+                style={{
+                  backgroundColor:
+                    resetCanContinue && !isForgotSubmitting
+                      ? "#389131"
+                      : "#929191",
+                  cursor:
+                    resetCanContinue && !isForgotSubmitting
+                      ? "pointer"
+                      : "not-allowed",
+                }}
               >
-                {isForgotSubmitting ? "Sending..." : "Continue"}
+                {isForgotSubmitting ? "Sending..." : "Submit"}
               </button>
 
               {forgotError && (
@@ -827,13 +1057,77 @@ const LoginModal: React.FC<LoginModalProps> = ({
               {forgotSuccess && (
                 <p className="mt-2 text-xs text-green-600">{forgotSuccess}</p>
               )}
+              <div
+                className="mt-auto pt-24 text-center text-black"
+                style={{
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                  fontSize: "10px",
+                  lineHeight: "100%",
+                  letterSpacing: "0%",
+                  color: "#000000",
+                }}
+              >
+                You agree with{" "}
+                <span
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecorationStyle: "solid",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Terms & Conditions{"  "}
+                </span>
+                and{"  "}
+                <span
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecorationStyle: "solid",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Privacy Policy
+                </span>
+              </div>
             </div>
           )}
-
           {step === "newPassword" && (
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
-                New Password
+              <button
+                type="button"
+                onClick={() => setStep("email")}
+                className="flex items-center gap-2 mb-5"
+              >
+                <img
+                  src={backButton}
+                  alt="Back"
+                  className="w-[5px] h-[10px] opacity-100 border-transparent object-contain"
+                />
+
+                <span className="text-sm text-gray-500">Back</span>
+              </button>
+              <label
+                className="block mb-2 text-black"
+                style={{
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                  fontSize: "17px",
+                  lineHeight: "100%",
+                  letterSpacing: "0%",
+                  color: "#000000",
+                }}
+              >
+                New Password<span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -855,9 +1149,18 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   )}
                 </button>
               </div>
-
-              <label className="block text-sm font-medium text-black mb-2 mt-5">
-                Confirm New Password
+              <label
+                className="block mb-2 text-black mt-5"
+                style={{
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                  fontSize: "17px",
+                  lineHeight: "100%",
+                  letterSpacing: "0%",
+                  color: "#000000",
+                }}
+              >
+                Confirm New Password<span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -879,25 +1182,65 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   )}
                 </button>
               </div>
-
               {confirmNewPassword.length > 0 && !passwordsMatch && (
                 <p className="mt-2 text-xs text-red-600">
                   Passwords do not match
                 </p>
               )}
-
               <button
                 type="button"
                 onClick={handleNewPasswordContinue}
                 disabled={!canSetNewPassword}
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  canSetNewPassword
-                    ? "bg-[#389131] text-white"
-                    : "bg-[#389131]/60 text-white cursor-not-allowed"
-                }`}
+                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white`}
+                style={{
+                  backgroundColor: canSetNewPassword ? "#389131" : "#929191",
+                  cursor: canSetNewPassword ? "pointer" : "not-allowed",
+                }}
               >
                 Continue
-              </button>
+              </button>{" "}
+              <div
+                className="mt-auto pt-24 text-center text-black"
+                style={{
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                  fontSize: "10px",
+                  lineHeight: "100%",
+                  letterSpacing: "0%",
+                  color: "#000000",
+                }}
+              >
+                You agree with{" "}
+                <span
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecorationStyle: "solid",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Terms & Conditions{"  "}
+                </span>
+                and{"  "}
+                <span
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecorationStyle: "solid",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Privacy Policy
+                </span>
+              </div>
             </div>
           )}
         </div>
@@ -905,7 +1248,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
         {/* OTP Modal */}
         {showOtpModal && (
           <div
-            className="modal-overlay fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4"
+            className="modal-overlay fixed inset-0 z-[90]
+             flex items-center justify-center bg-black/45 p-4"
             onClick={() => setShowOtpModal(false)}
             role="dialog"
             aria-modal="true"
@@ -920,53 +1264,116 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 variant="close"
               />
               <div className="px-5 py-5">
-                <p className="text-center text-sm text-gray-700">
+                <p
+                  className="text-center"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 300,
+                    fontSize: "13px",
+                    lineHeight: "130%",
+                    letterSpacing: "0px",
+                    color: "#393939",
+                  }}
+                >
                   Please enter the OTP sent to
                   <br />
-                  <span className="font-medium text-gray-900">
+                  <span
+                    style={{
+                      fontFamily: "Lexend",
+                      fontWeight: 300,
+                      fontSize: "13px",
+                      lineHeight: "100%",
+                      letterSpacing: "0px",
+                      color: "#000000",
+                    }}
+                  >
                     {otpTargetLabel}
                   </span>
+                  <br />
+                  <span
+                    style={{
+                      fontFamily: "Lexend",
+                      fontWeight: 400,
+                      fontSize: "12px",
+                      lineHeight: "100%",
+                      letterSpacing: "0px",
+                      color: "#666666",
+                    }}
+                  >
+                    (Demo OTP: 123456)
+                  </span>
                 </p>
-
-                <label className="block text-sm font-medium text-gray-900 mt-5 mb-2">
+                <label
+                  className="block mt-5 mb-2"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 400,
+                    fontSize: "14px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    color: "#434343",
+                  }}
+                >
                   Enter OTP
                 </label>
-                <input
-                  value={otp}
-                  onChange={(e) => {
-                    const onlyDigits = e.target.value
-                      .replace(/\D/g, "")
-                      .slice(0, 6);
-                    setOtp(onlyDigits);
-                    setOtpError(null);
-                  }}
-                  placeholder="Enter OTP"
-                  maxLength={6}
-                  className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
-                />
+                <>
+                  <input
+                    value={otp}
+                    onChange={(e) => {
+                      const onlyDigits = e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 6);
+                      setOtp(onlyDigits);
+                      setOtpError(null);
+                    }}
+                    placeholder="Enter OTP"
+                    maxLength={6}
+                    className="otp-input px-4 outline-none focus:outline-none focus:ring-0"
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      border: "1px solid #000000",
+                      borderRadius: "3px",
+                      color: "#000000",
+                      fontFamily: "Lexend",
+                      fontWeight: 400,
+                      fontSize: "14px",
+                    }}
+                  />
 
-                <div className="mt-2 flex justify-between items-center text-xs text-gray-600">
-                  <span>
-                    Didn&apos;t get Code{" "}
-                    <span className="ml-1 font-semibold">
-                      {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
-                      {String(otpSeconds % 60).padStart(2, "0")}
+                  <style>{`
+                    .otp-input::placeholder {
+                      font-family: Lexend;
+                      font-weight: 300;
+                      font-size: 12px;
+                      line-height: 100%;
+                      letter-spacing: 0%;
+                      color: #43434380;
+                    }
+                  `}</style>
+                </>
+                <div className="mt-2 flex justify-end items-center gap-2 text-xs text-gray-600">
+                  {otpSeconds > 0 ? (
+                    <span className="font-medium text-gray-600">
+                      Didn&apos;t get Code
+                      <span className="ml-2 font-semibold text-gray-900">
+                        {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
+                        {String(otpSeconds % 60).padStart(2, "0")}
+                      </span>
                     </span>
-                  </span>
-                  {otpSeconds === 0 && (
+                  ) : (
                     <button
                       type="button"
                       onClick={() => {
                         setShowOtpModal(false);
                         void handleResetContinue();
                       }}
-                      className="ml-3 text-[#389131] font-semibold"
+                      className="text-[#389131] font-semibold"
                     >
                       Resend
                     </button>
                   )}
                 </div>
-
                 {otpError && (
                   <p className="mt-3 text-xs text-red-600 font-medium flex items-center gap-2">
                     <span className="inline-flex h-4 w-4 rounded-full bg-red-600 text-white items-center justify-center text-[10px]">
@@ -980,11 +1387,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   type="button"
                   onClick={handleVerifyOtp}
                   disabled={!isOtpValid}
-                  className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                    isOtpValid
-                      ? "bg-[#389131] text-white"
-                      : "bg-[#389131]/60 text-white cursor-not-allowed"
-                  }`}
+                  className={`w-full mt-6 py-3.5 rounded-md text-white`}
+                  style={{
+                    backgroundColor: isOtpValid ? "#389131" : "#929191",
+                    fontFamily: "Lexend",
+                    fontWeight: 600,
+                    fontSize: "16px",
+                    lineHeight: "100%",
+                    letterSpacing: "3%",
+                    cursor: isOtpValid ? "pointer" : "not-allowed",
+                  }}
                 >
                   Verify
                 </button>

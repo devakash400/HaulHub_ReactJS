@@ -37,9 +37,17 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
           <X className="w-5 h-5" aria-hidden />
         )}
       </button>
+
       <h2
         id={titleId}
-        className="flex-1 text-center text-lg sm:text-2xl font-semibold text-white m-0 leading-tight px-2"
+        className="flex-1 text-center text-white m-0 px-2"
+        style={{
+          fontFamily: "Lexend",
+          fontWeight: 700,
+          fontSize: "23px",
+          lineHeight: "100%",
+          letterSpacing: "0px",
+        }}
       >
         {title}
       </h2>

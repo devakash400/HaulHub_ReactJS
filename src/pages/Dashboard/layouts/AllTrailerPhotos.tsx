@@ -1,9 +1,16 @@
 import React, { useState, useCallback } from "react";
 import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { ChevronLeft, Heart, Share2 } from "lucide-react";
-import { getTrailerById, getTrailerTypeLabel } from "../../../assets/data/trailers.ts";
+import {
+  getTrailerById,
+  getTrailerTypeLabel,
+} from "../../../assets/data/trailers.ts";
 import { images as assetImages } from "../../../assets/images/index.ts";
-import { ImageModal, ShareTrailerModal, WishlistLoginModal } from "../../../components/TrailerDetails/index.ts";
+import {
+  ImageModal,
+  ShareTrailerModal,
+  WishlistLoginModal,
+} from "../../../components/TrailerDetails/index.ts";
 
 export interface Photo {
   id: number;
@@ -39,9 +46,8 @@ const AllTrailerPhotos: React.FC = () => {
       : `/trailer/${id}`;
 
   return (
-    <div className="min-h-screen bg-background w-full min-w-0 overflow-x-hidden">
-      {/* Sticky header */}
-      <header className=" top-0 z-40 bg-background border-b border-gray-200/80 shadow-sm">
+    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden shadow-[0px_-4px_4px_0px_#00000040]">
+      <header className="top-0     z-40 bg-transparent border-0 shadow-none">
         <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-row flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
@@ -52,7 +58,7 @@ const AllTrailerPhotos: React.FC = () => {
               >
                 <ChevronLeft className="w-6 h-6" />
               </Link>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#389131] truncate">
+              <h1 className="truncate font-['Lexend'] font-semibold text-[40px] leading-[100%] tracking-[0%] align-middle text-[#389131]">
                 {trailer.title}
               </h1>
             </div>
@@ -63,8 +69,16 @@ const AllTrailerPhotos: React.FC = () => {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
                 aria-label="Share"
               >
-                <Share2 className="w-4 h-4" />
-                <span>Share</span>
+                <Share2
+                  className="w-[16.5px] h-[18px] text-black"
+                  style={{ strokeWidth: 1.5 }}
+                />
+                <span
+                  className="font-normal text-[16px] leading-[100%] tracking-[0%] underline text-black"
+                  style={{ fontFamily: "Lexend", verticalAlign: "middle" }}
+                >
+                  Share
+                </span>
               </button>
               <button
                 type="button"
@@ -72,8 +86,16 @@ const AllTrailerPhotos: React.FC = () => {
                 className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
                 aria-label="Save"
               >
-                <Heart className="h-4 w-4 fill-current" />
-                <span>Save</span>
+                <Heart
+                  className="w-[16.5px] h-[18px] text-black"
+                  style={{ strokeWidth: 1.5 }}
+                />
+                <span
+                  className="font-normal text-[16px] leading-[100%] tracking-[0%] underline text-black"
+                  style={{ fontFamily: "Lexend", verticalAlign: "middle" }}
+                >
+                  Save
+                </span>
               </button>
             </div>
           </div>
@@ -87,13 +109,13 @@ const AllTrailerPhotos: React.FC = () => {
             <button
               key={photo.id}
               type="button"
-              className="relative block w-full aspect-[4/3] overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
+              className="relative block w-full h-[283px] overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
               onClick={() => openModal(photo)}
             >
               <img
                 src={photo.url || PLACEHOLDER}
                 alt={`Trailer ${photo.id}`}
-                className="w-full h-full object-cover rounded-xl transition-transform duration-300 ease-out hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105"
               />
             </button>
           ))}

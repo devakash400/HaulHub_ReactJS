@@ -56,8 +56,9 @@ const OwnerTruckDescription: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const trailer = getTrailerById(Number(id));
-  const isBookedFromState =
-    Boolean((location.state as { isBooked?: boolean } | null)?.isBooked);
+  const isBookedFromState = Boolean(
+    (location.state as { isBooked?: boolean } | null)?.isBooked,
+  );
   const isTruckBooked =
     isBookedFromState || (Number(id) > 0 && Number(id) % 3 === 2);
   const [isAvailable, setIsAvailable] = useState(!isTruckBooked);
@@ -73,7 +74,7 @@ const OwnerTruckDescription: React.FC = () => {
           price: trailer.price,
           type: trailer.type,
         }
-      : null
+      : null,
   );
   const [draftDetails, setDraftDetails] = useState<EditableTruckDetails | null>(
     trailer
@@ -84,7 +85,7 @@ const OwnerTruckDescription: React.FC = () => {
           price: trailer.price,
           type: trailer.type,
         }
-      : null
+      : null,
   );
 
   const earnings = useMemo(() => {
@@ -229,18 +230,23 @@ const OwnerTruckDescription: React.FC = () => {
                   type="button"
                   onClick={() => {
                     if (isTruckBooked) {
-                      toast.info("Availability cannot be changed while truck is booked.");
+                      toast.info(
+                        "Availability cannot be changed while truck is booked.",
+                      );
                       return;
                     }
                     setIsAvailable((prev) => !prev);
                   }}
                   className={`rounded-lg px-4 py-2 text-sm font-semibold text-white ${
                     isTruckBooked
-                      ? "bg-gray-400 cursor-not-allowed"
+                      ? "cursor-not-allowed"
                       : isAvailable
                         ? "bg-[#B42318] hover:bg-[#912018]"
                         : "bg-[#389131] hover:bg-[#2f7a29]"
                   }`}
+                  style={{
+                    backgroundColor: isTruckBooked ? "#929191" : undefined,
+                  }}
                 >
                   {isTruckBooked
                     ? "Booked - Availability Locked"
@@ -255,7 +261,9 @@ const OwnerTruckDescription: React.FC = () => {
                       : "border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
                   }`}
                 >
-                  {isTruckBooked ? "Edit Disabled (Booked)" : "Edit Truck Details"}
+                  {isTruckBooked
+                    ? "Edit Disabled (Booked)"
+                    : "Edit Truck Details"}
                 </button>
                 <button
                   type="button"
@@ -295,7 +303,9 @@ const OwnerTruckDescription: React.FC = () => {
 
         <section className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">Manage Bookings</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Manage Bookings
+            </h2>
             <button
               type="button"
               className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
@@ -371,7 +381,7 @@ const OwnerTruckDescription: React.FC = () => {
                   value={draftDetails.title}
                   onChange={(event) =>
                     setDraftDetails((prev) =>
-                      prev ? { ...prev, title: event.target.value } : prev
+                      prev ? { ...prev, title: event.target.value } : prev,
                     )
                   }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -385,7 +395,7 @@ const OwnerTruckDescription: React.FC = () => {
                   value={draftDetails.type}
                   onChange={(event) =>
                     setDraftDetails((prev) =>
-                      prev ? { ...prev, type: event.target.value } : prev
+                      prev ? { ...prev, type: event.target.value } : prev,
                     )
                   }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -399,7 +409,7 @@ const OwnerTruckDescription: React.FC = () => {
                   value={draftDetails.location}
                   onChange={(event) =>
                     setDraftDetails((prev) =>
-                      prev ? { ...prev, location: event.target.value } : prev
+                      prev ? { ...prev, location: event.target.value } : prev,
                     )
                   }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -413,7 +423,7 @@ const OwnerTruckDescription: React.FC = () => {
                   value={draftDetails.specs}
                   onChange={(event) =>
                     setDraftDetails((prev) =>
-                      prev ? { ...prev, specs: event.target.value } : prev
+                      prev ? { ...prev, specs: event.target.value } : prev,
                     )
                   }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -427,7 +437,7 @@ const OwnerTruckDescription: React.FC = () => {
                   value={draftDetails.price}
                   onChange={(event) =>
                     setDraftDetails((prev) =>
-                      prev ? { ...prev, price: event.target.value } : prev
+                      prev ? { ...prev, price: event.target.value } : prev,
                     )
                   }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -471,7 +481,9 @@ const OwnerTruckDescription: React.FC = () => {
           }`}
         >
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">All Truck Photos</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              All Truck Photos
+            </h3>
             <button
               type="button"
               onClick={() => setIsPhotosOpen(false)}

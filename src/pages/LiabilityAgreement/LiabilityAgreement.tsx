@@ -19,7 +19,7 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
 const makeBookingId = () => {
   const d = new Date();
   return `HH-${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${Math.floor(
-    100000 + Math.random() * 900000
+    100000 + Math.random() * 900000,
   )}`;
 };
 
@@ -28,16 +28,24 @@ const LiabilityAgreement: React.FC = () => {
   const location = useLocation();
   const state = (location.state ?? {}) as LiabilityAgreementState;
 
-  const bookingId = useMemo(() => state.bookingId ?? makeBookingId(), [state.bookingId]);
+  const bookingId = useMemo(
+    () => state.bookingId ?? makeBookingId(),
+    [state.bookingId],
+  );
   const bookDates = useMemo(() => state.dates ?? "—", [state.dates]);
-  const pdfUrl = useMemo(() => state.pdfUrl ?? "/liability-agreement.pdf", [state.pdfUrl]);
+  const pdfUrl = useMemo(
+    () => state.pdfUrl ?? "/liability-agreement.pdf",
+    [state.pdfUrl],
+  );
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const signatureInputRef = useRef<HTMLInputElement | null>(null);
   const drawingRef = useRef(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const [hasSignature, setHasSignature] = useState(false);
-  const [signatureImageUrl, setSignatureImageUrl] = useState<string | null>(null);
+  const [signatureImageUrl, setSignatureImageUrl] = useState<string | null>(
+    null,
+  );
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentSignaturePreviewUrl, setPaymentSignaturePreviewUrl] = useState<
     string | null
@@ -156,7 +164,9 @@ const LiabilityAgreement: React.FC = () => {
       setPaymentSignaturePreviewUrl(signatureImageUrl);
     } else {
       const canvas = canvasRef.current;
-      setPaymentSignaturePreviewUrl(canvas ? canvas.toDataURL("image/png") : null);
+      setPaymentSignaturePreviewUrl(
+        canvas ? canvas.toDataURL("image/png") : null,
+      );
     }
     setShowPaymentModal(true);
   };
@@ -226,7 +236,9 @@ const LiabilityAgreement: React.FC = () => {
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-sm font-semibold text-gray-900">Digital Signature</h3>
+            <h3 className="text-sm font-semibold text-gray-900">
+              Digital Signature
+            </h3>
             <p className="text-xs text-gray-600">
               Please sign below using your finger, or upload a signature image.
             </p>
@@ -235,7 +247,9 @@ const LiabilityAgreement: React.FC = () => {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(e) => handleSignatureUpload(e.target.files?.[0] ?? null)}
+              onChange={(e) =>
+                handleSignatureUpload(e.target.files?.[0] ?? null)
+              }
             />
             <button
               type="button"
@@ -278,11 +292,11 @@ const LiabilityAgreement: React.FC = () => {
                 onClick={goNext}
                 disabled={!hasSignature}
                 aria-disabled={!hasSignature}
-                className={`w-full py-3 rounded-md text-sm font-semibold transition-opacity ${
-                  hasSignature
-                    ? "bg-[#389131] text-white hover:opacity-90"
-                    : "bg-[#389131]/60 text-white cursor-not-allowed"
-                }`}
+                className={`w-full py-3 rounded-md text-sm font-semibold transition-opacity text-white`}
+                style={{
+                  backgroundColor: !hasSignature ? "#929191" : "#389131",
+                  cursor: !hasSignature ? "not-allowed" : "pointer",
+                }}
               >
                 Next
               </button>
@@ -309,15 +323,20 @@ const LiabilityAgreement: React.FC = () => {
               <div className="mt-5 border border-gray-200 rounded-md p-4">
                 <p className="text-sm text-gray-900 font-medium">
                   Booking ID :{" "}
-                  <span className="font-semibold text-gray-900"># {bookingId}</span>
+                  <span className="font-semibold text-gray-900">
+                    # {bookingId}
+                  </span>
                 </p>
                 <p className="text-sm text-gray-900 font-medium mt-1">
-                  Book Dates : <span className="font-semibold">{bookDates}</span>
+                  Book Dates :{" "}
+                  <span className="font-semibold">{bookDates}</span>
                 </p>
               </div>
 
               <div className="mt-5">
-                <h3 className="text-sm font-semibold text-gray-900">Digital Signature</h3>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Digital Signature
+                </h3>
                 <p className="text-xs text-gray-600 mt-1">
                   Please sign below using your finger.
                 </p>
@@ -350,4 +369,3 @@ const LiabilityAgreement: React.FC = () => {
 };
 
 export default LiabilityAgreement;
-

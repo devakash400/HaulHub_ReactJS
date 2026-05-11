@@ -48,7 +48,8 @@ const EditProfile: React.FC = () => {
       e.password = "Password does not meet requirements";
     const phoneDigits = digitsOnly(phone);
     if (!phoneDigits) e.phone = "Enter phone number";
-    else if (phoneDigits.length < 10) e.phone = "Enter at least 10 digits number";
+    else if (phoneDigits.length < 10)
+      e.phone = "Enter at least 10 digits number";
     if (!dob) e.dob = "Enter date of birth";
     if (!address.trim()) e.address = "Enter address";
     if (!country.trim()) e.country = "Enter your Country";
@@ -177,13 +178,17 @@ const EditProfile: React.FC = () => {
                   }`}
                 />
                 {errors.lastName && (
-                  <p className="mt-1 text-[11px] text-red-600">{errors.lastName}</p>
+                  <p className="mt-1 text-[11px] text-red-600">
+                    {errors.lastName}
+                  </p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-800">Email</label>
+              <label className="block text-sm font-medium text-gray-800">
+                Email
+              </label>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -209,7 +214,9 @@ const EditProfile: React.FC = () => {
                 }`}
               />
               <div className="mt-2 text-[11px] space-y-0.5">
-                <p className={`${requirements.len ? "text-green-700" : "text-red-600"}`}>
+                <p
+                  className={`${requirements.len ? "text-green-700" : "text-red-600"}`}
+                >
                   - Add at least 8 characters
                 </p>
                 <p
@@ -222,7 +229,9 @@ const EditProfile: React.FC = () => {
                 >
                   - Lowercase letters (a-z)
                 </p>
-                <p className={`${requirements.num ? "text-green-700" : "text-red-600"}`}>
+                <p
+                  className={`${requirements.num ? "text-green-700" : "text-red-600"}`}
+                >
                   - Numbers (0-9)
                 </p>
                 <p
@@ -273,7 +282,9 @@ const EditProfile: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-800">Address</label>
+              <label className="block text-sm font-medium text-gray-800">
+                Address
+              </label>
               <input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
@@ -282,12 +293,16 @@ const EditProfile: React.FC = () => {
                 }`}
               />
               {errors.address && (
-                <p className="mt-1 text-[11px] text-red-600">{errors.address}</p>
+                <p className="mt-1 text-[11px] text-red-600">
+                  {errors.address}
+                </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-800">Country</label>
+              <label className="block text-sm font-medium text-gray-800">
+                Country
+              </label>
               <div
                 className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm flex items-center justify-between ${
                   errors.country ? "border-red-400" : "border-gray-300"
@@ -305,12 +320,16 @@ const EditProfile: React.FC = () => {
                 <ChevronDown className="w-4 h-4 text-gray-600" aria-hidden />
               </div>
               {errors.country && (
-                <p className="mt-1 text-[11px] text-red-600">{errors.country}</p>
+                <p className="mt-1 text-[11px] text-red-600">
+                  {errors.country}
+                </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-800">City</label>
+              <label className="block text-sm font-medium text-gray-800">
+                City
+              </label>
               <input
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
@@ -351,7 +370,9 @@ const EditProfile: React.FC = () => {
                 }`}
               />
               {errors.idNumber && (
-                <p className="mt-1 text-[11px] text-red-600">{errors.idNumber}</p>
+                <p className="mt-1 text-[11px] text-red-600">
+                  {errors.idNumber}
+                </p>
               )}
             </div>
 
@@ -397,7 +418,9 @@ const EditProfile: React.FC = () => {
                   }`}
                 />
                 {errors.checkIn && (
-                  <p className="mt-1 text-[11px] text-red-600">{errors.checkIn}</p>
+                  <p className="mt-1 text-[11px] text-red-600">
+                    {errors.checkIn}
+                  </p>
                 )}
               </div>
               <div>
@@ -434,11 +457,11 @@ const EditProfile: React.FC = () => {
               onClick={onNext}
               disabled={!isValid}
               aria-disabled={!isValid}
-              className={`w-full py-3 rounded-md text-sm font-semibold transition-opacity ${
-                isValid
-                  ? "bg-[#389131] text-white hover:opacity-90"
-                  : "bg-[#389131]/60 text-white cursor-not-allowed"
-              }`}
+              className={`w-full py-3 rounded-md text-sm font-semibold transition-opacity text-white`}
+              style={{
+                backgroundColor: !isValid ? "#929191" : "#389131",
+                cursor: !isValid ? "not-allowed" : "pointer",
+              }}
             >
               Next
             </button>
@@ -450,4 +473,3 @@ const EditProfile: React.FC = () => {
 };
 
 export default EditProfile;
-

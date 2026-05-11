@@ -23,7 +23,7 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
@@ -77,54 +77,54 @@ export const SelectRentalDatesModal: React.FC<SelectRentalDatesModalProps> = ({
           titleId="select-rental-dates-title"
         />
         <div className="p-6">
-        <div className="space-y-4 mb-6">
-          <div>
-            <label
-              htmlFor="pickup-date"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Pickup Date
-            </label>
-            <input
-              id="pickup-date"
-              type="date"
-              value={pickupDate}
-              onChange={(e) => setPickupDate(e.target.value)}
-              min={todayIso}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-            />
+          <div className="space-y-4 mb-6">
+            <div>
+              <label
+                htmlFor="pickup-date"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Pickup Date
+              </label>
+              <input
+                id="pickup-date"
+                type="date"
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+                min={todayIso}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="return-date"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Return Date
+              </label>
+              <input
+                id="return-date"
+                type="date"
+                value={returnDate}
+                onChange={(e) => setReturnDate(e.target.value)}
+                min={pickupDate || todayIso}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
+              />
+            </div>
           </div>
-          <div>
-            <label
-              htmlFor="return-date"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Return Date
-            </label>
-            <input
-              id="return-date"
-              type="date"
-              value={returnDate}
-              onChange={(e) => setReturnDate(e.target.value)}
-              min={pickupDate || todayIso}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#389131] focus:border-transparent"
-            />
-          </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={isNextDisabled}
-          aria-disabled={isNextDisabled}
-          className={`w-full py-3 text-sm font-semibold rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${
-            isNextDisabled
-              ? "bg-[#389131]/60 text-white cursor-not-allowed"
-              : "bg-[#389131] text-white hover:opacity-90"
-          }`}
-        >
-          Next
-        </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={isNextDisabled}
+            aria-disabled={isNextDisabled}
+            className={`w-full py-3 text-sm font-semibold rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 text-white`}
+            style={{
+              backgroundColor: isNextDisabled ? "#929191" : "#389131",
+              cursor: isNextDisabled ? "not-allowed" : "pointer",
+            }}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>

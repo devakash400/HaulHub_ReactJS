@@ -202,11 +202,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleScroll("left")}
                 aria-label="Scroll left"
                 disabled={!canScrollLeft}
-                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${
-                  !canScrollLeft
-                    ? "opacity-40 cursor-not-allowed hover:scale-100 active:scale-100"
-                    : ""
-                } bg-white active:bg-gray-200`}
+                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200`}
+                style={{
+                  opacity: !canScrollLeft ? 0.4 : 1,
+                  cursor: !canScrollLeft ? "not-allowed" : "pointer",
+                  pointerEvents: !canScrollLeft ? "none" : "auto",
+                }}
               >
                 <img
                   src={images.ArrowRight}
@@ -219,11 +220,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleScroll("right")}
                 aria-label="Scroll right"
                 disabled={!canScrollRight}
-                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${
-                  !canScrollRight
-                    ? "opacity-40 cursor-not-allowed hover:scale-100 active:scale-100"
-                    : ""
-                } bg-white active:bg-gray-200`}
+                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200`}
+                style={{
+                  opacity: !canScrollRight ? 0.4 : 1,
+                  cursor: !canScrollRight ? "not-allowed" : "pointer",
+                  pointerEvents: !canScrollRight ? "none" : "auto",
+                }}
               >
                 <img
                   src={images.ArrowRight}
