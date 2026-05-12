@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import { ModalHeader } from "../ModalHeader.tsx";
-
+import Calendar from "../../assets/images/calendar.png";
+import chevronDown from "../../assets/images/Dorpdown.png";
 export type SignUpData = {
   firstName: string;
   lastName: string;
@@ -29,16 +30,59 @@ type CountryOption = {
   name: string;
   dialCode: string;
   flag: string;
+  flagUrl: string;
 };
 
 const COUNTRY_OPTIONS: CountryOption[] = [
-  { code: "US", name: "United States", dialCode: "+1", flag: "🇺🇸" },
-  { code: "CA", name: "Canada", dialCode: "+1", flag: "🇨🇦" },
-  { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "🇬🇧" },
-  { code: "IN", name: "India", dialCode: "+91", flag: "🇮🇳" },
-  { code: "AU", name: "Australia", dialCode: "+61", flag: "🇦🇺" },
-  { code: "DE", name: "Germany", dialCode: "+49", flag: "🇩🇪" },
-  { code: "FR", name: "France", dialCode: "+33", flag: "🇫🇷" },
+  {
+    code: "US",
+    name: "United States",
+    dialCode: "+1",
+    flag: "🇺🇸",
+    flagUrl: "https://flagcdn.com/w20/us.png",
+  },
+  {
+    code: "CA",
+    name: "Canada",
+    dialCode: "+1",
+    flag: "🇨🇦",
+    flagUrl: "https://flagcdn.com/w20/ca.png",
+  },
+  {
+    code: "GB",
+    name: "United Kingdom",
+    dialCode: "+44",
+    flag: "🇬🇧",
+    flagUrl: "https://flagcdn.com/w20/gb.png",
+  },
+  {
+    code: "IN",
+    name: "India",
+    dialCode: "+91",
+    flag: "🇮🇳",
+    flagUrl: "https://flagcdn.com/w20/in.png",
+  },
+  {
+    code: "AU",
+    name: "Australia",
+    dialCode: "+61",
+    flag: "🇦🇺",
+    flagUrl: "https://flagcdn.com/w20/au.png",
+  },
+  {
+    code: "DE",
+    name: "Germany",
+    dialCode: "+49",
+    flag: "🇩🇪",
+    flagUrl: "https://flagcdn.com/w20/de.png",
+  },
+  {
+    code: "FR",
+    name: "France",
+    dialCode: "+33",
+    flag: "🇫🇷",
+    flagUrl: "https://flagcdn.com/w20/fr.png",
+  },
 ];
 
 export const SignUpModal: React.FC<SignUpModalProps> = ({
@@ -66,6 +110,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [genderTouched, setGenderTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const dateInputRef = useRef<HTMLInputElement | null>(null);
   const todayIso = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
@@ -162,13 +207,20 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   return (
     <>
       <style>{`
-        .custom-placeholder::placeholder {
+        .custom-placeholder::placeholder,
+        .date-field,
+        .date-field::-webkit-datetime-edit,
+        .date-field::-webkit-datetime-edit-text,
+        .date-field::-webkit-datetime-edit-month-field,
+        .date-field::-webkit-datetime-edit-day-field,
+        .date-field::-webkit-datetime-edit-year-field {
           font-family: "Lexend";
           font-weight: 300;
+          font-style: normal;
           font-size: 12px;
           line-height: 100%;
           letter-spacing: 0%;
-          color: #9b989e;
+          color: #929191;
         }
       `}</style>
       <div
@@ -216,13 +268,20 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       onBlur={() => setFirstNameTouched(true)}
-                      className="w-full px-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 custom-placeholder"
+                      className="w-full px-3 text-gray-900 placeholder:text-[#929191] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 custom-placeholder"
                       placeholder="Enter your First Name"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
                         border: "1px solid #7C7C7C",
                         opacity: 1,
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontStyle: "normal",
+                        fontSize: "12px",
+                        lineHeight: "100%",
+                        letterSpacing: "0%",
+                        color: "#000000",
                       }}
                     />
                     {firstNameTouched && !isFirstNameValid && (
@@ -250,13 +309,20 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       onBlur={() => setLastNameTouched(true)}
-                      className="w-full px-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 custom-placeholder"
+                      className="w-full px-3 text-gray-900 placeholder:text-[#929191] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 custom-placeholder"
                       placeholder="Enter your Last Name"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
                         border: "1px solid #7C7C7C",
                         opacity: 1,
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontStyle: "normal",
+                        fontSize: "12px",
+                        lineHeight: "100%",
+                        letterSpacing: "0%",
+                        color: "#000000",
                       }}
                     />
                     {lastNameTouched && !isLastNameValid && (
@@ -268,47 +334,56 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 </div>
 
                 <div>
-                  <label
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                    style={{
-                      fontFamily: "Lexend",
-                      fontWeight: 400,
-                      fontSize: "14px",
-                      lineHeight: "100%",
-                      letterSpacing: "0%",
-                      color: "#000000",
-                    }}
-                  >
+                  <label className="block mb-1 font-['Lexend'] font-normal text-[14px] leading-[100%] text-black">
                     Date of birth
                   </label>
-                  <input
-                    type="date"
-                    value={dateOfBirth}
-                    min="1900-01-01"
-                    max={todayIso}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (!v) {
-                        setDateOfBirth("");
-                        return;
+
+                  <div className="relative">
+                    <input
+                      ref={dateInputRef}
+                      type="date"
+                      value={dateOfBirth}
+                      min="1900-01-01"
+                      max={todayIso}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (!v) {
+                          setDateOfBirth("");
+                          return;
+                        }
+                        if (v > todayIso) {
+                          setDateOfBirth(todayIso);
+                          return;
+                        }
+                        const [y, m, d] = v.split("-");
+                        if (!y || !m || !d) return;
+                        setDateOfBirth(`${y.slice(0, 4)}-${m}-${d}`);
+                      }}
+                      className="date-field w-full h-[40px] px-3 pr-10 border border-[#7C7C7C] rounded-[5px] text-gray-900 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15
+      [appearance:textfield]
+      [&::-webkit-calendar-picker-indicator]:opacity-0
+      [&::-webkit-calendar-picker-indicator]:absolute"
+                      style={{
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontStyle: "normal",
+                        fontSize: "12px",
+                        lineHeight: "100%",
+                        letterSpacing: "0%",
+                        color: dateOfBirth ? "#000" : "#929191",
+                      }}
+                    />
+
+                    <img
+                      src={Calendar}
+                      alt="calendar"
+                      className="w-[18px] h-[18px] absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                      onClick={() =>
+                        dateInputRef.current?.showPicker?.() ??
+                        dateInputRef.current?.focus()
                       }
-                      if (v > todayIso) {
-                        setDateOfBirth(todayIso);
-                        return;
-                      }
-                      const [y, m, d] = v.split("-");
-                      if (!y || !m || !d) return;
-                      const year = y.slice(0, 4);
-                      setDateOfBirth(`${year}-${m}-${d}`);
-                    }}
-                    className="w-full px-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
-                    style={{
-                      height: "40px",
-                      borderRadius: "5px",
-                      border: "1px solid #7C7C7C",
-                      opacity: 1,
-                    }}
-                  />
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -330,12 +405,19 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
                       onBlur={() => setGenderTouched(true)}
-                      className="w-full px-3 pr-9 text-sm text-gray-900 bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
+                      className="w-full px-3 pr-9 text-[12px] bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
                         border: "1px solid #7C7C7C",
                         opacity: 1,
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontStyle: "normal",
+                        fontSize: "12px",
+                        lineHeight: "100%",
+                        letterSpacing: "0%",
+                        color: gender ? "#000000" : "#929191",
                       }}
                     >
                       <option value="">Select Gender</option>
@@ -373,8 +455,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => setEmailTouched(true)}
-                    placeholder="Enter your email address"
-                    className="w-full px-3 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 custom-placeholder"
+                    placeholder="Enter your Email"
+                    className="w-full px-3 text-gray-900 placeholder:text-[#929191] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 custom-placeholder"
                     style={{
                       height: "40px",
                       borderRadius: "5px",
@@ -383,6 +465,13 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                           ? "1px solid #f87171"
                           : "1px solid #7C7C7C",
                       opacity: 1,
+                      fontFamily: "Lexend",
+                      fontWeight: 300,
+                      fontStyle: "normal",
+                      fontSize: "12px",
+                      lineHeight: "100%",
+                      letterSpacing: "0%",
+                      color: "#000000",
                     }}
                   />
                   {emailTouched && !isEmailValid && (
@@ -412,13 +501,20 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onBlur={() => setPasswordTouched(true)}
-                      placeholder="Enter your password"
-                      className="w-full px-3 pr-10 text-gray-900 placeholder:text-gray-400 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 custom-placeholder"
+                      placeholder="Enter your Password"
+                      className="w-full px-3 pr-10 text-gray-900 placeholder:text-[#929191] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 custom-placeholder"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
                         border: "1px solid #7C7C7C",
                         opacity: 1,
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontStyle: "normal",
+                        fontSize: "12px",
+                        lineHeight: "100%",
+                        letterSpacing: "0%",
+                        color: "#000000",
                       }}
                     />
                     <button
@@ -501,15 +597,28 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     <select
                       value={trailor}
                       onChange={(e) => setTrailor(e.target.value)}
-                      className="w-full px-3 pr-9 text-sm text-gray-900 bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
+                      className="w-full px-3 pr-9 text-[12px] bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
                         border: "1px solid #7C7C7C",
                         opacity: 1,
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontStyle: "normal",
+                        fontSize: "12px",
+                        lineHeight: "100%",
+                        letterSpacing: "0%",
+                        color: trailor ? "#000000" : "#929191",
                       }}
                     >
-                      <option value="">Select option</option>
+                      <option
+                        value=""
+                        className="font-['Lexend'] font-light text-[12px] leading-[100%] tracking-[0%] text-[#929191]"
+                      >
+                        Select Your Category
+                      </option>
+
                       <option value="Renter">Renter</option>
                       <option value="Owner">Owner</option>
                     </select>
@@ -533,41 +642,91 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   >
                     Phone Number
                   </label>
-                  <div
-                    className="w-full pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/15"
-                    style={{
-                      height: "40px",
-                      borderRadius: "5px",
-                      border: "1px solid #7C7C7C",
-                      opacity: 1,
-                    }}
-                  >
-                    <select
-                      className="flex items-center gap-1 text-sm bg-transparent outline-none border-none pr-1 max-w-[40%] sm:max-w-[32%]"
-                      value={selectedCountry.code}
-                      onChange={(e) => {
-                        const next = COUNTRY_OPTIONS.find(
-                          (c) => c.code === e.target.value,
-                        );
-                        if (next) setSelectedCountry(next);
-                      }}
+                  <div className="relative">
+                    <div
+                      className="w-full h-[44px] 
+                    border border-[#8B8B8B] rounded-[8px]
+                     bg-white flex items-center
+                      px-3 focus-within:border-[#389131]
+                       focus-within:ring-2 focus-within:ring-[#389131]/10 
+                       transition-all gap-2"
                     >
-                      {COUNTRY_OPTIONS.map((country) => (
-                        <option key={country.code} value={country.code}>
-                          {country.flag} {country.dialCode}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="h-5 w-px bg-gray-300 flex-shrink-0" />
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      onBlur={() => setPhoneTouched(true)}
-                      placeholder="Enter your phone number"
-                      maxLength={10}
-                      className="flex-1 border-none outline-none text-sm px-1 py-0 bg-transparent custom-placeholder"
-                    />
+                      {/* Country Selector */}
+                      <div className="relative flex items-center gap-1 min-w-[60px]">
+                        {/* Flag */}
+                        <img
+                          src={selectedCountry.flagUrl}
+                          alt={selectedCountry.name}
+                          className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                        />
+
+                        {/* Country Code */}
+                        <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
+                          {selectedCountry.dialCode}
+                        </span>
+
+                        <div className="flex items-center">
+                          <img
+                            src={chevronDown}
+                            alt="dropdown"
+                            className="w-[8.5px] h-[6px] pointer-events-none"
+                          />
+                        </div>
+
+                        {/* Select */}
+                        <select
+                          className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
+                          value={selectedCountry.code}
+                          onChange={(e) => {
+                            const next = COUNTRY_OPTIONS.find(
+                              (c) => c.code === e.target.value,
+                            );
+                            if (next) setSelectedCountry(next);
+                          }}
+                          style={{
+                            WebkitAppearance: "none",
+                            MozAppearance: "none",
+                            appearance: "none",
+                          }}
+                        >
+                          {COUNTRY_OPTIONS.map((country) => (
+                            <option
+                              key={country.code}
+                              value={country.code}
+                              style={{
+                                padding: "12px",
+                                fontSize: "14px",
+                                color: "#222",
+                                background: "#fff",
+                              }}
+                            >
+                              {country.name} {country.dialCode}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Input */}
+                      <input
+                        type="tel"
+                        placeholder="Enter Your Phone Number"
+                        value={phoneNumber}
+                        onChange={(e) => {
+                          setPhoneNumber(e.target.value);
+                        }}
+                        onBlur={() => setPhoneTouched(true)}
+                        maxLength={10}
+                        className="flex-1 bg-transparent border-none outline-none text-left text-[15px] text-[#000] custom-placeholder font-normal placeholder:text-[#929191]"
+                        style={{
+                          fontFamily: "Lexend",
+                          fontWeight: 300,
+                          fontStyle: "normal",
+                          fontSize: "15px",
+                          lineHeight: "100%",
+                          letterSpacing: "0%",
+                        }}
+                      />
+                    </div>
                   </div>
                   {phoneTouched && !isPhoneValid && (
                     <p className="mt-1 text-xs text-red-600">
@@ -582,7 +741,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     type="checkbox"
                     checked={agreed}
                     onChange={(e) => setAgreed(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-[#389131] bg-white accent-[#389131] focus:ring-[#389131] flex-shrink-0"
+                    className="w-[24px] h-[24px] border border-black rounded-[4px] bg-white accent-black focus:ring-0 flex-shrink-0"
                   />
                   <label
                     htmlFor="signup-agree"
@@ -679,9 +838,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   </label>
                 </div>
               </div>
-            </div>
+              {/* </div> */}
 
-            <div className="px-6 pb-6 sm:px-10 sm:pb-8 border-t border-gray-200">
+              {/* <div className="px-6 pb-6 sm:px-10 sm:pb-8 border-t border-gray-200"> */}
               <button
                 type="submit"
                 disabled={!isFormValid}

@@ -28,13 +28,16 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
         className={`flex items-center justify-center shrink-0 ${
           variant === "back"
             ? "w-8 h-8 text-white hover:bg-white/10 rounded-full"
-            : "w-10 h-10 rounded-full bg-white/15 text-white hover:bg-white/25"
+            : "rounded-full bg-white/15 text-white hover:bg-white/25"
         } transition-colors`}
+        style={
+          variant === "close" ? { width: "19px", height: "19px" } : undefined
+        }
       >
         {variant === "back" ? (
           <ArrowLeft className="w-5 h-5" aria-hidden />
         ) : (
-          <X className="w-5 h-5" aria-hidden />
+          <X className="w-4 h-4" aria-hidden />
         )}
       </button>
 

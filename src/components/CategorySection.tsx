@@ -243,10 +243,6 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 ? "flex gap-3 overflow-x-auto pb-4 scroll-smooth"
                 : "flex gap-8 overflow-x-auto pb-6 scroll-smooth"
             }
-            style={{
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
-            }}
           >
             {items.map((item, index) => {
               const isWishlisted = wishlistIds.has(item.id);

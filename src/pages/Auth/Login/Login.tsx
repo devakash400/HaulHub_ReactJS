@@ -6,6 +6,8 @@ import { ModalHeader } from "../../../components/ModalHeader.tsx";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../store/authSlice.ts";
 import backButton from "../../../assets/images/Back button.png";
+import smartphone from "../../../assets/images/Mobile-phone.png";
+import chevronDown from "../../../assets/images/Dorpdown.png";
 import {
   login as loginApi,
   phoneLogin as phoneLoginApi,
@@ -462,6 +464,18 @@ const LoginModal: React.FC<LoginModalProps> = ({
       className="modal-overlay fixed inset-0 z-[80] flex items-center justify-center bg-black/45 px-4"
       onClick={handleOverlayClick}
     >
+      <style>{`
+        .custom-placeholder::placeholder {
+          font-family: "Lexend";
+          font-weight: 300;
+          font-style: normal;
+          font-size: 12px;
+          leading-trim: none;
+          line-height: 100%;
+          letter-spacing: 0%;
+          color: #9B989E;
+        }
+      `}</style>
       <div
         className="w-full max-w-[554px] max-h-[90vh] bg-white rounded-[18px] shadow-[0_20px_40px_rgba(15,23,42,0.25)] relative font-sans flex flex-col overflow-hidden"
         onClick={handleModalClick}
@@ -480,54 +494,73 @@ const LoginModal: React.FC<LoginModalProps> = ({
           variant="close"
         />
 
-        <div className="px-6 sm:px-10 py-8 flex-1 overflow-y-auto">
+        <div className="px-6 sm:px-10 pt-8 pb-8 flex-1 overflow-y-auto">
           {step === "email" && (
             <div>
-              <label className="block text-sm font-medium text-black mb-2">
+              <label
+                className="block mb-2 font-['Lexend']
+              font-normal text-[17px] leading-[100%]
+               tracking-[0%] text-black"
+              >
                 {usePhoneOnly ? "Phone Number" : "Email ID"}{" "}
                 <span className="text-red-500">*</span>
               </label>
               {usePhoneOnly ? (
-                <div className="w-full border border-gray-400 rounded-lg pl-3 pr-2 py-2.5 flex items-center gap-2 bg-white focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/15">
-                  <div className="relative flex items-center min-w-[95px] gap-2">
-                    <img
-                      src={selectedCountry.flagUrl}
-                      alt={selectedCountry.name}
-                      className="h-4 w-6 rounded-sm object-cover"
-                    />
-                    <span className="text-sm text-gray-700">
-                      {selectedCountry.dialCode}
-                    </span>
-                    <ChevronDown className="pointer-events-none h-4 w-4 text-gray-500" />
-                    <select
-                      className="absolute inset-0 opacity-0"
-                      value={selectedCountry.code}
-                      onChange={(e) => {
-                        const next = COUNTRY_OPTIONS.find(
-                          (c) => c.code === e.target.value,
-                        );
-                        if (next) setSelectedCountry(next);
-                      }}
-                    >
-                      {COUNTRY_OPTIONS.map((country) => (
-                        <option key={country.code} value={country.code}>
-                          {country.name} {country.dialCode}
-                        </option>
-                      ))}
-                    </select>
+                <div className="w-full">
+                  <div className="relative">
+                    <div className=" h-[40px] bg-white border border-black rounded-[5px] flex items-center px-3 gap-2">
+                      {/* Country Selector */}
+                      <div className="relative flex items-center gap-1 min-w-[6px]">
+                        <img
+                          src={selectedCountry.flagUrl}
+                          alt={selectedCountry.name}
+                          className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                        />
+
+                        <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
+                          {selectedCountry.dialCode}
+                        </span>
+
+                        <div className="flex items-center">
+                          <img
+                            src={chevronDown}
+                            alt="dropdown"
+                            className="w-[8.5px] h-[6px] pointer-events-none"
+                          />
+                        </div>
+
+                        <select
+                          className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
+                          value={selectedCountry.code}
+                          onChange={(e) => {
+                            const next = COUNTRY_OPTIONS.find(
+                              (c) => c.code === e.target.value,
+                            );
+                            if (next) setSelectedCountry(next);
+                          }}
+                        >
+                          {COUNTRY_OPTIONS.map((country) => (
+                            <option key={country.code} value={country.code}>
+                              {country.name} {country.dialCode}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Input */}
+                      <input
+                        type="tel"
+                        placeholder="Phone Number"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          setEmailError(null);
+                        }}
+                        maxLength={10}
+                        className="flex-1 bg-transparent outline-none text-[15px] text-black custom-placeholder placeholder:text-[#9B989E] font-normal"
+                      />
+                    </div>
                   </div>
-                  <div className="h-5 w-px bg-gray-300 flex-shrink-0" />
-                  <input
-                    type="tel"
-                    placeholder="Phone Number"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setEmailError(null);
-                    }}
-                    maxLength={10}
-                    className="flex-1 border-none outline-none text-sm px-1 py-0 bg-transparent"
-                  />
                 </div>
               ) : (
                 <input
@@ -538,7 +571,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     setEmail(e.target.value);
                     setEmailError(null);
                   }}
-                  className="w-full px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                  className="w-full px-4 text-sm custom-placeholder placeholder:text-[#9B989E] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   style={{
                     height: "40px",
                     background: "#FFFFFF",
@@ -559,19 +592,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
               )}
 
               <div className="mt-4">
-                <label
-                  className="block text-black mb-2"
-                  style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 400,
-                    fontSize: "14px",
-                    fontStyle: "normal",
-                    lineHeight: "100%",
-                    letterSpacing: "0%",
-                  }}
-                >
-                  Choose your category <span className="text-red-500">*</span>
+                <label className="block mb-2 font-['Lexend'] font-normal text-[14px] leading-[100%] tracking-[0%] text-black">
+                  Choose your Category <span className="text-red-500">*</span>
                 </label>
+
                 <div className="relative">
                   <select
                     value={loginTrailor}
@@ -620,7 +644,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
               <div className="flex items-center gap-3 my-7 text-sm text-gray-500">
                 <div className="flex-1 h-px bg-gray-200" />
-                <span>Or</span>
+                <span className="font-['Inter'] font-medium text-[14px] leading-[20px] tracking-[0%] align-middle text-black">
+                  Or
+                </span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
 
@@ -706,9 +732,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 {usePhoneOnly ? (
                   <Mail className="w-[22px] h-[22px] text-black" aria-hidden />
                 ) : (
-                  <Smartphone
-                    className="w-[22px] h-[22px] text-black"
-                    aria-hidden
+                  <img
+                    src={smartphone}
+                    alt="Smartphone"
+                    className="w-[22px] h-[22px]"
                   />
                 )}
                 <span
@@ -727,29 +754,29 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 </span>
               </button>
 
-              <p className="mt-8 text-center text-sm text-gray-800">
+              <p className="mt-8 text-center font-['Myriad Pro'] font-normal text-[12px] leading-[100%] tracking-[0px] text-black">
                 Don&apos;t have an account?{" "}
                 <button
                   type="button"
                   onClick={onOpenSignUp}
-                  className="text-[#389131] font-semibold underline cursor-pointer"
+                  className="font-['Myriad Pro'] font-semibold text-[12px] leading-[100%] tracking-[0px] text-[#389131] underline cursor-pointer"
                 >
                   Sign up
                 </button>
               </p>
 
-              <p className="mt-4 text-center text-xs sm:text-sm text-gray-800">
+              <p className="mt-4 text-center font-['Lexend'] text-[10px] font-medium leading-[100%] text-gray-800">
                 You agree with{" "}
                 <button
                   type="button"
-                  className="text-[#389131] font-semibold cursor-pointer"
+                  className="font-['Lexend'] text-[10px] font-medium leading-[100%] text-[#389131] underline underline-offset-0 decoration-1 cursor-pointer"
                 >
                   Terms &amp; Conditions
                 </button>{" "}
                 and{" "}
                 <button
                   type="button"
-                  className="text-[#389131] font-semibold cursor-pointer"
+                  className="font-['Lexend'] text-[10px] font-medium leading-[100%] text-[#389131] underline underline-offset-0 decoration-1 cursor-pointer"
                 >
                   Privacy Policy
                 </button>
@@ -760,19 +787,19 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
           {step === "password" && (
             <div className="flex flex-col min-h-[359px]">
-              {/* Back Button */}
               <button
                 type="button"
                 onClick={() => setStep("email")}
-                className="flex items-center gap-2 mb-5"
+                className="flex items-center gap-1 mb-5"
               >
                 <img
                   src={backButton}
                   alt="Back"
                   className="w-[5px] h-[10px] opacity-100 border-transparent object-contain"
                 />
-
-                <span className="text-sm text-gray-500">Back</span>
+                <span className="font-['Lexend'] text-[14px] font-normal leading-[100%] tracking-[0px] capitalize text-[#7C7C7C]">
+                  Back
+                </span>
               </button>
               {/* Password Label */}
               <label
@@ -797,14 +824,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   setPassword(e.target.value);
                   setLoginError(null);
                 }}
-                className="rounded-[5px] border border-black px-4 focus:outline-none focus:ring-0 placeholder:text-[#9B989E]"
+                className="rounded-[5px] border border-black px-4 focus:outline-none focus:ring-0 custom-placeholder placeholder:text-[#9B989E]"
                 style={{
                   height: "40px",
                   fontFamily: "Lexend",
                   fontWeight: 400,
                 }}
               />
-              {/* Error */}
+
               {loginError && (
                 <p className="mt-2 text-xs text-red-600">{loginError}</p>
               )}
@@ -893,15 +920,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="button"
                 onClick={() => setStep("email")}
-                className="flex items-center gap-2 mb-5"
+                className="flex items-center gap-1 mb-5"
               >
                 <img
                   src={backButton}
                   alt="Back"
                   className="w-[5px] h-[10px] opacity-100 border-transparent object-contain"
                 />
-
-                <span className="text-sm text-gray-500">Back</span>
+                <span className="font-['Lexend'] text-[14px] font-normal leading-[100%] tracking-[0px] capitalize text-[#7C7C7C]">
+                  Back
+                </span>
               </button>
               <p
                 className="text-center text-black"
@@ -920,44 +948,44 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </p>
 
               <div className="mt-6">
-                <label
-                  className="block mb-2 text-black"
-                  style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 400,
-                    fontSize: "17px",
-                    lineHeight: "100%",
-                    letterSpacing: "0%",
-                    color: "#000000",
-                  }}
-                >
-                  Phone Number <span className="text-red-500">*</span>
+                <label className="block mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
+                  Phone Number{" "}
+                  <span className="font-['Lexend'] text-[17px] font-normal leading-[100%] text-[#FF0000]">
+                    *
+                  </span>
                 </label>
                 <div
-                  className="flex items-center gap-2 px-3"
+                  className="h-[40px] bg-white border border-black rounded-[5px] flex items-center px-3 gap-2"
                   style={{
-                    height: "40px",
-                    border: "1px solid #000000",
-                    borderRadius: "5px",
                     fontFamily: "Lexend",
                   }}
                 >
-                  <div className="relative flex items-center min-w-[95px] gap-2">
+                  {/* Country Selector */}
+                  <div className="relative flex items-center gap-1 min-w-[95px] flex-shrink-0">
                     <img
                       src={selectedCountry.flagUrl}
                       alt={selectedCountry.name}
-                      className="h-4 w-6 rounded-sm object-cover"
+                      className="w-[20px] h-[12px] object-cover rounded-[1px]"
                     />
-                    <span className="text-sm text-gray-700">
+
+                    <span className="text-[14px] font-normal text-[#929191] leading-[15px] whitespace-nowrap">
                       {selectedCountry.dialCode}
                     </span>
-                    <ChevronDown className="pointer-events-none h-4 w-4 text-gray-500" />
+
+                    <div className="flex items-center">
+                      <img
+                        src={chevronDown}
+                        alt="dropdown"
+                        className="w-[8.5px] h-[6px] pointer-events-none"
+                      />
+                    </div>
+
                     <select
-                      className="absolute inset-0 opacity-0"
+                      className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
                       value={selectedCountry.code}
                       onChange={(e) => {
                         const next = COUNTRY_OPTIONS.find(
-                          (country) => country.code === e.target.value,
+                          (c) => c.code === e.target.value,
                         );
                         if (next) setSelectedCountry(next);
                       }}
@@ -969,16 +997,18 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       ))}
                     </select>
                   </div>
+
+                  {/* Divider */}
                   <div className="h-5 w-px bg-gray-300 flex-shrink-0" />
+
+                  {/* Input */}
                   <input
+                    type="tel"
                     value={resetPhone}
                     onChange={(e) => setResetPhone(e.target.value)}
                     placeholder="Phone Number"
-                    className="flex-1 outline-none bg-transparent text-sm"
-                    style={{
-                      fontFamily: "Lexend",
-                      fontWeight: 400,
-                    }}
+                    maxLength={10}
+                    className="flex-1 min-w-0 bg-transparent outline-none text-[15px] text-black custom-placeholder placeholder:text-[#9B989E] font-normal"
                   />
                 </div>
               </div>
@@ -1002,25 +1032,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </div>
 
               <div>
-                <label
-                  className="block mb-2 text-black"
-                  style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 400,
-                    fontSize: "17px",
-                    lineHeight: "100%",
-                    letterSpacing: "0%",
-                    color: "#000000",
-                  }}
-                >
+                <label className="block mb-2 font-['Lexend'] font-normal text-[17px] leading-[100%] tracking-[0%] text-black">
                   Email ID<span className="text-red-500">*</span>
                 </label>
 
                 <input
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="Enter Email ID"
-                  className="w-full rounded-[5px] border border-black px-4 outline-none focus:outline-none focus:ring-0"
+                  placeholder="Enter Your Email"
+                  className="w-full rounded-[5px] border border-black px-4 outline-none focus:outline-none focus:ring-0 custom-placeholder placeholder:text-[#9B989E]"
                   style={{
                     height: "40px",
                     fontFamily: "Lexend",
@@ -1048,7 +1068,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       : "not-allowed",
                 }}
               >
-                {isForgotSubmitting ? "Sending..." : "Submit"}
+                {isForgotSubmitting ? "Sending..." : "Continue"}
               </button>
 
               {forgotError && (
@@ -1106,28 +1126,22 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="button"
                 onClick={() => setStep("email")}
-                className="flex items-center gap-2 mb-5"
+                className="flex items-center gap-1 mb-5"
               >
                 <img
                   src={backButton}
                   alt="Back"
                   className="w-[5px] h-[10px] opacity-100 border-transparent object-contain"
                 />
-
-                <span className="text-sm text-gray-500">Back</span>
+                <span className="font-['Lexend'] text-[14px] font-normal leading-[100%] tracking-[0px] capitalize text-[#7C7C7C]">
+                  Back
+                </span>
               </button>
-              <label
-                className="block mb-2 text-black"
-                style={{
-                  fontFamily: "Lexend",
-                  fontWeight: 400,
-                  fontSize: "17px",
-                  lineHeight: "100%",
-                  letterSpacing: "0%",
-                  color: "#000000",
-                }}
-              >
-                New Password<span className="text-red-500">*</span>
+              <label className="block mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
+                New Password{" "}
+                <span className="font-['Lexend'] text-[17px] font-normal leading-[100%] text-[#FF0000]">
+                  *
+                </span>
               </label>
               <div className="relative">
                 <input
@@ -1149,18 +1163,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   )}
                 </button>
               </div>
-              <label
-                className="block mb-2 text-black mt-5"
-                style={{
-                  fontFamily: "Lexend",
-                  fontWeight: 400,
-                  fontSize: "17px",
-                  lineHeight: "100%",
-                  letterSpacing: "0%",
-                  color: "#000000",
-                }}
-              >
-                Confirm New Password<span className="text-red-500">*</span>
+              <label className="mt-5 block mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
+                Confirm New Password{" "}
+                <span className="font-['Lexend'] text-[17px] font-normal leading-[100%] text-[#FF0000]">
+                  *
+                </span>
               </label>
               <div className="relative">
                 <input
@@ -1255,7 +1262,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
             aria-modal="true"
           >
             <div
-              className="w-full max-w-[380px] bg-white rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(15,23,42,0.25)]"
+              className="w-full max-w-[380px] bg-white 
+              rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(15,23,42,0.25)]"
               onClick={(e) => e.stopPropagation()}
             >
               <ModalHeader
@@ -1263,7 +1271,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 onClose={() => setShowOtpModal(false)}
                 variant="close"
               />
-              <div className="px-5 py-5">
+              <div className="px-5 py-5 ">
                 <p
                   className="text-center"
                   style={{
@@ -1278,6 +1286,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   Please enter the OTP sent to
                   <br />
                   <span
+                    className="mt-2"
                     style={{
                       fontFamily: "Lexend",
                       fontWeight: 300,
@@ -1290,30 +1299,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     {otpTargetLabel}
                   </span>
                   <br />
-                  <span
-                    style={{
-                      fontFamily: "Lexend",
-                      fontWeight: 400,
-                      fontSize: "12px",
-                      lineHeight: "100%",
-                      letterSpacing: "0px",
-                      color: "#666666",
-                    }}
-                  >
-                    (Demo OTP: 123456)
-                  </span>
                 </p>
-                <label
-                  className="block mt-5 mb-2"
-                  style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 400,
-                    fontSize: "14px",
-                    lineHeight: "100%",
-                    letterSpacing: "0%",
-                    color: "#434343",
-                  }}
-                >
+
+                <label className="block mt-5 mb-2 font-['Lexend'] text-[14px] font-normal leading-[100%] text-[#434343]">
                   Enter OTP
                 </label>
                 <>
@@ -1328,7 +1316,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     }}
                     placeholder="Enter OTP"
                     maxLength={6}
-                    className="otp-input px-4 outline-none focus:outline-none focus:ring-0"
+                    className="otp-input px-4 outline-none focus:outline-none focus:ring-0 custom-placeholder placeholder:text-[#9B989E]"
                     style={{
                       width: "100%",
                       height: "40px",
@@ -1340,17 +1328,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       fontSize: "14px",
                     }}
                   />
-
-                  <style>{`
-                    .otp-input::placeholder {
-                      font-family: Lexend;
-                      font-weight: 300;
-                      font-size: 12px;
-                      line-height: 100%;
-                      letter-spacing: 0%;
-                      color: #43434380;
-                    }
-                  `}</style>
                 </>
                 <div className="mt-2 flex justify-end items-center gap-2 text-xs text-gray-600">
                   {otpSeconds > 0 ? (
@@ -1382,7 +1359,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     {otpError}
                   </p>
                 )}
-
                 <button
                   type="button"
                   onClick={handleVerifyOtp}
