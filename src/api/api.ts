@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 
 const BASE_URL =
- "https://retrieval-nibble-deferred.ngrok-free.dev"
+ "https://647f-2401-4900-1f32-77cb-d0c6-4956-a1cc-ff5e.ngrok-free.app"
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;

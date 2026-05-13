@@ -259,6 +259,16 @@ const Navbar: React.FC = () => {
                         <Link
                           to="/"
                           className="text-inherit no-underline cursor-pointer"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
                         >
                           Home
                         </Link>
@@ -317,7 +327,19 @@ const Navbar: React.FC = () => {
                           setIsLogoutConfirmOpen(true);
                         }}
                       >
-                        <span className="text-inherit no-underline cursor-pointer">
+                        <span
+                          className="text-inherit no-underline cursor-pointer"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
                           Login / Sign Up
                         </span>
                       </li>
@@ -331,6 +353,16 @@ const Navbar: React.FC = () => {
                         <Link
                           to="/"
                           className="text-inherit no-underline cursor-pointer"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
                         >
                           Home
                         </Link>
@@ -352,7 +384,19 @@ const Navbar: React.FC = () => {
                           handleProtectedDrawerNavigate("/booking")
                         }
                       >
-                        <span className="text-inherit no-underline cursor-pointer">
+                        <span
+                          className="text-inherit no-underline cursor-pointer"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
                           Booked Trailor
                         </span>
                       </li>
@@ -385,6 +429,16 @@ const Navbar: React.FC = () => {
                         <Link
                           to="/"
                           className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
                         >
                           Home
                         </Link>
@@ -395,7 +449,19 @@ const Navbar: React.FC = () => {
                           handleProtectedDrawerNavigate("/booking")
                         }
                       >
-                        <span className="text-inherit no-underline cursor-pointer block w-full">
+                        <span
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
                           Booked Trailor
                         </span>
                       </li>
@@ -406,6 +472,16 @@ const Navbar: React.FC = () => {
                         <Link
                           to="/contact"
                           className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
                         >
                           Contact
                         </Link>
@@ -416,7 +492,19 @@ const Navbar: React.FC = () => {
                           handleProtectedDrawerNavigate("/profile")
                         }
                       >
-                        <span className="text-inherit no-underline cursor-pointer block w-full">
+                        <span
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
                           Profile
                         </span>
                       </li>
@@ -428,7 +516,19 @@ const Navbar: React.FC = () => {
                           setIsLoginOpen(true);
                         }}
                       >
-                        <span className="text-inherit no-underline cursor-pointer block w-full">
+                        <span
+                          className="text-inherit no-underline cursor-pointer"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
                           Login / Sign Up
                         </span>
                       </li>
@@ -453,6 +553,16 @@ const Navbar: React.FC = () => {
                         <Link
                           to="/contact"
                           className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
                         >
                           Contact
                         </Link>

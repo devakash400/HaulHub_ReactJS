@@ -232,7 +232,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
         onClick={onClose}
       >
         <div
-          className="relative w-full max-w-[554px] bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-hidden"
+          className="relative w-full max-w-[554px]
+           bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           <form
@@ -247,7 +248,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
             />
 
             <div className="px-6 pt-6 pb-4 sm:px-10 sm:pt-6 sm:pb-6 overflow-y-auto">
-              <div className="mt-8 space-y-4">
+              <div className="mt-1 space-y-4">
                 <div className="flex flex-col gap-4">
                   <div>
                     <label
@@ -743,10 +744,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     onChange={(e) => setAgreed(e.target.checked)}
                     className="w-[24px] h-[24px] border border-black rounded-[4px] bg-white accent-black focus:ring-0 flex-shrink-0"
                   />
-                  <label
-                    htmlFor="signup-agree"
-                    className="text-[11px] sm:text-xs leading-relaxed text-gray-700 break-words"
-                  >
+
+                  {/* Changed label -> div so text click won't toggle checkbox */}
+                  <div className="text-[11px] sm:text-xs leading-relaxed text-gray-700 break-words">
                     <span
                       className="block sm:inline"
                       style={{
@@ -761,48 +761,56 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     >
                       By selecting Agree and continue, I agree to HaulHub{" "}
                     </span>
-                    <span
-                      className="block sm:inline"
+                    <a
+                      href="/terms"
+                      className="block sm:inline underline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
                         fontSize: "17px",
                         lineHeight: "21px",
-                        letterSpacing: "4%",
+                        letterSpacing: "0.04em",
+                        textDecorationStyle: "solid",
+                        textDecorationSkipInk: "auto",
                         color: "#389131",
                       }}
                     >
                       Terms of service
-                    </span>
+                    </a>
                     <span
-                      className="block sm:inline"
+                      className="block sm:inline underline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
                         fontSize: "17px",
                         lineHeight: "21px",
-                        letterSpacing: "4%",
+                        letterSpacing: "0.04em",
+                        textDecorationStyle: "solid",
+                        textDecorationSkipInk: "auto",
                         color: "#389131",
                       }}
                     >
                       ,{" "}
                     </span>
-                    <span
-                      className="block sm:inline"
+                    <a
+                      href="/payments-terms"
+                      className="block sm:inline underline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
                         fontSize: "17px",
                         lineHeight: "21px",
-                        letterSpacing: "4%",
+                        letterSpacing: "0.04em",
+                        textDecorationStyle: "solid",
+                        textDecorationSkipInk: "auto",
                         color: "#389131",
                       }}
                     >
                       Payments Terms of Service and Anti-Discrimination Policy
-                    </span>
+                    </a>
                     <span
                       className="block sm:inline"
                       style={{
@@ -820,22 +828,25 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     <span className="block sm:hidden mt-0.5">
                       , and acknowledge the
                     </span>{" "}
-                    <span
-                      className="block sm:inline"
+                    <a
+                      href="/privacy-policy"
+                      className="block sm:inline underline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
                         fontSize: "17px",
                         lineHeight: "21px",
-                        letterSpacing: "4%",
+                        letterSpacing: "0.04em",
+                        textDecorationStyle: "solid",
+                        textDecorationSkipInk: "auto",
                         color: "#389131",
                       }}
                     >
                       Privacy Policy
-                    </span>
+                    </a>
                     <span>.</span>
-                  </label>
+                  </div>
                 </div>
               </div>
               {/* </div> */}

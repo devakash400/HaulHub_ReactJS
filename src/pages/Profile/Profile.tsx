@@ -119,12 +119,18 @@ const Profile: React.FC = () => {
                     className="group flex h-[52px] w-full items-center justify-between rounded-[2px] border border-[#CFCFCF] bg-white px-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.22)] transition-all duration-200 hover:border-[#389131]/55 hover:bg-[#f6fbf4] hover:shadow-[0_8px_18px_rgba(56,145,49,0.18)]"
                   >
                     <span className="inline-flex items-center gap-4 text-gray-900 transition-colors duration-200 group-hover:text-[#2f7a2a]">
-                      <Icon className="h-6 w-6 text-gray-900 transition-colors duration-200 group-hover:text-[#389131]" aria-hidden />
+                      <Icon
+                        className="h-6 w-6 text-gray-900 transition-colors duration-200 group-hover:text-[#389131]"
+                        aria-hidden
+                      />
                       <span className="text-[14px] leading-none font-medium transition-colors duration-200 group-hover:text-[#2f7a2a]">
                         {item.label}
                       </span>
                     </span>
-                    <ChevronRight className="h-5 w-5 text-gray-700 transition-colors duration-200 group-hover:text-[#389131]" aria-hidden />
+                    <ChevronRight
+                      className="h-5 w-5 text-gray-700 transition-colors duration-200 group-hover:text-[#389131]"
+                      aria-hidden
+                    />
                   </button>
                 </li>
               );
@@ -145,4 +151,3 @@ const Profile: React.FC = () => {
 };
 
 export default Profile;
-
