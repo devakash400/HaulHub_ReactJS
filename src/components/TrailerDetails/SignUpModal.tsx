@@ -222,6 +222,15 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
           letter-spacing: 0%;
           color: #929191;
         }
+
+        .date-field.has-value,
+        .date-field.has-value::-webkit-datetime-edit,
+        .date-field.has-value::-webkit-datetime-edit-text,
+        .date-field.has-value::-webkit-datetime-edit-month-field,
+        .date-field.has-value::-webkit-datetime-edit-day-field,
+        .date-field.has-value::-webkit-datetime-edit-year-field {
+          color: #000000;
+        }
       `}</style>
       <div
         className="modal-overlay fixed 
@@ -343,27 +352,36 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     <input
                       ref={dateInputRef}
                       type="date"
+                      required
                       value={dateOfBirth}
                       min="1900-01-01"
                       max={todayIso}
                       onChange={(e) => {
                         const v = e.target.value;
+
                         if (!v) {
                           setDateOfBirth("");
                           return;
                         }
+
                         if (v > todayIso) {
                           setDateOfBirth(todayIso);
                           return;
                         }
+
                         const [y, m, d] = v.split("-");
                         if (!y || !m || !d) return;
+
                         setDateOfBirth(`${y.slice(0, 4)}-${m}-${d}`);
                       }}
-                      className="date-field w-full h-[40px] px-3 pr-10 border border-[#7C7C7C] rounded-[5px] text-gray-900 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15
+                      className={`date-field ${dateOfBirth ? "has-value text-[#FF0000]" : "text-[#929191]"} w-full h-[40px] px-3 pr-10 border border-[#7C7C7C] rounded-[5px]
+      focus:border-[#389131]
+      focus:outline-none
+      focus:ring-2
+      focus:ring-[#389131]/15
       [appearance:textfield]
       [&::-webkit-calendar-picker-indicator]:opacity-0
-      [&::-webkit-calendar-picker-indicator]:absolute"
+      [&::-webkit-calendar-picker-indicator]:absolute`}
                       style={{
                         fontFamily: "Lexend",
                         fontWeight: 300,
@@ -371,7 +389,6 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         fontSize: "12px",
                         lineHeight: "100%",
                         letterSpacing: "0%",
-                        color: dateOfBirth ? "#000" : "#929191",
                       }}
                     />
 
@@ -380,7 +397,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       alt="calendar"
                       className="w-[18px] h-[18px] absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
                       onClick={() =>
-                        dateInputRef.current?.showPicker?.() ??
+                        dateInputRef.current?.showPicker?.() ||
                         dateInputRef.current?.focus()
                       }
                     />
@@ -421,10 +438,18 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         color: gender ? "#000000" : "#929191",
                       }}
                     >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
+                      <option value="" style={{ color: "#000000" }}>
+                        Select Gender
+                      </option>
+                      <option value="Male" style={{ color: "#000000" }}>
+                        Male
+                      </option>
+                      <option value="Female" style={{ color: "#000000" }}>
+                        Female
+                      </option>
+                      <option value="Other" style={{ color: "#000000" }}>
+                        Other
+                      </option>
                     </select>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
                       <ChevronDown className="w-4 h-4" aria-hidden />
@@ -615,13 +640,18 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     >
                       <option
                         value=""
-                        className="font-['Lexend'] font-light text-[12px] leading-[100%] tracking-[0%] text-[#929191]"
+                        className="font-['Lexend'] font-light text-[12px] leading-[100%] tracking-[0%]"
+                        style={{ color: "#000000" }}
                       >
                         Select Your Category
                       </option>
 
-                      <option value="Renter">Renter</option>
-                      <option value="Owner">Owner</option>
+                      <option value="Renter" style={{ color: "#000000" }}>
+                        Renter
+                      </option>
+                      <option value="Owner" style={{ color: "#000000" }}>
+                        Owner
+                      </option>
                     </select>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
                       <ChevronDown className="w-4 h-4" aria-hidden />

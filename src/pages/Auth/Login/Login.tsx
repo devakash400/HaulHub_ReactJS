@@ -139,6 +139,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [isForgotSubmitting, setIsForgotSubmitting] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
   const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"phone" | "email" | null>(
+    null,
+  );
 
   // New password flow
   const [newPassword, setNewPassword] = useState("");
@@ -400,26 +403,35 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setOtpError(null);
     setForgotError(null);
     setForgotSuccess(null);
+    setMessageType(null);
 
-    const emailToUse = resetEmail.trim() || email.trim();
-    if (!emailRegex.test(emailToUse)) {
-      const msg = "Please enter a valid email address for password reset.";
-      setForgotError(msg);
-      toast.error(msg);
+    const phoneDigits = resetPhone.replace(/\D/g, "");
+    const isPhone = phoneDigits.length >= 10;
+    const isEmail = emailRegex.test(resetEmail.trim());
+
+    if (!isPhone && !isEmail) {
+      setMessageType("email");
+      setForgotError("Please enter a valid phone number or email.");
       return;
     }
 
     setIsForgotSubmitting(true);
     try {
+      const emailToUse = resetEmail.trim() || email.trim();
       const res = await forgotPasswordApi({ email: emailToUse });
       // eslint-disable-next-line no-console
       console.log("forgot-password response:", res);
-      const msg = "Password reset link has been sent to your email.";
-      setForgotSuccess(msg);
-      toast.success(msg);
+      if (isPhone) {
+        setMessageType("phone");
+        setForgotSuccess("OTP has been sent to your Phone Number.");
+      } else {
+        setMessageType("email");
+        setForgotSuccess("Password reset link has been sent to your email.");
+      }
       setShowOtpModal(true);
     } catch (err) {
-      const msg = "Unable to send reset email. Please try again.";
+      const msg = "Unable to send reset. Please try again.";
+      setMessageType(isPhone ? "phone" : "email");
       setForgotError(msg);
       toast.error(msg);
     } finally {
@@ -491,10 +503,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   : "New Password"
           }
           onClose={goBack}
-          variant="close"
+          variant={step === "email" ? "close" : "none"}
         />
 
-        <div className="px-6 sm:px-10 pt-8 pb-8 flex-1 overflow-y-auto">
+        <div
+          className={`px-[18px] pb-3 flex-1 overflow-y-auto ${
+            step === "email" ? "pt-6" : "pt-3"
+          }`}
+        >
           {step === "email" && (
             <div>
               <label
@@ -961,22 +977,33 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   }}
                 >
                   {/* Country Selector */}
-                  <div className="relative flex items-center gap-1 min-w-[95px] flex-shrink-0">
+                  <div
+                    className="relative flex
+                   items-center gap-1 flex-shrink-0"
+                  >
                     <img
                       src={selectedCountry.flagUrl}
                       alt={selectedCountry.name}
                       className="w-[20px] h-[12px] object-cover rounded-[1px]"
                     />
 
-                    <span className="text-[14px] font-normal text-[#929191] leading-[15px] whitespace-nowrap">
+                    <span
+                      className="
+    font-['Lexend']
+    text-[12px]
+    font-light
+    text-[#929191]
+    leading-[100%]
+    whitespace-nowrap
+  "
+                    >
                       {selectedCountry.dialCode}
                     </span>
-
                     <div className="flex items-center">
                       <img
                         src={chevronDown}
                         alt="dropdown"
-                        className="w-[8.5px] h-[6px] pointer-events-none"
+                        className="w-[8.4px] h-[6px] pointer-events-none"
                       />
                     </div>
 
@@ -999,7 +1026,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   </div>
 
                   {/* Divider */}
-                  <div className="h-5 w-px bg-gray-300 flex-shrink-0" />
 
                   {/* Input */}
                   <input
@@ -1008,10 +1034,23 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     onChange={(e) => setResetPhone(e.target.value)}
                     placeholder="Phone Number"
                     maxLength={10}
-                    className="flex-1 min-w-0 bg-transparent outline-none text-[15px] text-black custom-placeholder placeholder:text-[#9B989E] font-normal"
+                    className="flex-1 min-w-0 bg-transparent
+                     outline-none text-[15px] text-black 
+                     custom-placeholder placeholder:text-[#9B989E] 
+                     font-normal"
                   />
                 </div>
               </div>
+              {messageType === "phone" && forgotError && (
+                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-red-600">
+                  {forgotError}
+                </p>
+              )}
+              {messageType === "phone" && forgotSuccess && (
+                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-green-600">
+                  {forgotSuccess}
+                </p>
+              )}
 
               <div className="flex items-center gap-4 my-6 text-sm text-gray-500">
                 <div className="flex-1 h-px bg-gray-200" />
@@ -1033,7 +1072,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
               <div>
                 <label className="block mb-2 font-['Lexend'] font-normal text-[17px] leading-[100%] tracking-[0%] text-black">
-                  Email ID<span className="text-red-500">*</span>
+                  Email ID <span className="text-red-500">*</span>
                 </label>
 
                 <input
@@ -1051,6 +1090,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   }}
                 />
               </div>
+              {messageType === "email" && forgotError && (
+                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-red-600">
+                  {forgotError}
+                </p>
+              )}
+              {messageType === "email" && forgotSuccess && (
+                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-green-600">
+                  {forgotSuccess}
+                </p>
+              )}
 
               <button
                 type="button"
@@ -1070,13 +1119,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
               >
                 {isForgotSubmitting ? "Sending..." : "Continue"}
               </button>
-
-              {forgotError && (
-                <p className="mt-2 text-xs text-red-600">{forgotError}</p>
-              )}
-              {forgotSuccess && (
-                <p className="mt-2 text-xs text-green-600">{forgotSuccess}</p>
-              )}
               <div
                 className="mt-auto pt-24 text-center text-black"
                 style={{
@@ -1267,7 +1309,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
               onClick={(e) => e.stopPropagation()}
             >
               <ModalHeader
-                title="Enter OTP"
+                title={
+                  <span className="font-lexend font-semibold text-[18px] leading-[135%] tracking-[0.06em] text-white text-center">
+                    Enter OTP
+                  </span>
+                }
                 onClose={() => setShowOtpModal(false)}
                 variant="close"
               />
@@ -1331,9 +1377,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 </>
                 <div className="mt-2 flex justify-end items-center gap-2 text-xs text-gray-600">
                   {otpSeconds > 0 ? (
-                    <span className="font-medium text-gray-600">
-                      Didn&apos;t get Code
-                      <span className="ml-2 font-semibold text-gray-900">
+                    <span className="font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] text-[#757171]">
+                      Didn&apos;t get Code ?
+                      <span className="ml-2 font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] underline decoration-solid underline-offset-0 text-[#389131]">
                         {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
                         {String(otpSeconds % 60).padStart(2, "0")}
                       </span>
@@ -1345,9 +1391,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
                         setShowOtpModal(false);
                         void handleResetContinue();
                       }}
-                      className="text-[#389131] font-semibold"
                     >
-                      Resend
+                      <span className="font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] text-[#757171]">
+                        Didn&apos;t get Code ?{"    "}
+                      </span>
+                      <span className="font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] underline decoration-solid underline-offset-0 text-[#389131]">
+                        Resend
+                      </span>
                     </button>
                   )}
                 </div>
