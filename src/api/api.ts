@@ -1,7 +1,11 @@
 import axios, { AxiosError } from "axios";
 
-const BASE_URL =
- "https://api.renthaulhub.com"
+/** Override with e.g. `REACT_APP_API_URL=http://localhost:5100` for local backend. */
+export const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ?? "https://api.renthaulhub.com"
+).replace(/\/$/, "");
+
+const BASE_URL = API_BASE_URL;
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;

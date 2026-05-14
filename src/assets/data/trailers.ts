@@ -17,7 +17,7 @@ export type TrailerMetric = {
 };
 
 export type TrailerDetail = {
-  id: number;
+  id: string | number;
   type: TrailerType;
   title: string;
   model?: string;
@@ -355,7 +355,7 @@ export function getTrailerTypeLabel(type: TrailerType): string {
 }
 
 export type TrailerListItem = {
-  id: number;
+  id: string | number;
   image: string;
   modelLabel: string;
   priceLabel: string;

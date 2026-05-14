@@ -237,8 +237,10 @@ const BottomBar: React.FC = () => {
           </p>
 
           <div className="flex w-full shrink-0 items-center justify-center gap-2.5 sm:w-auto sm:justify-self-end sm:justify-end">
-            <span className="font-['Lexend'] 
-            font-normal text-[18px] leading-[1.1] text-[#504E4E]">
+            <span
+              className="font-['Lexend'] 
+            font-normal text-[18px] leading-[1.1] text-[#504E4E]"
+            >
               Join Us
             </span>
             <div className="flex items-center gap-2">

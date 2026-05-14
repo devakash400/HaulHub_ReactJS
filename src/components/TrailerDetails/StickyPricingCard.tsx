@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -10,6 +10,10 @@ import {
 import LoginModal from "../../pages/Auth/Login/Login.tsx";
 import { SignUpModal, type SignUpData } from "./SignUpModal.tsx";
 import { register } from "../../api/authApi.ts";
+import {
+  createBooking,
+  getBookingErrorMessage,
+} from "../../api/bookingsApi.ts";
 import { signUpSuccess } from "../../store/authSlice.ts";
 import type { RootState } from "../../store";
 
@@ -23,11 +27,14 @@ export type TrailerBookingInfo = {
 type StickyPricingCardProps = {
   price: string;
   trailer?: TrailerBookingInfo;
+  /** Route / API trailer id (Mongo string or legacy numeric id). */
+  trailerId?: string | number;
 };
 
 export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   price,
   trailer,
+  trailerId,
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -50,6 +57,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     checkIn: string;
     checkOut: string;
   } | null>(null);
+  const bookingInFlight = useRef(false);
 
   const handleReserve = () => {
     if (!isAuthenticated) {
@@ -80,22 +88,55 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     setShowIdentityModal(true);
   };
 
-  const handleIdentityContinue = (data: IdentityVerificationData) => {
-    if (!pendingBookingState) return;
-    navigate("/liability-agreement", {
-      state: {
-        ...pendingBookingState,
-        identityVerification: data,
-      },
-    });
-    setPendingBookingState(null);
+  const handleIdentityContinue = async (data: IdentityVerificationData) => {
+    if (!pendingBookingState || bookingInFlight.current) return;
+
+    const startDate = pendingBookingState.checkIn?.trim();
+    const endDate = pendingBookingState.checkOut?.trim();
+    if (!startDate || !endDate) {
+      toast.error("Please select pickup and return dates.");
+      return;
+    }
+    if (endDate < startDate) {
+      toast.error("Return date must be on or after pickup date.");
+      return;
+    }
+
+    const tid =
+      trailerId != null && String(trailerId).trim() !== ""
+        ? String(trailerId).trim()
+        : "";
+    if (!tid) {
+      toast.error("Missing trailer. Open this page from a listing to book.");
+      return;
+    }
+
+    bookingInFlight.current = true;
+    try {
+      await createBooking({ trailerId: tid, startDate, endDate });
+      toast.success("Booking submitted successfully.");
+      setShowIdentityModal(false);
+      navigate("/liability-agreement", {
+        state: {
+          ...pendingBookingState,
+          identityVerification: data,
+          trailerId: tid,
+          startDate,
+          endDate,
+        },
+      });
+      setPendingBookingState(null);
+    } catch (err: unknown) {
+      toast.error(getBookingErrorMessage(err));
+    } finally {
+      bookingInFlight.current = false;
+    }
   };
 
   const handleSignUpSubmit = async (data: SignUpData) => {
     try {
       const res = await register({
-        firstName: data.firstName,
-        lastName: data.lastName,
+        fullName: `${data.firstName} ${data.lastName}`.trim(),
         email: data.email,
         phoneNumber: data.phoneNumber,
         password: data.password,
@@ -147,6 +188,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   };
 
   return (
+    <>
     <div className="w-full min-w-0 self-start flex justify-center">
       <div
         className="
@@ -384,6 +426,38 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
         </button>
       </div>
     </div>
+
+    <LoginModal
+      isOpen={isLoginOpen}
+      onClose={() => setIsLoginOpen(false)}
+      onSuccess={() => {
+        setIsLoginOpen(false);
+        setShowRentalDatesModal(true);
+      }}
+      onOpenSignUp={() => {
+        setIsLoginOpen(false);
+        setIsSignUpOpen(true);
+      }}
+    />
+    <SignUpModal
+      isOpen={isSignUpOpen}
+      onClose={() => setIsSignUpOpen(false)}
+      onSubmit={handleSignUpSubmit}
+    />
+    <SelectRentalDatesModal
+      isOpen={showRentalDatesModal}
+      onClose={() => setShowRentalDatesModal(false)}
+      onNext={handleRentalDatesNext}
+    />
+    <IdentityVerificationModal
+      isOpen={showIdentityModal}
+      onClose={() => {
+        setShowIdentityModal(false);
+        setPendingBookingState(null);
+      }}
+      onContinue={handleIdentityContinue}
+    />
+    </>
   );
 };
 

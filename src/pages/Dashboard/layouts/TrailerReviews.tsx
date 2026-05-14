@@ -1,17 +1,48 @@
-import React, { useMemo, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import React, { useMemo, useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import { Star } from "lucide-react";
-import { getTrailerById } from "../../../assets/data/trailers.ts";
+import {
+  type TrailerDetail,
+} from "../../../assets/data/trailers.ts";
+import { resolveTrailerForRoute } from "../../../api/trailersApi.ts";
 
 const TrailerReviews: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const trailerId = id ? Number(id) : NaN;
-  const trailer = Number.isNaN(trailerId)
-    ? undefined
-    : getTrailerById(trailerId);
-
+  const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    if (!id) {
+      setTrailer(null);
+      setLoadState("error");
+      return;
+    }
+    let cancelled = false;
+    setLoadState("loading");
+    setTrailer(null);
+    void (async () => {
+      const resolved = await resolveTrailerForRoute(id);
+      if (cancelled) return;
+      if (resolved) {
+        setTrailer(resolved);
+        setLoadState("ready");
+      } else {
+        setTrailer(null);
+        setLoadState("error");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [id]);
 
   const allReviews = useMemo(() => trailer?.reviews ?? [], [trailer?.reviews]);
   const totalPages = Math.max(1, Math.ceil(allReviews.length / pageSize));
@@ -21,8 +52,26 @@ const TrailerReviews: React.FC = () => {
     return allReviews.slice(start, start + pageSize);
   }, [currentPage, pageSize, allReviews]);
 
-  if (!trailer) {
-    return <Navigate to="/" replace />;
+  if (loadState === "loading") {
+    return (
+      <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3 px-4">
+        <p className="text-gray-600 text-sm">Loading reviews…</p>
+      </div>
+    );
+  }
+
+  if (loadState === "error" || !trailer) {
+    return (
+      <div className="min-h-[40vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-gray-800 font-medium">We couldn&apos;t load this trailer.</p>
+        <Link
+          to="/"
+          className="text-[#389131] font-medium underline hover:no-underline"
+        >
+          Back to home
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -38,53 +87,58 @@ const TrailerReviews: React.FC = () => {
           </p>
         </header>
 
-        {/* Reviews list */}
-        <section className="space-y-6 pb-6">
-          {paginatedReviews.map((review, index) => (
-            <article
-              key={`${review.name}-${index + (currentPage - 1) * pageSize}`}
-              className="border-b border-gray-200 pb-6 last:border-b-0"
-            >
-              <div className="flex items-center gap-3 mb-1">
-                <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700 overflow-hidden">
-                  {review.avatar ? (
-                    <img
-                      src={review.avatar}
-                      alt={review.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    review.name.charAt(0)
-                  )}
+        {allReviews.length === 0 ? (
+          <p className="text-sm text-gray-600 py-8 text-center">
+            No reviews yet for &ldquo;{trailer.title}&rdquo;. Reviews will appear here after renters complete trips.
+          </p>
+        ) : (
+          <section className="space-y-6 pb-6">
+            {paginatedReviews.map((review, index) => (
+              <article
+                key={`${review.name}-${index + (currentPage - 1) * pageSize}`}
+                className="border-b border-gray-200 pb-6 last:border-b-0"
+              >
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700 overflow-hidden">
+                    {review.avatar ? (
+                      <img
+                        src={review.avatar}
+                        alt={review.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      review.name.charAt(0)
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {review.name}
+                    </p>
+                    <p className="text-[11px] text-gray-600">
+                      11 years renting trailers
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {review.name}
-                  </p>
-                  <p className="text-[11px] text-gray-600">
-                    11 years renting trailers
-                  </p>
+
+                <div className="mt-2 flex items-center gap-2 text-xs text-gray-700 flex-wrap">
+                  <span className="inline-flex items-center gap-1 text-[#F4B000]">
+                    <Star className="w-3 h-3 fill-current" aria-hidden />
+                    <span>★★★★★</span>
+                  </span>
+                  <span className="text-gray-500">·</span>
+                  <span>{review.context}</span>
                 </div>
-              </div>
 
-              <div className="mt-2 flex items-center gap-2 text-xs text-gray-700 flex-wrap">
-                <span className="inline-flex items-center gap-1 text-[#F4B000]">
-                  <Star className="w-3 h-3 fill-current" aria-hidden />
-                  <span>★★★★★</span>
-                </span>
-                <span className="text-gray-500">·</span>
-                <span>{review.context}</span>
-              </div>
-
-              <p className="mt-3 text-sm text-gray-800 leading-relaxed">
-                {review.text}
-              </p>
-            </article>
-          ))}
-        </section>
+                <p className="mt-3 text-sm text-gray-800 leading-relaxed">
+                  {review.text}
+                </p>
+              </article>
+            ))}
+          </section>
+        )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {allReviews.length > 0 && totalPages > 1 && (
           <div className="flex items-center justify-center gap-4 pt-2 pb-4">
             <button
               type="button"
