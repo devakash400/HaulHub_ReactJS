@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 
 const BASE_URL =
- "https://ea0b-2401-4900-1f32-77cb-88de-1b9-dd21-f9d0.ngrok-free.app"
+ "https://api.renthaulhub.com"
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;

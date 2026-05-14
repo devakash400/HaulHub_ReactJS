@@ -347,7 +347,7 @@ export const IdentityVerificationModal: React.FC<
       aria-labelledby="identity-verification-title"
     >
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-lg max-h-[90vh] flex flex-col"
+        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-lg max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader

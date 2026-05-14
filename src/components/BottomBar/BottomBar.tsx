@@ -15,7 +15,7 @@ const BottomBar: React.FC = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#F8F7F1] pt-10 pb-0 px-4 sm:px-6 font-sans w-full overflow-x-hidden mb-[10px]">
+    <footer className="bg-[#F9F7F0] pt-10 pb-0 px-4 sm:px-6 lg:px-10 font-sans w-full overflow-x-hidden mb-[10px]">
       <div className="max-w-[1120px] mx-auto flex flex-wrap items-start justify-between gap-8 min-w-0 w-full">
         {/* Left side: Explore & Company columns */}
         <div className="flex flex-wrap gap-8 sm:gap-12 flex-1 min-w-0 sm:min-w-[260px]">
@@ -194,65 +194,83 @@ const BottomBar: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom strip */}
-      <div className="max-w-[1120px] mx-auto pt-5 text-[0.95rem] text-[#4B5563]">
-        <div className="flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:items-center">
-          {/* Left spacer (keeps center truly centered on desktop) */}
-          <div className="hidden sm:block" />
+      {/* Bottom strip — Figma: compact legal row + Join Us / socials */}
+      <div className="mt-10 max-w-[1120px] mx-auto w-full min-w-0">
+        <div
+          className="
+            flex flex-col items-center gap-4
+            py-1 sm:py-1
+            sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]
+             sm:items-center sm:gap-x-6
+          "
+        >
+          <div className="hidden sm:block min-w-[88px]" aria-hidden />
 
-          {/* Center copyright */}
-          <p className="m-0 text-center">
+          <p
+            className="
+              m-0 max-w-[min(100%,42rem)] text-center font-['Lexend'] font-normal
+              text-[18px] sm:text-[18px] leading-[150%] tracking-[0.01em]
+              text-[#504E4E]
+            "
+          >
             @ {year} HaulHub,{" "}
             <Link
+              className="text-inherit no-underline decoration-inherit hover:text-[#389131] hover:underline"
               to="/trust-safety"
-              className="text-gray-700 transition-colors hover:text-[#389131] hover:underline"
             >
               Privacy
-            </Link>{" "}
+            </Link>
+            {", "}
             <Link
+              className="text-inherit no-underline decoration-inherit hover:text-[#389131] hover:underline"
               to="/trust-safety"
-              className="text-gray-700 transition-colors hover:text-[#389131] hover:underline"
             >
               Terms
-            </Link>{" "}
-            &amp;{" "}
+            </Link>
+            {" & "}
             <Link
+              className="text-inherit no-underline decoration-inherit hover:text-[#389131] hover:underline"
               to="/about"
-              className="text-gray-700 transition-colors hover:text-[#389131] hover:underline"
             >
               Company Details
             </Link>
           </p>
 
-          {/* Right socials */}
-          <div className="flex items-center justify-end gap-[3px] w-full">
-            <span className="text-gray-700 font-medium">Join Us</span>
-            <a
-              href="https://www.facebook.com"
-              aria-label="Facebook"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-9 w-9 items-center justify-center no-underline"
-            >
-              <img
-                src={images.Facebook}
-                alt="Facebook"
-                className="h-9 w-9 object-contain ml-[10px]"
-              />
-            </a>
-            <a
-              href="https://www.instagram.com"
-              aria-label="Instagram"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-9 w-9 items-center justify-center no-underline ml-[10px]"
-            >
-              <img
-                src={images.Instagram}
-                alt="Instagram"
-                className="h-9 w-9 object-contain"
-              />
-            </a>
+          <div className="flex w-full shrink-0 items-center justify-center gap-2.5 sm:w-auto sm:justify-self-end sm:justify-end">
+            <span className="font-['Lexend'] 
+            font-normal text-[18px] leading-[1.1] text-[#504E4E]">
+              Join Us
+            </span>
+            <div className="flex items-center gap-2">
+              <a
+                href="https://www.facebook.com"
+                aria-label="Facebook"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center no-underline transition-opacity hover:opacity-90"
+              >
+                <img
+                  src={images.Facebook}
+                  alt=""
+                  className="h-[28px] w-[28px] object-contain"
+                  aria-hidden
+                />
+              </a>
+              <a
+                href="https://www.instagram.com"
+                aria-label="Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center no-underline transition-opacity hover:opacity-90"
+              >
+                <img
+                  src={images.Instagram}
+                  alt=""
+                  className="h-[28px] w-[28px] object-contain"
+                  aria-hidden
+                />
+              </a>
+            </div>
           </div>
         </div>
       </div>

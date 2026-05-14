@@ -559,49 +559,27 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     </button>
                   </div>
                   {passwordTouched && password.trim().length > 0 && (
-                    <ul className="mt-2 space-y-0.5 text-xs">
-                      <li
-                        className={
-                          passwordHasMinLength
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }
-                      >
-                        • Add at least 8 characters
-                      </li>
-                      <li
-                        className={
-                          passwordHasUppercase
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }
-                      >
-                        • Uppercase letters (A-Z)
-                      </li>
-                      <li
-                        className={
-                          passwordHasLowercase
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }
-                      >
-                        • Lowercase letters (a-z)
-                      </li>
-                      <li
-                        className={
-                          passwordHasNumber ? "text-green-600" : "text-red-600"
-                        }
-                      >
-                        • Numbers (0-9)
-                      </li>
-                      <li
-                        className={
-                          passwordHasSpecial ? "text-green-600" : "text-red-600"
-                        }
-                      >
-                        • Special characters (e.g., @, #, $, %, !)
-                      </li>
-                    </ul>
+                   <ul className="mt-2 space-y-0.5 font-lexend font-light text-[12px] leading-[100%] tracking-[0em] text-[#6B6B6B]">
+                   <li className={passwordHasMinLength ? "text-[#6B6B6B]" : "text-red-600"}>
+                     • Add at least 8 characters
+                   </li>
+                 
+                   <li className={passwordHasUppercase ? "text-[#6B6B6B]" : "text-red-600"}>
+                     • Uppercase letters (A-Z)
+                   </li>
+                 
+                   <li className={passwordHasLowercase ? "text-[#6B6B6B]" : "text-red-600"}>
+                     • Lowercase letters (a-z)
+                   </li>
+                 
+                   <li className={passwordHasNumber ? "text-[#6B6B6B]" : "text-red-600"}>
+                     • Numbers (0-9)
+                   </li>
+                 
+                   <li className={passwordHasSpecial ? "text-[#6B6B6B]" : "text-red-600"}>
+                     • Special characters (e.g., @, #, $, %, !)
+                   </li>
+                 </ul>
                   )}
                 </div>
 
