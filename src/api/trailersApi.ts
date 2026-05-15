@@ -41,10 +41,11 @@ function resolveMediaUrl(path: string | undefined): string {
   return `${API_BASE_URL}/${p.replace(/^\//, "")}`;
 }
 
+/** Main card image: profile picture first, then gallery, then takePhoto. */
 function pickTrailerImage(t: ApiTrailer): string {
+  if (t.profilePicture?.trim()) return resolveMediaUrl(t.profilePicture);
   const fromArray = t.images?.find((u) => u?.trim());
   if (fromArray) return resolveMediaUrl(fromArray);
-  if (t.profilePicture?.trim()) return resolveMediaUrl(t.profilePicture);
   if (t.takePhoto?.trim()) return resolveMediaUrl(t.takePhoto);
   return FALLBACK_IMAGE;
 }

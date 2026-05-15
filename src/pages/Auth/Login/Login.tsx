@@ -3,8 +3,9 @@ import { createPortal } from "react-dom";
 import { images } from "../../../assets/images/index.ts";
 import { Eye, EyeOff, Mail, Smartphone, ChevronDown } from "lucide-react";
 import { ModalHeader } from "../../../components/ModalHeader.tsx";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess } from "../../../store/authSlice.ts";
+import { RootState } from "../../../store/index.ts";
 import backButton from "../../../assets/images/Back button.png";
 import smartphone from "../../../assets/images/Mobile-phone.png";
 import chevronDown from "../../../assets/images/Dorpdown.png";
@@ -116,6 +117,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
   onOpenSignUp,
 }) => {
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
   const [email, setEmail] = useState("");
   const [usePhoneOnly, setUsePhoneOnly] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
@@ -193,6 +197,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
     }, 1000);
     return () => window.clearInterval(id);
   }, [showOtpModal]);
+
+  useEffect(() => {
+    if (!isOpen || !isAuthenticated) return;
+    onSuccess();
+  }, [isOpen, isAuthenticated, onSuccess]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -526,7 +535,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
     onSuccess();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || isAuthenticated) return null;
 
   const modal = (
     <div

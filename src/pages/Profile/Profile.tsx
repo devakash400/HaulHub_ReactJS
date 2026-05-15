@@ -13,11 +13,13 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
+
 import { logout } from "../../store/authSlice.ts";
 import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
 import { RootState } from "../../store";
+
 import {
   getUserProfile,
   resolveProfilePictureUrl,
@@ -31,13 +33,17 @@ type ProfileUpdateErrorBody = {
 
 const formatProfileSaveError = (err: unknown): string => {
   const ax = err as AxiosError<ProfileUpdateErrorBody>;
+
   const list = ax.response?.data?.errors;
+
   if (Array.isArray(list) && list.length > 0) {
     const parts = list
       .map((e) => e.msg || e.message)
       .filter((s): s is string => Boolean(s && String(s).trim()));
+
     if (parts.length > 0) return parts.join(" ");
   }
+
   return (
     ax.response?.data?.message ||
     ax.message ||
@@ -48,15 +54,21 @@ const formatProfileSaveError = (err: unknown): string => {
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
+
   const user = useSelector((state: RootState) => state.auth.user);
+
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+
   const [profilePicturePath, setProfilePicturePath] = useState<string | null>(
     null
   );
+
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadProfilePicture = useCallback(async () => {
@@ -64,6 +76,7 @@ const Profile: React.FC = () => {
       setProfilePicturePath(null);
       return;
     }
+
     try {
       const data = await getUserProfile();
       setProfilePicturePath(data.profilePicture ?? null);
@@ -78,15 +91,22 @@ const Profile: React.FC = () => {
 
   const profilePictureUrl = resolveProfilePictureUrl(profilePicturePath);
 
-  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
+
     e.target.value = "";
+
     if (!file?.type.startsWith("image/")) return;
 
     setUploadingPhoto(true);
+
     try {
       const next = await updateUserProfilePicture(file);
+
       setProfilePicturePath(next.profilePicture ?? null);
+
       toast.success("Profile photo updated");
     } catch (err) {
       toast.error(formatProfileSaveError(err));
@@ -97,6 +117,7 @@ const Profile: React.FC = () => {
 
   const displayName =
     `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Demo";
+
   const initials = displayName
     .split(" ")
     .filter(Boolean)
@@ -143,40 +164,47 @@ const Profile: React.FC = () => {
     } finally {
       dispatch(logout());
       dispatch(clearWishlist());
+
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem("openLoginAfterLogout", "1");
       }
+
       navigate("/", { replace: true });
+
       toast.success("Logged out successfully");
     }
   };
 
   return (
     <div className="min-h-screen w-full bg-white overflow-x-hidden">
-     <div className="mb-5 w-full px-[20px]">
-        
+      <div className="mb-5 w-full px-[20px]">
         {/* Header */}
-        <header className=" pt-6 pb-2">
-        <h1 className=" text-[42px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
-  Profile
-</h1>
+        <header className="pt-6 pb-2">
+          <h1 className="text-[42px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
+            Profile
+          </h1>
         </header>
-  
+
         {/* Profile Section */}
         <section className="mt-3 flex flex-col items-center border-b border-[#D9D9D9] pb-8">
-          <div className="relative h-[110px] w-[110px] rounded-full overflow-hidden bg-[#D9D9D9] shadow-md flex items-center justify-center">
-            {profilePictureUrl ? (
-              <img
-                src={profilePictureUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span className="text-[34px] font-semibold text-gray-700">
-                {initials || "D"}
-              </span>
-            )}
-  
+          {/* Profile Image Wrapper */}
+          <div className="relative h-[110px] w-[110px]">
+            {/* Circle Container */}
+            <div className="h-full w-full rounded-full bg-[#D9D9D9] shadow-md flex items-center justify-center overflow-hidden">
+              {profilePictureUrl ? (
+                <img
+                  src={profilePictureUrl}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-[34px] font-semibold text-gray-700">
+                  {initials || "D"}
+                </span>
+              )}
+            </div>
+
+            {/* Hidden File Input */}
             <input
               ref={fileInputRef}
               type="file"
@@ -185,43 +213,46 @@ const Profile: React.FC = () => {
               onChange={(ev) => void handlePhotoChange(ev)}
               disabled={uploadingPhoto}
             />
-  
+
+            {/* Camera Button */}
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto}
-              className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#4A9B3D] border-2 border-white flex items-center justify-center"
+              className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-[#4A9B3D] border-2 border-white flex items-center justify-center shadow-md z-10"
               aria-label="Change profile photo"
             >
               <Camera className="w-4 h-4 text-white" />
             </button>
           </div>
-  
+
+          {/* Name */}
           <p className="mt-3 text-[28px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
-  {displayName}
-</p>
+            {displayName}
+          </p>
         </section>
-  
+
         {/* Menu Items */}
         <nav className="px-3 pt-5">
           <ul className="space-y-3">
             {menuItems.map((item) => {
               const Icon = item.icon;
-  
+
               return (
                 <li key={item.label}>
                   <button
                     type="button"
                     onClick={item.onClick}
-                   className="flex items-center justify-between w-full h-[71px] bg-white border border-[#00000042] px-5 shadow-[0px_4px_4px_0px_#00000040] hover:bg-[#fafafa] transition"
+                    className="flex items-center justify-between w-full h-[71px] bg-white border border-[#00000042] px-5 shadow-[0px_4px_4px_0px_#00000040] hover:bg-[#fafafa] transition"
                   >
                     <div className="flex items-center gap-4">
-                    <Icon className="w-[32.86px] h-[33.45px] text-black" />
+                      <Icon className="w-[32.86px] h-[33.45px] text-black" />
+
                       <span className="text-[24px] leading-[100%] font-normal text-black tracking-[0px] font-['Lexend']">
-  {item.label}
-</span> 
+                        {item.label}
+                      </span>
                     </div>
-  
+
                     <ChevronRight className="w-5 h-5 text-[#666]" />
                   </button>
                 </li>
@@ -229,7 +260,7 @@ const Profile: React.FC = () => {
             })}
           </ul>
         </nav>
-  
+
         {/* Logout Modal */}
         <LogoutConfirmModal
           isOpen={isLogoutConfirmOpen}

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -58,6 +58,12 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     checkOut: string;
   } | null>(null);
   const bookingInFlight = useRef(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoginOpen(false);
+    }
+  }, [isAuthenticated]);
 
   const handleReserve = () => {
     if (!isAuthenticated) {
@@ -395,7 +401,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     </div>
 
     <LoginModal
-      isOpen={isLoginOpen}
+      isOpen={isLoginOpen && !isAuthenticated}
       onClose={() => setIsLoginOpen(false)}
       onSuccess={() => {
         setIsLoginOpen(false);
