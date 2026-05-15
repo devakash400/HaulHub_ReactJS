@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../store/index.ts";
 import { toast } from "react-toastify";
 import LoginModal from "./Login.tsx";
 import {
@@ -14,12 +15,25 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
       {!isSignUpOpen && (
         <LoginModal
-          isOpen={!isSignUpOpen}
+          isOpen
           onClose={() => navigate(-1)}
           onSuccess={() => navigate("/")}
           onOpenSignUp={() => setIsSignUpOpen(true)}

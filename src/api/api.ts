@@ -1,4 +1,10 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import {
+  handleSessionExpired,
+  isPublicAuthRequest,
+} from "./sessionExpired.ts";
+
+type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 /** Override with e.g. `REACT_APP_API_URL=http://localhost:5100` for local backend. */
 export const API_BASE_URL = (
@@ -65,12 +71,29 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
+const forceLogoutForExpiredSession = () => {
+  clearTokens();
+  handleSessionExpired();
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest: any = error.config;
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-    if (error.response?.status === 401 && !originalRequest._retry && refreshToken) {
+    if (error.response?.status !== 401 || !originalRequest) {
+      return Promise.reject(error);
+    }
+
+    const requestUrl = originalRequest.url ?? "";
+
+    if (isPublicAuthRequest(requestUrl)) {
+      return Promise.reject(error);
+    }
+
+    const hadSession = Boolean(accessToken || refreshToken);
+
+    if (refreshToken && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
@@ -112,11 +135,17 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        clearTokens();
+        if (hadSession) {
+          forceLogoutForExpiredSession();
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
+    }
+
+    if (hadSession) {
+      forceLogoutForExpiredSession();
     }
 
     return Promise.reject(error);

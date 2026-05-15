@@ -1,4 +1,5 @@
 import api, { setTokens, clearTokens } from "./api.ts";
+import { resetSessionExpiredGuard } from "./sessionExpired.ts";
 
 export type LoginPayload = {
   email: string;
@@ -105,6 +106,7 @@ export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
   } = res.data;
 
   setTokens(accessToken, refreshToken);
+  resetSessionExpiredGuard();
 
   return {
     success,
@@ -129,6 +131,7 @@ export const phoneLogin = async (
   } = res.data;
 
   setTokens(accessToken, refreshToken);
+  resetSessionExpiredGuard();
 
   return {
     success,
@@ -154,6 +157,7 @@ export const register = async (
   } = res.data;
 
   setTokens(accessToken, refreshToken);
+  resetSessionExpiredGuard();
 
   // eslint-disable-next-line no-console
   console.log("register response:", res.data);
@@ -187,6 +191,7 @@ export const otpLogin = async (payload: OtpLoginPayload) => {
   } = res.data;
 
   setTokens(accessToken, refreshToken);
+  resetSessionExpiredGuard();
 
   return {
     success,

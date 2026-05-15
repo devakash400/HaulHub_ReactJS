@@ -66,6 +66,15 @@ const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoginOpen(false);
+      setIsSignUpOpen(false);
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem("openLoginAfterLogout");
+      }
+      return;
+    }
+
     if (typeof window === "undefined") return;
     const shouldOpen = window.sessionStorage.getItem("openLoginAfterLogout");
     if (shouldOpen === "1") {
@@ -73,7 +82,7 @@ const Navbar: React.FC = () => {
       setIsSignUpOpen(false);
       setIsLoginOpen(true);
     }
-  }, [location.pathname]);
+  }, [location.pathname, isAuthenticated]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -771,9 +780,9 @@ focus-visible:outline-none"
         )}
 
         {/* Auth modals */}
-        {isLoginOpen && (
+        {isLoginOpen && !isAuthenticated && (
           <LoginModal
-            isOpen={isLoginOpen && !isSignUpOpen}
+            isOpen={!isSignUpOpen}
             onClose={() => setIsLoginOpen(false)}
             onSuccess={() => {
               setIsLoginOpen(false);
