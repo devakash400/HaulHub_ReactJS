@@ -7,7 +7,7 @@ import {
   SignUpModal,
   SignUpData,
 } from "../../../components/TrailerDetails/SignUpModal.tsx";
-import { register } from "../../../api/authApi.ts";
+import { register, roleToTrailor } from "../../../api/authApi.ts";
 import { signUpSuccess } from "../../../store/authSlice.ts";
 
 const LoginPage: React.FC = () => {
@@ -50,12 +50,18 @@ const LoginPage: React.FC = () => {
                 .filter(Boolean);
               const lastName =
                 restName.length > 0 ? restName.join(" ") : undefined;
-              const trailorFromApi = (
-                res.user as { trailor?: string | string[] }
-              ).trailor;
-              const normalizedTrailor = Array.isArray(trailorFromApi)
-                ? trailorFromApi[0]
-                : trailorFromApi;
+              const apiUser = res.user as {
+                role?: string;
+                trailor?: string | string[];
+              };
+              const trailorFromApi =
+                roleToTrailor(apiUser.role) ??
+                roleToTrailor(
+                  Array.isArray(apiUser.trailor)
+                    ? apiUser.trailor[0]
+                    : apiUser.trailor
+                );
+              const normalizedTrailor = trailorFromApi ?? data.trailor;
 
               dispatch(
                 signUpSuccess({
@@ -63,11 +69,11 @@ const LoginPage: React.FC = () => {
                     firstName: firstName || undefined,
                     lastName,
                     email: res.user.email || data.email,
-                    trailor: normalizedTrailor || data.trailor,
+                    trailor: normalizedTrailor,
                   },
                   accessToken: res.accessToken,
                   refreshToken: res.refreshToken,
-                  userType: normalizedTrailor || data.trailor,
+                  userType: normalizedTrailor,
                 }),
               );
 

@@ -9,7 +9,7 @@ import {
 } from "./IdentityVerificationModal.tsx";
 import LoginModal from "../../pages/Auth/Login/Login.tsx";
 import { SignUpModal, type SignUpData } from "./SignUpModal.tsx";
-import { register } from "../../api/authApi.ts";
+import { register, roleToTrailor } from "../../api/authApi.ts";
 import {
   createBooking,
   getBookingErrorMessage,
@@ -151,11 +151,16 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
           : `${data.firstName} ${data.lastName}`.trim();
       const [firstName, ...restName] = fullName.split(" ").filter(Boolean);
       const lastName = restName.length > 0 ? restName.join(" ") : undefined;
-      const trailorFromApi = (res.user as { trailor?: string | string[] })
-        .trailor;
-      const normalizedTrailor = Array.isArray(trailorFromApi)
-        ? trailorFromApi[0]
-        : trailorFromApi;
+      const apiUser = res.user as {
+        role?: string;
+        trailor?: string | string[];
+      };
+      const trailorFromApi =
+        roleToTrailor(apiUser.role) ??
+        roleToTrailor(
+          Array.isArray(apiUser.trailor) ? apiUser.trailor[0] : apiUser.trailor
+        );
+      const normalizedTrailor = trailorFromApi ?? data.trailor;
 
       dispatch(
         signUpSuccess({
@@ -163,17 +168,17 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
             firstName: firstName || undefined,
             lastName,
             email: res.user.email || data.email,
-            trailor: normalizedTrailor || data.trailor,
+            trailor: normalizedTrailor,
           },
           accessToken: res.accessToken,
           refreshToken: res.refreshToken,
-          userType: normalizedTrailor || data.trailor,
+          userType: normalizedTrailor,
         }),
       );
 
       setIsSignUpOpen(false);
       toast.success("Account created successfully");
-      if ((normalizedTrailor || data.trailor) === "Owner") {
+      if (normalizedTrailor === "Owner") {
         navigate("/");
       } else {
         setShowRentalDatesModal(true);

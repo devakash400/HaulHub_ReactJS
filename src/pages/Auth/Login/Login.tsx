@@ -250,7 +250,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
       if (!usePhoneOnly) {
         // Email-only path
-        const res = await checkEmailApi({ email: trimmed });
+        const res = await checkEmailApi({
+          email: trimmed,
+          trailor: loginTrailor,
+        });
         // eslint-disable-next-line no-console
         console.log("check-email response:", res);
 
@@ -274,7 +277,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
         // Phone-only path
         const digits = trimmed.replace(/\D/g, "");
         const phoneWithCode = `${selectedCountry.dialCode}${digits}`;
-        const res = await checkPhoneApi({ phoneNumber: phoneWithCode });
+        const res = await checkPhoneApi({
+          phoneNumber: phoneWithCode,
+          trailor: loginTrailor,
+        });
         // eslint-disable-next-line no-console
         console.log("check-phone response:", res);
 
@@ -344,6 +350,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         gender?: string;
         dateOfBirth?: string;
         trailor?: string | string[];
+        role?: string;
       };
       const fullName =
         typeof userWithShape.fullName === "string"
@@ -352,9 +359,17 @@ const LoginModal: React.FC<LoginModalProps> = ({
       const [firstFromFullName, ...restName] = fullName
         .split(" ")
         .filter(Boolean);
-      const normalizedTrailor = Array.isArray(userWithShape.trailor)
-        ? userWithShape.trailor[0]
-        : userWithShape.trailor;
+      const trailorOrRole =
+        userWithShape.role ??
+        (Array.isArray(userWithShape.trailor)
+          ? userWithShape.trailor[0]
+          : userWithShape.trailor);
+      const normalizedTrailor =
+        trailorOrRole?.toLowerCase() === "owner"
+          ? "Owner"
+          : trailorOrRole?.toLowerCase() === "renter"
+            ? "Renter"
+            : loginTrailor;
       const userPhoneField = userWithShape.phoneNumber;
       const normalizedPhone = Array.isArray(userPhoneField)
         ? userPhoneField[0]

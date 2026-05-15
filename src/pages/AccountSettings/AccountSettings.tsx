@@ -1,113 +1,366 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User,
-  Info,
-  ShieldAlert,
-  Receipt,
-  LogOut,
   ChevronRight,
+  Settings,
+  CircleHelp,
+  ShieldCheck,
+  LogOut,
+  FileText,
+  History,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 import { logout } from "../../store/authSlice.ts";
 import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
+import { RootState } from "../../store";
+import {
+  getUserProfile,
+  updateUserProfile,
+  type EmergencyContactPayload,
+  type UpdateUserProfilePayload,
+  type UserProfileApiData,
+} from "../../api/userApi.ts";
 
-type LeftItemKey =
-  | "personal"
-  | "about"
-  | "privacy"
-  | "transactions"
-  | "notifications"
-  | "logout";
+const isFilled = (v?: string | null) => Boolean(v && String(v).trim());
 
-type TxStatus = "Pending" | "Confirmed" | "Canceled";
-type TxItem = {
-  id: string;
-  name: string;
-  amount: number;
-  status: TxStatus;
-  at: string;
+const emergencyHasData = (ec?: EmergencyContactPayload | null) =>
+  Boolean(ec && (isFilled(ec.name) || isFilled(ec.email) || isFilled(ec.phoneNumber)));
+
+const residentialFromProfile = (p: UserProfileApiData | null): string => {
+  if (!p) return "";
+  if (isFilled(p.residentialAddress)) return String(p.residentialAddress).trim();
+  if (isFilled(p.address)) return String(p.address).trim();
+  const list = p.addresses;
+  if (Array.isArray(list) && list.length > 0) {
+    const first = list[0];
+    if (typeof first === "string") return first.trim();
+    if (first && typeof first === "object") {
+      const o = first as Record<string, unknown>;
+      const s = o.formattedAddress ?? o.address ?? o.street ?? o.line1 ?? o.city;
+      if (typeof s === "string" && s.trim()) return s.trim();
+    }
+  }
+  return "";
 };
 
-const MOCK_TX: TxItem[] = [
+const legalDisplay = (p: UserProfileApiData | null) => {
+  if (!p) return "";
+  if (isFilled(p.legalName)) return String(p.legalName).trim();
+  if (isFilled(p.fullName)) return String(p.fullName).trim();
+  return "";
+};
+
+type ProfileUpdateErrorBody = {
+  message?: string;
+  errors?: Array<{ msg?: string; message?: string }>;
+};
+
+const formatProfileSaveError = (err: unknown): string => {
+  const ax = err as AxiosError<ProfileUpdateErrorBody>;
+  const list = ax.response?.data?.errors;
+  if (Array.isArray(list) && list.length > 0) {
+    const parts = list
+      .map((e) => e.msg || e.message)
+      .filter((s): s is string => Boolean(s && String(s).trim()));
+    if (parts.length > 0) return parts.join(" ");
+  }
+  return (
+    ax.response?.data?.message ||
+    ax.message ||
+    "Could not save changes."
+  );
+};
+
+type EditField =
+  | "legalName"
+  | "preferredFirstName"
+  | "phoneNumber"
+  | "email"
+  | "residentialAddress"
+  | "emergencyContact";
+
+type RightPanelView = "personalInfo" | "transactionHistory";
+
+type TransactionStatus = "pending" | "confirmed" | "canceled";
+
+type TransactionItem = {
+  id: string;
+  name: string;
+  transactionId: string;
+  amount: string;
+  status: TransactionStatus;
+  date: string;
+  avatarLetter: string;
+  avatarColor: string;
+};
+
+const TRANSACTIONS: TransactionItem[] = [
   {
-    id: "698094553417",
+    id: "1",
     name: "Groceries",
-    amount: 350,
-    status: "Pending",
-    at: "26 Jan 2026 11:21 AM",
+    transactionId: "TXN-2023-001234",
+    amount: "$ 350.00",
+    status: "pending",
+    date: "16 Jan 2023 11:21 AM",
+    avatarLetter: "G",
+    avatarColor: "#F4A4C8",
   },
   {
-    id: "698094553417",
+    id: "2",
     name: "demo",
-    amount: 174,
-    status: "Confirmed",
-    at: "30 Jan 2025 11:21 AM",
+    transactionId: "TXN-2023-001235",
+    amount: "$ 174.00",
+    status: "confirmed",
+    date: "15 Jan 2023 09:45 AM",
+    avatarLetter: "S",
+    avatarColor: "#8FD99A",
   },
   {
-    id: "698094553417",
-    name: "demo",
-    amount: 174,
-    status: "Confirmed",
-    at: "18 Jan 2025 8:23 PM",
-  },
-  {
-    id: "698094553417",
-    name: "Demo",
-    amount: 144,
-    status: "Canceled",
-    at: "14 Jan 2025 1:25 PM",
-  },
-  {
-    id: "698094553417",
+    id: "3",
     name: "john",
-    amount: 174,
-    status: "Confirmed",
-    at: "10 Jan 2025 9:30 PM",
+    transactionId: "TXN-2023-001236",
+    amount: "$ 174.00",
+    status: "confirmed",
+    date: "14 Jan 2023 03:12 PM",
+    avatarLetter: "S",
+    avatarColor: "#C4A8F4",
+  },
+  {
+    id: "4",
+    name: "Rental",
+    transactionId: "TXN-2023-001237",
+    amount: "$ 220.00",
+    status: "canceled",
+    date: "12 Jan 2023 06:30 PM",
+    avatarLetter: "R",
+    avatarColor: "#B8E6C8",
   },
 ];
 
-const statusMeta: Record<TxStatus, { label: string; className: string }> = {
-  Pending: { label: "Pending", className: "text-amber-600" },
-  Confirmed: { label: "Confirmed", className: "text-green-700" },
-  Canceled: { label: "Canceled", className: "text-red-600" },
+const transactionStatusLabel: Record<TransactionStatus, string> = {
+  pending: "pending",
+  confirmed: "Confirmed",
+  canceled: "Canceled",
 };
 
-const initials = (name: string) =>
-  name.trim()[0] ? name.trim()[0].toUpperCase() : "?";
+const transactionStatusClass: Record<TransactionStatus, string> = {
+  pending: "text-[#E67E22]",
+  confirmed: "text-[#389131]",
+  canceled: "text-[#E74C3C]",
+};
 
-const AccountSettings: React.FC = () => {
+const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const [active, setActive] = useState<LeftItemKey>("personal");
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const reduxUser = useSelector((state: RootState) => state.auth.user);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [legalName, setLegalName] = useState("Demo");
-  const [isEditingLegalName, setIsEditingLegalName] = useState(false);
-  const [firstNameOnId, setFirstNameOnId] = useState("Demo");
-  const [surnameOnId, setSurnameOnId] = useState("Demo");
-  const [preferredFirstName] = useState("demo");
-  const [phoneNumber] = useState("");
-  const [emailValue] = useState("Demo@gmail.com");
+  const [profile, setProfile] = useState<UserProfileApiData | null>(null);
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [editField, setEditField] = useState<EditField | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [rightPanel, setRightPanel] = useState<RightPanelView>("personalInfo");
 
-  const rightTitle = useMemo(() => {
-    switch (active) {
-      case "personal":
-        return "Personal info";
-      case "about":
-        return "About US";
-      case "privacy":
-        return "Privacy Policy";
-      case "transactions":
-        return "Transaction history";
-      case "notifications":
-        return "Notifications";
-      default:
-        return "Account Settings";
+  const [draftLegal, setDraftLegal] = useState("");
+  const [draftPreferred, setDraftPreferred] = useState("");
+  const [draftPhone, setDraftPhone] = useState("");
+  const [draftEmail, setDraftEmail] = useState("");
+  const [draftResidential, setDraftResidential] = useState("");
+  const [draftEcName, setDraftEcName] = useState("");
+  const [draftEcEmail, setDraftEcEmail] = useState("");
+  const [draftEcPhone, setDraftEcPhone] = useState("");
+
+  const loadProfile = useCallback(async () => {
+    if (!isAuthenticated) {
+      setProfile(null);
+      setProfileLoadFailed(false);
+      setLoading(false);
+      return;
     }
-  }, [active]);
+    setLoading(true);
+    setProfileLoadFailed(false);
+    try {
+      const data = await getUserProfile();
+      setProfile(data);
+    } catch (err) {
+      const ax = err as AxiosError<{ message?: string }>;
+      const msg =
+        ax.response?.data?.message ||
+        ax.message ||
+        "Could not load your profile.";
+      toast.error(msg);
+      setProfile(null);
+      setProfileLoadFailed(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
+
+  const openEditor = (field: EditField) => {
+    if (!profile) return;
+    if (field === "legalName") {
+      setDraftLegal(legalDisplay(profile) || "");
+    } else if (field === "preferredFirstName") {
+      setDraftPreferred(profile.preferredFirstName?.trim() ?? "");
+    } else if (field === "phoneNumber") {
+      setDraftPhone(profile.phoneNumber?.trim() ?? "");
+    } else if (field === "email") {
+      setDraftEmail(profile.email?.trim() ?? "");
+    } else if (field === "residentialAddress") {
+      setDraftResidential(residentialFromProfile(profile));
+    } else if (field === "emergencyContact") {
+      setDraftEcName(profile.emergencyContact?.name?.trim() ?? "");
+      setDraftEcEmail(profile.emergencyContact?.email?.trim() ?? "");
+      setDraftEcPhone(profile.emergencyContact?.phoneNumber?.trim() ?? "");
+    }
+    setEditField(field);
+  };
+
+  const closeEditor = () => setEditField(null);
+
+  useEffect(() => {
+    if (!editField) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setEditField(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [editField]);
+
+  /** PATCH only the keys sent here — do not merge empty strings for other fields (server validates the body). */
+  const persist = async (patch: UpdateUserProfilePayload) => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const next = await updateUserProfile(patch);
+      setProfile(next);
+      toast.success("Profile updated");
+      closeEditor();
+    } catch (err) {
+      toast.error(formatProfileSaveError(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveField = () => {
+    if (!profile || !editField) return;
+    if (editField === "legalName") {
+      const v = draftLegal.trim();
+      if (!v) {
+        toast.error("Enter a legal name");
+        return;
+      }
+      void persist({ legalName: v });
+      return;
+    }
+    if (editField === "preferredFirstName") {
+      const pf = draftPreferred.trim();
+      if (!pf) {
+        toast.error("Enter a preferred first name (1–50 characters)");
+        return;
+      }
+      void persist({ preferredFirstName: pf });
+      return;
+    }
+    if (editField === "phoneNumber") {
+      const v = draftPhone.trim();
+      if (!v) {
+        toast.error("Enter a phone number");
+        return;
+      }
+      void persist({ phoneNumber: v });
+      return;
+    }
+    if (editField === "email") {
+      const v = draftEmail.trim();
+      if (!v) {
+        toast.error("Enter an email");
+        return;
+      }
+      void persist({ email: v });
+      return;
+    }
+    if (editField === "residentialAddress") {
+      const v = draftResidential.trim();
+      if (!v) {
+        toast.error("Enter an address");
+        return;
+      }
+      void persist({ residentialAddress: v });
+      return;
+    }
+    if (editField === "emergencyContact") {
+      const name = draftEcName.trim();
+      const email = draftEcEmail.trim();
+      const phoneNumber = draftEcPhone.trim();
+      if (!name && !email && !phoneNumber) {
+        toast.error("Add at least one emergency contact detail");
+        return;
+      }
+      void persist({
+        emergencyContact: { name, email, phoneNumber },
+      });
+    }
+  };
+
+  const showPersonalInfo = () => {
+    closeEditor();
+    setRightPanel("personalInfo");
+  };
+
+  const showTransactionHistory = () => {
+    closeEditor();
+    setRightPanel("transactionHistory");
+  };
+
+  const menuItems = [
+    {
+      label: "Personal Information",
+      icon: Settings,
+      panel: "personalInfo" as const,
+      onClick: showPersonalInfo,
+    },
+    {
+      label: "About US",
+      icon: CircleHelp,
+      panel: null,
+      onClick: () => navigate("/about"),
+    },
+    {
+      label: "Privacy Policy",
+      icon: ShieldCheck,
+      panel: null,
+      onClick: () => navigate("/trust-safety"),
+    },
+    {
+      label: "Terms & Conditions",
+      icon: FileText,
+      panel: null,
+      onClick: () => navigate("/trust-safety"),
+    },
+    {
+      label: "Transaction History",
+      icon: History,
+      panel: "transactionHistory" as const,
+      onClick: showTransactionHistory,
+    },
+    {
+      label: "Log Out",
+      icon: LogOut,
+      panel: null,
+      onClick: () => setIsLogoutConfirmOpen(true),
+    },
+  ] as const;
 
   const handleLogout = async () => {
     try {
@@ -123,442 +376,338 @@ const AccountSettings: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
-      <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-2 gap-10 items-start">
-          <aside>
-            <h1 className="text-lg font-semibold text-gray-900">
-              Account Settings
+  const personalRows = useMemo(() => {
+    const p = profile;
+    const legal = legalDisplay(p);
+    const preferred = p?.preferredFirstName?.trim() ?? "";
+    const phone = p?.phoneNumber?.trim() ?? "";
+    const email = p?.email?.trim() ?? reduxUser?.email?.trim() ?? "";
+    const residential = residentialFromProfile(p);
+    const ec = p?.emergencyContact;
+
+    return [
+      {
+        key: "legalName" as const,
+        label: "Legal name",
+        value: legal,
+        placeholder: "Not provided",
+        hasData: isFilled(legal),
+      },
+      {
+        key: "preferredFirstName" as const,
+        label: "Preferred First Name",
+        value: preferred,
+        placeholder: "Not provided",
+        hasData: isFilled(preferred),
+      },
+      {
+        key: "phoneNumber" as const,
+        label: "Phone number",
+        value: phone,
+        placeholder: "Provide phone number",
+        hasData: isFilled(phone),
+      },
+      {
+        key: "email" as const,
+        label: "Email",
+        value: email,
+        placeholder: "Not provided",
+        hasData: isFilled(email),
+      },
+      {
+        key: "residentialAddress" as const,
+        label: "Residential Address",
+        value: residential,
+        placeholder: "Not provided",
+        hasData: isFilled(residential),
+      },
+      {
+        key: "emergencyContact" as const,
+        label: "Emergency contact",
+        value: emergencyHasData(ec)
+          ? [ec?.name, ec?.phoneNumber, ec?.email].filter(isFilled).join(" · ")
+          : "",
+        placeholder: "Not provided",
+        hasData: emergencyHasData(ec),
+      },
+    ];
+  }, [profile, reduxUser?.email]);
+
+  const cardBtn =
+  "shrink-0 text-[22px] font-medium leading-[100%] tracking-normal text-[#389131] underline decoration-solid hover:text-[#2f7a2a]";
+
+  const inputEditClass =
+  "h-[44px] w-full rounded-[2px] border border-black bg-white px-4 text-[14px] text-black outline-none";
+const inputEmergencyFieldClass =
+  "w-full rounded-sm border border-black bg-white px-3 py-2.5 text-[14px] text-gray-900 outline-none focus:ring-1 focus:ring-black/20";
+
+const profileCardClass =
+  "flex h-[71px] w-full max-w-[539px] shrink-0 items-center justify-between rounded-[3px] border border-[#00000042] bg-white px-4 text-left transition-colors hover:bg-[#fafafa] lg:w-[539px]";
+
+  const personalCardClass =
+  "min-h-[71px] w-full max-w-[593px] rounded-[2px] border border-[#D9D9D9] bg-white px-5 py-4 lg:w-[593px]";
+
+  const transactionCardClass =
+    "flex min-h-[71px] w-full max-w-[593px] items-center justify-between rounded-[2px] border border-[#D9D9D9] bg-white px-5 py-4 lg:w-[593px]";
+
+return (
+  <div className="min-h-screen w-full overflow-x-hidden bg-white">
+    <div className="w-full px-[40px] py-6 sm:py-8">
+      <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+
+        {/* LEFT SIDE */}
+        <div className="flex w-full flex-col lg:max-w-[539px]">
+          <header>
+            <h1 className="text-[36px] font-medium leading-[100%] text-black">
+              Account Setting
             </h1>
+          </header>
 
-            <nav className="mt-5">
-              <ul className="m-0 p-0 list-none divide-y divide-gray-200 border border-gray-200 rounded-md overflow-hidden">
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActive("personal")}
-                    className="w-full px-4 py-4 flex items-center justify-between text-left bg-white hover:bg-gray-50"
-                  >
-                    <span className="inline-flex items-center gap-3">
-                      <User className="w-5 h-5 text-gray-700" aria-hidden />
-                      <span className="text-sm text-gray-900">
-                        Personal information
-                      </span>
-                    </span>
-                    <ChevronRight
-                      className="w-5 h-5 text-gray-500"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActive("about")}
-                    className="w-full px-4 py-4 flex items-center justify-between text-left bg-white hover:bg-gray-50"
-                  >
-                    <span className="inline-flex items-center gap-3">
-                      <Info className="w-5 h-5 text-gray-700" aria-hidden />
-                      <span className="text-sm text-gray-900">About US</span>
-                    </span>
-                    <ChevronRight
-                      className="w-5 h-5 text-gray-500"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActive("privacy")}
-                    className="w-full px-4 py-4 flex items-center justify-between text-left bg-white hover:bg-gray-50"
-                  >
-                    <span className="inline-flex items-center gap-3">
-                      <ShieldAlert
-                        className="w-5 h-5 text-gray-700"
-                        aria-hidden
-                      />
-                      <span className="text-sm text-gray-900">
-                        Privacy Policy
-                      </span>
-                    </span>
-                    <ChevronRight
-                      className="w-5 h-5 text-gray-500"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActive("transactions")}
-                    className="w-full px-4 py-4 flex items-center justify-between text-left bg-white hover:bg-gray-50"
-                  >
-                    <span className="inline-flex items-center gap-3">
-                      <Receipt className="w-5 h-5 text-gray-700" aria-hidden />
-                      <span className="text-sm text-gray-900">
-                        Transaction history
-                      </span>
-                    </span>
-                    <ChevronRight
-                      className="w-5 h-5 text-gray-500"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActive("notifications")}
-                    className="w-full px-4 py-4 flex items-center justify-between text-left bg-white hover:bg-gray-50"
-                  >
-                    <span className="inline-flex items-center gap-3">
-                      <Receipt className="w-5 h-5 text-gray-700" aria-hidden />
-                      <span className="text-sm text-gray-900">
-                        Notifications
-                      </span>
-                    </span>
-                    <ChevronRight
-                      className="w-5 h-5 text-gray-500"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActive("logout");
-                      setIsLogoutConfirmOpen(true);
-                    }}
-                    className="w-full px-4 py-4 flex items-center justify-between text-left bg-white hover:bg-gray-50"
-                  >
-                    <span className="inline-flex items-center gap-3">
-                      <LogOut className="w-5 h-5 text-gray-700" aria-hidden />
-                      <span className="text-sm text-gray-900">Log out</span>
-                    </span>
-                    <ChevronRight
-                      className="w-5 h-5 text-gray-500"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </aside>
+          <nav className="mt-6 flex flex-col gap-5">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive =
+                item.panel !== null && rightPanel === item.panel;
 
-          <section className="min-w-0">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {rightTitle}
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={item.onClick}
+                  className={`${profileCardClass} ${
+                    isActive ? "border-[#389131] bg-[#f6fbf4]" : ""
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Icon
+                      className="size-[21px] shrink-0 text-black"
+                      strokeWidth={1.75}
+                    />
+
+                    <span className="text-2xl font-medium leading-[100%] text-black">
+                      {item.label}
+                    </span>
+                  </span>
+
+                  <ChevronRight
+                    className="size-[21px] shrink-0 text-black"
+                    strokeWidth={1.75}
+                  />
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="flex w-full flex-col lg:max-w-[593px]">
+          <header>
+            <h2 className="text-[36px] font-medium leading-[100%] text-black">
+              {rightPanel === "transactionHistory"
+                ? "Transaction History"
+                : "Personal info"}
             </h2>
+          </header>
 
-            {active === "personal" ? (
-              <div className="mt-6 space-y-3 max-w-md">
-                {/* Legal name row (view mode) */}
-                {!isEditingLegalName && (
-                  <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3">
+          <div className="mt-6 flex flex-col gap-5">
+            {rightPanel === "transactionHistory" ? (
+              TRANSACTIONS.map((txn) => (
+                <div key={txn.id} className={transactionCardClass}>
+                  <div className="flex min-w-0 flex-1 items-center gap-4">
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[16px] font-semibold text-black"
+                      style={{ backgroundColor: txn.avatarColor }}
+                    >
+                      {txn.avatarLetter}
+                    </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">
-                        Legal name
+                      <p className="text-[14px] font-medium leading-[100%] text-black">
+                        {txn.name}
                       </p>
-                      <p className="mt-0.5 text-sm text-gray-700 truncate">
-                        {legalName}
+                      <p className="mt-[6px] text-[11px] font-light leading-[100%] text-black/70">
+                        Transaction ID
                       </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFirstNameOnId(legalName.split(" ")[0] || "");
-                        setSurnameOnId(
-                          legalName.split(" ").slice(1).join(" ") || "",
-                        );
-                        setIsEditingLegalName(true);
-                      }}
-                      className="text-sm font-semibold text-[#389131] underline"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                )}
-
-                {/* Legal name edit panel */}
-                {isEditingLegalName && (
-                  <div className="border border-gray-200 rounded-md px-4 py-4 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">
-                          Legal name
-                        </p>
-                        <p className="text-xs text-gray-600 mt-0.5">
-                          Make sure this matches the name on your government ID.
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsEditingLegalName(false)}
-                        className="text-sm font-semibold text-gray-800"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="border border-gray-300 rounded-md px-3 py-2">
-                        <p className="text-xs text-gray-600">
-                          First name on ID
-                        </p>
-                        <input
-                          type="text"
-                          value={firstNameOnId}
-                          onChange={(e) => setFirstNameOnId(e.target.value)}
-                          className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-gray-900 outline-none"
-                        />
-                      </div>
-                      <div className="border border-gray-300 rounded-md px-3 py-2">
-                        <p className="text-xs text-gray-600">Surname on ID</p>
-                        <input
-                          type="text"
-                          value={surnameOnId}
-                          onChange={(e) => setSurnameOnId(e.target.value)}
-                          className="mt-1 w-full border-0 bg-transparent p-0 text-sm text-gray-900 outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const full = `${firstNameOnId} ${surnameOnId}`.trim();
-                        setLegalName(full || legalName);
-                        setIsEditingLegalName(false);
-                      }}
-                      className="mt-1 inline-flex items-center justify-center rounded-md bg-[#389131] px-6 py-2 text-sm font-semibold text-white"
-                    >
-                      Save
-                    </button>
-                  </div>
-                )}
-
-                <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3 opacity-60">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">
-                      Preferred first name
-                    </p>
-                    <p className="mt-0.5 text-sm text-gray-700 truncate">
-                      {preferredFirstName || "Not provided"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/edit-profile")}
-                    className="text-sm font-semibold text-[#389131] underline"
-                  >
-                    Add
-                  </button>
-                </div>
-
-                <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3 opacity-60">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">
-                      Phone number
-                    </p>
-                    <p className="mt-0.5 text-sm text-gray-600">
-                      {phoneNumber || "Provide phone number"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/edit-profile")}
-                    className="text-sm font-semibold text-[#389131] underline"
-                  >
-                    Add
-                  </button>
-                </div>
-
-                <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3 opacity-60">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">Email</p>
-                    <p className="mt-0.5 text-sm text-gray-700 truncate">
-                      {emailValue}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/edit-profile")}
-                    className="text-sm font-semibold text-[#389131] underline"
-                  >
-                    Add
-                  </button>
-                </div>
-
-                <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3 opacity-60">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">
-                      Residental Address
-                    </p>
-                    <p className="mt-0.5 text-sm text-gray-600">Not provided</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/edit-profile")}
-                    className="text-sm font-semibold text-[#389131] underline"
-                  >
-                    Add
-                  </button>
-                </div>
-
-                <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">
-                      Emergency contact
-                    </p>
-                    <p className="mt-0.5 text-sm text-gray-600">Not provided</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/edit-profile")}
-                    className="text-sm font-semibold text-[#389131] underline"
-                  >
-                    Add
-                  </button>
-                </div>
-
-                <div className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">
-                      Identify verification
-                    </p>
-                    <p className="mt-0.5 text-sm text-gray-600">Not Started</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/liability-agreement")}
-                    className="text-sm font-semibold text-[#389131]"
-                  >
-                    Start
-                  </button>
-                </div>
-              </div>
-            ) : active === "transactions" ? (
-              <div className="mt-6 max-w-md space-y-3">
-                {MOCK_TX.map((tx, idx) => {
-                  const meta = statusMeta[tx.status];
-                  const bg =
-                    tx.status === "Pending"
-                      ? "bg-amber-100"
-                      : tx.status === "Canceled"
-                        ? "bg-red-100"
-                        : "bg-green-100";
-                  const text =
-                    tx.status === "Pending"
-                      ? "text-amber-700"
-                      : tx.status === "Canceled"
-                        ? "text-red-700"
-                        : "text-green-700";
-                  return (
-                    <div
-                      key={`${tx.name}-${idx}`}
-                      className="border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between gap-4"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className={`h-10 w-10 rounded-full ${bg} inline-flex items-center justify-center shrink-0`}
-                        >
-                          <span className={`text-sm font-semibold ${text}`}>
-                            {initials(tx.name)}
-                          </span>
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">
-                            {tx.name}
-                          </p>
-                          <p className="text-[11px] text-gray-600 leading-4">
-                            Transaction ID
-                          </p>
-                          <p className="text-[11px] text-gray-700 leading-4">
-                            {tx.id}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-semibold text-gray-900">
-                          $ {tx.amount.toFixed(2)}
-                        </p>
-                        <p
-                          className={`text-[11px] font-semibold ${meta.className}`}
-                        >
-                          {meta.label}
-                        </p>
-                        <p className="text-[10px] text-gray-600 mt-1">
-                          {tx.at}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : active === "notifications" ? (
-              <div className="mt-6 space-y-4 max-w-2xl">
-                <div className="border border-gray-200 rounded-2xl shadow-sm bg-white overflow-hidden">
-                  <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5">
-                    <div className="w-full sm:w-32 h-28 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-                      <img
-                        src="https://images.pexels.com/photos/2432228/pexels-photo-2432228.jpeg?auto=compress&cs=tinysrgb&w=600"
-                        alt="Trailer"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
-                        Gooseneck Trailer
-                      </p>
-                      <p className="text-xs text-gray-700 mt-0.5">
-                        Model: FMX208
-                      </p>
-                      <p className="text-xs text-gray-700 mt-1">$ 21,435.3</p>
-                      <p className="mt-1 text-xs text-gray-700 flex items-center gap-1">
-                        <span className="text-[#F4B000] text-base leading-none">
-                          ★
-                        </span>
-                        <span>
-                          4.9 (593){" "}
-                          <span className="font-medium">Guest Favourite</span>
-                        </span>
+                      <p className="mt-[2px] truncate text-[11px] font-light leading-[100%] text-black">
+                        {txn.transactionId}
                       </p>
                     </div>
                   </div>
-                  <div className="border-t border-gray-200 px-4 sm:px-5 py-3 flex flex-col sm:flex-row gap-3">
-                    <button
-                      type="button"
-                      className="w-full sm:w-1/2 border border-gray-300 rounded-md py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
+                  <div className="shrink-0 text-right">
+                    <p className="text-[14px] font-medium leading-[100%] text-black">
+                      {txn.amount}
+                    </p>
+                    <p
+                      className={`mt-[6px] text-[12px] font-medium capitalize leading-[100%] ${transactionStatusClass[txn.status]}`}
                     >
-                      Reject
-                    </button>
-                    <button
-                      type="button"
-                      className="w-full sm:w-1/2 rounded-md py-2.5 text-sm font-medium text-white bg-[#389131] hover:opacity-90"
-                    >
-                      Accept
-                    </button>
+                      {transactionStatusLabel[txn.status]}
+                    </p>
+                    <p className="mt-[6px] text-[11px] font-light leading-[100%] text-black/70">
+                      {txn.date}
+                    </p>
                   </div>
                 </div>
-
-                <p className="text-xs text-gray-500">
-                  This is a demo notification card. You can hook it up to your
-                  real booking or request notifications later.
+              ))
+            ) : loading ? (
+              <div className={personalCardClass}>
+                <p className="text-sm text-black/70">
+                  Loading your information…
                 </p>
               </div>
-            ) : (
-              <div className="mt-5 text-sm text-gray-600">
-                {active === "about" && <p>About US content goes here.</p>}
-                {active === "privacy" && (
-                  <p>Privacy Policy content goes here.</p>
-                )}
+            ) : !isAuthenticated ? (
+              <div className={personalCardClass}>
+                <p className="text-sm text-black/70">
+                  Sign in to view and edit your personal information.
+                </p>
               </div>
+            ) : profileLoadFailed ? (
+              <div className="w-full max-w-[593px] rounded-[3px] border border-[#00000042] bg-white p-4 lg:w-[593px]">
+                <p className="text-sm text-black">
+                  We could not load your profile from the server.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => void loadProfile()}
+                  className="mt-3 rounded-md bg-[#389131] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f7a2a]"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : (
+              personalRows.map((row) => {
+                const isActive = editField === row.key;
+                const dimOthers = editField !== null && !isActive;
+
+                return (
+                  <div
+                    key={row.key}
+                    className={`${personalCardClass} ${
+                      dimOthers ? "opacity-40" : "opacity-100"
+                    }`}
+                  >
+                    {isActive ? (
+  <div className="flex min-h-[71px] flex-col justify-center">
+    <p className="text-[14px] font-semibold text-black mb-2">
+      {row.label}
+    </p>
+
+    {row.key === "legalName" && (
+      <input
+        value={draftLegal}
+        onChange={(e) => setDraftLegal(e.target.value)}
+        className={inputEditClass}
+        placeholder="Legal name as on ID"
+        autoComplete="name"
+      />
+    )}
+
+    {row.key === "preferredFirstName" && (
+      <input
+        value={draftPreferred}
+        onChange={(e) => setDraftPreferred(e.target.value)}
+        className={inputEditClass}
+        placeholder="Preferred first name"
+      />
+    )}
+
+    {row.key === "phoneNumber" && (
+      <input
+        value={draftPhone}
+        onChange={(e) => setDraftPhone(e.target.value)}
+        className={inputEditClass}
+        placeholder="Phone number"
+      />
+    )}
+
+    {row.key === "email" && (
+      <input
+        type="email"
+        value={draftEmail}
+        onChange={(e) => setDraftEmail(e.target.value)}
+        className={inputEditClass}
+        placeholder="Email"
+      />
+    )}
+
+    {row.key === "residentialAddress" && (
+      <textarea
+        value={draftResidential}
+        onChange={(e) => setDraftResidential(e.target.value)}
+        rows={3}
+        className={`${inputEditClass} resize-none`}
+        placeholder="Street, city, state, ZIP"
+      />
+    )}
+
+    {row.key === "emergencyContact" && (
+      <div className="mt-2 space-y-2">
+        <input
+          value={draftEcName}
+          onChange={(e) => setDraftEcName(e.target.value)}
+          className={inputEmergencyFieldClass}
+          placeholder="Contact name"
+        />
+
+        <input
+          type="email"
+          value={draftEcEmail}
+          onChange={(e) => setDraftEcEmail(e.target.value)}
+          className={inputEmergencyFieldClass}
+          placeholder="Contact email"
+        />
+
+        <input
+          value={draftEcPhone}
+          onChange={(e) => setDraftEcPhone(e.target.value)}
+          className={inputEmergencyFieldClass}
+          placeholder="Contact phone"
+        />
+      </div>
+    )}
+
+    <button
+      type="button"
+      onClick={handleSaveField}
+      disabled={saving}
+      className="mt-3 h-[36px] w-[90px] rounded-[4px] bg-[#389131] text-[14px] font-semibold text-white hover:bg-[#2f7a2a] disabled:opacity-50"
+    >
+      {saving ? "Saving..." : "Save"}
+    </button>
+  </div>
+) : (
+                      <div className="flex h-full w-full items-center justify-between gap-3">
+                        <div className="flex min-w-0 flex-1 flex-col justify-center">
+                          <p className="text-[14px] font-medium leading-[100%] text-black">
+                            {row.label}
+                          </p>
+
+                          <p
+                            className={`mt-[6px] truncate text-[11px] font-light leading-[100%] ${
+                              row.hasData
+                                ? "text-black"
+                                : "text-black/45"
+                            }`}
+                          >
+                            {row.hasData
+                              ? row.value
+                              : row.placeholder}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => openEditor(row.key)}
+                          className={cardBtn}
+                        >
+                          {row.hasData ? "Edit" : "Add"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
             )}
-          </section>
+          </div>
         </div>
       </div>
 
@@ -571,7 +720,7 @@ const AccountSettings: React.FC = () => {
         }}
       />
     </div>
-  );
-};
+  </div>
+);}
 
-export default AccountSettings;
+export default Profile;

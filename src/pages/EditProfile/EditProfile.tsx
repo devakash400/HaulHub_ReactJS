@@ -1,475 +1,592 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronDown, Pencil } from "lucide-react";
+import {
+  ChevronRight,
+  Settings,
+  CircleHelp,
+  ShieldCheck,
+  LogOut,
+  FileText,
+  History,
+} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
+import { logout } from "../../store/authSlice.ts";
+import { clearWishlist } from "../../store/wishlistSlice.ts";
+import { logout as logoutApi } from "../../api/authApi.ts";
+import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
+import { RootState } from "../../store";
+import {
+  getUserProfile,
+  updateUserProfile,
+  type EmergencyContactPayload,
+  type UpdateUserProfilePayload,
+  type UserProfileApiData,
+} from "../../api/userApi.ts";
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isFilled = (v?: string | null) => Boolean(v && String(v).trim());
 
-const isStrongPassword = (pwd: string) => {
-  const s = pwd;
+const emergencyHasData = (ec?: EmergencyContactPayload | null) =>
+  Boolean(ec && (isFilled(ec.name) || isFilled(ec.email) || isFilled(ec.phoneNumber)));
+
+const residentialFromProfile = (p: UserProfileApiData | null): string => {
+  if (!p) return "";
+  if (isFilled(p.residentialAddress)) return String(p.residentialAddress).trim();
+  if (isFilled(p.address)) return String(p.address).trim();
+  const list = p.addresses;
+  if (Array.isArray(list) && list.length > 0) {
+    const first = list[0];
+    if (typeof first === "string") return first.trim();
+    if (first && typeof first === "object") {
+      const o = first as Record<string, unknown>;
+      const s = o.formattedAddress ?? o.address ?? o.street ?? o.line1 ?? o.city;
+      if (typeof s === "string" && s.trim()) return s.trim();
+    }
+  }
+  return "";
+};
+
+const legalDisplay = (p: UserProfileApiData | null) => {
+  if (!p) return "";
+  if (isFilled(p.legalName)) return String(p.legalName).trim();
+  if (isFilled(p.fullName)) return String(p.fullName).trim();
+  return "";
+};
+
+type ProfileUpdateErrorBody = {
+  message?: string;
+  errors?: Array<{ msg?: string; message?: string }>;
+};
+
+const formatProfileSaveError = (err: unknown): string => {
+  const ax = err as AxiosError<ProfileUpdateErrorBody>;
+  const list = ax.response?.data?.errors;
+  if (Array.isArray(list) && list.length > 0) {
+    const parts = list
+      .map((e) => e.msg || e.message)
+      .filter((s): s is string => Boolean(s && String(s).trim()));
+    if (parts.length > 0) return parts.join(" ");
+  }
   return (
-    s.length >= 8 &&
-    /[A-Z]/.test(s) &&
-    /[a-z]/.test(s) &&
-    /[0-9]/.test(s) &&
-    /[^A-Za-z0-9]/.test(s)
+    ax.response?.data?.message ||
+    ax.message ||
+    "Could not save changes."
   );
 };
 
-const digitsOnly = (v: string) => v.replace(/\D/g, "");
+type EditField =
+  | "legalName"
+  | "preferredFirstName"
+  | "phoneNumber"
+  | "email"
+  | "residentialAddress"
+  | "emergencyContact";
 
-const EditProfile: React.FC = () => {
+const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const reduxUser = useSelector((state: RootState) => state.auth.user);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [profile, setProfile] = useState<UserProfileApiData | null>(null);
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [editField, setEditField] = useState<EditField | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [firstName, setFirstName] = useState("demo");
-  const [lastName, setLastName] = useState("demo");
-  const [email, setEmail] = useState("dem@gmail.com");
-  const [password, setPassword] = useState("*****");
-  const [phone, setPhone] = useState("*****");
-  const [dob, setDob] = useState("2003-12-10");
-  const [address, setAddress] = useState("2458 Parkside Avenue");
-  const [country, setCountry] = useState("USA");
-  const [city, setCity] = useState("New York City");
-  const [zip, setZip] = useState("2432");
-  const [idNumber, setIdNumber] = useState("34535");
-  const [bookTrailer, setBookTrailer] = useState("Flatbed");
-  const [checkIn, setCheckIn] = useState("2024-10-12");
-  const [checkOut, setCheckOut] = useState("2024-10-20");
+  const [draftLegal, setDraftLegal] = useState("");
+  const [draftPreferred, setDraftPreferred] = useState("");
+  const [draftPhone, setDraftPhone] = useState("");
+  const [draftEmail, setDraftEmail] = useState("");
+  const [draftResidential, setDraftResidential] = useState("");
+  const [draftEcName, setDraftEcName] = useState("");
+  const [draftEcEmail, setDraftEcEmail] = useState("");
+  const [draftEcPhone, setDraftEcPhone] = useState("");
 
-  const errors = useMemo(() => {
-    const e: Record<string, string> = {};
-    if (!firstName.trim()) e.firstName = "Enter first name";
-    if (!lastName.trim()) e.lastName = "Enter last name";
-    if (!email.trim()) e.email = "Enter email";
-    else if (!emailRegex.test(email.trim())) e.email = "Enter a valid Email ID";
-    if (!password) e.password = "Enter password";
-    else if (!isStrongPassword(password))
-      e.password = "Password does not meet requirements";
-    const phoneDigits = digitsOnly(phone);
-    if (!phoneDigits) e.phone = "Enter phone number";
-    else if (phoneDigits.length < 10)
-      e.phone = "Enter at least 10 digits number";
-    if (!dob) e.dob = "Enter date of birth";
-    if (!address.trim()) e.address = "Enter address";
-    if (!country.trim()) e.country = "Enter your Country";
-    if (!city.trim()) e.city = "Enter your City";
-    if (!zip.trim()) e.zip = "Enter zip code";
-    else if (digitsOnly(zip).length < 3) e.zip = "Enter a valid zip code";
-    if (!idNumber.trim()) e.idNumber = "Enter ID number";
-    if (!bookTrailer.trim()) e.bookTrailer = "Select trailer";
-    if (!checkIn) e.checkIn = "Select check-in";
-    if (!checkOut) e.checkOut = "Select check-out";
-    if (checkIn && checkOut && new Date(checkOut) < new Date(checkIn))
-      e.checkOut = "Checkout must be after check-in";
-    return e;
-  }, [
-    firstName,
-    lastName,
-    email,
-    password,
-    phone,
-    dob,
-    address,
-    country,
-    city,
-    zip,
-    idNumber,
-    bookTrailer,
-    checkIn,
-    checkOut,
-  ]);
+  const loadProfile = useCallback(async () => {
+    if (!isAuthenticated) {
+      setProfile(null);
+      setProfileLoadFailed(false);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setProfileLoadFailed(false);
+    try {
+      const data = await getUserProfile();
+      setProfile(data);
+    } catch (err) {
+      const ax = err as AxiosError<{ message?: string }>;
+      const msg =
+        ax.response?.data?.message ||
+        ax.message ||
+        "Could not load your profile.";
+      toast.error(msg);
+      setProfile(null);
+      setProfileLoadFailed(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
 
-  const isValid = useMemo(() => Object.keys(errors).length === 0, [errors]);
+  useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
 
-  const requirements = useMemo(() => {
-    const s = password;
-    return {
-      len: s.length >= 8,
-      upper: /[A-Z]/.test(s),
-      lower: /[a-z]/.test(s),
-      num: /[0-9]/.test(s),
-      special: /[^A-Za-z0-9]/.test(s),
-    };
-  }, [password]);
-
-  const onNext = () => {
-    if (!isValid) return;
-    navigate("/", { replace: false });
+  const openEditor = (field: EditField) => {
+    if (!profile) return;
+    if (field === "legalName") {
+      setDraftLegal(legalDisplay(profile) || "");
+    } else if (field === "preferredFirstName") {
+      setDraftPreferred(profile.preferredFirstName?.trim() ?? "");
+    } else if (field === "phoneNumber") {
+      setDraftPhone(profile.phoneNumber?.trim() ?? "");
+    } else if (field === "email") {
+      setDraftEmail(profile.email?.trim() ?? "");
+    } else if (field === "residentialAddress") {
+      setDraftResidential(residentialFromProfile(profile));
+    } else if (field === "emergencyContact") {
+      setDraftEcName(profile.emergencyContact?.name?.trim() ?? "");
+      setDraftEcEmail(profile.emergencyContact?.email?.trim() ?? "");
+      setDraftEcPhone(profile.emergencyContact?.phoneNumber?.trim() ?? "");
+    }
+    setEditField(field);
   };
 
-  return (
-    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
-      <div className="max-w-3xl mx-auto w-full">
-        <header className="relative py-5">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-gray-100 text-gray-900 inline-flex items-center justify-center"
-            aria-label="Back"
-          >
-            <ArrowLeft className="w-5 h-5" aria-hidden />
-          </button>
-          <h1 className="text-center text-xl font-semibold text-gray-900">
-            Edit Profile
-          </h1>
-        </header>
+  const closeEditor = () => setEditField(null);
 
-        <main className="px-4 sm:px-6 pb-10">
-          <div className="flex items-center justify-center py-4">
-            <div className="relative">
-              <input
-                ref={photoInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
-              />
-              <div className="h-20 w-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                {photo ? (
-                  <img
-                    src={URL.createObjectURL(photo)}
-                    alt="Profile"
-                    className="h-full w-full object-cover"
+  useEffect(() => {
+    if (!editField) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setEditField(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [editField]);
+
+  /** PATCH only the keys sent here — do not merge empty strings for other fields (server validates the body). */
+  const persist = async (patch: UpdateUserProfilePayload) => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const next = await updateUserProfile(patch);
+      setProfile(next);
+      toast.success("Profile updated");
+      closeEditor();
+    } catch (err) {
+      toast.error(formatProfileSaveError(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveField = () => {
+    if (!profile || !editField) return;
+    if (editField === "legalName") {
+      const v = draftLegal.trim();
+      if (!v) {
+        toast.error("Enter a legal name");
+        return;
+      }
+      void persist({ legalName: v });
+      return;
+    }
+    if (editField === "preferredFirstName") {
+      const pf = draftPreferred.trim();
+      if (!pf) {
+        toast.error("Enter a preferred first name (1–50 characters)");
+        return;
+      }
+      void persist({ preferredFirstName: pf });
+      return;
+    }
+    if (editField === "phoneNumber") {
+      const v = draftPhone.trim();
+      if (!v) {
+        toast.error("Enter a phone number");
+        return;
+      }
+      void persist({ phoneNumber: v });
+      return;
+    }
+    if (editField === "email") {
+      const v = draftEmail.trim();
+      if (!v) {
+        toast.error("Enter an email");
+        return;
+      }
+      void persist({ email: v });
+      return;
+    }
+    if (editField === "residentialAddress") {
+      const v = draftResidential.trim();
+      if (!v) {
+        toast.error("Enter an address");
+        return;
+      }
+      void persist({ residentialAddress: v });
+      return;
+    }
+    if (editField === "emergencyContact") {
+      const name = draftEcName.trim();
+      const email = draftEcEmail.trim();
+      const phoneNumber = draftEcPhone.trim();
+      if (!name && !email && !phoneNumber) {
+        toast.error("Add at least one emergency contact detail");
+        return;
+      }
+      void persist({
+        emergencyContact: { name, email, phoneNumber },
+      });
+    }
+  };
+
+  const menuItems = [
+    {
+      label: "Account Settings",
+      icon: Settings,
+      onClick: () => navigate("/account-settings"),
+    },
+    {
+      label: "About US",
+      icon: CircleHelp,
+      onClick: () => navigate("/about"),
+    },
+    {
+      label: "Privacy",
+      icon: ShieldCheck,
+      onClick: () => navigate("/trust-safety"),
+    },
+    {
+      label: "Terms & Conditions",
+      icon: FileText,
+      onClick: () => navigate("/trust-safety"),
+    },
+    {
+      label: "Transaction History",
+      icon: History,
+      onClick: () => navigate("/booking"),
+    },
+    {
+      label: "Log Out",
+      icon: LogOut,
+      onClick: () => setIsLogoutConfirmOpen(true),
+    },
+  ] as const;
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } finally {
+      dispatch(logout());
+      dispatch(clearWishlist());
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("openLoginAfterLogout", "1");
+      }
+      navigate("/", { replace: true });
+      toast.success("Logged out successfully");
+    }
+  };
+
+  const personalRows = useMemo(() => {
+    const p = profile;
+    const legal = legalDisplay(p);
+    const preferred = p?.preferredFirstName?.trim() ?? "";
+    const phone = p?.phoneNumber?.trim() ?? "";
+    const email = p?.email?.trim() ?? reduxUser?.email?.trim() ?? "";
+    const residential = residentialFromProfile(p);
+    const ec = p?.emergencyContact;
+
+    return [
+      {
+        key: "legalName" as const,
+        label: "Legal name",
+        value: legal,
+        placeholder: "Not provided",
+        hasData: isFilled(legal),
+      },
+      {
+        key: "preferredFirstName" as const,
+        label: "Preferred First Name",
+        value: preferred,
+        placeholder: "Not provided",
+        hasData: isFilled(preferred),
+      },
+      {
+        key: "phoneNumber" as const,
+        label: "Phone number",
+        value: phone,
+        placeholder: "Provide phone number",
+        hasData: isFilled(phone),
+      },
+      {
+        key: "email" as const,
+        label: "Email",
+        value: email,
+        placeholder: "Not provided",
+        hasData: isFilled(email),
+      },
+      {
+        key: "residentialAddress" as const,
+        label: "Residential Address",
+        value: residential,
+        placeholder: "Not provided",
+        hasData: isFilled(residential),
+      },
+      {
+        key: "emergencyContact" as const,
+        label: "Emergency contact",
+        value: emergencyHasData(ec)
+          ? [ec?.name, ec?.phoneNumber, ec?.email].filter(isFilled).join(" · ")
+          : "",
+        placeholder: "Not provided",
+        hasData: emergencyHasData(ec),
+      },
+    ];
+  }, [profile, reduxUser?.email]);
+
+  const cardBtn =
+  "shrink-0 text-[22px] font-medium leading-[100%] tracking-normal text-[#389131] underline decoration-solid hover:text-[#2f7a2a]";
+
+  const inputEditClass =
+  "h-[44px] w-full rounded-[2px] border border-black bg-white px-4 text-[14px] text-black outline-none";
+const inputEmergencyFieldClass =
+  "w-full rounded-sm border border-black bg-white px-3 py-2.5 text-[14px] text-gray-900 outline-none focus:ring-1 focus:ring-black/20";
+
+const profileCardClass =
+  "flex h-[71px] w-full max-w-[539px] shrink-0 items-center justify-between rounded-[3px] border border-[#00000042] bg-white px-4 text-left transition-colors hover:bg-[#fafafa] lg:w-[539px]";
+
+  const personalCardClass =
+  "min-h-[71px] w-full max-w-[593px] rounded-[2px] border border-[#D9D9D9] bg-white px-5 py-4 lg:w-[593px]";
+return (
+  <div className="min-h-screen w-full overflow-x-hidden bg-white">
+    <div className="w-full px-[40px] py-6 sm:py-8">
+      <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+
+        {/* LEFT SIDE */}
+        <div className="flex w-full flex-col lg:max-w-[539px]">
+          <header>
+            <h1 className="text-[36px] font-medium leading-[100%] text-black">
+              Profile
+            </h1>
+          </header>
+
+          <nav className="mt-6 flex flex-col gap-5">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={item.onClick}
+                  className={profileCardClass}
+                >
+                  <span className="flex items-center gap-3">
+                    <Icon
+                      className="size-[21px] shrink-0 text-black"
+                      strokeWidth={1.75}
+                    />
+
+                    <span className="text-2xl font-medium leading-[100%] text-black">
+                      {item.label}
+                    </span>
+                  </span>
+
+                  <ChevronRight
+                    className="size-[21px] shrink-0 text-black"
+                    strokeWidth={1.75}
                   />
-                ) : (
-                  <span className="text-xs text-gray-600">Photo</span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => photoInputRef.current?.click()}
-                className="absolute bottom-0 right-0 h-7 w-7 rounded-full bg-[#389131] text-white inline-flex items-center justify-center shadow-sm"
-                aria-label="Edit photo"
-              >
-                <Pencil className="w-4 h-4" aria-hidden />
-              </button>
-            </div>
-          </div>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-800">
-                  First Name
-                </label>
-                <input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                    errors.firstName ? "border-red-400" : "border-gray-300"
-                  }`}
-                />
-                {errors.firstName && (
-                  <p className="mt-1 text-[11px] text-red-600">
-                    {errors.firstName}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-800">
-                  Last Name
-                </label>
-                <input
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                    errors.lastName ? "border-red-400" : "border-gray-300"
-                  }`}
-                />
-                {errors.lastName && (
-                  <p className="mt-1 text-[11px] text-red-600">
-                    {errors.lastName}
-                  </p>
-                )}
-              </div>
-            </div>
+        {/* RIGHT SIDE */}
+        <div className="flex w-full flex-col lg:max-w-[593px]">
+          <header>
+            <h2 className="text-[36px] font-medium leading-[100%] text-black">
+              Personal info
+            </h2>
+          </header>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                Email
-              </label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                  errors.email ? "border-red-400" : "border-gray-300"
-                }`}
-              />
-              {errors.email && (
-                <p className="mt-1 text-[11px] text-red-600">{errors.email}</p>
-              )}
-            </div>
+          <div className="mt-6 flex flex-col gap-5">
+            {loading ? (
+              <div className={personalCardClass}>
+                <p className="text-sm text-black/70">
+                  Loading your information…
+                </p>
+              </div>
+            ) : !isAuthenticated ? (
+              <div className={personalCardClass}>
+                <p className="text-sm text-black/70">
+                  Sign in to view and edit your personal information.
+                </p>
+              </div>
+            ) : profileLoadFailed ? (
+              <div className="w-full max-w-[593px] rounded-[3px] border border-[#00000042] bg-white p-4 lg:w-[593px]">
+                <p className="text-sm text-black">
+                  We could not load your profile from the server.
+                </p>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                  errors.password ? "border-red-400" : "border-gray-300"
-                }`}
-              />
-              <div className="mt-2 text-[11px] space-y-0.5">
-                <p
-                  className={`${requirements.len ? "text-green-700" : "text-red-600"}`}
+                <button
+                  type="button"
+                  onClick={() => void loadProfile()}
+                  className="mt-3 rounded-md bg-[#389131] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f7a2a]"
                 >
-                  - Add at least 8 characters
-                </p>
-                <p
-                  className={`${requirements.upper ? "text-green-700" : "text-red-600"}`}
-                >
-                  - Uppercase letters (A-Z)
-                </p>
-                <p
-                  className={`${requirements.lower ? "text-green-700" : "text-red-600"}`}
-                >
-                  - Lowercase letters (a-z)
-                </p>
-                <p
-                  className={`${requirements.num ? "text-green-700" : "text-red-600"}`}
-                >
-                  - Numbers (0-9)
-                </p>
-                <p
-                  className={`${requirements.special ? "text-green-700" : "text-red-600"}`}
-                >
-                  - Special characters (e.g. @, #, $, %)
-                </p>
+                  Try again
+                </button>
               </div>
-            </div>
+            ) : (
+              personalRows.map((row) => {
+                const isActive = editField === row.key;
+                const dimOthers = editField !== null && !isActive;
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                Phone Number
-              </label>
-              <div
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm flex items-center gap-2 ${
-                  errors.phone ? "border-red-400" : "border-gray-300"
-                }`}
-              >
-                <span className="text-sm">🇺🇸</span>
-                <span className="text-gray-500 text-sm">+1</span>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="flex-1 outline-none"
-                />
-              </div>
-              {errors.phone && (
-                <p className="mt-1 text-[11px] text-red-600">{errors.phone}</p>
-              )}
-            </div>
+                return (
+                  <div
+                    key={row.key}
+                    className={`${personalCardClass} ${
+                      dimOthers ? "opacity-40" : "opacity-100"
+                    }`}
+                  >
+                    {isActive ? (
+  <div className="flex min-h-[71px] flex-col justify-center">
+    <p className="text-[14px] font-semibold text-black mb-2">
+      {row.label}
+    </p>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                Date of birth
-              </label>
-              <input
-                type="date"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                  errors.dob ? "border-red-400" : "border-gray-300"
-                }`}
-              />
-              {errors.dob && (
-                <p className="mt-1 text-[11px] text-red-600">{errors.dob}</p>
-              )}
-            </div>
+    {row.key === "legalName" && (
+      <input
+        value={draftLegal}
+        onChange={(e) => setDraftLegal(e.target.value)}
+        className={inputEditClass}
+        placeholder="Legal name as on ID"
+        autoComplete="name"
+      />
+    )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                Address
-              </label>
-              <input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                  errors.address ? "border-red-400" : "border-gray-300"
-                }`}
-              />
-              {errors.address && (
-                <p className="mt-1 text-[11px] text-red-600">
-                  {errors.address}
-                </p>
-              )}
-            </div>
+    {row.key === "preferredFirstName" && (
+      <input
+        value={draftPreferred}
+        onChange={(e) => setDraftPreferred(e.target.value)}
+        className={inputEditClass}
+        placeholder="Preferred first name"
+      />
+    )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                Country
-              </label>
-              <div
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm flex items-center justify-between ${
-                  errors.country ? "border-red-400" : "border-gray-300"
-                }`}
-              >
-                <select
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  className="flex-1 bg-transparent outline-none appearance-none"
-                >
-                  <option value="">Select Country</option>
-                  <option value="USA">USA</option>
-                  <option value="Canada">Canada</option>
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-600" aria-hidden />
-              </div>
-              {errors.country && (
-                <p className="mt-1 text-[11px] text-red-600">
-                  {errors.country}
-                </p>
-              )}
-            </div>
+    {row.key === "phoneNumber" && (
+      <input
+        value={draftPhone}
+        onChange={(e) => setDraftPhone(e.target.value)}
+        className={inputEditClass}
+        placeholder="Phone number"
+      />
+    )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                City
-              </label>
-              <input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                  errors.city ? "border-red-400" : "border-gray-300"
-                }`}
-              />
-              {errors.city && (
-                <p className="mt-1 text-[11px] text-red-600">{errors.city}</p>
-              )}
-            </div>
+    {row.key === "email" && (
+      <input
+        type="email"
+        value={draftEmail}
+        onChange={(e) => setDraftEmail(e.target.value)}
+        className={inputEditClass}
+        placeholder="Email"
+      />
+    )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                Zip Code
-              </label>
-              <input
-                value={zip}
-                onChange={(e) => setZip(e.target.value)}
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                  errors.zip ? "border-red-400" : "border-gray-300"
-                }`}
-              />
-              {errors.zip && (
-                <p className="mt-1 text-[11px] text-red-600">{errors.zip}</p>
-              )}
-            </div>
+    {row.key === "residentialAddress" && (
+      <textarea
+        value={draftResidential}
+        onChange={(e) => setDraftResidential(e.target.value)}
+        rows={3}
+        className={`${inputEditClass} resize-none`}
+        placeholder="Street, city, state, ZIP"
+      />
+    )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                ID Number
-              </label>
-              <input
-                value={idNumber}
-                onChange={(e) => setIdNumber(e.target.value)}
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                  errors.idNumber ? "border-red-400" : "border-gray-300"
-                }`}
-              />
-              {errors.idNumber && (
-                <p className="mt-1 text-[11px] text-red-600">
-                  {errors.idNumber}
-                </p>
-              )}
-            </div>
+    {row.key === "emergencyContact" && (
+      <div className="mt-2 space-y-2">
+        <input
+          value={draftEcName}
+          onChange={(e) => setDraftEcName(e.target.value)}
+          className={inputEmergencyFieldClass}
+          placeholder="Contact name"
+        />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-800">
-                Book Trailer
-              </label>
-              <div
-                className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm flex items-center justify-between ${
-                  errors.bookTrailer ? "border-red-400" : "border-gray-300"
-                }`}
-              >
-                <select
-                  value={bookTrailer}
-                  onChange={(e) => setBookTrailer(e.target.value)}
-                  className="flex-1 bg-transparent outline-none appearance-none"
-                >
-                  <option value="">Select Trailer</option>
-                  <option value="Flatbed">Flatbed</option>
-                  <option value="Gooseneck">Gooseneck</option>
-                  <option value="Enclosed">Enclosed</option>
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-600" aria-hidden />
-              </div>
-              {errors.bookTrailer && (
-                <p className="mt-1 text-[11px] text-red-600">
-                  {errors.bookTrailer}
-                </p>
-              )}
-            </div>
+        <input
+          type="email"
+          value={draftEcEmail}
+          onChange={(e) => setDraftEcEmail(e.target.value)}
+          className={inputEmergencyFieldClass}
+          placeholder="Contact email"
+        />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-800">
-                  CheckDate
-                </label>
-                <input
-                  type="date"
-                  value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
-                  className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                    errors.checkIn ? "border-red-400" : "border-gray-300"
-                  }`}
-                />
-                {errors.checkIn && (
-                  <p className="mt-1 text-[11px] text-red-600">
-                    {errors.checkIn}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-800">
-                  Check out
-                </label>
-                <input
-                  type="date"
-                  value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
-                  className={`mt-1 w-full border rounded-md px-3 py-2.5 text-sm outline-none ${
-                    errors.checkOut ? "border-red-400" : "border-gray-300"
-                  }`}
-                />
-                {errors.checkOut && (
-                  <p className="mt-1 text-[11px] text-red-600">
-                    {errors.checkOut}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="w-full border border-gray-300 bg-white text-gray-900 py-3 rounded-md text-sm font-semibold hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={onNext}
-              disabled={!isValid}
-              aria-disabled={!isValid}
-              className={`w-full py-3 rounded-md text-sm font-semibold transition-opacity text-white`}
-              style={{
-                backgroundColor: !isValid ? "#929191" : "#389131",
-                cursor: !isValid ? "not-allowed" : "pointer",
-              }}
-            >
-              Next
-            </button>
-          </div>
-        </main>
+        <input
+          value={draftEcPhone}
+          onChange={(e) => setDraftEcPhone(e.target.value)}
+          className={inputEmergencyFieldClass}
+          placeholder="Contact phone"
+        />
       </div>
-    </div>
-  );
-};
+    )}
 
-export default EditProfile;
+    <button
+      type="button"
+      onClick={handleSaveField}
+      disabled={saving}
+      className="mt-3 h-[36px] w-[90px] rounded-[4px] bg-[#389131] text-[14px] font-semibold text-white hover:bg-[#2f7a2a] disabled:opacity-50"
+    >
+      {saving ? "Saving..." : "Save"}
+    </button>
+  </div>
+) : (
+                      <div className="flex h-full w-full items-center justify-between gap-3">
+                        <div className="flex min-w-0 flex-1 flex-col justify-center">
+                          <p className="text-[14px] font-medium leading-[100%] text-black">
+                            {row.label}
+                          </p>
+
+                          <p
+                            className={`mt-[6px] truncate text-[11px] font-light leading-[100%] ${
+                              row.hasData
+                                ? "text-black"
+                                : "text-black/45"
+                            }`}
+                          >
+                            {row.hasData
+                              ? row.value
+                              : row.placeholder}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => openEditor(row.key)}
+                          className={cardBtn}
+                        >
+                          {row.hasData ? "Edit" : "Add"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </div>
+
+      <LogoutConfirmModal
+        isOpen={isLogoutConfirmOpen}
+        onCancel={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={() => {
+          setIsLogoutConfirmOpen(false);
+          void handleLogout();
+        }}
+      />
+    </div>
+  </div>
+);}
+
+export default Profile;
