@@ -289,20 +289,8 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
             "
               />
 
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="absolute right-4 top-[34px] w-5 h-5 text-black pointer-events-none"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
+            
+               
             </div>
 
             {/* Check Out */}
@@ -336,20 +324,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
             "
               />
 
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="absolute right-4 top-[34px] w-5 h-5 text-black pointer-events-none"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
+             
             </div>
           </div>
 
@@ -384,20 +359,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
           "
             />
 
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute right-4 top-[36px] w-5 h-5 text-black pointer-events-none"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+           
           </div>
         </div>
 
