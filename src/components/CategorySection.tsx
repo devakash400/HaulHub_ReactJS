@@ -189,20 +189,23 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             maxWidth: isMobileCompact ? "100%" : `${sectionContentWidth}px`,
           }}
         >
-          <header className="flex items-center justify-between mb-4">
-            <h2 className="m-0 font-['Lexend'] font-semibold text-[30px] leading-[100%] text-[#389131]">
+          <header className="flex items-center justify-between mb-5">
+            <h2 className="mt-5 font-['Lexend'] font-semibold text-[30px] leading-[100%] text-[#389131]">
               {title}
             </h2>
 
             <div
-              className={`items-center gap-[2px] ${isMobileCompact ? "hidden" : "flex"}`}
+              className={`items-center  ${isMobileCompact ? "hidden" : "flex"}`}
             >
               <button
                 type="button"
                 onClick={() => handleScroll("left")}
                 aria-label="Scroll left"
                 disabled={!canScrollLeft}
-                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200`}
+                className={`flex items-center justify-center 
+                  rounded-full p-0 border-0 cursor-pointer 
+                  transition-all duration-200 hover:scale-105 active:scale-95 
+                  bg-white active:bg-gray-200`}
                 style={{
                   opacity: !canScrollLeft ? 0.4 : 1,
                   cursor: !canScrollLeft ? "not-allowed" : "pointer",
@@ -220,7 +223,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleScroll("right")}
                 aria-label="Scroll right"
                 disabled={!canScrollRight}
-                className={`flex items-center justify-center rounded-full p-1 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200`}
+                className={`flex items-center justify-center rounded-full p-0 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200`}
                 style={{
                   opacity: !canScrollRight ? 0.4 : 1,
                   cursor: !canScrollRight ? "not-allowed" : "pointer",
@@ -262,11 +265,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     />
 
                     {/* BADGE */}
-                    {item.badgeLabel && (
+                    {/* {item.badgeLabel && ( */}
                       <span className="absolute top-3 left-3 px-3 py-1 rounded-[9px] bg-white text-[11px] font-medium text-black shadow">
-                        {item.badgeLabel}
+                        {/* {item.badgeLabel} */}
+                        Guest favourite
                       </span>
-                    )}
+                    {/* )} */}
 
                     {/* WISHLIST */}
                     <button

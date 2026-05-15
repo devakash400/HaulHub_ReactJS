@@ -1,10 +1,11 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useParams, Navigate, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  getTrailerById,
   getTrailerTypeLabel,
+  type TrailerDetail,
 } from "../../../assets/data/trailers.ts";
+import { resolveTrailerForRoute } from "../../../api/trailersApi.ts";
 import {
   TrailerTitleSection,
   TrailerImageGallery,
@@ -92,8 +93,11 @@ const RevealSection: React.FC<RevealSectionProps> = ({
 
 const Trailer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const trailer = id ? getTrailerById(Number(id)) : undefined;
   const navigate = useNavigate();
+  const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
@@ -155,8 +159,54 @@ const Trailer: React.FC = () => {
     };
   }, [id]);
 
-  if (!trailer) {
-    return <Navigate to="/" replace />;
+  useEffect(() => {
+    if (!id) {
+      setTrailer(null);
+      setLoadState("error");
+      return;
+    }
+    let cancelled = false;
+    setLoadState("loading");
+    setTrailer(null);
+    void (async () => {
+      const resolved = await resolveTrailerForRoute(id);
+      if (cancelled) return;
+      if (resolved) {
+        setTrailer(resolved);
+        setLoadState("ready");
+      } else {
+        setTrailer(null);
+        setLoadState("error");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (loadState === "loading") {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4">
+        <p className="text-gray-600 text-sm">Loading trailer…</p>
+      </div>
+    );
+  }
+
+  if (loadState === "error" || !trailer) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-gray-800 font-medium">We couldn&apos;t load this trailer.</p>
+        <p className="text-gray-600 text-sm max-w-md">
+          It may have been removed or the link is invalid. Return home to keep browsing.
+        </p>
+        <Link
+          to="/"
+          className="text-[#389131] font-medium underline hover:no-underline"
+        >
+          Back to home
+        </Link>
+      </div>
+    );
   }
 
   const typeLabel = getTrailerTypeLabel(trailer.type);
@@ -276,7 +326,7 @@ const Trailer: React.FC = () => {
           >
             <TrailerImageGallery
               images={trailer.images}
-              trailerId={trailer.id}
+              trailerId={id ?? trailer.id}
             />
           </div>
         </RevealSection>
@@ -327,6 +377,7 @@ const Trailer: React.FC = () => {
           <div className="lg:col-span-1 mt-8 lg:mt-0">
             <RevealSection delayMs={140} variant="soft">
               <StickyPricingCard
+                trailerId={id ?? String(trailer.id)}
                 price={trailer.price}
                 trailer={{
                   title: locationText,

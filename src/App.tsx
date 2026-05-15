@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar.tsx";
 import BottomBar from "./components/BottomBar/BottomBar.tsx";
 import Home from "./pages/Dashboard/Home.tsx";
+import ScrollToTop from "./components/ScrollToTop.tsx";
 import LoginPage from "./pages/Auth/Login/LoginPage.tsx";
 import About from "./pages/About/About.tsx";
 import Contact from "./pages/Contact/Contact.tsx";
@@ -41,7 +42,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden min-w-0">
-      {!hideNavFooter && <Navbar />}
+     <ScrollToTop /> {!hideNavFooter && <Navbar />}
       <main className={contentTopPadding}>
         <Routes>
           <Route path="/" element={<Home />} />

@@ -3,12 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Container from "./Container.tsx";
 import { CategorySection } from "../../components/CategorySection.tsx";
-import {
-  getGooseneckListItems,
-  getBumperPullListItems,
-  getFlatbedListItems,
-  getCarHaulersListItems,
-} from "../../assets/data/trailers.ts";
+import { getGooseneckListItems } from "../../assets/data/trailers.ts";
+import { fetchTrailersList } from "../../api/trailersApi.ts";
+import type { TrailerListItem } from "../../assets/data/trailers.ts";
 import { RootState } from "../../store";
 import { AddTrailerModal } from "../../components/TrailerDetails/AddTrailerModal.tsx";
 
@@ -60,6 +57,13 @@ const RevealBlock: React.FC<RevealBlockProps> = ({ children, delayMs = 0 }) => {
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const [addTrailerOpen, setAddTrailerOpen] = useState(false);
+  const [renterListings, setRenterListings] = useState<{
+    gooseneck: TrailerListItem[];
+    bumperPull: TrailerListItem[];
+    flatbed: TrailerListItem[];
+    carHaulers: TrailerListItem[];
+  } | null>(null);
+  const [listingsLoadError, setListingsLoadError] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
   const userType = useSelector((state: RootState) => state.auth.userType);
   const ownerTrailersCount = useSelector(
@@ -73,11 +77,50 @@ const Home: React.FC = () => {
     (user?.trailor === "Owner" || userType === "Owner") &&
     ownerTrailersCount > 0;
 
+  const showRenterCategories = !isOwnerWithNoTrailers && !isOwnerWithTrailers;
+
+  useEffect(() => {
+    if (!showRenterCategories) return;
+
+    let cancelled = false;
+    setListingsLoadError(false);
+
+    (async () => {
+      try {
+        const grouped = await fetchTrailersList({ page: 1, limit: 100 });
+        if (cancelled) return;
+        setRenterListings({
+          gooseneck: grouped.gooseneck,
+          bumperPull: grouped.bumper_pull,
+          flatbed: grouped.flatbed,
+          carHaulers: grouped.car_hauler,
+        });
+      } catch {
+        if (!cancelled) {
+          setListingsLoadError(true);
+          setRenterListings({
+            gooseneck: [],
+            bumperPull: [],
+            flatbed: [],
+            carHaulers: [],
+          });
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showRenterCategories]);
+
   const gooseneckItems = getGooseneckListItems();
-  const bumperPullItems = getBumperPullListItems();
-  const flatbedItems = getFlatbedListItems();
-  const carHaulersItems = getCarHaulersListItems();
   const ownerTrailerCards = gooseneckItems;
+
+  const gooseneckSectionItems = renterListings?.gooseneck ?? [];
+  const bumperPullSectionItems = renterListings?.bumperPull ?? [];
+  const flatbedSectionItems = renterListings?.flatbed ?? [];
+  const carHaulersSectionItems = renterListings?.carHaulers ?? [];
+  const listingsStillLoading = showRenterCategories && renterListings === null;
   const isBookedTrailer = (truckId: number) => truckId % 3 === 2;
   const visibleOwnerTrailers = ownerTrailerCards.slice(0, 4);
 
@@ -187,27 +230,72 @@ const Home: React.FC = () => {
         </RevealBlock>
       ) : (
         <>
-          <RevealBlock delayMs={80}>
-            <CategorySection
-              title="Gooseneck Trailers"
-              items={gooseneckItems}
-            />
-          </RevealBlock>
-
-          <RevealBlock delayMs={120}>
-            <CategorySection
-              title="Bumper Pull Trailers"
-              items={bumperPullItems}
-            />
-          </RevealBlock>
-
-          <RevealBlock delayMs={160}>
-            <CategorySection title="Flatbed Trailers" items={flatbedItems} />
-          </RevealBlock>
-
-          <RevealBlock delayMs={200}>
-            <CategorySection title="Car Haulers" items={carHaulersItems} />
-          </RevealBlock>
+          {listingsStillLoading ? (
+            <RevealBlock delayMs={80}>
+              <div className="px-4 py-12 text-center text-[15px] text-gray-500">
+                Loading trailers…
+              </div>
+            </RevealBlock>
+          ) : (
+            <>
+              {listingsLoadError && (
+                <RevealBlock delayMs={40}>
+                  <div className="px-4 pt-4 text-center text-sm text-amber-800 bg-amber-50 border-b border-amber-100">
+                    Could not load trailers. Check that the API is reachable
+                    (set{" "}
+                    <code className="text-xs bg-amber-100 px-1 rounded">
+                      REACT_APP_API_URL
+                    </code>{" "}
+                    if your backend is not the default host).
+                  </div>
+                </RevealBlock>
+              )}
+              {gooseneckSectionItems.length > 0 && (
+                <RevealBlock delayMs={80}>
+                  <CategorySection
+                    title="Gooseneck Trailers"
+                    items={gooseneckSectionItems}
+                  />
+                </RevealBlock>
+              )}
+              {bumperPullSectionItems.length > 0 && (
+                <RevealBlock delayMs={120}>
+                  <CategorySection
+                    title="Bumper Pull Trailers"
+                    items={bumperPullSectionItems}
+                  />
+                </RevealBlock>
+              )}
+              {flatbedSectionItems.length > 0 && (
+                <RevealBlock delayMs={160}>
+                  <CategorySection
+                    title="Flatbed Trailers"
+                    items={flatbedSectionItems}
+                  />
+                </RevealBlock>
+              )}
+              {carHaulersSectionItems.length > 0 && (
+                <RevealBlock delayMs={200}>
+                  <CategorySection
+                    title="Car Haulers"
+                    items={carHaulersSectionItems}
+                  />
+                </RevealBlock>
+              )}
+              {!listingsLoadError &&
+                renterListings &&
+                gooseneckSectionItems.length === 0 &&
+                bumperPullSectionItems.length === 0 &&
+                flatbedSectionItems.length === 0 &&
+                carHaulersSectionItems.length === 0 && (
+                  <RevealBlock delayMs={80}>
+                    <div className="px-4 py-12 text-center text-[15px] text-gray-500">
+                      No trailers match the home categories yet.
+                    </div>
+                  </RevealBlock>
+                )}
+            </>
+          )}
         </>
       )}
 

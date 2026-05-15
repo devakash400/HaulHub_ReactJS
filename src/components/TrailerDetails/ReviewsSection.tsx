@@ -1,16 +1,9 @@
 import React from "react";
 import { Star } from "lucide-react";
-
-type Review = {
-  avatar: string;
-  name: string;
-  years: string;
-  context: string;
-  text: string;
-};
+import type { TrailerReview } from "../../assets/data/trailers.ts";
 
 type ReviewsSectionProps = {
-  reviews: Review[];
+  reviews: TrailerReview[];
   onShowAll?: () => void;
 };
 
@@ -83,7 +76,7 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                 </h4>
 
                 <p className="mt-[4px] text-[11px] text-[#8A8A8A] leading-none">
-                  {review.years}
+                  HaulHub renter
                 </p>
               </div>
             </div>

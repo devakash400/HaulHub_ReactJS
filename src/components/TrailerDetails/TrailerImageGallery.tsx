@@ -5,7 +5,7 @@ import showAllPhotosIcon from "../../assets/icons/showallphoto.png";
 
 type TrailerImageGalleryProps = {
   images: string[];
-  trailerId?: number;
+  trailerId?: string | number;
 };
 
 const PLACEHOLDER = assetImages.Catimg;

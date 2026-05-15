@@ -373,7 +373,7 @@ focus-visible:outline-none"
                               color: "#000000",
                             }}
                           >
-                            Login / Sign Up
+                            Logout
                           </span>
                         </li>
                       </>

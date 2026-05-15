@@ -28,6 +28,9 @@ type Step = "email" | "password" | "reset" | "newPassword";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Same rule as `SignUpModal` password special-character check */
+const passwordSpecialCharRegex = /[!@#$%^&*(),.?":{}|<>_\-\\[\];'/`~+]/;
+
 type CountryOption = {
   code: string;
   name: string;
@@ -149,6 +152,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [showNewPwd, setShowNewPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [showLoginPwd, setShowLoginPwd] = useState(false);
+  const [newPasswordTouched, setNewPasswordTouched] = useState(false);
+  const [confirmNewPasswordTouched, setConfirmNewPasswordTouched] =
+    useState(false);
 
   const isEmailFilled = email.trim().length > 0;
   const isEmailValid = useMemo(() => emailRegex.test(email.trim()), [email]);
@@ -197,6 +203,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setEmailError(null);
     setPassword("");
     setIsSubmitting(false);
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setNewPasswordTouched(false);
+    setConfirmNewPasswordTouched(false);
 
     const previousBodyOverflow = document.body.style.overflow;
     const previousBodyTouchAction = document.body.style.touchAction;
@@ -457,9 +467,41 @@ const LoginModal: React.FC<LoginModalProps> = ({
     [newPassword, confirmNewPassword],
   );
 
+  const newPasswordRules = useMemo(() => {
+    const p = newPassword;
+    return {
+      hasMinLength: p.length >= 8,
+      hasUppercase: /[A-Z]/.test(p),
+      hasLowercase: /[a-z]/.test(p),
+      hasNumber: /[0-9]/.test(p),
+      hasSpecial: passwordSpecialCharRegex.test(p),
+    };
+  }, [newPassword]);
+
+  const isNewPasswordValid = useMemo(
+    () =>
+      newPasswordRules.hasMinLength &&
+      newPasswordRules.hasUppercase &&
+      newPasswordRules.hasLowercase &&
+      newPasswordRules.hasNumber &&
+      newPasswordRules.hasSpecial,
+    [newPasswordRules],
+  );
+
+  const confirmPasswordRules = useMemo(() => {
+    const p = confirmNewPassword;
+    return {
+      hasMinLength: p.length >= 8,
+      hasUppercase: /[A-Z]/.test(p),
+      hasLowercase: /[a-z]/.test(p),
+      hasNumber: /[0-9]/.test(p),
+      hasSpecial: passwordSpecialCharRegex.test(p),
+    };
+  }, [confirmNewPassword]);
+
   const canSetNewPassword = useMemo(() => {
-    return newPassword.length >= 6 && passwordsMatch;
-  }, [newPassword, passwordsMatch]);
+    return isNewPasswordValid && passwordsMatch;
+  }, [isNewPasswordValid, passwordsMatch]);
 
   const isOtpValid = useMemo(() => otp.trim().length === 6, [otp]);
 
@@ -1190,6 +1232,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   type={showNewPwd ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  onBlur={() => setNewPasswordTouched(true)}
                   className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
                 <button
@@ -1205,6 +1248,59 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   )}
                 </button>
               </div>
+              {newPasswordTouched && newPassword.trim().length > 0 && (
+                <ul className="mt-2 space-y-0.5 font-lexend font-light text-[12px] leading-[100%] tracking-[0em] text-[#6B6B6B]">
+                  <li
+                    className={
+                      newPasswordRules.hasMinLength
+                        ? "text-[#6B6B6B]"
+                        : "text-red-600"
+                    }
+                  >
+                    • Add at least 8 characters
+                  </li>
+
+                  <li
+                    className={
+                      newPasswordRules.hasUppercase
+                        ? "text-[#6B6B6B]"
+                        : "text-red-600"
+                    }
+                  >
+                    • Uppercase letters (A-Z)
+                  </li>
+
+                  <li
+                    className={
+                      newPasswordRules.hasLowercase
+                        ? "text-[#6B6B6B]"
+                        : "text-red-600"
+                    }
+                  >
+                    • Lowercase letters (a-z)
+                  </li>
+
+                  <li
+                    className={
+                      newPasswordRules.hasNumber
+                        ? "text-[#6B6B6B]"
+                        : "text-red-600"
+                    }
+                  >
+                    • Numbers (0-9)
+                  </li>
+
+                  <li
+                    className={
+                      newPasswordRules.hasSpecial
+                        ? "text-[#6B6B6B]"
+                        : "text-red-600"
+                    }
+                  >
+                    • Special characters (e.g., @, #, $, %, !)
+                  </li>
+                </ul>
+              )}
               <label className="mt-5 block mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
                 Confirm New Password{" "}
                 <span className="font-['Lexend'] text-[17px] font-normal leading-[100%] text-[#FF0000]">
@@ -1216,6 +1312,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   type={showConfirmPwd ? "text" : "password"}
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  onBlur={() => setConfirmNewPasswordTouched(true)}
                   className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
                 <button
@@ -1231,8 +1328,61 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   )}
                 </button>
               </div>
+              {confirmNewPasswordTouched &&
+                confirmNewPassword.trim().length > 0 && (
+                  <ul className="mt-2 space-y-0.5 text-xs">
+                    <li
+                      className={
+                        confirmPasswordRules.hasMinLength
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }
+                    >
+                      • Add at least 8 characters
+                    </li>
+                    <li
+                      className={
+                        confirmPasswordRules.hasUppercase
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }
+                    >
+                      • Uppercase letters (A-Z)
+                    </li>
+                    <li
+                      className={
+                        confirmPasswordRules.hasLowercase
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }
+                    >
+                      • Lowercase letters (a-z)
+                    </li>
+                    <li
+                      className={
+                        confirmPasswordRules.hasNumber
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }
+                    >
+                      • Numbers (0-9)
+                    </li>
+                    <li
+                      className={
+                        confirmPasswordRules.hasSpecial
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }
+                    >
+                      • Special characters (e.g., @, #, $, %, !)
+                    </li>
+                  </ul>
+                )}
               {confirmNewPassword.length > 0 && !passwordsMatch && (
-                <p className="mt-2 text-xs text-red-600">
+                <p
+                  className="text-[12px] font-light 
+                font-['Lexend'] text-red-600 mt-2"
+                >
                   Passwords do not match
                 </p>
               )}
@@ -1316,6 +1466,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 }
                 onClose={() => setShowOtpModal(false)}
                 variant="close"
+                closeOnRight
+                closeSizePx={24}
               />
               <div className="px-5 py-5 ">
                 <p
@@ -1375,6 +1527,23 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     }}
                   />
                 </>
+                {otpError && (
+                  <p
+                    className="mt-3 text-xs text-red-600 font-medium 
+                  flex items-center gap-2"
+                  >
+                    <span className="inline-flex h-3 w-3 rounded-full bg-red-600 text-white items-center justify-center text-[10px]">
+                      !
+                    </span>
+                    <span
+                      className="text-[12px] font-light 
+                font-['Lexend'] text-red-600"
+                    >
+                      {" "}
+                      {otpError}
+                    </span>
+                  </p>
+                )}
                 <div className="mt-2 flex justify-end items-center gap-2 text-xs text-gray-600">
                   {otpSeconds > 0 ? (
                     <span className="font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] text-[#757171]">
@@ -1401,14 +1570,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     </button>
                   )}
                 </div>
-                {otpError && (
-                  <p className="mt-3 text-xs text-red-600 font-medium flex items-center gap-2">
-                    <span className="inline-flex h-4 w-4 rounded-full bg-red-600 text-white items-center justify-center text-[10px]">
-                      !
-                    </span>
-                    {otpError}
-                  </p>
-                )}
+
                 <button
                   type="button"
                   onClick={handleVerifyOtp}

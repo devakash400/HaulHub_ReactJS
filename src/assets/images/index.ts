@@ -15,8 +15,9 @@ import ModalLogo from './modallogo.png';
 import Instagram from "./instagram.png";
 import Facebook from "./facebook.png";
 import Contact from "./contact.png";
+// import trailer2 from "../../../src/assets/images/trailer2."
 
-// Export them all
+// Export them al
 export const images = {
   logo,
   appStore,

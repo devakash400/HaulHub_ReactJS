@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from "react";
-import { useParams, useNavigate, Link, Navigate } from "react-router-dom";
+import React, { useState, useCallback, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Heart, Share2 } from "lucide-react";
 import {
-  getTrailerById,
   getTrailerTypeLabel,
+  type TrailerDetail,
 } from "../../../assets/data/trailers.ts";
+import { resolveTrailerForRoute } from "../../../api/trailersApi.ts";
 import { images as assetImages } from "../../../assets/images/index.ts";
 import {
   ImageModal,
@@ -22,10 +23,38 @@ const PLACEHOLDER = assetImages.Catimg;
 const AllTrailerPhotos: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const trailer = id ? getTrailerById(Number(id)) : undefined;
+  const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
   const [modalPhoto, setModalPhoto] = useState<Photo | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [wishlistModalOpen, setWishlistModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!id) {
+      setTrailer(null);
+      setLoadState("error");
+      return;
+    }
+    let cancelled = false;
+    setLoadState("loading");
+    setTrailer(null);
+    void (async () => {
+      const resolved = await resolveTrailerForRoute(id);
+      if (cancelled) return;
+      if (resolved) {
+        setTrailer(resolved);
+        setLoadState("ready");
+      } else {
+        setTrailer(null);
+        setLoadState("error");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const photos: Photo[] = trailer
     ? trailer.images.map((url, index) => ({ id: index + 1, url }))
@@ -34,8 +63,26 @@ const AllTrailerPhotos: React.FC = () => {
   const openModal = useCallback((photo: Photo) => setModalPhoto(photo), []);
   const closeModal = useCallback(() => setModalPhoto(null), []);
 
-  if (!trailer) {
-    return <Navigate to="/" replace />;
+  if (loadState === "loading") {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4">
+        <p className="text-gray-600 text-sm">Loading photos…</p>
+      </div>
+    );
+  }
+
+  if (loadState === "error" || !trailer) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-gray-800 font-medium">We couldn&apos;t load this trailer.</p>
+        <Link
+          to="/"
+          className="text-[#389131] font-medium underline hover:no-underline"
+        >
+          Back to home
+        </Link>
+      </div>
+    );
   }
 
   const typeLabel = getTrailerTypeLabel(trailer.type);
