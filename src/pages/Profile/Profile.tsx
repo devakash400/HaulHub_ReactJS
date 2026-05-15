@@ -219,7 +219,7 @@ const Profile: React.FC = () => {
                     <Icon className="w-[32.86px] h-[33.45px] text-black" />
                       <span className="text-[24px] leading-[100%] font-normal text-black tracking-[0px] font-['Lexend']">
   {item.label}
-</span>
+</span> 
                     </div>
   
                     <ChevronRight className="w-5 h-5 text-[#666]" />

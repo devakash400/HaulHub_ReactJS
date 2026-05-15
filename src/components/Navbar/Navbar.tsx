@@ -9,7 +9,11 @@ import { SignUpModal, SignUpData } from "../TrailerDetails/SignUpModal.tsx";
 import { RootState } from "../../store";
 import { logout, signUpSuccess } from "../../store/authSlice.ts";
 import { clearWishlist } from "../../store/wishlistSlice.ts";
-import { logout as logoutApi, register } from "../../api/authApi.ts";
+import {
+  logout as logoutApi,
+  register,
+  roleToTrailor,
+} from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../Auth/LogoutConfirmModal.tsx";
 
 function profileInitial(
@@ -806,12 +810,18 @@ focus-visible:outline-none"
                 .filter(Boolean);
               const lastName =
                 restName.length > 0 ? restName.join(" ") : undefined;
-              const trailorFromApi = (
-                res.user as { trailor?: string | string[] }
-              ).trailor;
-              const normalizedTrailor = Array.isArray(trailorFromApi)
-                ? trailorFromApi[0]
-                : trailorFromApi;
+              const apiUser = res.user as {
+                role?: string;
+                trailor?: string | string[];
+              };
+              const trailorFromApi =
+                roleToTrailor(apiUser.role) ??
+                roleToTrailor(
+                  Array.isArray(apiUser.trailor)
+                    ? apiUser.trailor[0]
+                    : apiUser.trailor
+                );
+              const normalizedTrailor = trailorFromApi ?? data.trailor;
 
               dispatch(
                 signUpSuccess({
@@ -819,11 +829,11 @@ focus-visible:outline-none"
                     firstName: firstName || undefined,
                     lastName,
                     email: res.user.email || data.email,
-                    trailor: normalizedTrailor || data.trailor,
+                    trailor: normalizedTrailor,
                   },
                   accessToken: res.accessToken,
                   refreshToken: res.refreshToken,
-                  userType: normalizedTrailor || data.trailor,
+                  userType: normalizedTrailor,
                 }),
               );
               // eslint-disable-next-line no-console
