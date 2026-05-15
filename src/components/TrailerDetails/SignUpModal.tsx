@@ -254,6 +254,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
               onClose={onClose}
               variant="close"
               titleId="sign-up-title"
+              closeOnRight={true}
             />
 
             <div className="px-6 pt-6 pb-4 sm:px-10 sm:pt-6 sm:pb-6 overflow-y-auto">
@@ -678,7 +679,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                           <img
                             src={chevronDown}
                             alt="dropdown"
-                            className="w-[8.5px] h-[6px] pointer-events-none"
+                            className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
                           />
                         </div>
 

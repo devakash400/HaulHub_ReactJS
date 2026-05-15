@@ -557,6 +557,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
           }
           onClose={goBack}
           variant={step === "email" ? "close" : "none"}
+          closeOnRight={true}
         />
 
         <div
@@ -568,7 +569,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             <div>
               <label
                 className="block mb-2 font-['Lexend']
-              font-normal text-[17px] leading-[100%]
+              font-normal text-[14px] leading-[100%]
                tracking-[0%] text-black"
               >
                 {usePhoneOnly ? "Phone Number" : "Email ID"}{" "}
@@ -594,7 +595,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                           <img
                             src={chevronDown}
                             alt="dropdown"
-                            className="w-[8.5px] h-[6px] pointer-events-none"
+                            className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
                           />
                         </div>
 
@@ -660,48 +661,51 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <p className="mt-2 text-xs text-red-600">{emailError}</p>
               )}
 
-              <div className="mt-4">
-                <label className="block mb-2 font-['Lexend'] font-normal text-[14px] leading-[100%] tracking-[0%] text-black">
-                  Choose your Category <span className="text-red-500">*</span>
-                </label>
+<div className="mt-4">
+  <label
+    className="block mb-2 text-black"
+    style={{
+      fontFamily: "Lexend",
+      fontWeight: 400,
+      fontSize: "14px",
+      lineHeight: "100%",
+      letterSpacing: "0%",
+    }}
+  >
+    Choose your Category <span className="text-red-500">*</span>
+  </label>
 
-                <div className="relative">
-                  <select
-                    value={loginTrailor}
-                    onChange={(e) => {
-                      setLoginTrailor(e.target.value as "Renter" | "Owner");
-                      setLoginError(null);
-                    }}
-                    className="w-full px-4 pr-10 text-sm bg-white 
-                    appearance-none focus:outline-none focus:ring-2 
-                    focus:ring-[#389131]/15"
-                    style={{
-                      height: "40px",
-                      background: "#FFFFFF",
-                      border: "1px solid #050303",
-                      borderRadius: "5px",
-                    }}
-                  >
-           <option
-  value="Renter"
-  className="font-[Lexend] font-light text-[12px] leading-[100%] tracking-[0%] text-black"
->
-  Renter
-</option>
+  <div className="relative">
+    <select
+      value={loginTrailor}
+      onChange={(e) => {
+        setLoginTrailor(e.target.value as "Renter" | "Owner");
+        setLoginError(null);
+      }}
+      className="w-full px-4 pr-10 appearance-none bg-white outline-none"
+      style={{
+        height: "40px",
+        minHeight: "40px",
+        border: "1px solid #050303",
+        borderRadius: "5px",
+        fontFamily: "Lexend",
+        fontWeight: 300,
+        fontSize: "12px",
+        lineHeight: "40px",
+        color: "#000",
+        WebkitAppearance: "none",
+        MozAppearance: "none",
+      }}
+    >
+      <option value="Renter">Renter</option>
+      <option value="Owner">Owner</option>
+    </select>
 
-<option
-  value="Owner"
-  className="font-[Lexend] font-light text-[12px] leading-[100%] tracking-[0%] text-black"
->
-  Owner
-</option>
-                  </select>
-
-                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-                    <ChevronDown className="w-4 h-4" aria-hidden />
-                  </span>
-                </div>
-              </div>
+    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+      <ChevronDown className="w-4 h-4" aria-hidden />
+    </span>
+  </div>
+</div>
 
               <button
                 type="button"
@@ -839,29 +843,65 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <p className="mt-8 text-center font-['Myriad Pro'] font-normal text-[12px] leading-[100%] tracking-[0px] text-black">
                 Don&apos;t have an account?{" "}
                 <button
-                  type="button"
-                  onClick={onOpenSignUp}
-                  className="font-['Myriad Pro'] font-semibold text-[12px] leading-[100%] tracking-[0px] text-[#389131] underline cursor-pointer"
-                >
-                  Sign up
-                </button>
+  type="button"
+  onClick={onOpenSignUp}
+  className="cursor-pointer text-[#389131] underline"
+  style={{
+    fontFamily: "Lexend",
+    fontWeight: 600,
+    fontStyle: "normal",
+    fontSize: "12px",
+    lineHeight: "100%",
+    letterSpacing: "0px",
+    textDecoration: "underline",
+    textDecorationStyle: "solid",
+
+    textDecorationThickness: "0%",
+  }}
+>
+  Sign up
+</button>
               </p>
 
               <p className="mt-4 text-center font-['Lexend'] text-[10px] font-medium leading-[100%] text-gray-800">
                 You agree with{" "}
                 <button
-                  type="button"
-                  className="font-['Lexend'] text-[10px] font-medium leading-[100%] text-[#389131] underline underline-offset-0 decoration-1 cursor-pointer"
-                >
-                  Terms &amp; Conditions
-                </button>{" "}
+  type="button"
+  className="cursor-pointer text-[#389131] underline"
+  style={{
+    fontFamily: "Lexend",
+    fontWeight: 700,
+    fontStyle: "normal",
+    fontSize: "10px",
+    lineHeight: "100%",
+    letterSpacing: "0%",
+    textDecoration: "underline",
+    textDecorationStyle: "solid",
+    textDecorationThickness: "0%",
+    textDecorationSkipInk: "auto",
+  }}
+>
+  Terms &amp; Conditions
+</button>{" "}
                 and{" "}
                 <button
-                  type="button"
-                  className="font-['Lexend'] text-[10px] font-medium leading-[100%] text-[#389131] underline underline-offset-0 decoration-1 cursor-pointer"
-                >
-                  Privacy Policy
-                </button>
+  type="button"
+  className="cursor-pointer text-[#389131] underline"
+  style={{
+    fontFamily: "Lexend",
+    fontWeight: 700,
+    fontStyle: "normal",
+    fontSize: "10px",
+    lineHeight: "100%",
+    letterSpacing: "0%",
+    textDecoration: "underline",
+    textDecorationStyle: "solid",
+    textDecorationThickness: "0%",
+    textDecorationSkipInk: "auto",
+  }}
+>
+  Privacy Policy
+</button>
                 .
               </p>
             </div>
@@ -1126,7 +1166,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </div>
 
               <div>
-                <label className="block mb-2 font-['Lexend'] font-normal text-[17px] leading-[100%] tracking-[0%] text-black">
+                <label className="block mb-2 font-['Lexend'] font-normal 
+                text-[14px] leading-[100%] tracking-[0%] text-black">
                   Email ID <span className="text-red-500">*</span>
                 </label>
 
@@ -1497,19 +1538,22 @@ const LoginModal: React.FC<LoginModalProps> = ({
               >
                 You agree with{" "}
                 <span
-                  className="cursor-pointer text-[#389131] underline"
-                  style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 700,
-                    fontSize: "10px",
-                    lineHeight: "100%",
-                    letterSpacing: "0%",
-                    textDecorationStyle: "solid",
-                    textDecorationSkipInk: "auto",
-                  }}
-                >
-                  Terms & Conditions{"  "}
-                </span>
+  className="cursor-pointer text-[#389131] underline"
+  style={{
+    fontFamily: "Lexend",
+    fontWeight: 700,
+    fontStyle: "normal",
+    fontSize: "10px",
+    lineHeight: "100%",
+    letterSpacing: "0%",
+    textDecoration: "underline",
+    textDecorationStyle: "solid",
+    textDecorationThickness: "0%",
+    textDecorationSkipInk: "auto",
+  }}
+>
+  Terms & Conditions
+</span>
                 and{"  "}
                 <span
                   className="cursor-pointer text-[#389131] underline"
