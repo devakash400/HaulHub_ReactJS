@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, MouseEvent } from "react";
+﻿import React, { useEffect, useMemo, useState, MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { images } from "../../../assets/images/index.ts";
 import { Eye, EyeOff, Mail, Smartphone, ChevronDown } from "lucide-react";
@@ -14,7 +14,6 @@ import {
   phoneLogin as phoneLoginApi,
   checkEmail as checkEmailApi,
   checkPhone as checkPhoneApi,
-  forgotPassword as forgotPasswordApi,
 } from "../../../api/authApi.ts";
 import { toast } from "react-toastify";
 
@@ -25,7 +24,9 @@ type LoginModalProps = {
   onOpenSignUp?: () => void;
 };
 
-type Step = "email" | "password" | "reset" | "newPassword";
+type Step = "email" | "password" | "reset" | "otp" | "newPassword";
+
+const STATIC_RESET_OTP = "123456";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -45,49 +46,49 @@ const COUNTRY_OPTIONS: CountryOption[] = [
     code: "US",
     name: "United States",
     dialCode: "+1",
-    flag: "🇺🇸",
+    flag: "ðŸ‡ºðŸ‡¸",
     flagUrl: "https://flagcdn.com/w20/us.png",
   },
   {
     code: "CA",
     name: "Canada",
     dialCode: "+1",
-    flag: "🇨🇦",
+    flag: "ðŸ‡¨ðŸ‡¦",
     flagUrl: "https://flagcdn.com/w20/ca.png",
   },
   {
     code: "GB",
     name: "United Kingdom",
     dialCode: "+44",
-    flag: "🇬🇧",
+    flag: "ðŸ‡¬ðŸ‡§",
     flagUrl: "https://flagcdn.com/w20/gb.png",
   },
   {
     code: "IN",
     name: "India",
     dialCode: "+91",
-    flag: "🇮🇳",
+    flag: "ðŸ‡®ðŸ‡³",
     flagUrl: "https://flagcdn.com/w20/in.png",
   },
   {
     code: "AU",
     name: "Australia",
     dialCode: "+61",
-    flag: "🇦🇺",
+    flag: "ðŸ‡¦ðŸ‡º",
     flagUrl: "https://flagcdn.com/w20/au.png",
   },
   {
     code: "DE",
     name: "Germany",
     dialCode: "+49",
-    flag: "🇩🇪",
+    flag: "ðŸ‡©ðŸ‡ª",
     flagUrl: "https://flagcdn.com/w20/de.png",
   },
   {
     code: "FR",
     name: "France",
     dialCode: "+33",
-    flag: "🇫🇷",
+    flag: "ðŸ‡«ðŸ‡·",
     flagUrl: "https://flagcdn.com/w20/fr.png",
   },
 ];
@@ -140,15 +141,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [resetEmail, setResetEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSeconds, setOtpSeconds] = useState(59);
-  const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpError, setOtpError] = useState<string | null>(null);
-
-  const [isForgotSubmitting, setIsForgotSubmitting] = useState(false);
-  const [forgotError, setForgotError] = useState<string | null>(null);
-  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<"phone" | "email" | null>(
-    null,
-  );
 
   // New password flow
   const [newPassword, setNewPassword] = useState("");
@@ -166,7 +159,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
     const digits = email.replace(/\D/g, "");
     return digits.length === 10;
   }, [email]);
-  // In email mode, only email is allowed; in phone mode, only a 10‑digit phone is allowed
+  // In email mode, only email is allowed; in phone mode, only a 10â€‘digit phone is allowed
   const isIdentifierValid = usePhoneOnly ? isPhoneLike : isEmailValid;
   const showIdentifierFormatError = useMemo(() => {
     return isEmailFilled && !isIdentifierValid;
@@ -190,13 +183,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
   }, [resetEmail]);
 
   useEffect(() => {
-    if (!showOtpModal) return;
+    if (step !== "otp") return;
     setOtpSeconds(59);
     const id = window.setInterval(() => {
       setOtpSeconds((s) => (s > 0 ? s - 1 : 0));
     }, 1000);
     return () => window.clearInterval(id);
-  }, [showOtpModal]);
+  }, [step]);
 
   useEffect(() => {
     if (!isOpen || !isAuthenticated) return;
@@ -238,15 +231,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   const goBack = () => {
-    if (showOtpModal) {
-      setShowOtpModal(false);
-      setOtp("");
-      setOtpError(null);
-      return;
-    }
     if (step === "password") setStep("email");
     else if (step === "reset") setStep("password");
-    else if (step === "newPassword") setStep("reset");
+    else if (step === "otp") {
+      setStep("reset");
+      setOtp("");
+      setOtpError(null);
+    } else if (step === "newPassword") setStep("otp");
     else onClose();
   };
 
@@ -428,60 +419,54 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setResetPhone("");
     setOtp("");
     setOtpError(null);
-    setShowOtpModal(false);
   };
 
-  const handleResetContinue = async () => {
-    if (!resetCanContinue || isForgotSubmitting) return;
-    setOtp("");
-    setOtpError(null);
-    setForgotError(null);
-    setForgotSuccess(null);
-    setMessageType(null);
+  /** Static forgot-password flow â€” no API; Continue opens OTP step. */
+  // const handleResetContinue = () => {
+  //   if (!resetCanContinue) return;
 
+  //   const phoneDigits = resetPhone.replace(/\D/g, "");
+  //   const isPhone = phoneDigits.length >= 10;
+  //   const isEmail = emailRegex.test(resetEmail.trim());
+
+  //   if (!isPhone && !isEmail) {
+  //     toast.error("Please enter a valid phone number or email.");
+  //     return;
+  //   }
+
+  //   setOtp("");
+  //   setOtpError(null);
+  //   setStep("otp");
+  // };
+  const handleResetContinue = () => {
+    if (!resetCanContinue) return;
+  
     const phoneDigits = resetPhone.replace(/\D/g, "");
     const isPhone = phoneDigits.length >= 10;
     const isEmail = emailRegex.test(resetEmail.trim());
-
+  
     if (!isPhone && !isEmail) {
-      setMessageType("email");
-      setForgotError("Please enter a valid phone number or email.");
+      toast.error("Please enter a valid phone number or email.");
       return;
     }
-
-    setIsForgotSubmitting(true);
-    try {
-      const emailToUse = resetEmail.trim() || email.trim();
-      const res = await forgotPasswordApi({ email: emailToUse });
-      // eslint-disable-next-line no-console
-      console.log("forgot-password response:", res);
-      if (isPhone) {
-        setMessageType("phone");
-        setForgotSuccess("OTP has been sent to your Phone Number.");
-      } else {
-        setMessageType("email");
-        setForgotSuccess("Password reset link has been sent to your email.");
-      }
-      setShowOtpModal(true);
-    } catch (err) {
-      const msg = "Unable to send reset. Please try again.";
-      setMessageType(isPhone ? "phone" : "email");
-      setForgotError(msg);
-      toast.error(msg);
-    } finally {
-      setIsForgotSubmitting(false);
-    }
+  
+    setOtp("");
+    setOtpError(null);
+    setStep("otp"); // Directly opens OTP screen
+  };
+  const handleResendOtp = () => {
+    setOtpSeconds(59);
+    setOtp("");
+    setOtpError(null);
   };
 
   const handleVerifyOtp = () => {
-    // Demo OTP validation: accept "123456" only
-    if (otp.trim() !== "123456") {
+    if (otp.trim() !== STATIC_RESET_OTP) {
       const msg = "Invalid OTP. Please try again.";
       setOtpError(msg);
       toast.error(msg);
       return;
     }
-    setShowOtpModal(false);
     setOtpError(null);
     setStep("newPassword");
   };
@@ -566,7 +551,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 ? "Password"
                 : step === "reset"
                   ? "Reset Password"
-                  : "New Password"
+                  : step === "otp"
+                    ? "Enter OTP"
+                    : "New Password"
           }
           onClose={goBack}
           variant={step === "email" ? "close" : "none"}
@@ -685,7 +672,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       setLoginTrailor(e.target.value as "Renter" | "Owner");
                       setLoginError(null);
                     }}
-                    className="w-full px-4 pr-10 text-sm bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                    className="w-full px-4 pr-10 text-sm bg-white 
+                    appearance-none focus:outline-none focus:ring-2 
+                    focus:ring-[#389131]/15"
                     style={{
                       height: "40px",
                       background: "#FFFFFF",
@@ -693,8 +682,19 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       borderRadius: "5px",
                     }}
                   >
-                    <option value="Renter">Renter</option>
-                    <option value="Owner">Owner</option>
+           <option
+  value="Renter"
+  className="font-[Lexend] font-light text-[12px] leading-[100%] tracking-[0%] text-black"
+>
+  Renter
+</option>
+
+<option
+  value="Owner"
+  className="font-[Lexend] font-light text-[12px] leading-[100%] tracking-[0%] text-black"
+>
+  Owner
+</option>
                   </select>
 
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
@@ -1001,7 +1001,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             <div>
               <button
                 type="button"
-                onClick={() => setStep("email")}
+                onClick={() => setStep("password")}
                 className="flex items-center gap-1 mb-5"
               >
                 <img
@@ -1107,17 +1107,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   />
                 </div>
               </div>
-              {messageType === "phone" && forgotError && (
-                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-red-600">
-                  {forgotError}
-                </p>
-              )}
-              {messageType === "phone" && forgotSuccess && (
-                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-green-600">
-                  {forgotSuccess}
-                </p>
-              )}
-
               <div className="flex items-center gap-4 my-6 text-sm text-gray-500">
                 <div className="flex-1 h-px bg-gray-200" />
                 <span
@@ -1156,34 +1145,17 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   }}
                 />
               </div>
-              {messageType === "email" && forgotError && (
-                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-red-600">
-                  {forgotError}
-                </p>
-              )}
-              {messageType === "email" && forgotSuccess && (
-                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-green-600">
-                  {forgotSuccess}
-                </p>
-              )}
-
               <button
                 type="button"
                 onClick={handleResetContinue}
-                disabled={!resetCanContinue || isForgotSubmitting}
+                disabled={!resetCanContinue}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white`}
                 style={{
-                  backgroundColor:
-                    resetCanContinue && !isForgotSubmitting
-                      ? "#389131"
-                      : "#929191",
-                  cursor:
-                    resetCanContinue && !isForgotSubmitting
-                      ? "pointer"
-                      : "not-allowed",
+                  backgroundColor: resetCanContinue ? "#389131" : "#929191",
+                  cursor: resetCanContinue ? "pointer" : "not-allowed",
                 }}
               >
-                {isForgotSubmitting ? "Sending..." : "Continue"}
+                Continue
               </button>
               <div
                 className="mt-auto pt-24 text-center text-black"
@@ -1229,11 +1201,101 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             </div>
           )}
+          {step === "otp" && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setStep("reset")}
+                className="flex items-center gap-1 mb-5"
+              >
+                <img
+                  src={backButton}
+                  alt="Back"
+                  className="w-[5px] h-[10px] opacity-100 border-transparent object-contain"
+                />
+                <span className="font-['Lexend'] text-[14px] font-normal leading-[100%] tracking-[0px] capitalize text-[#7C7C7C]">
+                  Back
+                </span>
+              </button>
+              <p
+                className="text-center text-black"
+                style={{
+                  fontFamily: "Lexend",
+                  fontWeight: 400,
+                  fontSize: "16px",
+                  lineHeight: "130%",
+                }}
+              >
+                Please enter the OTP sent to
+                <br />
+                <span className="font-medium">{otpTargetLabel}</span>
+              </p>
+
+              <label className="block mt-6 mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
+                Enter OTP <span className="text-red-500">*</span>
+              </label>
+              <input
+                value={otp}
+                onChange={(e) => {
+                  const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                  setOtp(onlyDigits);
+                  setOtpError(null);
+                }}
+                placeholder="Enter OTP"
+                maxLength={6}
+                inputMode="numeric"
+                className="w-full rounded-[5px] border border-black px-4 outline-none custom-placeholder placeholder:text-[#9B989E]"
+                style={{
+                  height: "40px",
+                  fontFamily: "Lexend",
+                  fontSize: "17px",
+                }}
+              />
+              {otpError && (
+                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-red-600">
+                  {otpError}
+                </p>
+              )}
+              <div className="mt-2 flex justify-end">
+                {otpSeconds > 0 ? (
+                  <span className="font-lexend text-[11px] text-[#757171]">
+                    Didn&apos;t get Code ?
+                    <span className="ml-2 text-[#389131]">
+                      {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
+                      {String(otpSeconds % 60).padStart(2, "0")}
+                    </span>
+                  </span>
+                ) : (
+                  <button type="button" onClick={handleResendOtp}>
+                    <span className="text-[11px] text-[#757171]">
+                      Didn&apos;t get Code ?{" "}
+                    </span>
+                    <span className="text-[11px] underline text-[#389131]">
+                      Resend
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleVerifyOtp}
+                disabled={!isOtpValid}
+                className="w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white"
+                style={{
+                  backgroundColor: isOtpValid ? "#389131" : "#929191",
+                  cursor: isOtpValid ? "pointer" : "not-allowed",
+                }}
+              >
+                Verify
+              </button>
+            </div>
+          )}
           {step === "newPassword" && (
             <div>
               <button
                 type="button"
-                onClick={() => setStep("email")}
+                onClick={() => setStep("otp")}
                 className="flex items-center gap-1 mb-5"
               >
                 <img
@@ -1281,7 +1343,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                         : "text-red-600"
                     }
                   >
-                    • Add at least 8 characters
+                      • Add at least 8 characters
                   </li>
 
                   <li
@@ -1291,7 +1353,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                         : "text-red-600"
                     }
                   >
-                    • Uppercase letters (A-Z)
+                   • Uppercase letters (A-Z)
                   </li>
 
                   <li
@@ -1311,7 +1373,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                         : "text-red-600"
                     }
                   >
-                    • Numbers (0-9)
+                  • Numbers (0-9)
                   </li>
 
                   <li
@@ -1352,7 +1414,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   )}
                 </button>
               </div>
-              {confirmNewPasswordTouched &&
+              {/* {confirmNewPasswordTouched &&
                 confirmNewPassword.trim().length > 0 && (
                   <ul className="mt-2 space-y-0.5 text-xs">
                     <li
@@ -1362,7 +1424,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                           : "text-red-600"
                       }
                     >
-                      • Add at least 8 characters
+                      â€¢Add at least 8 characters
                     </li>
                     <li
                       className={
@@ -1371,7 +1433,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                           : "text-red-600"
                       }
                     >
-                      • Uppercase letters (A-Z)
+                      â€¢ Uppercase letters (A-Z)
                     </li>
                     <li
                       className={
@@ -1380,7 +1442,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                           : "text-red-600"
                       }
                     >
-                      • Lowercase letters (a-z)
+                      â€¢ Lowercase letters (a-z)
                     </li>
                     <li
                       className={
@@ -1389,7 +1451,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                           : "text-red-600"
                       }
                     >
-                      • Numbers (0-9)
+                      â€¢ Numbers (0-9)
                     </li>
                     <li
                       className={
@@ -1398,10 +1460,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                           : "text-red-600"
                       }
                     >
-                      • Special characters (e.g., @, #, $, %, !)
+                      â€¢ Special characters (e.g., @, #, $, %, !)
                     </li>
                   </ul>
-                )}
+                )} */}
               {confirmNewPassword.length > 0 && !passwordsMatch && (
                 <p
                   className="text-[12px] font-light 
@@ -1467,155 +1529,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
             </div>
           )}
         </div>
-
-        {/* OTP Modal */}
-        {showOtpModal && (
-          <div
-            className="modal-overlay fixed inset-0 z-[90]
-             flex items-center justify-center bg-black/45 p-4"
-            onClick={() => setShowOtpModal(false)}
-            role="dialog"
-            aria-modal="true"
-          >
-            <div
-              className="w-full max-w-[380px] bg-white 
-              rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(15,23,42,0.25)]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ModalHeader
-                title={
-                  <span className="font-lexend font-semibold text-[18px] leading-[135%] tracking-[0.06em] text-white text-center">
-                    Enter OTP
-                  </span>
-                }
-                onClose={() => setShowOtpModal(false)}
-                variant="close"
-                closeOnRight
-                closeSizePx={24}
-              />
-              <div className="px-5 py-5 ">
-                <p
-                  className="text-center"
-                  style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 300,
-                    fontSize: "13px",
-                    lineHeight: "130%",
-                    letterSpacing: "0px",
-                    color: "#393939",
-                  }}
-                >
-                  Please enter the OTP sent to
-                  <br />
-                  <span
-                    className="mt-2"
-                    style={{
-                      fontFamily: "Lexend",
-                      fontWeight: 300,
-                      fontSize: "13px",
-                      lineHeight: "100%",
-                      letterSpacing: "0px",
-                      color: "#000000",
-                    }}
-                  >
-                    {otpTargetLabel}
-                  </span>
-                  <br />
-                </p>
-
-                <label className="block mt-5 mb-2 font-['Lexend'] text-[14px] font-normal leading-[100%] text-[#434343]">
-                  Enter OTP
-                </label>
-                <>
-                  <input
-                    value={otp}
-                    onChange={(e) => {
-                      const onlyDigits = e.target.value
-                        .replace(/\D/g, "")
-                        .slice(0, 6);
-                      setOtp(onlyDigits);
-                      setOtpError(null);
-                    }}
-                    placeholder="Enter OTP"
-                    maxLength={6}
-                    className="otp-input px-4 outline-none focus:outline-none focus:ring-0 custom-placeholder placeholder:text-[#9B989E]"
-                    style={{
-                      width: "100%",
-                      height: "40px",
-                      border: "1px solid #000000",
-                      borderRadius: "3px",
-                      color: "#000000",
-                      fontFamily: "Lexend",
-                      fontWeight: 400,
-                      fontSize: "14px",
-                    }}
-                  />
-                </>
-                {otpError && (
-                  <p
-                    className="mt-3 text-xs text-red-600 font-medium 
-                  flex items-center gap-2"
-                  >
-                    <span className="inline-flex h-3 w-3 rounded-full bg-red-600 text-white items-center justify-center text-[10px]">
-                      !
-                    </span>
-                    <span
-                      className="text-[12px] font-light 
-                font-['Lexend'] text-red-600"
-                    >
-                      {" "}
-                      {otpError}
-                    </span>
-                  </p>
-                )}
-                <div className="mt-2 flex justify-end items-center gap-2 text-xs text-gray-600">
-                  {otpSeconds > 0 ? (
-                    <span className="font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] text-[#757171]">
-                      Didn&apos;t get Code ?
-                      <span className="ml-2 font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] underline decoration-solid underline-offset-0 text-[#389131]">
-                        {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
-                        {String(otpSeconds % 60).padStart(2, "0")}
-                      </span>
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowOtpModal(false);
-                        void handleResetContinue();
-                      }}
-                    >
-                      <span className="font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] text-[#757171]">
-                        Didn&apos;t get Code ?{"    "}
-                      </span>
-                      <span className="font-lexend font-light text-[11px] leading-[100%] tracking-[-0.3px] underline decoration-solid underline-offset-0 text-[#389131]">
-                        Resend
-                      </span>
-                    </button>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleVerifyOtp}
-                  disabled={!isOtpValid}
-                  className={`w-full mt-6 py-3.5 rounded-md text-white`}
-                  style={{
-                    backgroundColor: isOtpValid ? "#389131" : "#929191",
-                    fontFamily: "Lexend",
-                    fontWeight: 600,
-                    fontSize: "16px",
-                    lineHeight: "100%",
-                    letterSpacing: "3%",
-                    cursor: isOtpValid ? "pointer" : "not-allowed",
-                  }}
-                >
-                  Verify
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
