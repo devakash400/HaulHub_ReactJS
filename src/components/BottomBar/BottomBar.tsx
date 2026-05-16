@@ -16,7 +16,7 @@ const BottomBar: React.FC = () => {
 
   return (
     <footer className="bg-[#F9F7F0] pt-10 pb-0 px-4 sm:px-6 lg:px-10 font-sans w-full overflow-x-hidden mb-[10px]">
-      <div className="max-w-[1120px] mx-auto flex flex-wrap items-start justify-between gap-8 min-w-0 w-full">
+      <div className="w-full px-10 mx-auto flex flex-wrap items-start justify-between gap-8 min-w-0 w-full">
         {/* Left side: Explore & Company columns */}
         <div className="flex flex-wrap gap-8 sm:gap-12 flex-1 min-w-0 sm:min-w-[260px]">
           <div>
@@ -195,7 +195,7 @@ const BottomBar: React.FC = () => {
       </div>
 
       {/* Bottom strip — Figma: compact legal row + Join Us / socials */}
-      <div className="mt-10 max-w-[1120px] mx-auto w-full min-w-0">
+      <div className="mt-10 max-w-full mx-auto w-full min-w-0">
         <div
           className="
             flex flex-col items-center gap-4

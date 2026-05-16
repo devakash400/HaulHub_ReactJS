@@ -83,7 +83,7 @@ const HowItWorks: React.FC = () => {
         {/* Intro */}
         <section className="py-10 sm:py-14">
         <p className="max-w-2xl font-light text-[25px] 
-        leading-[140%] tracking-[0.01em] text-black">
+        leading-[120%] tracking-[0.01em] text-black">
   HaulHub makes trailer rental simple. Whether you need a flatbed for
   a one-time haul or a car hauler for a road trip, follow the steps
   below to find, book, and return a trailer with confidence.

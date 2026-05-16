@@ -39,13 +39,13 @@ const About: React.FC = () => {
         <section className="px-6 py-10 sm:px-10"
          style={{ fontFamily: "Lexend, sans-serif" }}>
   
-  <h1 className="mb-6 text-[32px] font-[400] leading-[140%] tracking-[0em] text-[#000000]">
+  <h1 className="mb-6 text-[32px] font-[400] leading-[120%] tracking-[0em] text-[#000000]">
     About 
   </h1>
 
   <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-12">
 
-    <div className="flex-1 space-y-4 text-[25px] font-light leading-[140%] tracking-[0.01em] text-[#000000]">
+    <div className="flex-1 space-y-4 text-[25px] font-light leading-[120%] tracking-[0.01em] text-[#000000]">
 
       <p>
       HaulHub is a family-owned and operated trailer 
@@ -99,10 +99,10 @@ nationwide.
 </section>
         {/* Product Owner */}
         <section className=" px-6 py-10 sm:px-10 sm:py-14" style={{ fontFamily: "Lexend, sans-serif" }}>
-        <h2 className="mb-4 font-lexend font-normal text-[32px] leading-[140%] tracking-[0em] text-[#000000]">
+        <h2 className="mb-4 font-lexend font-normal text-[32px] leading-[120%] tracking-[0em] text-[#000000]">
   Product Owner
 </h2>
-<p className="max-w-3xl font-lexend font-light text-[25px] leading-[140%] tracking-[0.01em] text-[#000000]">
+<p className="max-w-3xl font-lexend font-light text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]">
 HaulHub is owned and operated by the HaulHub 
 founding team, a family-run business focused on 
 building reliable, community-driven solutions through
@@ -117,10 +117,11 @@ of Haul Hub is Angelina Houston.
         {/* Our Mission */}
         <section className=" px-6 py-10 sm:px-10 sm:py-14"
          style={{ fontFamily: "Lexend, sans-serif" }}>
-         <h2 className="mb-4 font-lexend font-normal text-[32px] leading-[140%] tracking-[0em] text-[#000000]">
+         <h2 className="mb-4 font-lexend font-normal text-[32px] leading-[120%] tracking-[0em] text-[#000000]">
   Our Mission
 </h2>
-<p className="max-w-3xl font-lexend font-light text-[25px] leading-[140%] tracking-[0.01em] text-[#000000]">
+<p className="max-w-3xl font-lexend font-light 
+text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]">
 Our mission is to provide a convenient and dependable way for people to access trailers without the expense of ownership 
 while helping owners maximize the value of their equipment.
           </p>
@@ -130,12 +131,12 @@ while helping owners maximize the value of their equipment.
         <section className="px-6 py-10 sm:px-10 sm:py-14" 
          style={{ fontFamily: "Lexend, sans-serif" }}>
         <h2 className="mb-4 font-lexend font-normal text-[32px] 
-        leading-[140%] tracking-[0em] text-[#000000]">
+        leading-[120%] tracking-[0em] text-[#000000]">
   Contact &amp; Support
 </h2>
 <p
   className="mb-6 max-w-3xl text-[25px] font-light
-   leading-[140%] tracking-[0.01em] text-[#000000]"
+   leading-[120%] tracking-[0.01em] text-[#000000]"
   style={{ fontFamily: "Lexend, sans-serif" }}
 >
   We believe transparency and accessibility are important. Users can contact{" "}
@@ -161,28 +162,28 @@ support feature
 
 
 <ul className="mb-8 flex flex-col gap-3"> 
-<li className="flex items-center gap-3 font-light text-[25px] leading-[140%] tracking-[0em] text-[#000000]">
+<li className="flex items-center gap-3 font-light text-[25px] leading-[120%] tracking-[0em] text-[#000000]">
   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#389131]/15 text-[#389131]">
     <ThumbsUp className="h-5 w-5" aria-hidden />
   </span>
   Providing a safe and reliable platform
 </li>
 
-<li className="flex items-center gap-3 font-light text-[25px] leading-[140%] tracking-[0em] text-[#000000]">
+<li className="flex items-center gap-3 font-light text-[25px] leading-[120%] tracking-[0em] text-[#000000]">
   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#389131]/15 text-[#389131]">
     <Lock className="h-5 w-5" aria-hidden />
   </span>
   Supporting responsible rentals
 </li>
 
-<li className="flex items-center gap-3 font-light text-[25px] leading-[140%] tracking-[0em] text-[#000000]">
+<li className="flex items-center gap-3 font-light text-[25px] leading-[120%] tracking-[0em] text-[#000000]">
   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#389131]/15 text-[#389131]">
     <Check className="h-5 w-5" aria-hidden />
   </span>
   Protecting user information and privacy
 </li>
 
-<li className="flex items-center gap-3 font-light text-[25px] leading-[140%] tracking-[0em] text-[#000000]">
+<li className="flex items-center gap-3 font-light text-[25px] leading-[120%] tracking-[0em] text-[#000000]">
   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#389131]/15 text-[#389131]">
     <Check className="h-5 w-5" aria-hidden />
   </span>
