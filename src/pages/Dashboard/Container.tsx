@@ -5,9 +5,10 @@ import Containers1 from "../../assets/images/container.png";
 import Containers2 from "../../assets/images/Container2.png";
 import Containers3 from "../../assets/images/car_haulers.png";
 const SLIDES = [
-  { src: Containers1, alt: "HaulHub trailer hero" },
+ 
   { src: Containers2, alt: "HaulHub trailer hero" },
-  { src: Containers3, alt: "HaulHub trailer hero" },
+  
+  { src: Containers3, alt: "HaulHub trailer hero" },{ src: Containers1, alt: "HaulHub trailer hero" },
 ];
 
 

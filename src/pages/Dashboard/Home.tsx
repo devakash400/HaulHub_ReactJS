@@ -232,12 +232,19 @@ const Home: React.FC = () => {
         <>
           {listingsStillLoading ? (
             <RevealBlock delayMs={80}>
-              <div className="px-4 py-12 text-center text-[15px] text-gray-500">
-                Loading trailers…
-              </div>
+              <div className="flex items-center justify-center py-6">
+  <div
+    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
+    aria-label="Loading"
+  />
+</div>
             </RevealBlock>
           ) : (
             <>
+            <div style={{
+  background: "#FFFFFF",
+  boxShadow: "0px 4px 4px 0px #00000040",
+}}>
               {listingsLoadError && (
                 <RevealBlock delayMs={40}>
                   <div className="px-4 pt-4 text-center text-sm text-amber-800 bg-amber-50 border-b border-amber-100">
@@ -294,9 +301,9 @@ const Home: React.FC = () => {
                     </div>
                   </RevealBlock>
                 )}
-            </>
+          </div>  </>
           )}
-        </>
+           </>
       )}
 
       <AddTrailerModal

@@ -458,7 +458,7 @@ return (
         {/* LEFT SIDE */}
         <div className="flex w-full flex-col lg:max-w-[539px]">
           <header>
-            <h1 className="text-[36px] font-medium leading-[100%] text-black">
+            <h1 className="text-[32px] font-medium leading-[100%] text-black mb-4">
               Account Setting
             </h1>
           </header>
@@ -475,7 +475,7 @@ return (
                   type="button"
                   onClick={item.onClick}
                   className={`${profileCardClass} ${
-                    isActive ? "border-[#389131] bg-[#f6fbf4]" : ""
+                    isActive ? " bg-[#f6fbf4]" : ""
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -502,7 +502,7 @@ return (
         {/* RIGHT SIDE */}
         <div className="flex w-full flex-col lg:max-w-[593px]">
           <header>
-            <h2 className="text-[36px] font-medium leading-[100%] text-black">
+            <h2 className="text-[32px] font-medium leading-[100%] text-black mb-4">
               {rightPanel === "transactionHistory"
                 ? "Transaction History"
                 : "Personal info"}
@@ -548,11 +548,14 @@ return (
                 </div>
               ))
             ) : loading ? (
-              <div className={personalCardClass}>
-                <p className="text-sm text-black/70">
-                  Loading your information…
-                </p>
-              </div>
+           
+              <div className="flex items-center justify-center py-6">
+  <div
+    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
+    aria-label="Loading"
+  />
+</div>
+            
             ) : !isAuthenticated ? (
               <div className={personalCardClass}>
                 <p className="text-sm text-black/70">
