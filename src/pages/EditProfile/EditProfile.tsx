@@ -415,9 +415,12 @@ return (
           <div className="mt-6 flex flex-col gap-5">
             {loading ? (
               <div className={personalCardClass}>
-                <p className="text-sm text-black/70">
-                  Loading your information…
-                </p>
+               <div className="flex items-center justify-center py-6">
+  <div
+    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
+    aria-label="Loading"
+  />
+</div>
               </div>
             ) : !isAuthenticated ? (
               <div className={personalCardClass}>

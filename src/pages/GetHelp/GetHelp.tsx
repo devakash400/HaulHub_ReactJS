@@ -89,7 +89,8 @@ const GetHelp: React.FC = () => {
         );
 
   return (
-    <main className="min-h-screen w-full min-w-0 overflow-x-hidden bg-[#F6F1E8] font-sans">
+    <main style={{fontFamily:"Lexend"}} className="min-h-screen w-full min-w-0 
+    overflow-x-hidden bg-[#F6F1E8] font-sans">
       {/* Hero */}
       <section className="relative w-full min-h-[40vh] overflow-hidden">
         <img
@@ -109,7 +110,7 @@ const GetHelp: React.FC = () => {
         </div>
       </section>
 
-      <div className="mx-auto max-w-[1120px]">
+      <div className="mx-auto max-w-full">
         {/* Search */}
         <section className="px-6 pt-10 sm:px-10 sm:pt-14">
           <div className="relative">
@@ -130,9 +131,9 @@ const GetHelp: React.FC = () => {
 
         {/* Help categories */}
         <section className="px-6 py-10 sm:px-10 sm:py-14">
-          <h2 className="mb-6 text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-            Browse by topic
-          </h2>
+        <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
+  Browse by topic
+</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {HELP_CATEGORIES.map((cat) => {
               const Icon = cat.icon;
@@ -168,9 +169,9 @@ const GetHelp: React.FC = () => {
 
         {/* FAQ */}
         <section className="border-t border-neutral-200 px-6 py-10 sm:px-10 sm:py-14">
-          <h2 className="mb-6 text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-            Frequently asked questions
-          </h2>
+        <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
+        Frequently asked questions
+</h2>  
           <div className="space-y-2">
             {filteredFaq.length === 0 ? (
               <p className="rounded-xl border border-neutral-200 bg-white/60 px-5 py-8 text-center text-neutral-600">
@@ -216,9 +217,9 @@ const GetHelp: React.FC = () => {
 
         {/* Quick links */}
         <section className="border-t border-neutral-200 px-6 py-10 sm:px-10 sm:py-14">
-          <h2 className="mb-6 text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-            Quick links
-          </h2>
+         <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
+          Quick links
+</h2> 
           <div className="flex flex-wrap gap-4">
             <Link
               to="/how-it-works"

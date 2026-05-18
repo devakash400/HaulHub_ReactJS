@@ -120,7 +120,7 @@ export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
 export const phoneLogin = async (
   payload: PhoneLoginPayload
 ): Promise<LoginResponse> => {
-  const res = await api.post<BackendLoginResponse>("/api/auth/login/phone", {
+  const res = await api.post<BackendLoginResponse>("/api/auth/login", {
     phoneNumber: payload.phoneNumber,
     password: payload.password,
     role: trailorToRole(payload.trailor),

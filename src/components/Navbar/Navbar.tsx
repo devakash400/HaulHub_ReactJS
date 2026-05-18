@@ -282,114 +282,159 @@ focus-visible:outline-none"
 
             {/* Dropdown menu */}
             {isDrawerOpen && (
-              <div className="absolute right-0 top-full z-[60] mt-2 w-[161px] rounded-lg bg-white py-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)]">
+              <div
+              className="absolute right-0 top-full z-[60] mt-2 rounded-lg bg-white py-2"
+              style={{
+                width: "161px",
+                height: "197px",
+                opacity: 1,
+                border: "1px solid #00000033",
+              }}
+            >
                 <div className="p-0">
-                  <ul className="m-0 list-none p-0 text-[14px] text-black font-medium leading-none font-[Inter] navbar-menu-bar">
+                <ul className="m-0 list-none p-0 flex flex-col gap-[12px] 
+                text-[14px] text-black font-medium leading-none 
+                font-[Inter] navbar-menu-bar">
                     {/* Trailer page menu override */}
                     {isTrailerScreen ? (
-                      <>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/"
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Home
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={() =>
-                            handleProtectedDrawerNavigate("/booking")
-                          }
-                        >
-                          <span className="text-inherit no-underline cursor-pointer">
-                            Your Booked Trailers
-                          </span>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/notifications"
-                            className="text-inherit no-underline cursor-pointer"
-                          >
-                            Notification
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/contact"
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Contact
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={() =>
-                            handleProtectedDrawerNavigate("/profile")
-                          }
-                        >
-                          <span className="text-inherit no-underline cursor-pointer">
-                            Profile
-                          </span>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={() => {
-                            if (!isAuthenticated) {
-                              closeDrawer();
-                              setIsSignUpOpen(false);
-                              setIsLoginOpen(true);
-                              return;
-                            }
-                            setIsLogoutConfirmOpen(true);
-                          }}
-                        >
-                          <span
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Logout
-                          </span>
-                        </li>
-                      </>
+                       <>
+                       <li
+                         className="px-7 py-1.5 cursor-pointer 
+                         whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                         onClick={handleDrawerLinkRowClick}
+                       >
+                         <Link
+                           to="/"
+                           className="text-inherit no-underline cursor-pointer block w-full"
+                           style={{
+                             fontFamily: "Inter, sans-serif",
+                             fontWeight: 500,
+                             fontStyle: "normal",
+                             fontSize: "14px",
+                             lineHeight: "100%",
+                             letterSpacing: "0%",
+                             verticalAlign: "middle",
+                             color: "#000000",
+                           }}
+                         >
+                           Home
+                         </Link>
+                       </li>
+                     
+                       <li
+                         className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                         onClick={handleDrawerLinkRowClick}
+                       >
+                         <Link
+                           to="/booking"
+                           className="text-inherit no-underline cursor-pointer block w-full"
+                           style={{
+                             fontFamily: "Inter, sans-serif",
+                             fontWeight: 500,
+                             fontStyle: "normal",
+                             fontSize: "14px",
+                             lineHeight: "100%",
+                             letterSpacing: "0%",
+                             verticalAlign: "middle",
+                             color: "#000000",
+                           }}
+                         >
+                           Booking Screen
+                         </Link>
+                       </li>
+                     
+                       <li
+                         className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                         onClick={handleDrawerLinkRowClick}
+                       >
+                         <Link
+                           to="/contact"
+                           className="text-inherit no-underline cursor-pointer block w-full"
+                           style={{
+                             fontFamily: "Inter, sans-serif",
+                             fontWeight: 500,
+                             fontStyle: "normal",
+                             fontSize: "14px",
+                             lineHeight: "100%",
+                             letterSpacing: "0%",
+                             verticalAlign: "middle",
+                             color: "#000000",
+                           }}
+                         >
+                           Contact
+                         </Link>
+                       </li>
+                     
+                       <li
+                         className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                         onClick={handleDrawerLinkRowClick}
+                       >
+                         <Link
+                           to="/profile"
+                           className="text-inherit no-underline cursor-pointer block w-full"
+                           style={{
+                             fontFamily: "Inter, sans-serif",
+                             fontWeight: 500,
+                             fontStyle: "normal",
+                             fontSize: "14px",
+                             lineHeight: "100%",
+                             letterSpacing: "0%",
+                             verticalAlign: "middle",
+                             color: "#000000",
+                           }}
+                         >
+                           Profile
+                         </Link>
+                       </li>
+                     
+                       {isAuthenticated ? (
+  <li
+    className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+    onClick={() => setIsLogoutConfirmOpen(true)}
+  >
+    <span
+      className="text-inherit no-underline cursor-pointer block w-full"
+      style={{
+        fontFamily: "Inter, sans-serif",
+        fontWeight: 500,
+        fontStyle: "normal",
+        fontSize: "14px",
+        lineHeight: "100%",
+        letterSpacing: "0%",
+        verticalAlign: "middle",
+        color: "#000000",
+      }}
+    >
+      Logout
+    </span>
+  </li>
+) : (
+  <li
+    className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+    onClick={() => {
+      closeDrawer();
+      setIsSignUpOpen(false);
+      setIsLoginOpen(true);
+    }}
+  >
+    <span
+      className="text-inherit no-underline cursor-pointer block w-full"
+      style={{
+        fontFamily: "Inter, sans-serif",
+        fontWeight: 500,
+        fontStyle: "normal",
+        fontSize: "14px",
+        lineHeight: "100%",
+        letterSpacing: "0%",
+        verticalAlign: "middle",
+        color: "#000000",
+      }}
+    >
+      Login / Sign Up
+    </span>
+  </li>
+)}
+                     </>
                     ) : isOwner ? (
                       <>
                         <li
@@ -468,266 +513,382 @@ focus-visible:outline-none"
                       </>
                     ) : !isAuthenticated ? (
                       <>
-                        <li
-                          className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/"
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Home
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
-                          onClick={() =>
-                            handleProtectedDrawerNavigate("/booking")
-                          }
-                        >
-                          <span
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Booked Trailor
-                          </span>
-                        </li>
-                        <li
-                          className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/contact"
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Contact
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
-                          onClick={() =>
-                            handleProtectedDrawerNavigate("/profile")
-                          }
-                        >
-                          <span
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Profile
-                          </span>
-                        </li>
-                        <li
-                          className="px-5 py-2.5 cursor-pointer whitespace-nowrap text-[#000000] text-left font-medium transition-colors hover:bg-gray-100"
-                          onClick={() => {
-                            closeDrawer();
-                            setIsSignUpOpen(false);
-                            setIsLoginOpen(true);
+                      <li
+                        className="px-7 py-1.5 cursor-pointer whitespace-nowrap
+                         transition-colors hover:bg-gray-100"
+                        onClick={handleDrawerLinkRowClick}
+                      >
+                        <Link
+                          to="/"
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0%",
+                            verticalAlign: "middle",
+                            color: "#000000",
                           }}
                         >
-                          <span
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Login / Sign Up
-                          </span>
-                        </li>
-                      </>
+                          Home
+                        </Link>
+                      </li>
+                    
+                      <li
+                        className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                        onClick={() => handleProtectedDrawerNavigate("/booking")}
+                      >
+                        <span
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0%",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
+                          Booked Trailor
+                        </span>
+                      </li>
+                    
+                      <li
+                        className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                        onClick={handleDrawerLinkRowClick}
+                      >
+                        <Link
+                          to="/contact"
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0%",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
+                          Contact
+                        </Link>
+                      </li>
+                    
+                      <li
+                        className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                        onClick={() => handleProtectedDrawerNavigate("/profile")}
+                      >
+                        <span
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0%",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
+                          Profile
+                        </span>
+                      </li>
+                    
+                      <li
+                        className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                        onClick={() => {
+                          closeDrawer();
+                          setIsSignUpOpen(false);
+                          setIsLoginOpen(true);
+                        }}
+                      >
+                        <span
+                          className="text-inherit no-underline cursor-pointer block w-full"
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontStyle: "normal",
+                            fontSize: "14px",
+                            lineHeight: "100%",
+                            letterSpacing: "0%",
+                            verticalAlign: "middle",
+                            color: "#000000",
+                          }}
+                        >
+                          Login / Sign Up
+                        </span>
+                      </li>
+                    </>
+
+
+
+
                     ) : (
+                      // <>
+                      //   <li
+                      //     className="px-7 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                      //     onClick={handleDrawerLinkRowClick}
+                      //   >
+                      //     <Link
+                      //       to="/"
+                      //       className="text-inherit no-underline cursor-pointer"
+                      //       style={{
+                      //         fontFamily: "Inter, sans-serif",
+                      //         fontWeight: 500,
+                      //         fontStyle: "normal",
+                      //         fontSize: "14px",
+                      //         lineHeight: "100%",
+                      //         letterSpacing: "0",
+                      //         verticalAlign: "middle",
+                      //         color: "#000000",
+                      //       }}
+                      //     >
+                      //       Home
+                      //     </Link>
+                      //   </li>
+                      //   <li
+                      //     className="px-7 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                      //     onClick={handleDrawerLinkRowClick}
+                      //   > <Link
+                      //   to="/booking"
+                      //   className="text-inherit no-underline cursor-pointer"
+                      //   style={{
+                      //     fontFamily: "Inter, sans-serif",
+                      //     fontWeight: 500,
+                      //     fontStyle: "normal",
+                      //     fontSize: "14px",
+                      //     lineHeight: "100%",
+                      //     letterSpacing: "0",
+                      //     verticalAlign: "middle",
+                      //     color: "#000000",
+                      //   }}
+                      // >
+                      //  Booking Screen
+                      // </Link>
+                          
+                      //   </li>
+                      //   {/* <li
+                      //     className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                      //     onClick={handleDrawerLinkRowClick}
+                      //   >
+                      //     <Link
+                      //       to="/notifications"
+                      //       className="text-inherit no-underline cursor-pointer block w-full"
+                      //       style={{
+                      //         fontFamily: "Inter, sans-serif",
+                      //         fontWeight: 500,
+                      //         fontStyle: "normal",
+                      //         fontSize: "14px",
+                      //         lineHeight: "100%",
+                      //         letterSpacing: "0",
+                      //         verticalAlign: "middle",
+                      //         color: "#000000",
+                      //       }}
+                      //     >
+                      //       Notification
+                      //     </Link>
+                      //   </li> */}
+                      //   {/* <li
+                      //     className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                      //     onClick={handleDrawerLinkRowClick}
+                      //   >
+                      //     <Link
+                      //       to="/about"
+                      //       className="text-inherit no-underline cursor-pointer"
+                      //       style={{
+                      //         fontFamily: "Inter, sans-serif",
+                      //         fontWeight: 500,
+                      //         fontStyle: "normal",
+                      //         fontSize: "14px",
+                      //         lineHeight: "100%",
+                      //         letterSpacing: "0",
+                      //         verticalAlign: "middle",
+                      //         color: "#000000",
+                      //       }}
+                      //     >
+                      //       About
+                      //     </Link>
+                      //   </li> */}
+                      //   <li
+                      //     className="px-7 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                      //     onClick={handleDrawerLinkRowClick}
+                      //   >
+                      //    <Link
+                      //       to="/contact"
+                      //       className="text-inherit no-underline cursor-pointer block w-full"
+                      //       style={{
+                      //         fontFamily: "Inter, sans-serif",
+                      //         fontWeight: 500,
+                      //         fontStyle: "normal",
+                      //         fontSize: "14px",
+                      //         lineHeight: "100%",
+                      //         letterSpacing: "0",
+                      //         verticalAlign: "middle",
+                      //         color: "#000000",
+                      //       }}
+                      //     >
+                      //       Contact
+                      //     </Link>
+                      //   </li>
+                      //   <li
+                      //     className="px-7 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                      //     onClick={handleDrawerLinkRowClick}
+                      //   >
+                      //     <Link
+                      //       to="/profile"
+                      //       className="text-inherit no-underline cursor-pointer"
+                      //       style={{
+                      //         fontFamily: "Inter, sans-serif",
+                      //         fontWeight: 500,
+                      //         fontStyle: "normal",
+                      //         fontSize: "14px",
+                      //         lineHeight: "100%",
+                      //         letterSpacing: "0",
+                      //         verticalAlign: "middle",
+                      //         color: "#000000",
+                      //       }}
+                      //     >
+                      //       Profile
+                      //     </Link>
+                      //   </li>
+                      //   <li
+                      //     className="px-7 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                      //     onClick={() => setIsLogoutConfirmOpen(true)}
+                      //   >
+                      //     <span
+                      //       className="text-inherit no-underline cursor-pointer"
+                      //       style={{
+                      //         fontFamily: "Inter, sans-serif",
+                      //         fontWeight: 500,
+                      //         fontStyle: "normal",
+                      //         fontSize: "14px",
+                      //         lineHeight: "100%",
+                      //         letterSpacing: "0",
+                      //         verticalAlign: "middle",
+                      //         color: "#000000",
+                      //       }}
+                      //     >
+                      //       Logout
+                      //     </span>
+                      //   </li>
+                      // </>
                       <>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/"
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Home
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/contact"
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Contact
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/notifications"
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Notification
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/about"
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            About
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/booking"
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Your Booked Trailers
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/profile"
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Profile
-                          </Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={() => setIsLogoutConfirmOpen(true)}
-                        >
-                          <span
-                            className="text-inherit no-underline cursor-pointer"
-                            style={{
-                              fontFamily: "Inter, sans-serif",
-                              fontWeight: 500,
-                              fontStyle: "normal",
-                              fontSize: "14px",
-                              lineHeight: "100%",
-                              letterSpacing: "0",
-                              verticalAlign: "middle",
-                              color: "#000000",
-                            }}
-                          >
-                            Logout
-                          </span>
-                        </li>
-                      </>
+  <li
+    className="px-7 py-1.5 cursor-pointer 
+    whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+    onClick={handleDrawerLinkRowClick}
+  >
+    <Link
+      to="/"
+      className="text-inherit no-underline cursor-pointer block w-full"
+      style={{
+        fontFamily: "Inter, sans-serif",
+        fontWeight: 500,
+        fontStyle: "normal",
+        fontSize: "14px",
+        lineHeight: "100%",
+        letterSpacing: "0%",
+        verticalAlign: "middle",
+        color: "#000000",
+      }}
+    >
+      Home
+    </Link>
+  </li>
+
+  <li
+    className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+    onClick={handleDrawerLinkRowClick}
+  >
+    <Link
+      to="/booking"
+      className="text-inherit no-underline cursor-pointer block w-full"
+      style={{
+        fontFamily: "Inter, sans-serif",
+        fontWeight: 500,
+        fontStyle: "normal",
+        fontSize: "14px",
+        lineHeight: "100%",
+        letterSpacing: "0%",
+        verticalAlign: "middle",
+        color: "#000000",
+      }}
+    >
+      Booking Screen
+    </Link>
+  </li>
+
+  <li
+    className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+    onClick={handleDrawerLinkRowClick}
+  >
+    <Link
+      to="/contact"
+      className="text-inherit no-underline cursor-pointer block w-full"
+      style={{
+        fontFamily: "Inter, sans-serif",
+        fontWeight: 500,
+        fontStyle: "normal",
+        fontSize: "14px",
+        lineHeight: "100%",
+        letterSpacing: "0%",
+        verticalAlign: "middle",
+        color: "#000000",
+      }}
+    >
+      Contact
+    </Link>
+  </li>
+
+  <li
+    className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+    onClick={handleDrawerLinkRowClick}
+  >
+    <Link
+      to="/profile"
+      className="text-inherit no-underline cursor-pointer block w-full"
+      style={{
+        fontFamily: "Inter, sans-serif",
+        fontWeight: 500,
+        fontStyle: "normal",
+        fontSize: "14px",
+        lineHeight: "100%",
+        letterSpacing: "0%",
+        verticalAlign: "middle",
+        color: "#000000",
+      }}
+    >
+      Profile
+    </Link>
+  </li>
+
+  <li
+    className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+    onClick={() => setIsLogoutConfirmOpen(true)}
+  >
+    <span
+      className="text-inherit no-underline cursor-pointer block w-full"
+      style={{
+        fontFamily: "Inter, sans-serif",
+        fontWeight: 500,
+        fontStyle: "normal",
+        fontSize: "14px",
+        lineHeight: "100%",
+        letterSpacing: "0%",
+        verticalAlign: "middle",
+        color: "#000000",
+      }}
+    >
+      Logout
+    </span>
+  </li>
+</>
                     )}
                   </ul>
                 </div>

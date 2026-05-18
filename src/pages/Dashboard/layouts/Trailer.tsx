@@ -187,7 +187,12 @@ const Trailer: React.FC = () => {
   if (loadState === "loading") {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4">
-        <p className="text-gray-600 text-sm">Loading trailer…</p>
+      <div className="flex items-center justify-center py-6">
+  <div
+    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
+    aria-label="Loading"
+  />
+</div>
       </div>
     );
   }

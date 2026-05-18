@@ -177,8 +177,8 @@ const Profile: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-white overflow-x-hidden">
-      <div className="mb-5 w-full px-[20px]">
-        {/* Header */}
+      <div className="mb-5 w-full px-[32px]">
+       
         <header className="pt-6 pb-2">
           <h1 className="text-[42px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
             Profile
@@ -186,51 +186,84 @@ const Profile: React.FC = () => {
         </header>
 
         {/* Profile Section */}
-        <section className="mt-3 flex flex-col items-center border-b border-[#D9D9D9] pb-8">
-          {/* Profile Image Wrapper */}
-          <div className="relative h-[110px] w-[110px]">
-            {/* Circle Container */}
-            <div className="h-full w-full rounded-full bg-[#D9D9D9] shadow-md flex items-center justify-center overflow-hidden">
-              {profilePictureUrl ? (
-                <img
-                  src={profilePictureUrl}
-                  alt="Profile"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-[34px] font-semibold text-gray-700">
-                  {initials || "D"}
-                </span>
-              )}
-            </div>
+      {/* Profile Section */}
+{/* Profile Section */}
+<section className="mt-3 flex flex-col items-center border-b border-[#D9D9D9] pb-8">
+  {/* Profile Image Wrapper */}
+  <div className="relative flex flex-col items-center">
+    
+    {/* Profile Circle */}
+    <div
+      className="rounded-full bg-[#D9D9D9] shadow-md flex items-center justify-center overflow-hidden"
+      style={{
+        width: "156px",
+        height: "156px",
+      }}
+    >
+      {profilePictureUrl ? (
+        <img
+          src={profilePictureUrl}
+          alt="Profile"
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <span
+          style={{
+            fontFamily: "Lexend",
+            fontWeight: 600,
+            fontSize: "48px",
+            lineHeight: "100%",
+            color: "#2F4A6D",
+          }}
+        >
+          {initials || "VG"}
+        </span>
+      )}
+    </div>
 
-            {/* Hidden File Input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(ev) => void handlePhotoChange(ev)}
-              disabled={uploadingPhoto}
-            />
+    {/* Camera Button */}
+    <button
+      type="button"
+      onClick={() => fileInputRef.current?.click()}
+      disabled={uploadingPhoto}
+      className="absolute flex items-center justify-center rounded-full shadow-md"
+      style={{
+        width: "42px",
+        height: "42px",
+        background: "#4A9B3D",
+        right: "-6px",
+        bottom: "42px",
+      }}
+      aria-label="Change profile photo"
+    >
+      <Camera className="w-[20px] h-[20px] text-white" />
+    </button>
 
-            {/* Camera Button */}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingPhoto}
-              className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-[#4A9B3D] border-2 border-white flex items-center justify-center shadow-md z-10"
-              aria-label="Change profile photo"
-            >
-              <Camera className="w-4 h-4 text-white" />
-            </button>
-          </div>
+    {/* Hidden File Input */}
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={(ev) => void handlePhotoChange(ev)}
+      disabled={uploadingPhoto}
+    />
 
-          {/* Name */}
-          <p className="mt-3 text-[28px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
-            {displayName}
-          </p>
-        </section>
+    {/* Name */}
+    <p
+      className="mt-4"
+      style={{
+        fontFamily: "Lexend",
+        fontWeight: 600,
+        fontSize: "20px",
+        lineHeight: "100%",
+        color: "#000000",
+      }}
+    >
+      {displayName}
+    </p>
+  </div>
+</section>
 
         {/* Menu Items */}
         <nav className="px-3 pt-5">

@@ -53,7 +53,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
           {variant === "back" ? (
             <ArrowLeft className="w-5 h-5" aria-hidden />
           ) : (
-            <X className="w-4 h-4" aria-hidden />
+            <X className="4-4 h-4" aria-hidden />
           )}
         </button>
       )}
@@ -79,7 +79,8 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute z-10 flex items-center justify-center rounded-full bg-white text-[#389131] shadow-[0_1px_3px_rgba(0,0,0,0.12)] hover:bg-[#f5f5f5] active:bg-[#ebebeb] transition-colors right-3 top-3 sm:right-5 sm:top-4"
+          className="absolute z-10 flex items-center justify-center rounded-full bg-white text-[#389131] shadow-[0_1px_3px_rgba(0,0,0,0.12)] hover:bg-[#f5f5f5] active:bg-[#ebebeb] 
+          transition-colors right-3 top-3 sm:right-5 sm:top-4"
           style={{ width: closeDim, height: closeDim }}
         >
           <X className="w-[14px] h-[14px]" strokeWidth={2.25} aria-hidden />
