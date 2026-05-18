@@ -32,12 +32,15 @@ const Contact: React.FC = () => {
 
   return (
     <main
-      className="min-h-screen w-full min-w-0 overflow-x-hidden bg-[#F6F3E9] font-sans px-4 py-8 sm:px-6 sm:py-12"
+      className="min-h-screen w-full min-w-0
+       overflow-x-hidden bg-[#F6F3E9] font-sans 
+       px-4 py-8 sm:px-10 sm:py-12"
     >
-      <div className="mx-auto max-w-[1120px]">
+      <div className="mx-auto w-full">
         <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:gap-6">
           {/* Left Image */}
-          <div className="w-full overflow-hidden rounded-[24px] lg:w-[46%] lg:min-w-0 shrink-0">
+          <div className="w-full overflow-hidden 
+          rounded-[24px] lg:w-[46%] lg:min-w-0 shrink-0">
             <img
               src={images.Contact}
               alt="Dump trailer at dealership"
@@ -146,24 +149,36 @@ const Contact: React.FC = () => {
                 >
                   What service are you interested in
                 </label>
-
                 <select
                   id="contact-service"
                   value={serviceType}
                   onChange={(e) => setServiceType(e.target.value)}
-                  className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 text-sm text-neutral-800 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                  className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   style={{
                     background: "#FFFFFF",
                     boxShadow: "0px 4px 4px 0px #00000040",
                     height: "46px",
+                    fontFamily: "Lexend",
+                    fontWeight: 300,
+                    fontSize: "15px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    color: serviceType ? "#000000" : "#B2B2B2",
                   }}
                 >
-                  <option value="" className="text-[#B2B2B2]">
+                  <option value="" disabled hidden>
                     Select Service type
                   </option>
 
                   {SERVICE_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
+                    <option
+                      key={opt}
+                      value={opt}
+                      style={{
+                        color: "#000000",
+                        fontFamily: "Lexend",
+                      }}
+                    >
                       {opt}
                     </option>
                   ))}
@@ -196,19 +211,32 @@ const Contact: React.FC = () => {
                   id="contact-budget"
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
-                  className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 text-sm text-neutral-800 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                  className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   style={{
                     background: "#FFFFFF",
                     boxShadow: "0px 4px 4px 0px #00000040",
                     height: "46px",
+                    fontFamily: "Lexend",
+                    fontWeight: 300,
+                    fontSize: "15px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    color: budget ? "#000000" : "#B2B2B2",
                   }}
                 >
-                  <option value="" className="text-[#B2B2B2]">
+                  <option value="" disabled hidden>
                     Select project budget
                   </option>
 
                   {BUDGET_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
+                    <option
+                      key={opt}
+                      value={opt}
+                      style={{
+                        color: "#000000",
+                        fontFamily: "Lexend",
+                      }}
+                    >
                       {opt}
                     </option>
                   ))}

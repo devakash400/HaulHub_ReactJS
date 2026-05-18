@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState, MouseEvent } from "react";
+import React, { useEffect, useMemo, useState, MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { images } from "../../../assets/images/index.ts";
 import { Eye, EyeOff, Mail, Smartphone, ChevronDown } from "lucide-react";
@@ -259,11 +259,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
         const exists =
           res &&
-          typeof res === "object" &&
-          "data" in res &&
-          (res as any).data &&
-          typeof (res as any).data === "object" &&
-          "exists" in (res as any).data
+            typeof res === "object" &&
+            "data" in res &&
+            (res as any).data &&
+            typeof (res as any).data === "object" &&
+            "exists" in (res as any).data
             ? Boolean((res as any).data.exists)
             : false;
 
@@ -286,11 +286,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
         const exists =
           res &&
-          typeof res === "object" &&
-          "data" in res &&
-          (res as any).data &&
-          typeof (res as any).data === "object" &&
-          "exists" in (res as any).data
+            typeof res === "object" &&
+            "data" in res &&
+            (res as any).data &&
+            typeof (res as any).data === "object" &&
+            "exists" in (res as any).data
             ? Boolean((res as any).data.exists)
             : false;
 
@@ -440,16 +440,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
   // };
   const handleResetContinue = () => {
     if (!resetCanContinue) return;
-  
+
     const phoneDigits = resetPhone.replace(/\D/g, "");
     const isPhone = phoneDigits.length >= 10;
     const isEmail = emailRegex.test(resetEmail.trim());
-  
+
     if (!isPhone && !isEmail) {
       toast.error("Please enter a valid phone number or email.");
       return;
     }
-  
+
     setOtp("");
     setOtpError(null);
     setStep("otp"); // Directly opens OTP screen
@@ -549,11 +549,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
               ? "Login"
               : step === "password"
                 ? "Password"
-                : step === "reset"
+                : step === "reset" || step === "otp"
                   ? "Reset Password"
-                  : step === "otp"
-                    ? "Enter OTP"
-                    : "New Password"
+                  : "New Password"
           }
           onClose={goBack}
           variant={step === "email" ? "close" : "none"}
@@ -561,9 +559,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
         />
 
         <div
-          className={`px-[18px] pb-3 flex-1 overflow-y-auto ${
-            step === "email" ? "pt-6" : "pt-3"
-          }`}
+          className={`px-[18px] pb-3 flex-1 overflow-y-auto ${step === "email" ? "pt-6" : "pt-3"
+            }`}
         >
           {step === "email" && (
             <div>
@@ -661,51 +658,51 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <p className="mt-2 text-xs text-red-600">{emailError}</p>
               )}
 
-<div className="mt-4">
-  <label
-    className="block mb-2 text-black"
-    style={{
-      fontFamily: "Lexend",
-      fontWeight: 400,
-      fontSize: "14px",
-      lineHeight: "100%",
-      letterSpacing: "0%",
-    }}
-  >
-    Choose your Category <span className="text-red-500">*</span>
-  </label>
+              <div className="mt-4">
+                <label
+                  className="block mb-2 text-black"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 400,
+                    fontSize: "14px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                  }}
+                >
+                  Choose your Category <span className="text-red-500">*</span>
+                </label>
 
-  <div className="relative">
-    <select
-      value={loginTrailor}
-      onChange={(e) => {
-        setLoginTrailor(e.target.value as "Renter" | "Owner");
-        setLoginError(null);
-      }}
-      className="w-full px-4 pr-10 appearance-none bg-white outline-none"
-      style={{
-        height: "40px",
-        minHeight: "40px",
-        border: "1px solid #050303",
-        borderRadius: "5px",
-        fontFamily: "Lexend",
-        fontWeight: 300,
-        fontSize: "12px",
-        lineHeight: "40px",
-        color: "#000",
-        WebkitAppearance: "none",
-        MozAppearance: "none",
-      }}
-    >
-      <option value="Renter">Renter</option>
-      <option value="Owner">Owner</option>
-    </select>
+                <div className="relative">
+                  <select
+                    value={loginTrailor}
+                    onChange={(e) => {
+                      setLoginTrailor(e.target.value as "Renter" | "Owner");
+                      setLoginError(null);
+                    }}
+                    className="w-full px-4 pr-10 appearance-none bg-white outline-none"
+                    style={{
+                      height: "40px",
+                      minHeight: "40px",
+                      border: "1px solid #050303",
+                      borderRadius: "5px",
+                      fontFamily: "Lexend",
+                      fontWeight: 300,
+                      fontSize: "12px",
+                      lineHeight: "40px",
+                      color: "#000",
+                      WebkitAppearance: "none",
+                      MozAppearance: "none",
+                    }}
+                  >
+                    <option value="Renter">Renter</option>
+                    <option value="Owner">Owner</option>
+                  </select>
 
-    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-      <ChevronDown className="w-4 h-4" aria-hidden />
-    </span>
-  </div>
-</div>
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                    <ChevronDown className="w-4 h-4" aria-hidden />
+                  </span>
+                </div>
+              </div>
 
               <button
                 type="button"
@@ -713,11 +710,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 disabled={
                   !isEmailFilled || !isIdentifierValid || isCheckingEmail
                 }
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
-                  isEmailFilled && isIdentifierValid && !isCheckingEmail
-                    ? "bg-[#389131] text-white"
-                    : "text-white cursor-not-allowed"
-                }`}
+                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${isEmailFilled && isIdentifierValid && !isCheckingEmail
+                  ? "bg-[#389131] text-white"
+                  : "text-white cursor-not-allowed"
+                  }`}
                 style={{
                   backgroundColor:
                     isEmailFilled && isIdentifierValid && !isCheckingEmail
@@ -843,65 +839,65 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <p className="mt-8 text-center font-['Myriad Pro'] font-normal text-[12px] leading-[100%] tracking-[0px] text-black">
                 Don&apos;t have an account?{" "}
                 <button
-  type="button"
-  onClick={onOpenSignUp}
-  className="cursor-pointer text-[#389131] underline"
-  style={{
-    fontFamily: "Lexend",
-    fontWeight: 600,
-    fontStyle: "normal",
-    fontSize: "12px",
-    lineHeight: "100%",
-    letterSpacing: "0px",
-    textDecoration: "underline",
-    textDecorationStyle: "solid",
+                  type="button"
+                  onClick={onOpenSignUp}
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 600,
+                    fontStyle: "normal",
+                    fontSize: "12px",
+                    lineHeight: "100%",
+                    letterSpacing: "0px",
+                    textDecoration: "underline",
+                    textDecorationStyle: "solid",
 
-    textDecorationThickness: "0%",
-  }}
->
-  Sign up
-</button>
+                    textDecorationThickness: "0%",
+                  }}
+                >
+                  Sign up
+                </button>
               </p>
 
               <p className="mt-4 text-center font-['Lexend'] text-[10px] font-medium leading-[100%] text-gray-800">
                 You agree with{" "}
                 <button
-  type="button"
-  className="cursor-pointer text-[#389131] underline"
-  style={{
-    fontFamily: "Lexend",
-    fontWeight: 700,
-    fontStyle: "normal",
-    fontSize: "10px",
-    lineHeight: "100%",
-    letterSpacing: "0%",
-    textDecoration: "underline",
-    textDecorationStyle: "solid",
-    textDecorationThickness: "0%",
-    textDecorationSkipInk: "auto",
-  }}
->
-  Terms &amp; Conditions
-</button>{" "}
+                  type="button"
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecoration: "underline",
+                    textDecorationStyle: "solid",
+                    textDecorationThickness: "0%",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Terms &amp; Conditions
+                </button>{" "}
                 and{" "}
                 <button
-  type="button"
-  className="cursor-pointer text-[#389131] underline"
-  style={{
-    fontFamily: "Lexend",
-    fontWeight: 700,
-    fontStyle: "normal",
-    fontSize: "10px",
-    lineHeight: "100%",
-    letterSpacing: "0%",
-    textDecoration: "underline",
-    textDecorationStyle: "solid",
-    textDecorationThickness: "0%",
-    textDecorationSkipInk: "auto",
-  }}
->
-  Privacy Policy
-</button>
+                  type="button"
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecoration: "underline",
+                    textDecorationStyle: "solid",
+                    textDecorationThickness: "0%",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Privacy Policy
+                </button>
                 .
               </p>
             </div>
@@ -1037,7 +1033,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             </div>
           )}
-          {step === "reset" && (
+          {(step === "reset" || step === "otp") && (
             <div>
               <button
                 type="button"
@@ -1242,96 +1238,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             </div>
           )}
-          {step === "otp" && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setStep("reset")}
-                className="flex items-center gap-1 mb-5"
-              >
-                <img
-                  src={backButton}
-                  alt="Back"
-                  className="w-[5px] h-[10px] opacity-100 border-transparent object-contain"
-                />
-                <span className="font-['Lexend'] text-[14px] font-normal leading-[100%] tracking-[0px] capitalize text-[#7C7C7C]">
-                  Back
-                </span>
-              </button>
-              <p
-                className="text-center text-black"
-                style={{
-                  fontFamily: "Lexend",
-                  fontWeight: 400,
-                  fontSize: "16px",
-                  lineHeight: "130%",
-                }}
-              >
-                Please enter the OTP sent to
-                <br />
-                <span className="font-medium">{otpTargetLabel}</span>
-              </p>
 
-              <label className="block mt-6 mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
-                Enter OTP <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={otp}
-                onChange={(e) => {
-                  const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 6);
-                  setOtp(onlyDigits);
-                  setOtpError(null);
-                }}
-                placeholder="Enter OTP"
-                maxLength={6}
-                inputMode="numeric"
-                className="w-full rounded-[5px] border border-black px-4 outline-none custom-placeholder placeholder:text-[#9B989E]"
-                style={{
-                  height: "40px",
-                  fontFamily: "Lexend",
-                  fontSize: "17px",
-                }}
-              />
-              {otpError && (
-                <p className="mt-2 text-[12px] font-light font-['Lexend'] text-red-600">
-                  {otpError}
-                </p>
-              )}
-              <div className="mt-2 flex justify-end">
-                {otpSeconds > 0 ? (
-                  <span className="font-lexend text-[11px] text-[#757171]">
-                    Didn&apos;t get Code ?
-                    <span className="ml-2 text-[#389131]">
-                      {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
-                      {String(otpSeconds % 60).padStart(2, "0")}
-                    </span>
-                  </span>
-                ) : (
-                  <button type="button" onClick={handleResendOtp}>
-                    <span className="text-[11px] text-[#757171]">
-                      Didn&apos;t get Code ?{" "}
-                    </span>
-                    <span className="text-[11px] underline text-[#389131]">
-                      Resend
-                    </span>
-                  </button>
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleVerifyOtp}
-                disabled={!isOtpValid}
-                className="w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white"
-                style={{
-                  backgroundColor: isOtpValid ? "#389131" : "#929191",
-                  cursor: isOtpValid ? "pointer" : "not-allowed",
-                }}
-              >
-                Verify
-              </button>
-            </div>
-          )}
           {step === "newPassword" && (
             <div>
               <button
@@ -1368,65 +1275,32 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   aria-label="Toggle password visibility"
                 >
-                  {showNewPwd ? (
-                    <EyeOff className="w-5 h-5" aria-hidden />
+                  {showNewPwd ? (<Eye className="w-5 h-5" aria-hidden />
+
                   ) : (
-                    <Eye className="w-5 h-5" aria-hidden />
+                    <EyeOff className="w-5 h-5" aria-hidden />
                   )}
                 </button>
               </div>
-              {newPasswordTouched && newPassword.trim().length > 0 && (
-                <ul className="mt-2 space-y-0.5 font-lexend font-light text-[12px] leading-[100%] tracking-[0em] text-[#6B6B6B]">
-                  <li
-                    className={
-                      newPasswordRules.hasMinLength
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                      • Add at least 8 characters
-                  </li>
-
-                  <li
-                    className={
-                      newPasswordRules.hasUppercase
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                   • Uppercase letters (A-Z)
-                  </li>
-
-                  <li
-                    className={
-                      newPasswordRules.hasLowercase
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                    • Lowercase letters (a-z)
-                  </li>
-
-                  <li
-                    className={
-                      newPasswordRules.hasNumber
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                  • Numbers (0-9)
-                  </li>
-
-                  <li
-                    className={
-                      newPasswordRules.hasSpecial
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                    • Special characters (e.g., @, #, $, %, !)
-                  </li>
-                </ul>
+              {newPasswordTouched && newPassword.trim().length > 0 && !isNewPasswordValid && (
+                <p className="mt-2 font-lexend font-normal text-[12px] leading-[1.3] tracking-[0em] text-red-500">
+                  {!newPasswordRules.hasMinLength
+                    ? "Password must be at least 8 characters"
+                    : (() => {
+                      const missing = [];
+                      if (!newPasswordRules.hasUppercase) missing.push("uppercase");
+                      if (!newPasswordRules.hasLowercase) missing.push("lowercase");
+                      if (!newPasswordRules.hasNumber) missing.push("numbers");
+                      if (!newPasswordRules.hasSpecial) missing.push("special characters");
+                      if (missing.length === 1) return `Password must contain ${missing[0]}`;
+                      if (missing.length === 2) return `Password must contain ${missing[0]} and ${missing[1]}`;
+                      if (missing.length > 2) {
+                        const last = missing.pop();
+                        return `Password must contain ${missing.join(", ")}, and ${last}`;
+                      }
+                      return "";
+                    })()}
+                </p>
               )}
               <label className="mt-5 block mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
                 Confirm New Password{" "}
@@ -1449,62 +1323,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   aria-label="Toggle confirm password visibility"
                 >
                   {showConfirmPwd ? (
-                    <EyeOff className="w-5 h-5" aria-hidden />
-                  ) : (
                     <Eye className="w-5 h-5" aria-hidden />
+
+
+                  ) : (
+                    <EyeOff className="w-5 h-5" aria-hidden />
+
                   )}
                 </button>
               </div>
-              {/* {confirmNewPasswordTouched &&
-                confirmNewPassword.trim().length > 0 && (
-                  <ul className="mt-2 space-y-0.5 text-xs">
-                    <li
-                      className={
-                        confirmPasswordRules.hasMinLength
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢Add at least 8 characters
-                    </li>
-                    <li
-                      className={
-                        confirmPasswordRules.hasUppercase
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢ Uppercase letters (A-Z)
-                    </li>
-                    <li
-                      className={
-                        confirmPasswordRules.hasLowercase
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢ Lowercase letters (a-z)
-                    </li>
-                    <li
-                      className={
-                        confirmPasswordRules.hasNumber
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢ Numbers (0-9)
-                    </li>
-                    <li
-                      className={
-                        confirmPasswordRules.hasSpecial
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢ Special characters (e.g., @, #, $, %, !)
-                    </li>
-                  </ul>
-                )} */}
+
               {confirmNewPassword.length > 0 && !passwordsMatch && (
                 <p
                   className="text-[12px] font-light 
@@ -1538,22 +1366,22 @@ const LoginModal: React.FC<LoginModalProps> = ({
               >
                 You agree with{" "}
                 <span
-  className="cursor-pointer text-[#389131] underline"
-  style={{
-    fontFamily: "Lexend",
-    fontWeight: 700,
-    fontStyle: "normal",
-    fontSize: "10px",
-    lineHeight: "100%",
-    letterSpacing: "0%",
-    textDecoration: "underline",
-    textDecorationStyle: "solid",
-    textDecorationThickness: "0%",
-    textDecorationSkipInk: "auto",
-  }}
->
-  Terms & Conditions
-</span>
+                  className="cursor-pointer text-[#389131] underline"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 700,
+                    fontStyle: "normal",
+                    fontSize: "10px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    textDecoration: "underline",
+                    textDecorationStyle: "solid",
+                    textDecorationThickness: "0%",
+                    textDecorationSkipInk: "auto",
+                  }}
+                >
+                  Terms & Conditions
+                </span>
                 and{"  "}
                 <span
                   className="cursor-pointer text-[#389131] underline"
@@ -1573,6 +1401,145 @@ const LoginModal: React.FC<LoginModalProps> = ({
             </div>
           )}
         </div>
+
+        {step === "otp" && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/45">
+            <div className="w-[85%] max-w-[400px] bg-white rounded-[15px] overflow-hidden shadow-2xl flex flex-col relative">
+              <ModalHeader
+                title={
+                  <span
+                    style={{
+                      fontFamily: "Lexend",
+                      fontWeight: 600,
+                      fontSize: "22px",
+                      lineHeight: "135%",
+                      letterSpacing: "6%",
+                      textAlign: "center",
+                      color: "#FFFFFF",
+                      display: "block",
+                    }}
+                  >
+                    Enter OTP
+                  </span>
+                }
+                onClose={() => setStep("reset")}
+                variant="close"
+                closeOnRight={true}
+              />
+              <div className="p-6">
+                <p
+                  className="text-center mb-6"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 300,
+                    fontSize: "13px",
+                    lineHeight: "100%",
+                    letterSpacing: "0px",
+                    color: "#393939",
+                  }}
+                >
+                  Please enter the OTP sent to
+                  <br />
+
+                  <span
+                    style={{
+                      display: "inline-block",
+                      marginTop: "6px", // adjust spacing here
+                      fontFamily: "Lexend",
+                      fontWeight: 300,
+                      fontSize: "13px",
+                      lineHeight: "100%",
+                      letterSpacing: "0px",
+                      color: "#000000",
+                    }}
+                  >
+                    {otpTargetLabel}
+                  </span>
+                </p>
+                <label
+                  className="block mb-2"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 400,
+                    fontSize: "14px",
+                    lineHeight: "100%",
+                    letterSpacing: "0%",
+                    color: "#434343",
+                  }}
+                >
+                  Enter OTP
+                </label>
+                <input
+                  value={otp}
+                  onChange={(e) => {
+                    const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setOtp(onlyDigits);
+                    setOtpError(null);
+                  }}
+                  placeholder="Enter OTP"
+                  maxLength={6}
+                  inputMode="numeric"
+                  className="w-full rounded-[5px] border border-black px-4 outline-none custom-placeholder placeholder:text-[#9B989E]"
+                  style={{
+                    height: "40px",
+                    fontFamily: "Lexend",
+                    fontSize: "15px",
+                  }}
+                />
+                {otpError && (
+                  <p className="mt-2 text-[12px] font-light font-['Lexend'] text-red-600">
+                    {otpError}
+                  </p>
+                )}
+                <div className="mt-2 flex justify-end">
+                  {otpSeconds > 0 ? (
+                    <span className="font-lexend text-[11px] text-[#757171]">
+                      Didn&apos;t get Code ?{" "}
+                      <span
+                        style={{
+                          fontFamily: "Lexend",
+                          fontWeight: 300,
+                          fontSize: "11px",
+                          lineHeight: "100%",
+                          letterSpacing: "-0.3px",
+                          textDecoration: "underline",
+                          textDecorationStyle: "solid",
+                          textDecorationColor: "#389131",
+                          color: "#389131",
+                        }}
+                      >
+                        {String(Math.floor(otpSeconds / 60)).padStart(2, "0")}:
+                        {String(otpSeconds % 60).padStart(2, "0")}
+                      </span>
+                    </span>
+                  ) : (
+                    <button type="button" onClick={handleResendOtp}>
+                      <span className="text-[11px] text-[#757171]">
+                        Didn&apos;t get Code ?{" "}
+                      </span>
+                      <span className="text-[11px] underline text-[#389131]">
+                        Resend
+                      </span>
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={!isOtpValid}
+                  className="w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white"
+                  style={{
+                    backgroundColor: isOtpValid ? "#389131" : "#929191",
+                    cursor: isOtpValid ? "pointer" : "not-allowed",
+                  }}
+                >
+                  Verify
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
