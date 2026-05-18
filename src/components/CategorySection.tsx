@@ -174,17 +174,16 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   };
 
   return (
-    <section 
+    <section
       ref={sectionRef}
       className={`w-full min-w-0 pt-6 bg-white
          self-center overflow-x-hidden transition-all 
-         duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
-        isSectionVisible
+         duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${isSectionVisible
           ? "opacity-100 translate-y-0"
           : "opacity-0 translate-y-3"
-      }`}
+        }`}
     >
-      <div  className="max-w-full box-border w-full min-w-0 ">
+      <div className="max-w-full box-border w-full min-w-0 ">
         <div
           className="mx-auto"
           style={{
@@ -192,58 +191,57 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
           }}
         >
           <header className="flex items-center justify-between mb-5">
-          <h2
-  className="mt-5 font-['Lexend'] font-semibold text-[30px] leading-[100%] text-[#389131] align-middle"
-  style={{
-    verticalAlign: "middle",
-  }}
->
-  {title}
-</h2>
+            <h2
+              className="mt-5 font-['Lexend'] font-semibold text-[30px] leading-[100%] text-[#389131] align-middle"
+              style={{
+                verticalAlign: "middle",
+              }}
+            >
+              {title}
+            </h2>
 
-<div
-  className={`items-center gap-0 ${
-    isMobileCompact ? "hidden" : "flex"
-  }`}
->
-  <button
-    type="button"
-    onClick={() => handleScroll("left")}
-    aria-label="Scroll left"
-    disabled={!canScrollLeft}
-    className="flex items-center justify-center rounded-full p-0 m-0 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200"
-    style={{
-      opacity: !canScrollLeft ? 0.4 : 1,
-      cursor: !canScrollLeft ? "not-allowed" : "pointer",
-      pointerEvents: !canScrollLeft ? "none" : "auto",
-    }}
-  >
-    <img
-      src={images.ArrowRight}
-      alt="Previous"
-      className="w-[40px] h-[40px] object-contain rotate-180"
-    />
-  </button>
+            <div
+              className={`items-center gap-0 ${isMobileCompact ? "hidden" : "flex"
+                }`}
+            >
+              <button
+                type="button"
+                onClick={() => handleScroll("left")}
+                aria-label="Scroll left"
+                disabled={!canScrollLeft}
+                className="flex items-center justify-center rounded-full p-0 m-0 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200"
+                style={{
+                  opacity: !canScrollLeft ? 0.4 : 1,
+                  cursor: !canScrollLeft ? "not-allowed" : "pointer",
+                  pointerEvents: !canScrollLeft ? "none" : "auto",
+                }}
+              >
+                <img
+                  src={images.ArrowRight}
+                  alt="Previous"
+                  className="w-[40px] h-[40px] object-contain rotate-180"
+                />
+              </button>
 
-  <button
-    type="button"
-    onClick={() => handleScroll("right")}
-    aria-label="Scroll right"
-    disabled={!canScrollRight}
-    className="flex items-center justify-center rounded-full p-0 m-0 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200"
-    style={{
-      opacity: !canScrollRight ? 0.4 : 1,
-      cursor: !canScrollRight ? "not-allowed" : "pointer",
-      pointerEvents: !canScrollRight ? "none" : "auto",
-    }}
-  >
-    <img
-      src={images.ArrowRight}
-      alt="Next"
-      className="w-[40px] h-[40px] object-contain"
-    />
-  </button>
-</div>
+              <button
+                type="button"
+                onClick={() => handleScroll("right")}
+                aria-label="Scroll right"
+                disabled={!canScrollRight}
+                className="flex items-center justify-center rounded-full p-0 m-0 border-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-white active:bg-gray-200"
+                style={{
+                  opacity: !canScrollRight ? 0.4 : 1,
+                  cursor: !canScrollRight ? "not-allowed" : "pointer",
+                  pointerEvents: !canScrollRight ? "none" : "auto",
+                }}
+              >
+                <img
+                  src={images.ArrowRight}
+                  alt="Next"
+                  className="w-[40px] h-[40px] object-contain"
+                />
+              </button>
+            </div>
           </header>
 
           <div
@@ -258,7 +256,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               const isWishlisted = wishlistIds.has(item.id);
 
               return (
-                <article 
+                <article
                   key={item.id}
                   onClick={() => navigate(`/trailer/${item.id}`)}
                   className="group w-[288px] shrink-0 cursor-pointer"
@@ -273,10 +271,10 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
                     {/* BADGE */}
                     {/* {item.badgeLabel && ( */}
-                      <span className="absolute top-3 left-3 px-3 py-1 rounded-[9px] bg-white text-[11px] font-medium text-black shadow">
-                        {/* {item.badgeLabel} */}
-                        Guest favourite
-                      </span>
+                    <span className="absolute top-3 left-3 px-3 py-1 rounded-[9px] bg-white text-[11px] font-medium text-black shadow">
+                      {/* {item.badgeLabel} */}
+                      Guest favourite
+                    </span>
                     {/* )} */}
 
                     {/* WISHLIST */}
@@ -298,35 +296,35 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
                   {/* TEXT BELOW IMAGE */}
                   <div className="pt-2 px-1">
-                  <p
-  style={{
-    fontFamily: "Lexend",
-    fontWeight: 700,
-    fontStyle: "normal",
-    fontSize: "15px",
-    lineHeight: "100%",
-    letterSpacing: "0%",
-    verticalAlign: "middle",
-    color: "#000000",
-  }}
->
-  {item.modelLabel}
-</p>
+                    <p
+                      style={{
+                        fontFamily: "Lexend",
+                        fontWeight: 700,
+                        fontStyle: "normal",
+                        fontSize: "15px",
+                        lineHeight: "100%",
+                        letterSpacing: "0%",
+                        verticalAlign: "middle",
+                        color: "#000000",
+                      }}
+                    >
+                      {item.modelLabel}
+                    </p>
 
-<p
-  style={{
-    fontFamily: "Lexend",
-    fontWeight: 400,
-    fontStyle: "normal",
-    fontSize: "16px",
-    lineHeight: "100%",
-    letterSpacing: "0%",
-    verticalAlign: "middle",
-    color: "#9B989E",marginTop:'8px'
-  }}
->
-  {item.priceLabel}
-</p>
+                    <p
+                      style={{
+                        fontFamily: "Lexend",
+                        fontWeight: 400,
+                        fontStyle: "normal",
+                        fontSize: "16px",
+                        lineHeight: "100%",
+                        letterSpacing: "0%",
+                        verticalAlign: "middle",
+                        color: "#9B989E", marginTop: '8px'
+                      }}
+                    >
+                      {item.priceLabel}
+                    </p>
                   </div>
                 </article>
               );

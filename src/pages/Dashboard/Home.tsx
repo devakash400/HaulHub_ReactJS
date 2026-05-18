@@ -42,11 +42,10 @@ const RevealBlock: React.FC<RevealBlockProps> = ({ children, delayMs = 0 }) => {
   return (
     <div
       ref={blockRef}
-      className={`will-change-transform transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
-        visible
-          ? "opacity-100 translate-y-0 scale-100"
-          : "opacity-0 translate-y-5 scale-[0.99]"
-      }`}
+      className={`will-change-transform transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${visible
+        ? "opacity-100 translate-y-0 scale-100"
+        : "opacity-0 translate-y-5 scale-[0.99]"
+        }`}
       style={{ transitionDelay: `${delayMs}ms` }}
     >
       {children}
@@ -211,11 +210,10 @@ const Home: React.FC = () => {
                     </p>
                     <div className="mt-1">
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-[2px] text-[9px] font-medium ${
-                          isBookedTrailer(Number(item.id))
-                            ? "bg-gray-200 text-gray-700"
-                            : "bg-[#E7F6E6] text-[#2F7A29]"
-                        }`}
+                        className={`inline-flex items-center rounded-full px-2 py-[2px] text-[9px] font-medium ${isBookedTrailer(Number(item.id))
+                          ? "bg-gray-200 text-gray-700"
+                          : "bg-[#E7F6E6] text-[#2F7A29]"
+                          }`}
                       >
                         {isBookedTrailer(Number(item.id))
                           ? "Booked"
@@ -233,77 +231,77 @@ const Home: React.FC = () => {
           {listingsStillLoading ? (
             <RevealBlock delayMs={80}>
               <div className="flex items-center justify-center py-6">
-  <div
-    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
-    aria-label="Loading"
-  />
-</div>
+                <div
+                  className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
+                  aria-label="Loading"
+                />
+              </div>
             </RevealBlock>
           ) : (
             <>
-            <div style={{
-  background: "#FFFFFF",
-  boxShadow: "0px 4px 4px 0px #00000040",
-}}>
-              {listingsLoadError && (
-                <RevealBlock delayMs={40}>
-                  <div className="px-4 pt-4 text-center text-sm text-amber-800 bg-amber-50 border-b border-amber-100">
-                    Could not load trailers. Check that the API is reachable
-                    (set{" "}
-                    <code className="text-xs bg-amber-100 px-1 rounded">
-                      REACT_APP_API_URL
-                    </code>{" "}
-                    if your backend is not the default host).
-                  </div>
-                </RevealBlock>
-              )}
-              {gooseneckSectionItems.length > 0 && (
-                <RevealBlock delayMs={80}>
-                  <CategorySection
-                    title="Gooseneck Trailers"
-                    items={gooseneckSectionItems}
-                  />
-                </RevealBlock>
-              )}
-              {bumperPullSectionItems.length > 0 && (
-                <RevealBlock delayMs={120}>
-                  <CategorySection
-                    title="Bumper Pull Trailers"
-                    items={bumperPullSectionItems}
-                  />
-                </RevealBlock>
-              )}
-              {flatbedSectionItems.length > 0 && (
-                <RevealBlock delayMs={160}>
-                  <CategorySection
-                    title="Flatbed Trailers"
-                    items={flatbedSectionItems}
-                  />
-                </RevealBlock>
-              )}
-              {carHaulersSectionItems.length > 0 && (
-                <RevealBlock delayMs={200}>
-                  <CategorySection
-                    title="Car Haulers"
-                    items={carHaulersSectionItems}
-                  />
-                </RevealBlock>
-              )}
-              {!listingsLoadError &&
-                renterListings &&
-                gooseneckSectionItems.length === 0 &&
-                bumperPullSectionItems.length === 0 &&
-                flatbedSectionItems.length === 0 &&
-                carHaulersSectionItems.length === 0 && (
-                  <RevealBlock delayMs={80}>
-                    <div className="px-4 py-12 text-center text-[15px] text-gray-500">
-                      No trailers match the home categories yet.
+              <div style={{
+                background: "#FFFFFF",
+                boxShadow: "0px 4px 4px 0px #00000040",
+              }}>
+                {listingsLoadError && (
+                  <RevealBlock delayMs={40}>
+                    <div className="px-4 pt-4 text-center text-sm text-amber-800 bg-amber-50 border-b border-amber-100">
+                      Could not load trailers. Check that the API is reachable
+                      (set{" "}
+                      <code className="text-xs bg-amber-100 px-1 rounded">
+                        REACT_APP_API_URL
+                      </code>{" "}
+                      if your backend is not the default host).
                     </div>
                   </RevealBlock>
                 )}
-          </div>  </>
+                {gooseneckSectionItems.length > 0 && (
+                  <RevealBlock delayMs={80}>
+                    <CategorySection
+                      title="Gooseneck Trailers"
+                      items={gooseneckSectionItems}
+                    />
+                  </RevealBlock>
+                )}
+                {bumperPullSectionItems.length > 0 && (
+                  <RevealBlock delayMs={120}>
+                    <CategorySection
+                      title="Bumper Pull Trailers"
+                      items={bumperPullSectionItems}
+                    />
+                  </RevealBlock>
+                )}
+                {flatbedSectionItems.length > 0 && (
+                  <RevealBlock delayMs={160}>
+                    <CategorySection
+                      title="Flatbed Trailers"
+                      items={flatbedSectionItems}
+                    />
+                  </RevealBlock>
+                )}
+                {carHaulersSectionItems.length > 0 && (
+                  <RevealBlock delayMs={200}>
+                    <CategorySection
+                      title="Car Haulers"
+                      items={carHaulersSectionItems}
+                    />
+                  </RevealBlock>
+                )}
+                {!listingsLoadError &&
+                  renterListings &&
+                  gooseneckSectionItems.length === 0 &&
+                  bumperPullSectionItems.length === 0 &&
+                  flatbedSectionItems.length === 0 &&
+                  carHaulersSectionItems.length === 0 && (
+                    <RevealBlock delayMs={80}>
+                      <div className="px-4 py-12 text-center text-[15px] text-gray-500">
+                        No trailers match the home categories yet.
+                      </div>
+                    </RevealBlock>
+                  )}
+              </div>  </>
           )}
-           </>
+        </>
       )}
 
       <AddTrailerModal

@@ -1275,65 +1275,32 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   aria-label="Toggle password visibility"
                 >
-                  {showNewPwd ? (
-                    <EyeOff className="w-5 h-5" aria-hidden />
+                  {showNewPwd ? (<Eye className="w-5 h-5" aria-hidden />
+
                   ) : (
-                    <Eye className="w-5 h-5" aria-hidden />
+                    <EyeOff className="w-5 h-5" aria-hidden />
                   )}
                 </button>
               </div>
-              {newPasswordTouched && newPassword.trim().length > 0 && (
-                <ul className="mt-2 space-y-0.5 font-lexend font-light text-[12px] leading-[100%] tracking-[0em] text-[#6B6B6B]">
-                  <li
-                    className={
-                      newPasswordRules.hasMinLength
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                    • Add at least 8 characters
-                  </li>
-
-                  <li
-                    className={
-                      newPasswordRules.hasUppercase
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                    • Uppercase letters (A-Z)
-                  </li>
-
-                  <li
-                    className={
-                      newPasswordRules.hasLowercase
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                    • Lowercase letters (a-z)
-                  </li>
-
-                  <li
-                    className={
-                      newPasswordRules.hasNumber
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                    • Numbers (0-9)
-                  </li>
-
-                  <li
-                    className={
-                      newPasswordRules.hasSpecial
-                        ? "text-[#6B6B6B]"
-                        : "text-red-600"
-                    }
-                  >
-                    • Special characters (e.g., @, #, $, %, !)
-                  </li>
-                </ul>
+              {newPasswordTouched && newPassword.trim().length > 0 && !isNewPasswordValid && (
+                <p className="mt-2 font-lexend font-normal text-[12px] leading-[1.3] tracking-[0em] text-red-500">
+                  {!newPasswordRules.hasMinLength
+                    ? "Password must be at least 8 characters"
+                    : (() => {
+                      const missing = [];
+                      if (!newPasswordRules.hasUppercase) missing.push("uppercase");
+                      if (!newPasswordRules.hasLowercase) missing.push("lowercase");
+                      if (!newPasswordRules.hasNumber) missing.push("numbers");
+                      if (!newPasswordRules.hasSpecial) missing.push("special characters");
+                      if (missing.length === 1) return `Password must contain ${missing[0]}`;
+                      if (missing.length === 2) return `Password must contain ${missing[0]} and ${missing[1]}`;
+                      if (missing.length > 2) {
+                        const last = missing.pop();
+                        return `Password must contain ${missing.join(", ")}, and ${last}`;
+                      }
+                      return "";
+                    })()}
+                </p>
               )}
               <label className="mt-5 block mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
                 Confirm New Password{" "}
@@ -1356,62 +1323,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   aria-label="Toggle confirm password visibility"
                 >
                   {showConfirmPwd ? (
-                    <EyeOff className="w-5 h-5" aria-hidden />
-                  ) : (
                     <Eye className="w-5 h-5" aria-hidden />
+
+
+                  ) : (
+                    <EyeOff className="w-5 h-5" aria-hidden />
+
                   )}
                 </button>
               </div>
-              {/* {confirmNewPasswordTouched &&
-                confirmNewPassword.trim().length > 0 && (
-                  <ul className="mt-2 space-y-0.5 text-xs">
-                    <li
-                      className={
-                        confirmPasswordRules.hasMinLength
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢Add at least 8 characters
-                    </li>
-                    <li
-                      className={
-                        confirmPasswordRules.hasUppercase
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢ Uppercase letters (A-Z)
-                    </li>
-                    <li
-                      className={
-                        confirmPasswordRules.hasLowercase
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢ Lowercase letters (a-z)
-                    </li>
-                    <li
-                      className={
-                        confirmPasswordRules.hasNumber
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢ Numbers (0-9)
-                    </li>
-                    <li
-                      className={
-                        confirmPasswordRules.hasSpecial
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }
-                    >
-                      â€¢ Special characters (e.g., @, #, $, %, !)
-                    </li>
-                  </ul>
-                )} */}
+
               {confirmNewPassword.length > 0 && !passwordsMatch && (
                 <p
                   className="text-[12px] font-light 

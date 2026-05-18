@@ -80,7 +80,7 @@ function formatPricePerDay(n: number | undefined): string {
   return `$${n.toLocaleString("en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  })}/day`;
+  })}`;
 }
 
 export function apiTrailerToListItem(t: ApiTrailer): TrailerListItem {
@@ -261,7 +261,7 @@ export function mapApiTrailerDetailToTrailerDetail(
     loc?.city && loc?.state
       ? `${loc.city}, ${loc.state}`
       : [loc?.address, loc?.city, loc?.state].filter(Boolean).join(", ") ||
-        "Location on request";
+      "Location on request";
 
   const specParts = [data.model, data.dimensions, data.hitchType].filter(
     Boolean,
