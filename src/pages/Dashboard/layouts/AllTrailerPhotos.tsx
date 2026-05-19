@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useLocation, useParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Heart, Share2 } from "lucide-react";
 import {
   getTrailerTypeLabel,
@@ -23,6 +23,7 @@ const PLACEHOLDER = assetImages.Catimg;
 const AllTrailerPhotos: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
     "loading",
@@ -66,12 +67,12 @@ const AllTrailerPhotos: React.FC = () => {
   if (loadState === "loading") {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4">
-       <div className="flex items-center justify-center py-6">
-  <div
-    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
-    aria-label="Loading"
-  />
-</div>
+        <div className="flex items-center justify-center py-6">
+          <div
+            className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
+            aria-label="Loading"
+          />
+        </div>
       </div>
     );
   }
@@ -79,7 +80,9 @@ const AllTrailerPhotos: React.FC = () => {
   if (loadState === "error" || !trailer) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="text-gray-800 font-medium">We couldn&apos;t load this trailer.</p>
+        <p className="text-gray-800 font-medium">
+          We couldn&apos;t load this trailer.
+        </p>
         <Link
           to="/"
           className="text-[#389131] font-medium underline hover:no-underline"
@@ -194,7 +197,9 @@ const AllTrailerPhotos: React.FC = () => {
       <WishlistLoginModal
         isOpen={wishlistModalOpen}
         onClose={() => setWishlistModalOpen(false)}
-        onLoginClick={() => navigate("/login")}
+        onLoginClick={() => {
+          navigate("/login", { state: { backgroundLocation: location } });
+        }}
       />
     </div>
   );

@@ -108,11 +108,14 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
 
           <h2
             className="
-              text-white
-              text-[22px]
-              font-semibold
-              tracking-[0.2px]
-            "
+    text-white
+    font-normal
+    text-[32px]
+    leading-[100%]
+    tracking-[0%]
+    align-middle
+    font-['Lexend']
+  "
           >
             Share This Trailer
           </h2>
@@ -126,34 +129,44 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
               src={trailerImage}
               alt={trailerTitle}
               className="
-                w-[82px] h-[58px]
-                rounded-[4px]
-                object-cover
-                shrink-0
-              "
+      w-[99px]
+      h-[67px]
+      rounded-[4px]
+      object-cover
+      shrink-0
+      opacity-100
+    "
             />
 
             <div className="min-w-0">
               <h3
                 className="
-                  text-[18px]
-                  font-semibold
-                  text-[#222]
-                  leading-tight
-                  m-0
-                "
+    font-['Lexend']
+    font-normal
+    text-[21px]
+    leading-[100%]
+    tracking-[0%]
+    text-center
+    align-middle
+    text-black
+    m-0
+  "
               >
                 {trailerTitle}
               </h3>
 
               <p
                 className="
-                  mt-[4px]
-                  text-[14px]
-                  text-[#8A8A8A]
-                  leading-none
-                  m-0
-                "
+    mt-[8px]
+    font-['Lexend']
+    font-normal
+    text-[14px]
+    leading-[100%]
+    tracking-[0%]
+    align-middle
+    text-[#929191]
+    m-0
+  "
               >
                 {trailerDescription}
               </p>
@@ -185,24 +198,41 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
               type="button"
               onClick={handleCopyLink}
               className="
-                h-[58px]
-                border border-[#D7D7D7]
-                rounded-[8px]
-                bg-white
+      w-[278px]
+      h-[50px]
+      border
+      border-[#00000066]
+      rounded-[7px]
+      bg-white
+      opacity-100
 
-                flex items-center justify-center gap-3
+      flex items-center justify-center gap-3
 
-                text-[16px]
-                font-medium
-                text-[#222]
+      font-['Lexend']
+      font-normal
+      text-[19px]
+      leading-[100%]
+      tracking-[0%]
+      align-middle
+      text-black
 
-                hover:bg-gray-50
-                transition
-              "
+      transition
+      hover:bg-gray-50
+    "
             >
-              <Link2 className="w-5 h-5" />
+              <Link2
+                className="
+    w-[21.56px]
+    h-[21.67px]
+    text-black
+    opacity-100
+    shrink-0
+  "
+              />
 
-              <span>Copy Link</span>
+              <span className="flex items-center justify-center">
+                Copy Link
+              </span>
             </button>
 
             {/* WhatsApp */}
@@ -210,24 +240,39 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
               type="button"
               onClick={handleWhatsApp}
               className="
-                h-[58px]
-                border border-[#D7D7D7]
-                rounded-[8px]
-                bg-white
+      w-[278px]
+      h-[50px]
+      border
+      border-[#00000066]
+      rounded-[7px]
+      bg-white
+      opacity-100
 
-                flex items-center justify-center gap-3
+      flex items-center justify-center gap-3
 
-                text-[16px]
-                font-medium
-                text-[#222]
+      font-['Lexend']
+      font-normal
+      text-[19px]
+      leading-[100%]
+      tracking-[0%]
+      align-middle
+      text-black
 
-                hover:bg-gray-50
-                transition
-              "
+      transition
+      hover:bg-gray-50
+    "
             >
-              <WhatsAppIcon className="w-5 h-5" />
+              <WhatsAppIcon
+                className="
+    w-[21.56px]
+    h-[21.67px]
+    text-black
+    opacity-100
+    shrink-0
+  "
+              />
 
-              <span>WhatsApp</span>
+              <span className="flex items-center justify-center">WhatsApp</span>
             </button>
           </div>
         </div>

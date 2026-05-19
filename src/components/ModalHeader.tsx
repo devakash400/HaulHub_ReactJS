@@ -47,7 +47,9 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
               : "rounded-full bg-white/15 text-white hover:bg-white/25"
           } transition-colors`}
           style={
-            variant === "close" ? { width: closeDim, height: closeDim } : undefined
+            variant === "close"
+              ? { width: closeDim, height: closeDim }
+              : undefined
           }
         >
           {variant === "back" ? (

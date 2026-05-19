@@ -19,7 +19,7 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
         onCancel();
       }
     },
-    [onCancel]
+    [onCancel],
   );
 
   useEffect(() => {
@@ -58,34 +58,34 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
           title="Sign out of your account?"
           onClose={onCancel}
           variant="close"
+          closeOnRight
           titleId="logout-confirm-title"
         />
         <div className="px-6 py-6 sm:px-8 sm:py-7">
-        <p className="mb-4 text-sm text-gray-600">
-          You&apos;ll be logged out of HaulHub on this device. You can keep
-          browsing trailers, but you&apos;ll need to log in again to manage
-          bookings, your wishlist, or account settings.
-        </p>
+          <p className="mb-4 text-sm text-gray-600">
+            You&apos;ll be logged out of HaulHub on this device. You can keep
+            browsing trailers, but you&apos;ll need to log in again to manage
+            bookings, your wishlist, or account settings.
+          </p>
 
-        <div className="mt-5 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 text-sm font-semibold">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-full border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 transition-colors"
-          >
-            Stay logged in
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-full bg-[#389131] text-white hover:bg-[#2f7a29] transition-colors"
-          >
-            Log out
-          </button>
-        </div>
+          <div className="mt-5 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 text-sm font-semibold">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-full border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 transition-colors"
+            >
+              Stay logged in
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-full bg-[#389131] text-white hover:bg-[#2f7a29] transition-colors"
+            >
+              Log out
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-

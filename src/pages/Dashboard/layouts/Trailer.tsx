@@ -1,11 +1,13 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import {
   getTrailerTypeLabel,
   type TrailerDetail,
 } from "../../../assets/data/trailers.ts";
 import { resolveTrailerForRoute } from "../../../api/trailersApi.ts";
+import { openAuthModal } from "../../../app/authModal.ts";
 import {
   TrailerTitleSection,
   TrailerImageGallery,
@@ -21,6 +23,10 @@ import {
   WishlistItem,
 } from "../../../components/TrailerDetails/index.ts";
 import { RootState } from "../../../store";
+import {
+  addWishlistItem,
+  deleteWishlistItem,
+} from "../../../api/wishlistApi.ts";
 
 type RevealSectionProps = {
   children: React.ReactNode;
@@ -187,12 +193,12 @@ const Trailer: React.FC = () => {
   if (loadState === "loading") {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4">
-      <div className="flex items-center justify-center py-6">
-  <div
-    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
-    aria-label="Loading"
-  />
-</div>
+        <div className="flex items-center justify-center py-6">
+          <div
+            className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
+            aria-label="Loading"
+          />
+        </div>
       </div>
     );
   }
@@ -200,9 +206,12 @@ const Trailer: React.FC = () => {
   if (loadState === "error" || !trailer) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="text-gray-800 font-medium">We couldn&apos;t load this trailer.</p>
+        <p className="text-gray-800 font-medium">
+          We couldn&apos;t load this trailer.
+        </p>
         <p className="text-gray-600 text-sm max-w-md">
-          It may have been removed or the link is invalid. Return home to keep browsing.
+          It may have been removed or the link is invalid. Return home to keep
+          browsing.
         </p>
         <Link
           to="/"
@@ -237,36 +246,56 @@ const Trailer: React.FC = () => {
     }
   };
 
-  const handleSaveClick = () => {
+  const handleSaveClick = async () => {
     if (!isAuthenticated) {
       setWishlistLoginOpen(true);
-    } else {
-      const current = readWishlistFromStorage();
-      const trailerId = String(trailer.id);
-      const exists = current.some((item) => item.id === trailerId);
-
-      const next: WishlistItem[] = exists
-        ? current
-        : [
-            ...current,
-            {
-              id: trailerId,
-              title: trailer.title,
-              subtitle: trailer.specs,
-              imageUrl: trailer.images[0] ?? "",
-            },
-          ];
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("wishlistItems", JSON.stringify(next));
-      }
-
-      setWishlistItems(next);
-      setWishlistOpen(true);
+      return;
     }
+
+    const current = readWishlistFromStorage();
+    const trailerId = String(trailer.id);
+    const exists = current.some((item) => item.id === trailerId);
+
+    if (!exists) {
+      try {
+        await addWishlistItem(trailerId);
+        toast.success("Added to wishlist");
+      } catch (error) {
+        toast.error("Could not add trailer to wishlist.");
+        return;
+      }
+    }
+
+    const next: WishlistItem[] = exists
+      ? current
+      : [
+          ...current,
+          {
+            id: trailerId,
+            title: trailer.title,
+            subtitle: trailer.specs,
+            imageUrl: trailer.images[0] ?? "",
+          },
+        ];
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("wishlistItems", JSON.stringify(next));
+    }
+
+    setWishlistItems(next);
+    setWishlistOpen(true);
   };
 
-  const handleRemoveItem = (itemId: string) => {
+  const handleRemoveItem = async (itemId: string) => {
+    if (isAuthenticated) {
+      try {
+        await deleteWishlistItem(String(itemId));
+        toast.success("Removed from wishlist");
+      } catch (error) {
+        toast.error("Could not remove item from wishlist.");
+      }
+    }
+
     setWishlistItems((prev) => {
       const next = prev.filter((item) => String(item.id) !== String(itemId));
       if (typeof window !== "undefined") {
@@ -279,7 +308,17 @@ const Trailer: React.FC = () => {
     });
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
+    if (isAuthenticated) {
+      try {
+        await Promise.all(
+          wishlistItems.map((item) => deleteWishlistItem(String(item.id))),
+        );
+      } catch (error) {
+        toast.error("Could not clear wishlist from server.");
+      }
+    }
+
     setWishlistItems(() => {
       if (typeof window !== "undefined") {
         localStorage.removeItem("wishlistItems");
@@ -311,9 +350,7 @@ const Trailer: React.FC = () => {
         <WishlistLoginModal
           isOpen={wishlistLoginOpen}
           onClose={() => setWishlistLoginOpen(false)}
-          onLoginClick={() => {
-            navigate("/login");
-          }}
+          onLoginClick={() => openAuthModal("login")}
         />
 
         <WishlistModal
@@ -413,7 +450,7 @@ const Trailer: React.FC = () => {
               reviews={trailer.reviews}
               onShowAll={() => {
                 if (!isAuthenticated) {
-                  navigate("/login");
+                  openAuthModal("login");
                 } else if (id) {
                   navigate(`/trailer/${id}/reviews`);
                 }

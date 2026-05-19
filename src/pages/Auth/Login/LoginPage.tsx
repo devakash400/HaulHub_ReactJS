@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/index.ts";
 import { toast } from "react-toastify";
 import LoginModal from "./Login.tsx";
+
 import {
   SignUpModal,
   SignUpData,
@@ -73,7 +74,7 @@ const LoginPage: React.FC = () => {
                 roleToTrailor(
                   Array.isArray(apiUser.trailor)
                     ? apiUser.trailor[0]
-                    : apiUser.trailor
+                    : apiUser.trailor,
                 );
               const normalizedTrailor = trailorFromApi ?? data.trailor;
 

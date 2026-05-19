@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar/Navbar.tsx";
 import BottomBar from "./components/BottomBar/BottomBar.tsx";
 import Home from "./pages/Dashboard/Home.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
-import LoginPage from "./pages/Auth/Login/LoginPage.tsx";
+// Auth flows are now handled via in-place modals; no dedicated auth routes
 import About from "./pages/About/About.tsx";
 import Contact from "./pages/Contact/Contact.tsx";
 import ListTrailer from "./pages/ListTrailer/ListTrailer.tsx";
@@ -28,6 +28,11 @@ import TrailorConditionAfter from "./pages/TrailorCondition/TrailorConditionAfte
 import Return from "./pages/Return/Return.tsx";
 import OwnerTruckDescription from "./pages/OwnerTruckDescription/OwnerTruckDescription.tsx";
 import OwnerViewMoreTrucks from "./pages/OwnerViewMoreTrucks/OwnerViewMoreTrucks.tsx";
+import LoginPage from "./pages/Auth/Login/LoginPage.tsx";
+import SignupPage from "./pages/Auth/Signup/SignupPage.tsx";
+import ForgotPasswordPage from "./pages/Auth/ForgotPassword/ForgotPasswordPage.tsx";
+import OtpPage from "./pages/Auth/Otp/OtpPage.tsx";
+import NewPasswordPage from "./pages/Auth/NewPassword/NewPasswordPage.tsx";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -42,11 +47,70 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden min-w-0">
-     <ScrollToTop /> {!hideNavFooter && <Navbar />}
+      <ScrollToTop /> {!hideNavFooter && <Navbar />}
       <main className={contentTopPadding}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
+          {/* Auth routes (login/signup/forgot/otp/new-password) */}
+
+          <Route
+            path="/signup"
+            element={
+              <>
+                <Home />
+                <SignupPage />
+              </>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <>
+                <Home />
+                <LoginPage />
+              </>
+            }
+          />
+
+          <Route
+            path="/signup"
+            element={
+              <>
+                <Home />
+                <SignupPage />
+              </>
+            }
+          />
+
+          <Route
+            path="/reset-password"
+            element={
+              <>
+                <Home />
+                <ForgotPasswordPage />
+              </>
+            }
+          />
+
+          <Route
+            path="/otp"
+            element={
+              <>
+                <Home />
+                <OtpPage />
+              </>
+            }
+          />
+
+          <Route
+            path="/Newpassword"
+            element={
+              <>
+                <Home />
+                <NewPasswordPage />
+              </>
+            }
+          />
           <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/account-settings" element={<AccountSettings />} />
@@ -55,10 +119,16 @@ const App: React.FC = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/list-trailer" element={<ListTrailer />} />
           <Route path="/trailor-condition" element={<TrailorCondition />} />
-          <Route path="/trailor-condition-after" element={<TrailorConditionAfter />} />
+          <Route
+            path="/trailor-condition-after"
+            element={<TrailorConditionAfter />}
+          />
           <Route path="/return" element={<Return />} />
           <Route path="/owner/truck/:id" element={<OwnerTruckDescription />} />
-          <Route path="/owner/view-more-trucks" element={<OwnerViewMoreTrucks />} />
+          <Route
+            path="/owner/view-more-trucks"
+            element={<OwnerViewMoreTrucks />}
+          />
           <Route path="/trailer/:id" element={<Trailer />} />
           <Route path="/trailer/:id/photos" element={<AllTrailerPhotos />} />
           <Route path="/trailer/:id/reviews" element={<TrailerReviews />} />
@@ -78,4 +148,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
