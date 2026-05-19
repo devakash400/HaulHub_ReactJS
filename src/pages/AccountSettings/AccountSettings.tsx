@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import settingsIcon from "../../assets/images/Personalinfo.png";
+import privacyicon from "../../assets/images/privacypolicy.png";
+import termsicon from "../../assets/images/termscondition.png";
+import transactionicon from "../../assets/images/transactionhistory.png";
 import {
   ChevronRight,
   Settings,
@@ -28,11 +32,14 @@ import {
 const isFilled = (v?: string | null) => Boolean(v && String(v).trim());
 
 const emergencyHasData = (ec?: EmergencyContactPayload | null) =>
-  Boolean(ec && (isFilled(ec.name) || isFilled(ec.email) || isFilled(ec.phoneNumber)));
+  Boolean(
+    ec && (isFilled(ec.name) || isFilled(ec.email) || isFilled(ec.phoneNumber)),
+  );
 
 const residentialFromProfile = (p: UserProfileApiData | null): string => {
   if (!p) return "";
-  if (isFilled(p.residentialAddress)) return String(p.residentialAddress).trim();
+  if (isFilled(p.residentialAddress))
+    return String(p.residentialAddress).trim();
   if (isFilled(p.address)) return String(p.address).trim();
   const list = p.addresses;
   if (Array.isArray(list) && list.length > 0) {
@@ -40,7 +47,14 @@ const residentialFromProfile = (p: UserProfileApiData | null): string => {
     if (typeof first === "string") return first.trim();
     if (first && typeof first === "object") {
       const o = first as Record<string, unknown>;
-      const s = o.formattedAddress ?? o.address ?? o.street ?? o.line1 ?? o.city;
+      const s =
+        o.formattedAddress ??
+        o.address ??
+        o.addressLine ??
+        o.addressLine1 ??
+        o.street ??
+        o.line1 ??
+        o.city;
       if (typeof s === "string" && s.trim()) return s.trim();
     }
   }
@@ -68,11 +82,7 @@ const formatProfileSaveError = (err: unknown): string => {
       .filter((s): s is string => Boolean(s && String(s).trim()));
     if (parts.length > 0) return parts.join(" ");
   }
-  return (
-    ax.response?.data?.message ||
-    ax.message ||
-    "Could not save changes."
-  );
+  return ax.response?.data?.message || ax.message || "Could not save changes.";
 };
 
 type EditField =
@@ -156,7 +166,9 @@ const transactionStatusClass: Record<TransactionStatus, string> = {
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
   const reduxUser = useSelector((state: RootState) => state.auth.user);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfileApiData | null>(null);
@@ -226,6 +238,31 @@ const Profile: React.FC = () => {
   };
 
   const closeEditor = () => setEditField(null);
+
+  const handleCancelEdit = () => {
+    if (!profile) {
+      closeEditor();
+      return;
+    }
+
+    if (editField === "legalName") {
+      setDraftLegal(legalDisplay(profile) || "");
+    } else if (editField === "preferredFirstName") {
+      setDraftPreferred(profile.preferredFirstName?.trim() ?? "");
+    } else if (editField === "phoneNumber") {
+      setDraftPhone(profile.phoneNumber?.trim() ?? "");
+    } else if (editField === "email") {
+      setDraftEmail(profile.email?.trim() ?? "");
+    } else if (editField === "residentialAddress") {
+      setDraftResidential(residentialFromProfile(profile));
+    } else if (editField === "emergencyContact") {
+      setDraftEcName(profile.emergencyContact?.name?.trim() ?? "");
+      setDraftEcEmail(profile.emergencyContact?.email?.trim() ?? "");
+      setDraftEcPhone(profile.emergencyContact?.phoneNumber?.trim() ?? "");
+    }
+
+    closeEditor();
+  };
 
   useEffect(() => {
     if (!editField) return;
@@ -326,7 +363,7 @@ const Profile: React.FC = () => {
   const menuItems = [
     {
       label: "Personal Information",
-      icon: Settings,
+      icon: settingsIcon,
       panel: "personalInfo" as const,
       onClick: showPersonalInfo,
     },
@@ -338,19 +375,19 @@ const Profile: React.FC = () => {
     },
     {
       label: "Privacy Policy",
-      icon: ShieldCheck,
+      icon: privacyicon,
       panel: null,
       onClick: () => navigate("/trust-safety"),
     },
     {
       label: "Terms & Conditions",
-      icon: FileText,
+      icon: termsicon,
       panel: null,
       onClick: () => navigate("/trust-safety"),
     },
     {
       label: "Transaction History",
-      icon: History,
+      icon: transactionicon,
       panel: "transactionHistory" as const,
       onClick: showTransactionHistory,
     },
@@ -434,296 +471,322 @@ const Profile: React.FC = () => {
   }, [profile, reduxUser?.email]);
 
   const cardBtn =
-  "shrink-0 text-[22px] font-medium leading-[100%] tracking-normal text-[#389131] underline decoration-solid hover:text-[#2f7a2a]";
+    "shrink-0 text-[13px] font-medium leading-[100%] tracking-normal text-[#389131] underline decoration-solid hover:text-[#2f7a2a]";
 
   const inputEditClass =
-  "h-[44px] w-full rounded-[2px] border border-black bg-white px-4 text-[14px] text-black outline-none";
-const inputEmergencyFieldClass =
-  "w-full rounded-sm border border-black bg-white px-3 py-2.5 text-[14px] text-gray-900 outline-none focus:ring-1 focus:ring-black/20";
+    "h-[44px] w-full rounded-[2px] border border-black bg-white px-4 text-[14px] leading-[44px] text-black outline-none";
+  const inputEmergencyFieldClass =
+    "w-full rounded-sm border border-black bg-white px-3 py-2.5 text-[14px] text-gray-900 outline-none focus:ring-1 focus:ring-black/20";
 
-const profileCardClass =
-  "flex h-[71px] w-full max-w-[539px] shrink-0 items-center justify-between rounded-[3px] border border-[#00000042] bg-white px-4 text-left transition-colors hover:bg-[#fafafa] lg:w-[539px]";
+  const profileCardClass =
+    "flex h-[71px] w-full max-w-[539px] shrink-0 items-center justify-between rounded-[3px] border border-[#00000042] bg-white px-4 text-left transition-colors hover:bg-[#fafafa] lg:w-[539px]";
 
   const personalCardClass =
-  "min-h-[71px] w-full max-w-[593px] rounded-[2px] border border-[#D9D9D9] bg-white px-5 py-4 lg:w-[593px]";
+    "min-h-[71px] w-full max-w-[593px] rounded-[2px] border border-[#D9D9D9] bg-white px-5 py-4 lg:w-[593px]";
 
   const transactionCardClass =
     "flex min-h-[71px] w-full max-w-[593px] items-center justify-between rounded-[2px] border border-[#D9D9D9] bg-white px-5 py-4 lg:w-[593px]";
 
-return (
-  <div className="min-h-screen w-full overflow-x-hidden bg-white">
-    <div className="w-full px-[40px] py-6 sm:py-8">
-      <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+  return (
+    <div className="min-h-screen w-full overflow-x-hidden bg-white">
+      <div className="w-full px-[40px] py-6 sm:py-8">
+        <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+          {/* LEFT SIDE */}
+          <div className="flex w-full flex-col lg:max-w-[539px]">
+            <header>
+              <h1 className="text-[32px] font-medium leading-[100%] text-black mb-4">
+                Account Setting
+              </h1>
+            </header>
 
-        {/* LEFT SIDE */}
-        <div className="flex w-full flex-col lg:max-w-[539px]">
-          <header>
-            <h1 className="text-[32px] font-medium leading-[100%] text-black mb-4">
-              Account Setting
-            </h1>
-          </header>
+            <nav className="mt-6 flex flex-col gap-5">
+              {menuItems.map((item) => {
+                const Icon = item.icon as any;
+                const isActive =
+                  item.panel !== null && rightPanel === item.panel;
 
-          <nav className="mt-6 flex flex-col gap-5">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                item.panel !== null && rightPanel === item.panel;
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={item.onClick}
+                    className={`${profileCardClass} ${
+                      isActive ? " bg-[#f6fbf4]" : ""
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      {typeof Icon === "string" ? (
+                        <img
+                          src={Icon}
+                          alt={item.label}
+                          className="h-[25px] w-[25px] shrink-0 object-contain"
+                        />
+                      ) : (
+                        <Icon
+                          className="w-[25px] h-[25px] shrink-0 text-black"
+                          strokeWidth={1.75}
+                        />
+                      )}
 
-              return (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={item.onClick}
-                  className={`${profileCardClass} ${
-                    isActive ? " bg-[#f6fbf4]" : ""
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <Icon
+                      <span className="text-[24px] font-normal leading-[100%] tracking-[0px] text-black">
+                        {item.label}
+                      </span>
+                    </span>
+
+                    <ChevronRight
                       className="size-[21px] shrink-0 text-black"
                       strokeWidth={1.75}
                     />
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-                    <span className="text-2xl font-medium leading-[100%] text-black">
-                      {item.label}
-                    </span>
-                  </span>
+          {/* RIGHT SIDE */}
+          <div className="flex w-full flex-col lg:max-w-[593px]">
+            <header>
+              <h2 className="text-[32px] font-medium leading-[100%] text-black mb-4">
+                {rightPanel === "transactionHistory"
+                  ? "Transaction History"
+                  : "Personal info"}
+              </h2>
+            </header>
 
-                  <ChevronRight
-                    className="size-[21px] shrink-0 text-black"
-                    strokeWidth={1.75}
-                  />
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* RIGHT SIDE */}
-        <div className="flex w-full flex-col lg:max-w-[593px]">
-          <header>
-            <h2 className="text-[32px] font-medium leading-[100%] text-black mb-4">
-              {rightPanel === "transactionHistory"
-                ? "Transaction History"
-                : "Personal info"}
-            </h2>
-          </header>
-
-          <div className="mt-6 flex flex-col gap-5">
-            {rightPanel === "transactionHistory" ? (
-              TRANSACTIONS.map((txn) => (
-                <div key={txn.id} className={transactionCardClass}>
-                  <div className="flex min-w-0 flex-1 items-center gap-4">
-                    <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[16px] font-semibold text-black"
-                      style={{ backgroundColor: txn.avatarColor }}
-                    >
-                      {txn.avatarLetter}
-                    </span>
-                    <div className="min-w-0">
+            <div className="mt-6 flex flex-col gap-5">
+              {rightPanel === "transactionHistory" ? (
+                TRANSACTIONS.map((txn) => (
+                  <div key={txn.id} className={transactionCardClass}>
+                    <div className="flex min-w-0 flex-1 items-center gap-4">
+                      <span
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[16px] font-semibold text-black"
+                        style={{ backgroundColor: txn.avatarColor }}
+                      >
+                        {txn.avatarLetter}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-medium leading-[100%] text-black">
+                          {txn.name}
+                        </p>
+                        <p className="mt-[6px] text-[11px] font-light leading-[100%] text-black/70">
+                          Transaction ID
+                        </p>
+                        <p className="mt-[2px] truncate text-[11px] font-light leading-[100%] text-black">
+                          {txn.transactionId}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
                       <p className="text-[14px] font-medium leading-[100%] text-black">
-                        {txn.name}
+                        {txn.amount}
+                      </p>
+                      <p
+                        className={`mt-[6px] text-[12px] font-medium capitalize leading-[100%] ${transactionStatusClass[txn.status]}`}
+                      >
+                        {transactionStatusLabel[txn.status]}
                       </p>
                       <p className="mt-[6px] text-[11px] font-light leading-[100%] text-black/70">
-                        Transaction ID
-                      </p>
-                      <p className="mt-[2px] truncate text-[11px] font-light leading-[100%] text-black">
-                        {txn.transactionId}
+                        {txn.date}
                       </p>
                     </div>
                   </div>
-                  <div className="shrink-0 text-right">
-                    <p className="text-[14px] font-medium leading-[100%] text-black">
-                      {txn.amount}
-                    </p>
-                    <p
-                      className={`mt-[6px] text-[12px] font-medium capitalize leading-[100%] ${transactionStatusClass[txn.status]}`}
-                    >
-                      {transactionStatusLabel[txn.status]}
-                    </p>
-                    <p className="mt-[6px] text-[11px] font-light leading-[100%] text-black/70">
-                      {txn.date}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : loading ? (
-           
-              <div className="flex items-center justify-center py-6">
-  <div
-    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
-    aria-label="Loading"
-  />
-</div>
-            
-            ) : !isAuthenticated ? (
-              <div className={personalCardClass}>
-                <p className="text-sm text-black/70">
-                  Sign in to view and edit your personal information.
-                </p>
-              </div>
-            ) : profileLoadFailed ? (
-              <div className="w-full max-w-[593px] rounded-[3px] border border-[#00000042] bg-white p-4 lg:w-[593px]">
-                <p className="text-sm text-black">
-                  We could not load your profile from the server.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => void loadProfile()}
-                  className="mt-3 rounded-md bg-[#389131] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f7a2a]"
-                >
-                  Try again
-                </button>
-              </div>
-            ) : (
-              personalRows.map((row) => {
-                const isActive = editField === row.key;
-                const dimOthers = editField !== null && !isActive;
-
-                return (
+                ))
+              ) : loading ? (
+                <div className="flex items-center justify-center py-6">
                   <div
-                    key={row.key}
-                    className={`${personalCardClass} ${
-                      dimOthers ? "opacity-40" : "opacity-100"
-                    }`}
+                    className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
+                    aria-label="Loading"
+                  />
+                </div>
+              ) : !isAuthenticated ? (
+                <div className={personalCardClass}>
+                  <p className="text-sm text-black/70">
+                    Sign in to view and edit your personal information.
+                  </p>
+                </div>
+              ) : profileLoadFailed ? (
+                <div className="w-full max-w-[593px] rounded-[3px] border border-[#00000042] bg-white p-4 lg:w-[593px]">
+                  <p className="text-sm text-black">
+                    We could not load your profile from the server.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => void loadProfile()}
+                    className="mt-3 rounded-md bg-[#389131] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f7a2a]"
                   >
-                    {isActive ? (
-  <div className="flex min-h-[71px] flex-col justify-center">
-    <p className="text-[14px] font-semibold text-black mb-2">
-      {row.label}
-    </p>
+                    Try again
+                  </button>
+                </div>
+              ) : (
+                personalRows.map((row) => {
+                  const isActive = editField === row.key;
+                  const dimOthers = editField !== null && !isActive;
 
-    {row.key === "legalName" && (
-      <input
-        value={draftLegal}
-        onChange={(e) => setDraftLegal(e.target.value)}
-        className={inputEditClass}
-        placeholder="Legal name as on ID"
-        autoComplete="name"
-      />
-    )}
-
-    {row.key === "preferredFirstName" && (
-      <input
-        value={draftPreferred}
-        onChange={(e) => setDraftPreferred(e.target.value)}
-        className={inputEditClass}
-        placeholder="Preferred first name"
-      />
-    )}
-
-    {row.key === "phoneNumber" && (
-      <input
-        value={draftPhone}
-        onChange={(e) => setDraftPhone(e.target.value)}
-        className={inputEditClass}
-        placeholder="Phone number"
-      />
-    )}
-
-    {row.key === "email" && (
-      <input
-        type="email"
-        value={draftEmail}
-        onChange={(e) => setDraftEmail(e.target.value)}
-        className={inputEditClass}
-        placeholder="Email"
-      />
-    )}
-
-    {row.key === "residentialAddress" && (
-      <textarea
-        value={draftResidential}
-        onChange={(e) => setDraftResidential(e.target.value)}
-        rows={3}
-        className={`${inputEditClass} resize-none`}
-        placeholder="Street, city, state, ZIP"
-      />
-    )}
-
-    {row.key === "emergencyContact" && (
-      <div className="mt-2 space-y-2">
-        <input
-          value={draftEcName}
-          onChange={(e) => setDraftEcName(e.target.value)}
-          className={inputEmergencyFieldClass}
-          placeholder="Contact name"
-        />
-
-        <input
-          type="email"
-          value={draftEcEmail}
-          onChange={(e) => setDraftEcEmail(e.target.value)}
-          className={inputEmergencyFieldClass}
-          placeholder="Contact email"
-        />
-
-        <input
-          value={draftEcPhone}
-          onChange={(e) => setDraftEcPhone(e.target.value)}
-          className={inputEmergencyFieldClass}
-          placeholder="Contact phone"
-        />
-      </div>
-    )}
-
-    <button
-      type="button"
-      onClick={handleSaveField}
-      disabled={saving}
-      className="mt-3 h-[36px] w-[90px] rounded-[4px] bg-[#389131] text-[14px] font-semibold text-white hover:bg-[#2f7a2a] disabled:opacity-50"
-    >
-      {saving ? "Saving..." : "Save"}
-    </button>
-  </div>
-) : (
-                      <div className="flex h-full w-full items-center justify-between gap-3">
-                        <div className="flex min-w-0 flex-1 flex-col justify-center">
-                          <p className="text-[14px] font-medium leading-[100%] text-black">
+                  return (
+                    <div
+                      key={row.key}
+                      className={`${personalCardClass} ${
+                        dimOthers ? "opacity-40" : "opacity-100"
+                      }`}
+                    >
+                      {isActive ? (
+                        <div className="flex min-h-[71px] flex-col justify-center">
+                          <p className="text-[14px] font-semibold text-black mb-2">
                             {row.label}
                           </p>
 
-                          <p
-                            className={`mt-[6px] truncate text-[11px] font-light leading-[100%] ${
-                              row.hasData
-                                ? "text-black"
-                                : "text-black/45"
-                            }`}
-                          >
-                            {row.hasData
-                              ? row.value
-                              : row.placeholder}
-                          </p>
-                        </div>
+                          {row.key === "legalName" && (
+                            <input
+                              value={draftLegal}
+                              onChange={(e) => setDraftLegal(e.target.value)}
+                              className={inputEditClass}
+                              placeholder="Legal name as on ID"
+                              autoComplete="name"
+                            />
+                          )}
 
-                        <button
-                          type="button"
-                          onClick={() => openEditor(row.key)}
-                          className={cardBtn}
-                        >
-                          {row.hasData ? "Edit" : "Add"}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
+                          {row.key === "preferredFirstName" && (
+                            <input
+                              value={draftPreferred}
+                              onChange={(e) =>
+                                setDraftPreferred(e.target.value)
+                              }
+                              className={inputEditClass}
+                              placeholder="Preferred first name"
+                            />
+                          )}
+
+                          {row.key === "phoneNumber" && (
+                            <input
+                              value={draftPhone}
+                              onChange={(e) => setDraftPhone(e.target.value)}
+                              className={inputEditClass}
+                              placeholder="Phone number"
+                            />
+                          )}
+
+                          {row.key === "email" && (
+                            <input
+                              type="email"
+                              value={draftEmail}
+                              onChange={(e) => setDraftEmail(e.target.value)}
+                              className={inputEditClass}
+                              placeholder="Email"
+                            />
+                          )}
+
+                          {row.key === "residentialAddress" && (
+                            <textarea
+                              value={draftResidential}
+                              onChange={(e) =>
+                                setDraftResidential(e.target.value)
+                              }
+                              rows={3}
+                              className={`${inputEditClass} resize-none`}
+                              placeholder="Street, city, state, ZIP"
+                            />
+                          )}
+
+                          {row.key === "emergencyContact" && (
+                            <div className="mt-2 space-y-2">
+                              <input
+                                value={draftEcName}
+                                onChange={(e) => setDraftEcName(e.target.value)}
+                                className={inputEmergencyFieldClass}
+                                placeholder="Contact name"
+                              />
+
+                              <input
+                                type="email"
+                                value={draftEcEmail}
+                                onChange={(e) =>
+                                  setDraftEcEmail(e.target.value)
+                                }
+                                className={inputEmergencyFieldClass}
+                                placeholder="Contact email"
+                              />
+
+                              <input
+                                value={draftEcPhone}
+                                onChange={(e) =>
+                                  setDraftEcPhone(e.target.value)
+                                }
+                                className={inputEmergencyFieldClass}
+                                placeholder="Contact phone"
+                              />
+                            </div>
+                          )}
+
+                          <div className="mt-3 flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={handleCancelEdit}
+                              disabled={saving}
+                              className="h-[36px] w-[90px] rounded-[4px] bg-[#E74C3C] text-[14px] font-semibold text-white hover:bg-[#C0392B] disabled:opacity-50"
+                            >
+                              Cancel
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleSaveField}
+                              disabled={saving}
+                              className="h-[36px] w-[90px] rounded-[4px] bg-[#389131] text-[14px] font-semibold text-white hover:bg-[#2f7a2a] disabled:opacity-50"
+                            >
+                              {saving ? "Saving..." : "Save"}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-between gap-3">
+                          <div className="flex min-w-0 flex-1 flex-col justify-center">
+                            <p className="text-[14px] font-medium leading-[100%] text-black">
+                              {row.label}
+                            </p>
+
+                            <p
+                              className={`mt-[6px] truncate text-[11px] font-light leading-[100%] ${
+                                row.hasData ? "text-black" : "text-black/45"
+                              }`}
+                            >
+                              {row.hasData ? row.value : row.placeholder}
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (dimOthers) return;
+                              openEditor(row.key);
+                            }}
+                            className={`${cardBtn} ${dimOthers ? "pointer-events-none" : ""}`}
+                            disabled={dimOthers}
+                            aria-disabled={dimOthers}
+                          >
+                            {row.hasData ? "Edit" : "Add"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <LogoutConfirmModal
-        isOpen={isLogoutConfirmOpen}
-        onCancel={() => setIsLogoutConfirmOpen(false)}
-        onConfirm={() => {
-          setIsLogoutConfirmOpen(false);
-          void handleLogout();
-        }}
-      />
+        <LogoutConfirmModal
+          isOpen={isLogoutConfirmOpen}
+          onCancel={() => setIsLogoutConfirmOpen(false)}
+          onConfirm={() => {
+            setIsLogoutConfirmOpen(false);
+            void handleLogout();
+          }}
+        />
+      </div>
     </div>
-  </div>
-);}
+  );
+};
 
 export default Profile;

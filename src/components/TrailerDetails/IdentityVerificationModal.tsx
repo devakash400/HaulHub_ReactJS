@@ -43,6 +43,7 @@ export interface IdentityVerificationModalProps {
   onClose: () => void;
   onContinue: (data: IdentityVerificationData) => void;
   defaultIssuingCountryRegion?: string;
+  startAtDetails?: boolean;
 }
 
 const METHOD_META: Record<
@@ -77,8 +78,16 @@ const METHOD_META: Record<
 
 export const IdentityVerificationModal: React.FC<
   IdentityVerificationModalProps
-> = ({ isOpen, onClose, onContinue, defaultIssuingCountryRegion = "USA" }) => {
-  const [step, setStep] = useState<"method" | "details">("method");
+> = ({
+  isOpen,
+  onClose,
+  onContinue,
+  defaultIssuingCountryRegion = "USA",
+  startAtDetails = false,
+}) => {
+  const [step, setStep] = useState<"method" | "details">(
+    startAtDetails ? "details" : "method",
+  );
   const [issuingCountryRegion, setIssuingCountryRegion] = useState(
     defaultIssuingCountryRegion,
   );
@@ -203,7 +212,7 @@ export const IdentityVerificationModal: React.FC<
 
   useEffect(() => {
     if (!isOpen) return;
-    setStep("method");
+    setStep(startAtDetails ? "details" : "method");
     setIssuingCountryRegion(defaultIssuingCountryRegion);
     setOpenMethod("driving_licence");
     setDocumentNumbers({
@@ -226,7 +235,7 @@ export const IdentityVerificationModal: React.FC<
       digital_signature: null,
     });
     setDigitalSignaturePreviewUrl(null);
-  }, [isOpen, defaultIssuingCountryRegion]);
+  }, [isOpen, defaultIssuingCountryRegion, startAtDetails]);
 
   const handleMethodFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
