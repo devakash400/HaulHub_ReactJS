@@ -11,6 +11,10 @@ import {
   FileText,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+
+import privacyicon from "../../assets/images/privacypolicy.png";
+import termsicon from "../../assets/images/termscondition.png";
+import transactionicon from "../../assets/images/transactionhistory.png";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 
@@ -24,6 +28,7 @@ import {
   getUserProfile,
   resolveProfilePictureUrl,
   updateUserProfilePicture,
+  type UserProfileApiData,
 } from "../../api/userApi.ts";
 
 type ProfileUpdateErrorBody = {
@@ -56,15 +61,16 @@ const Profile: React.FC = () => {
   const dispatch = useDispatch();
 
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+    (state: RootState) => state.auth.isAuthenticated,
   );
 
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
+  const [profile, setProfile] = useState<UserProfileApiData | null>(null);
   const [profilePicturePath, setProfilePicturePath] = useState<string | null>(
-    null
+    null,
   );
 
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -73,14 +79,17 @@ const Profile: React.FC = () => {
 
   const loadProfilePicture = useCallback(async () => {
     if (!isAuthenticated) {
+      setProfile(null);
       setProfilePicturePath(null);
       return;
     }
 
     try {
       const data = await getUserProfile();
+      setProfile(data);
       setProfilePicturePath(data.profilePicture ?? null);
     } catch {
+      setProfile(null);
       setProfilePicturePath(null);
     }
   }, [isAuthenticated]);
@@ -91,9 +100,7 @@ const Profile: React.FC = () => {
 
   const profilePictureUrl = resolveProfilePictureUrl(profilePicturePath);
 
-  const handlePhotoChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     e.target.value = "";
@@ -116,7 +123,8 @@ const Profile: React.FC = () => {
   };
 
   const displayName =
-    `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "Demo";
+    profile?.fullName?.trim() ||
+    `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
 
   const initials = displayName
     .split(" ")
@@ -138,17 +146,17 @@ const Profile: React.FC = () => {
     },
     {
       label: "Privacy Policy",
-      icon: ShieldCheck,
+      icon: privacyicon,
       onClick: () => navigate("/trust-safety"),
     },
     {
       label: "Terms & Conditions",
-      icon: FileText,
+      icon: termsicon,
       onClick: () => navigate("/trust-safety"),
     },
     {
       label: "Transaction History",
-      icon: CircleDollarSign,
+      icon: transactionicon,
       onClick: () => navigate("/booking"),
     },
     {
@@ -178,7 +186,6 @@ const Profile: React.FC = () => {
   return (
     <div className="min-h-screen w-full bg-white overflow-x-hidden">
       <div className="mb-5 w-full px-[32px]">
-       
         <header className="pt-6 pb-2">
           <h1 className="text-[42px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
             Profile
@@ -186,90 +193,89 @@ const Profile: React.FC = () => {
         </header>
 
         {/* Profile Section */}
-      {/* Profile Section */}
-{/* Profile Section */}
-<section className="mt-3 flex flex-col items-center border-b border-[#D9D9D9] pb-8">
-  {/* Profile Image Wrapper */}
-  <div className="relative flex flex-col items-center">
-    
-    {/* Profile Circle */}
-    <div
-      className="rounded-full bg-[#D9D9D9] shadow-md flex items-center justify-center overflow-hidden"
-      style={{
-        width: "156px",
-        height: "156px",
-      }}
-    >
-      {profilePictureUrl ? (
-        <img
-          src={profilePictureUrl}
-          alt="Profile"
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <span
-          style={{
-            fontFamily: "Lexend",
-            fontWeight: 600,
-            fontSize: "48px",
-            lineHeight: "100%",
-            color: "#2F4A6D",
-          }}
-        >
-          {initials || "VG"}
-        </span>
-      )}
-    </div>
+        {/* Profile Section */}
+        {/* Profile Section */}
+        <section className="mt-3 flex flex-col items-center border-b border-[#D9D9D9] pb-8">
+          {/* Profile Image Wrapper */}
+          <div className="relative flex flex-col items-center">
+            {/* Profile Circle */}
+            <div
+              className="rounded-full bg-[#D9D9D9] shadow-md flex items-center justify-center overflow-hidden"
+              style={{
+                width: "156px",
+                height: "156px",
+              }}
+            >
+              {profilePictureUrl ? (
+                <img
+                  src={profilePictureUrl}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span
+                  style={{
+                    fontFamily: "Lexend",
+                    fontWeight: 600,
+                    fontSize: "48px",
+                    lineHeight: "100%",
+                    color: "#2F4A6D",
+                  }}
+                >
+                  {initials}
+                </span>
+              )}
+            </div>
 
-    {/* Camera Button */}
-    <button
-      type="button"
-      onClick={() => fileInputRef.current?.click()}
-      disabled={uploadingPhoto}
-      className="absolute flex items-center justify-center rounded-full shadow-md"
-      style={{
-        width: "42px",
-        height: "42px",
-        background: "#4A9B3D",
-        right: "-6px",
-        bottom: "42px",
-      }}
-      aria-label="Change profile photo"
-    >
-      <Camera className="w-[20px] h-[20px] text-white" />
-    </button>
+            {/* Camera Button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="absolute flex items-center justify-center rounded-full shadow-md"
+              style={{
+                width: "42px",
+                height: "42px",
+                background: "#4A9B3D",
+                right: "-6px",
+                bottom: "42px",
+              }}
+              aria-label="Change profile photo"
+            >
+              <Camera className="w-[20px] h-[20px] text-white" />
+            </button>
 
-    {/* Hidden File Input */}
-    <input
-      ref={fileInputRef}
-      type="file"
-      accept="image/*"
-      className="hidden"
-      onChange={(ev) => void handlePhotoChange(ev)}
-      disabled={uploadingPhoto}
-    />
+            {/* Hidden File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(ev) => void handlePhotoChange(ev)}
+              disabled={uploadingPhoto}
+            />
 
-    {/* Name */}
-    <p
-      className="mt-4"
-      style={{
-        fontFamily: "Lexend",
-        fontWeight: 600,
-        fontSize: "20px",
-        lineHeight: "100%",
-        color: "#000000",
-      }}
-    >
-      {displayName}
-    </p>
-  </div>
-</section>
+            {/* Name */}
+            <p
+              className="mt-4"
+              style={{
+                fontFamily: "Lexend",
+                fontWeight: 600,
+                fontSize: "20px",
+                lineHeight: "100%",
+                color: "#000000",
+              }}
+            >
+              {displayName}
+            </p>
+          </div>
+        </section>
 
         {/* Menu Items */}
         <nav className="px-3 pt-5">
           <ul className="space-y-3">
             {menuItems.map((item) => {
-              const Icon = item.icon;
+              const Icon = item.icon as any;
 
               return (
                 <li key={item.label}>
@@ -279,7 +285,15 @@ const Profile: React.FC = () => {
                     className="flex items-center justify-between w-full h-[71px] bg-white border border-[#00000042] px-5 shadow-[0px_4px_4px_0px_#00000040] hover:bg-[#fafafa] transition"
                   >
                     <div className="flex items-center gap-4">
-                      <Icon className="w-[32.86px] h-[33.45px] text-black" />
+                      {typeof Icon === "string" ? (
+                        <img
+                          src={Icon}
+                          alt={item.label}
+                          className="w-[25px] h-[25px] shrink-0 object-contain"
+                        />
+                      ) : (
+                        <Icon className="w-[25px] h-[25px] shrink-0 text-black" />
+                      )}
 
                       <span className="text-[24px] leading-[100%] font-normal text-black tracking-[0px] font-['Lexend']">
                         {item.label}

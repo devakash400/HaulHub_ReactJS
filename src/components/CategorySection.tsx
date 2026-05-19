@@ -12,6 +12,7 @@ import {
 import { addWishlistItem, deleteWishlistItem } from "../api/wishlistApi.ts";
 
 import { WishlistLoginModal } from "./TrailerDetails/WishlistLoginModal.tsx";
+import { Heart } from "lucide-react";
 
 type CategoryItem = {
   id: string | number;
@@ -406,36 +407,27 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     aria-label={
                       isWishlisted ? "Remove from wishlist" : "Add to wishlist"
                     }
-                    className={`
+                    className="
                       absolute
                       top-3
                       right-3
-                      w-8
-                      h-8
+                      w-9
+                      h-9
+                      rounded-full
+                      bg-white
+                      border
+                      border-[#E6E6E6]
+                      shadow-md
                       flex
                       items-center
                       justify-center
-                      rounded-full
-                      transition-colors
-                      duration-200
-                      shadow-sm
-                      ${
-                        isWishlisted
-                          ? "bg-red-500"
-                          : "bg-white border border-gray-200"
-                      }
-                    `}
+                    "
                   >
-                    <img
-                      src={images.Wishlist}
-                      alt={isWishlisted ? "Wishlisted" : "Wishlist"}
-                      className={`
-                        w-[18px]
-                        h-[18px]
-                        transition-transform
-                        duration-300
-                        ${isWishlisted ? "scale-110 invert" : "scale-100"}
-                      `}
+                    <Heart
+                      size={18}
+                      strokeWidth={2.2}
+                      color={isWishlisted ? "#E03A3A" : "#8B8B8B"}
+                      fill={isWishlisted ? "#E03A3A" : "none"}
                     />
                   </button>
                 </div>

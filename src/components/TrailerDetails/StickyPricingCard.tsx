@@ -66,11 +66,32 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   }, [isAuthenticated]);
 
   const handleReserve = () => {
+    const dates =
+      checkIn && checkOut
+        ? `${checkIn} – ${checkOut}`
+        : checkIn || checkOut
+          ? `${checkIn || ""} – ${checkOut || ""}`
+          : "";
+
+    setPendingBookingState({
+      title: trailer?.title ?? "Gooseneck Trailer - Texas, USA",
+      subtitle:
+        trailer?.subtitle ??
+        "25FT Flatbed · Dual Axle · Industrial Steel Frame",
+      image: trailer?.image ?? "",
+      totalPrice: price,
+      dates: dates || "",
+      checkIn: checkIn,
+      checkOut: checkOut,
+    });
+
     if (!isAuthenticated) {
       setIsLoginOpen(true);
       return;
     }
-    setShowRentalDatesModal(true);
+
+    // Authenticated users: skip the rental dates modal and go straight to identity verification
+    setShowIdentityModal(true);
   };
 
   const handleRentalDatesNext = (pickupDate: string, returnDate: string) => {
@@ -164,7 +185,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       const trailorFromApi =
         roleToTrailor(apiUser.role) ??
         roleToTrailor(
-          Array.isArray(apiUser.trailor) ? apiUser.trailor[0] : apiUser.trailor
+          Array.isArray(apiUser.trailor) ? apiUser.trailor[0] : apiUser.trailor,
         );
       const normalizedTrailor = trailorFromApi ?? data.trailor;
 
@@ -187,7 +208,8 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       if (normalizedTrailor === "Owner") {
         navigate("/");
       } else {
-        setShowRentalDatesModal(true);
+        // After sign-up, proceed to identity verification (skip rental dates modal)
+        setShowIdentityModal(true);
       }
     } catch (err: any) {
       // eslint-disable-next-line no-console
@@ -200,9 +222,9 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
 
   return (
     <>
-    <div className="w-full min-w-0 self-start flex justify-center">
-      <div
-        className="
+      <div className="w-full min-w-0 self-start flex justify-center">
+        <div
+          className="
       w-full max-w-[403px]
       bg-[#F8F8F8]
       border border-[#D7D7D7]
@@ -210,10 +232,10 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       shadow-[0px_2px_8px_rgba(0,0,0,0.12)]
       p-[14px]
     "
-      >
-        {/* Top Tag */}
-        <div
-          className="
+        >
+          {/* Top Tag */}
+          <div
+            className="
     w-full h-[46px]
     border border-[#D8D8D8]
     rounded-[4px]
@@ -224,212 +246,177 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     font-light
     leading-[100%]
   "
-          style={{
-            fontFamily: "Lexend",
-            fontSize: "16px",
-            fontStyle: "normal",
-            letterSpacing: "0%",
-            verticalAlign: "middle",
-          }}
-        >
-          Frequently Ordered
-        </div>
-
-        {/* Price */}
-        <div className="mt-5 flex items-end gap-2">
-          <h2
-            className="text-black font-normal leading-[100%]"
             style={{
               fontFamily: "Lexend",
-              fontSize: "27px",
+              fontSize: "16px",
               fontStyle: "normal",
               letterSpacing: "0%",
               verticalAlign: "middle",
             }}
           >
-            <span className="border-b-2 border-[#E65C4F] pb-[2px]">
-              {price}
-            </span>
-          </h2>
-
-          <span
-            className="mb-[2px] text-black font-normal leading-[100%]"
-            style={{
-              fontFamily: "Lexend",
-              fontSize: "20px",
-              fontStyle: "normal",
-              letterSpacing: "0%",
-              verticalAlign: "middle",
-            }}
-          >
-            per unit
-          </span>
-        </div>
-
-        {/* Date Section */}
-        <div className="mt-5 border-t border-[#D9D9D9] border-b border-[#D9D9D9]">
-          <div className="grid grid-cols-2">
-            {/* Check In */}
-            <div className="relative px-4 py-4 border-r border-[#D9D9D9]">
-              <p
-                className="uppercase text-black font-normal leading-[100%]"
-                style={{
-                  fontFamily: "Lexend",
-                  fontSize: "12px",
-                  fontStyle: "normal",
-                  letterSpacing: "0%",
-                  verticalAlign: "middle",
-                }}
-              >
-                Check-in
-              </p>
-
-              <input
-                type="date"
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
-                className="
-              mt-1 w-full
-              bg-transparent
-              text-[14px]
-              text-[#8C8C8C]
-              focus:outline-none
-              appearance-none
-              [&::-webkit-calendar-picker-indicator]:opacity-100
-              [&::-webkit-calendar-picker-indicator]:cursor-pointer
-            "
-              />
-
-            
-               
-            </div>
-
-            {/* Check Out */}
-            <div className="relative px-4 py-4">
-              <p
-                className="uppercase text-black font-normal leading-[100%]"
-                style={{
-                  fontFamily: "Lexend",
-                  fontSize: "12px",
-                  fontStyle: "normal",
-                  letterSpacing: "0%",
-                  verticalAlign: "middle",
-                }}
-              >
-                Check-Out
-              </p>
-
-              <input
-                type="date"
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
-                className="
-              mt-1 w-full
-              bg-transparent
-              text-[14px]
-              text-[#8C8C8C]
-              focus:outline-none
-              appearance-none
-              [&::-webkit-calendar-picker-indicator]:opacity-100
-              [&::-webkit-calendar-picker-indicator]:cursor-pointer
-            "
-              />
-
-             
-            </div>
+            Frequently Ordered
           </div>
 
-          {/* Dispatch */}
-          <div className="relative px-4 py-4 border-t border-[#D9D9D9]">
-            <p
-              className="uppercase text-black font-normal leading-[100%]"
+          {/* Price */}
+          <div className="mt-5 flex items-end gap-2">
+            <h2
+              className="text-black font-normal leading-[100%]"
               style={{
                 fontFamily: "Lexend",
-                fontSize: "12px",
+                fontSize: "27px",
                 fontStyle: "normal",
                 letterSpacing: "0%",
                 verticalAlign: "middle",
               }}
             >
-              Estimated Dispatch:
-            </p>
+              <span className="border-b-2 border-[#E65C4F] pb-[2px]">
+                {price}
+              </span>
+            </h2>
 
-            <input
-              type="time"
-              value={dispatcher}
-              onChange={(e) => setDispatcher(e.target.value)}
-              className="
-            mt-1 w-full
-            bg-transparent
-            text-[14px]
-            text-[#8C8C8C]
-            focus:outline-none
-            appearance-none
-            [&::-webkit-calendar-picker-indicator]:opacity-100
-            [&::-webkit-calendar-picker-indicator]:cursor-pointer
-          "
-            />
-
-           
+            <span
+              className="mb-[2px] text-black font-normal leading-[100%]"
+              style={{
+                fontFamily: "Lexend",
+                fontSize: "20px",
+                fontStyle: "normal",
+                letterSpacing: "0%",
+                verticalAlign: "middle",
+              }}
+            >
+              per unit
+            </span>
           </div>
+
+          {/* Date Section */}
+          <div className="mt-5 border-t border-[#D9D9D9] border-b border-[#D9D9D9]">
+            <div className="grid grid-cols-2">
+              {/* Check In */}
+              <div className="relative px-4 py-4 border-r border-[#D9D9D9]">
+                <p
+                  className="uppercase text-black font-normal leading-[100%]"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontSize: "12px",
+                    fontStyle: "normal",
+                    letterSpacing: "0%",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  Pick Up Date
+                </p>
+
+                <input
+                  type="date"
+                  value={checkIn}
+                  onChange={(e) => setCheckIn(e.target.value)}
+                  className="
+              mt-1 w-full
+              bg-transparent
+              text-[14px]
+              text-[#8C8C8C]
+              focus:outline-none
+              appearance-none
+              [&::-webkit-calendar-picker-indicator]:opacity-100
+              [&::-webkit-calendar-picker-indicator]:cursor-pointer
+            "
+                />
+              </div>
+
+              {/* Check Out */}
+              <div className="relative px-4 py-4">
+                <p
+                  className="uppercase text-black font-normal leading-[100%]"
+                  style={{
+                    fontFamily: "Lexend",
+                    fontSize: "12px",
+                    fontStyle: "normal",
+                    letterSpacing: "0%",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  Return Date
+                </p>
+
+                <input
+                  type="date"
+                  value={checkOut}
+                  onChange={(e) => setCheckOut(e.target.value)}
+                  className="
+              mt-1 w-full
+              bg-transparent
+              text-[14px]
+              text-[#8C8C8C]
+              focus:outline-none
+              appearance-none
+              [&::-webkit-calendar-picker-indicator]:opacity-100
+              [&::-webkit-calendar-picker-indicator]:cursor-pointer
+            "
+                />
+              </div>
+            </div>
+
+            {/* Dispatch */}
+          </div>
+
+          {/* Button */}
+          <button
+            type="button"
+            onClick={handleReserve}
+            className="w-full mt-4 h-[53px] flex items-center justify-center text-white hover:opacity-90 transition"
+            style={{
+              background: "#389131",
+              paddingTop: "12px",
+              paddingRight: "98px",
+              paddingBottom: "12px",
+              paddingLeft: "98px",
+              gap: "10px",
+              fontFamily: "Lexend",
+              fontWeight: 500,
+              fontSize: "22px",
+              fontStyle: "normal",
+              lineHeight: "100%",
+              letterSpacing: "0%",
+              verticalAlign: "middle",
+            }}
+          >
+            <span>Reserve</span>
+          </button>
         </div>
-
-        {/* Button */}
-        <button
-          type="button"
-          onClick={handleReserve}
-          className="w-full h-[53px] flex items-center justify-center text-white hover:opacity-90 transition"
-          style={{
-            background: "#389131",
-            paddingTop: "12px",
-            paddingRight: "98px",
-            paddingBottom: "12px",
-            paddingLeft: "98px",
-            gap: "10px",
-            fontFamily: "Lexend",
-            fontWeight: 500,
-            fontSize: "22px",
-            fontStyle: "normal",
-            lineHeight: "100%",
-            letterSpacing: "0%",
-            verticalAlign: "middle",
-          }}
-        >
-          <span>Reserve</span>
-        </button>
       </div>
-    </div>
 
-    <LoginModal
-      isOpen={isLoginOpen && !isAuthenticated}
-      onClose={() => setIsLoginOpen(false)}
-      onSuccess={() => {
-        setIsLoginOpen(false);
-        setShowRentalDatesModal(true);
-      }}
-      onOpenSignUp={() => {
-        setIsLoginOpen(false);
-        setIsSignUpOpen(true);
-      }}
-    />
-    <SignUpModal
-      isOpen={isSignUpOpen}
-      onClose={() => setIsSignUpOpen(false)}
-      onSubmit={handleSignUpSubmit}
-    />
-    <SelectRentalDatesModal
-      isOpen={showRentalDatesModal}
-      onClose={() => setShowRentalDatesModal(false)}
-      onNext={handleRentalDatesNext}
-    />
-    <IdentityVerificationModal
-      isOpen={showIdentityModal}
-      onClose={() => {
-        setShowIdentityModal(false);
-        setPendingBookingState(null);
-      }}
-      onContinue={handleIdentityContinue}
-    />
+      <LoginModal
+        isOpen={isLoginOpen && !isAuthenticated}
+        onClose={() => setIsLoginOpen(false)}
+        onSuccess={() => {
+          setIsLoginOpen(false);
+          // After login, continue booking flow: open identity verification
+          setShowIdentityModal(true);
+        }}
+        onOpenSignUp={() => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(true);
+        }}
+      />
+      <SignUpModal
+        isOpen={isSignUpOpen}
+        onClose={() => setIsSignUpOpen(false)}
+        onSubmit={handleSignUpSubmit}
+      />
+      <SelectRentalDatesModal
+        isOpen={showRentalDatesModal}
+        onClose={() => setShowRentalDatesModal(false)}
+        onNext={handleRentalDatesNext}
+      />
+      <IdentityVerificationModal
+        isOpen={showIdentityModal}
+        onClose={() => {
+          setShowIdentityModal(false);
+          setPendingBookingState(null);
+        }}
+        onContinue={handleIdentityContinue}
+        startAtDetails={true}
+      />
     </>
   );
 };

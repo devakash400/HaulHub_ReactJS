@@ -8,6 +8,7 @@ export interface WishlistItem {
   id: string;
   title: string;
   subtitle?: string;
+  description?: string;
   imageUrl: string;
 }
 
@@ -35,7 +36,7 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
@@ -142,9 +143,9 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                     <h3 className="text-sm sm:text-base font-semibold text-gray-900">
                       {item.title}
                     </h3>
-                    {item.subtitle && (
+                    {(item.subtitle || item.description) && (
                       <p className="mt-1 text-xs sm:text-sm text-gray-600">
-                        {item.subtitle}
+                        {item.subtitle ?? item.description}
                       </p>
                     )}
                   </div>
@@ -157,7 +158,8 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                 No items saved yet
               </p>
               <p className="text-sm text-gray-600 max-w-sm">
-                Tap the heart on a trailer to save it to your wishlist and see it here.
+                Tap the heart on a trailer to save it to your wishlist and see
+                it here.
               </p>
             </div>
           )}
@@ -175,4 +177,3 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
     </div>
   );
 };
-

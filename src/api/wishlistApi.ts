@@ -41,7 +41,8 @@ const normalizeWishlistItem = (item: ApiWishlistEntry): WishlistItem => {
   const price = trailer?.pricePerDay ?? trailer?.price ?? undefined;
   const subtitle = price !== undefined
     ? `$${price}/day`
-    : (item.subtitle || item.description || undefined);
+    : item.subtitle ?? undefined;
+  const description = trailer?.description ?? item.description ?? undefined;
 
   const imageUrl = trailer?.profilePicture ?? (trailer?.images && trailer.images[0]) ?? item.imageUrl ?? item.image ?? item.thumbnail ?? "";
 
@@ -49,6 +50,7 @@ const normalizeWishlistItem = (item: ApiWishlistEntry): WishlistItem => {
     id,
     title,
     subtitle,
+    description,
     imageUrl,
   };
 };
