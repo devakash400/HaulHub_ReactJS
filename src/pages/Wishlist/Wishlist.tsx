@@ -1,30 +1,83 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 import { WishlistItem } from "../../components/TrailerDetails/WishlistModal.tsx";
 import { RootState } from "../../store/index.ts";
-import { toggleWishlistItem, clearWishlist } from "../../store/wishlistSlice.ts";
+import {
+  toggleWishlistItem,
+  clearWishlist,
+  setWishlist,
+  removeWishlistItem,
+} from "../../store/wishlistSlice.ts";
+import { fetchWishlist, deleteWishlistItem } from "../../api/wishlistApi.ts";
 import { images } from "../../assets/images/index.ts";
 
 const Wishlist: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const items = useSelector<RootState, WishlistItem[]>(
-    (state) => state.wishlist.items
+    (state) => state.wishlist.items,
+  );
+  const isAuthenticated = useSelector<RootState, boolean>(
+    (state) => state.auth.isAuthenticated,
   );
 
-  const handleToggleItem = (item: WishlistItem) => {
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let cancelled = false;
+
+    const loadWishlist = async () => {
+      try {
+        const wishlist = await fetchWishlist(1, 20);
+        if (!cancelled) {
+          dispatch(setWishlist(wishlist));
+        }
+      } catch (error) {
+        console.error("Failed to load wishlist", error);
+      }
+    };
+
+    loadWishlist();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, isAuthenticated]);
+
+  const handleToggleItem = async (item: WishlistItem) => {
+    if (isAuthenticated) {
+      try {
+        await deleteWishlistItem(String(item.id));
+        dispatch(removeWishlistItem(item.id));
+        toast.success("Removed from wishlist");
+      } catch (error) {
+        toast.error("Could not remove item from wishlist.");
+      }
+      return;
+    }
+
     dispatch(
       toggleWishlistItem({
         id: item.id,
         title: item.title,
         subtitle: item.subtitle,
         imageUrl: item.imageUrl,
-      })
+      }),
     );
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
+    if (isAuthenticated) {
+      try {
+        await Promise.all(
+          items.map((item) => deleteWishlistItem(String(item.id))),
+        );
+      } catch (error) {
+        toast.error("Could not clear wishlist from server.");
+      }
+    }
     dispatch(clearWishlist());
   };
 
@@ -39,8 +92,8 @@ const Wishlist: React.FC = () => {
               Wishlist
             </h1>
             <p className="mt-1 text-sm text-gray-600 max-w-xl">
-              Save trailers you love and quickly compare options when you&apos;re
-              ready to book.
+              Save trailers you love and quickly compare options when
+              you&apos;re ready to book.
             </p>
           </div>
 
@@ -142,4 +195,3 @@ const Wishlist: React.FC = () => {
 };
 
 export default Wishlist;
-

@@ -32,8 +32,13 @@ setSessionExpiredHandler(() => {
   toast.error("Your session has expired. Please sign in again.");
   window.sessionStorage.setItem("openLoginAfterLogout", "1");
 
-  if (window.location.pathname !== "/login") {
-    window.location.assign("/login");
+  // Open login modal without changing the current route
+  try {
+    window.dispatchEvent(new CustomEvent("openAuthModal", { detail: "login" }));
+  } catch (e) {
+    // fallback
+    // @ts-ignore
+    window.__OPEN_AUTH_MODAL__ = "login";
   }
 });
 

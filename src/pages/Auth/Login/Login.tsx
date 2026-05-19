@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, MouseEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { images } from "../../../assets/images/index.ts";
 import { Eye, EyeOff, Mail, Smartphone, ChevronDown } from "lucide-react";
@@ -22,6 +23,7 @@ type LoginModalProps = {
   onClose: () => void;
   onSuccess: () => void;
   onOpenSignUp?: () => void;
+  initialStep?: Step;
 };
 
 type Step = "email" | "password" | "reset" | "otp" | "newPassword";
@@ -116,6 +118,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   onClose,
   onSuccess,
   onOpenSignUp,
+  initialStep,
 }) => {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(
@@ -126,7 +129,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
     COUNTRY_OPTIONS[0],
   );
-  const [step, setStep] = useState<Step>("email");
+  const [step, setStep] = useState<Step>(initialStep ?? "email");
   const [password, setPassword] = useState("");
   const [loginTrailor, setLoginTrailor] = useState<"Renter" | "Owner">(
     "Renter",
@@ -230,6 +233,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
     event.stopPropagation();
   };
 
+  const navigate = useNavigate();
+
   const goBack = () => {
     if (step === "password") setStep("email");
     else if (step === "reset") setStep("password");
@@ -259,11 +264,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
         const exists =
           res &&
-            typeof res === "object" &&
-            "data" in res &&
-            (res as any).data &&
-            typeof (res as any).data === "object" &&
-            "exists" in (res as any).data
+          typeof res === "object" &&
+          "data" in res &&
+          (res as any).data &&
+          typeof (res as any).data === "object" &&
+          "exists" in (res as any).data
             ? Boolean((res as any).data.exists)
             : false;
 
@@ -286,11 +291,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
         const exists =
           res &&
-            typeof res === "object" &&
-            "data" in res &&
-            (res as any).data &&
-            typeof (res as any).data === "object" &&
-            "exists" in (res as any).data
+          typeof res === "object" &&
+          "data" in res &&
+          (res as any).data &&
+          typeof (res as any).data === "object" &&
+          "exists" in (res as any).data
             ? Boolean((res as any).data.exists)
             : false;
 
@@ -414,11 +419,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   const handleOpenReset = () => {
-    setStep("reset");
-    setResetEmail(email.trim());
-    setResetPhone("");
-    setOtp("");
-    setOtpError(null);
+    // Navigate to the dedicated reset-password route so the URL reflects the flow
+    navigate("/reset-password");
   };
 
   /** Static forgot-password flow â€” no API; Continue opens OTP step. */
@@ -559,8 +561,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
         />
 
         <div
-          className={`px-[18px] pb-3 flex-1 overflow-y-auto ${step === "email" ? "pt-6" : "pt-3"
-            }`}
+          className={`px-[18px] pb-3 flex-1 overflow-y-auto ${
+            step === "email" ? "pt-6" : "pt-3"
+          }`}
         >
           {step === "email" && (
             <div>
@@ -710,10 +713,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 disabled={
                   !isEmailFilled || !isIdentifierValid || isCheckingEmail
                 }
-                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${isEmailFilled && isIdentifierValid && !isCheckingEmail
-                  ? "bg-[#389131] text-white"
-                  : "text-white cursor-not-allowed"
-                  }`}
+                className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold ${
+                  isEmailFilled && isIdentifierValid && !isCheckingEmail
+                    ? "bg-[#389131] text-white"
+                    : "text-white cursor-not-allowed"
+                }`}
                 style={{
                   backgroundColor:
                     isEmailFilled && isIdentifierValid && !isCheckingEmail
@@ -840,7 +844,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 Don&apos;t have an account?{" "}
                 <button
                   type="button"
-                  onClick={onOpenSignUp}
+                  onClick={() => navigate("/signup")}
                   className="cursor-pointer text-[#389131] underline"
                   style={{
                     fontFamily: "Lexend",
@@ -1162,8 +1166,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
               </div>
 
               <div>
-                <label className="block mb-2 font-['Lexend'] font-normal 
-                text-[14px] leading-[100%] tracking-[0%] text-black">
+                <label
+                  className="block mb-2 font-['Lexend'] font-normal 
+                text-[14px] leading-[100%] tracking-[0%] text-black"
+                >
                   Email ID <span className="text-red-500">*</span>
                 </label>
 
@@ -1275,33 +1281,41 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   aria-label="Toggle password visibility"
                 >
-                  {showNewPwd ? (<Eye className="w-5 h-5" aria-hidden />
-
+                  {showNewPwd ? (
+                    <Eye className="w-5 h-5" aria-hidden />
                   ) : (
                     <EyeOff className="w-5 h-5" aria-hidden />
                   )}
                 </button>
               </div>
-              {newPasswordTouched && newPassword.trim().length > 0 && !isNewPasswordValid && (
-                <p className="mt-2 font-lexend font-normal text-[12px] leading-[1.3] tracking-[0em] text-red-500">
-                  {!newPasswordRules.hasMinLength
-                    ? "Password must be at least 8 characters"
-                    : (() => {
-                      const missing = [];
-                      if (!newPasswordRules.hasUppercase) missing.push("uppercase");
-                      if (!newPasswordRules.hasLowercase) missing.push("lowercase");
-                      if (!newPasswordRules.hasNumber) missing.push("numbers");
-                      if (!newPasswordRules.hasSpecial) missing.push("special characters");
-                      if (missing.length === 1) return `Password must contain ${missing[0]}`;
-                      if (missing.length === 2) return `Password must contain ${missing[0]} and ${missing[1]}`;
-                      if (missing.length > 2) {
-                        const last = missing.pop();
-                        return `Password must contain ${missing.join(", ")}, and ${last}`;
-                      }
-                      return "";
-                    })()}
-                </p>
-              )}
+              {newPasswordTouched &&
+                newPassword.trim().length > 0 &&
+                !isNewPasswordValid && (
+                  <p className="mt-2 font-lexend font-normal text-[12px] leading-[1.3] tracking-[0em] text-red-500">
+                    {!newPasswordRules.hasMinLength
+                      ? "Password must be at least 8 characters"
+                      : (() => {
+                          const missing = [];
+                          if (!newPasswordRules.hasUppercase)
+                            missing.push("uppercase");
+                          if (!newPasswordRules.hasLowercase)
+                            missing.push("lowercase");
+                          if (!newPasswordRules.hasNumber)
+                            missing.push("numbers");
+                          if (!newPasswordRules.hasSpecial)
+                            missing.push("special characters");
+                          if (missing.length === 1)
+                            return `Password must contain ${missing[0]}`;
+                          if (missing.length === 2)
+                            return `Password must contain ${missing[0]} and ${missing[1]}`;
+                          if (missing.length > 2) {
+                            const last = missing.pop();
+                            return `Password must contain ${missing.join(", ")}, and ${last}`;
+                          }
+                          return "";
+                        })()}
+                  </p>
+                )}
               <label className="mt-5 block mb-2 font-['Lexend'] text-[17px] font-normal leading-[100%] text-black">
                 Confirm New Password{" "}
                 <span className="font-['Lexend'] text-[17px] font-normal leading-[100%] text-[#FF0000]">
@@ -1324,15 +1338,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 >
                   {showConfirmPwd ? (
                     <Eye className="w-5 h-5" aria-hidden />
-
-
                   ) : (
                     <EyeOff className="w-5 h-5" aria-hidden />
-
                   )}
                 </button>
               </div>
-
               {confirmNewPassword.length > 0 && !passwordsMatch && (
                 <p
                   className="text-[12px] font-light 
@@ -1440,7 +1450,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 >
                   Please enter the OTP sent to
                   <br />
-
                   <span
                     style={{
                       display: "inline-block",
@@ -1472,7 +1481,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <input
                   value={otp}
                   onChange={(e) => {
-                    const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    const onlyDigits = e.target.value
+                      .replace(/\D/g, "")
+                      .slice(0, 6);
                     setOtp(onlyDigits);
                     setOtpError(null);
                   }}

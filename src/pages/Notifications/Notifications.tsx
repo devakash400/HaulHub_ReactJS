@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import NotificationCard from "../../components/NotificationCard.tsx";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { RootState } from "../../store";
 import { toast } from "react-toastify";
 import {
@@ -11,26 +11,27 @@ import {
 
 const Notifications: React.FC = () => {
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+    (state: RootState) => state.auth.isAuthenticated,
   );
   const user = useSelector((state: RootState) => state.auth.user);
   const userType = useSelector((state: RootState) => state.auth.userType);
   const isOwner =
     isAuthenticated && (user?.trailor === "Owner" || userType === "Owner");
   const ownerRequests = useSelector(
-    (state: RootState) => state.notifications.ownerRequests
+    (state: RootState) => state.notifications.ownerRequests,
   );
   const renterNotifications = useSelector(
-    (state: RootState) => state.notifications.renterNotifications
+    (state: RootState) => state.notifications.renterNotifications,
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login", { replace: true });
+      navigate("/login", { state: { backgroundLocation: location } });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, location, navigate]);
 
   const handleAccept = (id: number) => {
     const selected = ownerRequests.find((n) => n.id === id);
@@ -74,7 +75,9 @@ const Notifications: React.FC = () => {
         {isOwner ? (
           <div className="space-y-4">
             <div className="rounded-xl border border-gray-200 bg-[#F9F8F3] px-4 py-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-800">Order Status</p>
+              <p className="text-sm font-semibold text-gray-800">
+                Order Status
+              </p>
               <span
                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                   ownerRequests.length > 0
@@ -122,8 +125,8 @@ const Notifications: React.FC = () => {
                       Owner {notification.status.toLowerCase()} your order
                     </p>
                     <p className="mt-1 text-sm text-gray-700">
-                      Your booking request for {notification.trailerTitle} (Model{" "}
-                      {notification.trailerModel}) has been{" "}
+                      Your booking request for {notification.trailerTitle}{" "}
+                      (Model {notification.trailerModel}) has been{" "}
                       {notification.status.toLowerCase()}.
                     </p>
                     <p className="mt-2 text-xs font-medium text-gray-500">
@@ -149,7 +152,7 @@ const Notifications: React.FC = () => {
                       navigate(
                         notification.status === "Accepted"
                           ? "/booking"
-                          : "/notifications"
+                          : "/notifications",
                       )
                     }
                     className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors ${
@@ -179,4 +182,3 @@ const Notifications: React.FC = () => {
 };
 
 export default Notifications;
-

@@ -42,16 +42,43 @@ const RevealBlock: React.FC<RevealBlockProps> = ({ children, delayMs = 0 }) => {
   return (
     <div
       ref={blockRef}
-      className={`will-change-transform transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${visible
-        ? "opacity-100 translate-y-0 scale-100"
-        : "opacity-0 translate-y-5 scale-[0.99]"
-        }`}
+      className={`will-change-transform transition-all duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
+        visible
+          ? "opacity-100 translate-y-0 scale-100"
+          : "opacity-0 translate-y-5 scale-[0.99]"
+      }`}
       style={{ transitionDelay: `${delayMs}ms` }}
     >
       {children}
     </div>
   );
 };
+
+const LoadingCategorySection: React.FC<{ title: string }> = ({ title }) => (
+  <section aria-label={title} className="w-full bg-white pt-8">
+    <div className="w-full px-[16px] sm:px-[24px] md:px-[40px]">
+      <div className="mb-5 flex items-center justify-between">
+        <div className="h-[32px] w-52 rounded-full bg-[#E5E7EB] animate-pulse" />
+        <div className="hidden md:block h-9 w-28 rounded-full bg-[#E5E7EB] animate-pulse" />
+      </div>
+
+      <div className="flex overflow-x-auto gap-4 pb-5 no-scrollbar">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={`${title}-skeleton-${index}`}
+            className="shrink-0 w-[calc((100%-12px)/2)] md:w-[calc((100%-64px)/3)] lg:w-[calc((100%-96px)/4)] 2xl:w-[calc((100%-128px)/5)]"
+          >
+            <div className="aspect-square rounded-[18px] bg-[#E5E7EB] animate-pulse" />
+            <div className="mt-3 space-y-2">
+              <div className="h-4 w-3/4 rounded-full bg-[#E5E7EB] animate-pulse" />
+              <div className="h-4 w-1/2 rounded-full bg-[#E5E7EB] animate-pulse" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -210,10 +237,11 @@ const Home: React.FC = () => {
                     </p>
                     <div className="mt-1">
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-[2px] text-[9px] font-medium ${isBookedTrailer(Number(item.id))
-                          ? "bg-gray-200 text-gray-700"
-                          : "bg-[#E7F6E6] text-[#2F7A29]"
-                          }`}
+                        className={`inline-flex items-center rounded-full px-2 py-[2px] text-[9px] font-medium ${
+                          isBookedTrailer(Number(item.id))
+                            ? "bg-gray-200 text-gray-700"
+                            : "bg-[#E7F6E6] text-[#2F7A29]"
+                        }`}
                       >
                         {isBookedTrailer(Number(item.id))
                           ? "Booked"
@@ -229,20 +257,28 @@ const Home: React.FC = () => {
       ) : (
         <>
           {listingsStillLoading ? (
-            <RevealBlock delayMs={80}>
-              <div className="flex items-center justify-center py-6">
-                <div
-                  className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
-                  aria-label="Loading"
-                />
-              </div>
-            </RevealBlock>
+            <>
+              <RevealBlock delayMs={80}>
+                <LoadingCategorySection title="Gooseneck Trailers" />
+              </RevealBlock>
+              <RevealBlock delayMs={120}>
+                <LoadingCategorySection title="Bumper Pull Trailers" />
+              </RevealBlock>
+              <RevealBlock delayMs={160}>
+                <LoadingCategorySection title="Flatbed Trailers" />
+              </RevealBlock>
+              <RevealBlock delayMs={200}>
+                <LoadingCategorySection title="Car Haulers" />
+              </RevealBlock>
+            </>
           ) : (
             <>
-              <div style={{
-                background: "#FFFFFF",
-                boxShadow: "0px 4px 4px 0px #00000040",
-              }}>
+              <div
+                style={{
+                  background: "#FFFFFF",
+                  boxShadow: "0px 4px 4px 0px #00000040",
+                }}
+              >
                 {listingsLoadError && (
                   <RevealBlock delayMs={40}>
                     <div className="px-4 pt-4 text-center text-sm text-amber-800 bg-amber-50 border-b border-amber-100">
@@ -299,7 +335,8 @@ const Home: React.FC = () => {
                       </div>
                     </RevealBlock>
                   )}
-              </div>  </>
+              </div>{" "}
+            </>
           )}
         </>
       )}

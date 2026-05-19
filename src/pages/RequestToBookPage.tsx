@@ -84,7 +84,9 @@ const RequestToBookPage: React.FC = () => {
             <BookingStepCard
               title="Log in or sign Up"
               showContinueButton
-              onContinue={() => navigate("/login")}
+              onContinue={() => {
+                navigate("/login");
+              }}
             />
             <BookingStepCard title="Add Payment method" />
             <BookingStepCard title="Review your request" />

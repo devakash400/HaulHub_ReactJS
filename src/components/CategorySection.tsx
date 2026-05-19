@@ -1,10 +1,15 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 import { images } from "../assets/images/index.ts";
 import { RootState } from "../store/index.ts";
-import { toggleWishlistItem } from "../store/wishlistSlice.ts";
+import {
+  toggleWishlistItem,
+  removeWishlistItem as removeWishlistItemAction,
+} from "../store/wishlistSlice.ts";
+import { addWishlistItem, deleteWishlistItem } from "../api/wishlistApi.ts";
 
 import { WishlistLoginModal } from "./TrailerDetails/WishlistLoginModal.tsx";
 
@@ -31,24 +36,20 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const sectionRef = useRef<HTMLElement | null>(null);
 
-  const wishlistItems = useSelector(
-    (state: RootState) => state.wishlist.items,
-  );
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.items);
 
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
 
-  const [wishlistIds, setWishlistIds] = useState<Set<string | number>>(
-    () => {
-      const ids = wishlistItems.map((w) => {
-        const num = Number(w.id);
-        return Number.isNaN(num) ? w.id : num;
-      });
+  const [wishlistIds, setWishlistIds] = useState<Set<string | number>>(() => {
+    const ids = wishlistItems.map((w) => {
+      const num = Number(w.id);
+      return Number.isNaN(num) ? w.id : num;
+    });
 
-      return new Set(ids);
-    },
-  );
+    return new Set(ids);
+  });
 
   const [wishlistLoginOpen, setWishlistLoginOpen] = useState(false);
 
@@ -129,16 +130,13 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     if (!container) return;
 
     const updateScrollButtons = () => {
-      const maxScrollLeft =
-        container.scrollWidth - container.clientWidth;
+      const maxScrollLeft = container.scrollWidth - container.clientWidth;
 
       const epsilon = 2;
 
       setCanScrollLeft(container.scrollLeft > epsilon);
 
-      setCanScrollRight(
-        container.scrollLeft < maxScrollLeft - epsilon,
-      );
+      setCanScrollRight(container.scrollLeft < maxScrollLeft - epsilon);
     };
 
     updateScrollButtons();
@@ -150,25 +148,46 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     window.addEventListener("resize", updateScrollButtons);
 
     return () => {
-      container.removeEventListener(
-        "scroll",
-        updateScrollButtons,
-      );
+      container.removeEventListener("scroll", updateScrollButtons);
 
-      window.removeEventListener(
-        "resize",
-        updateScrollButtons,
-      );
+      window.removeEventListener("resize", updateScrollButtons);
     };
   }, [items.length, cardsPerRow]);
 
-  const toggleWishlist = (item: CategoryItem) => {
+  const toggleWishlist = async (item: CategoryItem) => {
     if (!isAuthenticated) {
       setWishlistLoginOpen(true);
       return;
     }
 
     const id = item.id;
+    const wishlisted = wishlistIds.has(id);
+
+    try {
+      if (wishlisted) {
+        await deleteWishlistItem(String(id));
+        dispatch(removeWishlistItemAction(id));
+        toast.success("Removed from wishlist");
+      } else {
+        await addWishlistItem(String(id));
+        dispatch(
+          toggleWishlistItem({
+            id,
+            title: item.modelLabel,
+            subtitle: item.priceLabel,
+            imageUrl: item.image,
+          }),
+        );
+        toast.success("Added to wishlist");
+      }
+    } catch (error) {
+      toast.error(
+        wishlisted
+          ? "Could not remove item from wishlist."
+          : "Could not add item to wishlist.",
+      );
+      return;
+    }
 
     setWishlistIds((prev) => {
       const next = new Set(prev);
@@ -181,20 +200,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
       return next;
     });
-
-    dispatch(
-      toggleWishlistItem({
-        id,
-        title: item.modelLabel,
-        subtitle: item.priceLabel,
-        imageUrl: item.image,
-      }),
-    );
   };
 
-  const handleScroll = (
-    direction: "left" | "right",
-  ) => {
+  const handleScroll = (direction: "left" | "right") => {
     if (
       (direction === "left" && !canScrollLeft) ||
       (direction === "right" && !canScrollRight)
@@ -206,11 +214,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
     if (!container) return;
 
-    const firstCard =
-      container.firstElementChild as HTMLElement;
+    const firstCard = container.firstElementChild as HTMLElement;
 
-    const scrollAmount =
-      (firstCard?.offsetWidth || 300) + 32;
+    const scrollAmount = (firstCard?.offsetWidth || 300) + 32;
 
     container.scrollTo({
       left:
@@ -236,9 +242,10 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         transition-all
         duration-700
 
-        ${isSectionVisible
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-3"
+        ${
+          isSectionVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-3"
         }
       `}
     >
@@ -268,9 +275,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 className="transition-all duration-200"
                 style={{
                   opacity: !canScrollLeft ? 0.4 : 1,
-                  cursor: !canScrollLeft
-                    ? "not-allowed"
-                    : "pointer",
+                  cursor: !canScrollLeft ? "not-allowed" : "pointer",
                 }}
               >
                 <img
@@ -287,9 +292,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 className="transition-all duration-200"
                 style={{
                   opacity: !canScrollRight ? 0.4 : 1,
-                  cursor: !canScrollRight
-                    ? "not-allowed"
-                    : "pointer",
+                  cursor: !canScrollRight ? "not-allowed" : "pointer",
                 }}
               >
                 <img
@@ -312,22 +315,16 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             no-scrollbar
             w-full
 
-            ${isMobileCompact
-              ? "gap-3 pb-4"
-              : "gap-8 pb-5"
-            }
+            ${isMobileCompact ? "gap-3 pb-4" : "gap-8 pb-5"}
           `}
         >
           {items.map((item) => {
-            const isWishlisted =
-              wishlistIds.has(item.id);
+            const isWishlisted = wishlistIds.has(item.id);
 
             return (
               <article
                 key={item.id}
-                onClick={() =>
-                  navigate(`/trailer/${item.id}`)
-                }
+                onClick={() => navigate(`/trailer/${item.id}`)}
                 className={`
                   group
                   shrink-0
@@ -340,8 +337,10 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 `}
               >
                 {/* IMAGE */}
-                <div className="relative w-full
-                 aspect-square rounded-[18px] overflow-hidden">
+                <div
+                  className="relative w-full
+                 aspect-square rounded-[18px] overflow-hidden"
+                >
                   <img
                     src={item.image}
                     alt={item.modelLabel}
@@ -356,23 +355,45 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   />
 
                   {/* BADGE */}
-                  <span
-                    className="
-                      absolute
-                      top-3
-                      left-3
-                      px-3
-                      py-1
-                      rounded-[9px]
-                      bg-white
-                      text-[11px]
-                      font-medium
-                      text-black
-                      shadow
-                    "
-                  >
-                    Guest favourite
-                  </span>
+                  {!isAuthenticated && (
+                    <span
+                      className="
+      absolute
+      top-3
+      left-3
+      px-3
+      py-1
+      rounded-[9px]
+      bg-white
+      text-[11px]
+      font-medium
+      text-black
+      shadow
+    "
+                    >
+                      Guest favourite
+                    </span>
+                  )}
+
+                  {isAuthenticated && (
+                    <span
+                      className="
+      absolute
+      top-3
+      left-3
+      px-3
+      py-1
+      rounded-[9px]
+      bg-white
+      text-[11px]
+      font-medium
+      text-black
+      shadow
+    "
+                    >
+                      Favourite
+                    </span>
+                  )}
 
                   {/* WISHLIST */}
                   <button
@@ -381,7 +402,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       event.stopPropagation();
                       toggleWishlist(item);
                     }}
-                    className="
+                    aria-pressed={isWishlisted}
+                    aria-label={
+                      isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+                    }
+                    className={`
                       absolute
                       top-3
                       right-3
@@ -390,21 +415,26 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       flex
                       items-center
                       justify-center
-                    "
+                      rounded-full
+                      transition-colors
+                      duration-200
+                      shadow-sm
+                      ${
+                        isWishlisted
+                          ? "bg-red-500"
+                          : "bg-white border border-gray-200"
+                      }
+                    `}
                   >
                     <img
                       src={images.Wishlist}
-                      alt="Wishlist"
+                      alt={isWishlisted ? "Wishlisted" : "Wishlist"}
                       className={`
                         w-[18px]
                         h-[18px]
-                        transition-all
+                        transition-transform
                         duration-300
-
-                        ${isWishlisted
-                          ? "scale-110"
-                          : "scale-100"
-                        }
+                        ${isWishlisted ? "scale-110 invert" : "scale-100"}
                       `}
                     />
                   </button>
@@ -446,10 +476,10 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
       {/* LOGIN MODAL */}
       <WishlistLoginModal
         isOpen={wishlistLoginOpen}
-        onClose={() =>
-          setWishlistLoginOpen(false)
-        }
-        onLoginClick={() => navigate("/login")}
+        onClose={() => setWishlistLoginOpen(false)}
+        onLoginClick={() => {
+          navigate("/login");
+        }}
       />
     </section>
   );
