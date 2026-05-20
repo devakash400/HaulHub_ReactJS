@@ -19,6 +19,8 @@ import RequestToBookPage from "./pages/RequestToBookPage.tsx";
 import BookingScreen from "./pages/BookingScreen/BookingScreen.tsx";
 import LiabilityAgreement from "./pages/LiabilityAgreement/LiabilityAgreement.tsx";
 import PaymentReceipt from "./pages/PaymentReceipt/PaymentReceipt.tsx";
+import BookingSent from "./pages/BookingSent/BookingSent.tsx";
+import VerifyIdentity from "./pages/VerifyIdentity/VerifyIdentity.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
 import AccountSettings from "./pages/AccountSettings/AccountSettings.tsx";
 import Wishlist from "./pages/Wishlist/Wishlist.tsx";
@@ -134,6 +136,8 @@ const App: React.FC = () => {
           <Route path="/trailer/:id/reviews" element={<TrailerReviews />} />
           <Route path="/request-to-book" element={<RequestToBookPage />} />
           <Route path="/liability-agreement" element={<LiabilityAgreement />} />
+          <Route path="/verify-identity" element={<VerifyIdentity />} />
+          <Route path="/booking-sent" element={<BookingSent />} />
           <Route path="/payment-receipt" element={<PaymentReceipt />} />
           <Route path="/booking" element={<BookingScreen />} />
           <Route path="/why-choose" element={<WhyChooseHaulHub />} />

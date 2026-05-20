@@ -34,6 +34,8 @@ export type IdentityVerificationData = {
   email: string;
   phoneNumber: string;
   idDocument?: File | null;
+  drivingLicenseDocument?: File | null;
+  passportDocument?: File | null;
   /** Optional uploaded digital signature image */
   digitalSignatureFile?: File | null;
 };
@@ -44,6 +46,8 @@ export interface IdentityVerificationModalProps {
   onContinue: (data: IdentityVerificationData) => void;
   defaultIssuingCountryRegion?: string;
   startAtDetails?: boolean;
+  /** When provided, show file inputs for these document methods in the details step */
+  requiredDocuments?: MethodKey[];
 }
 
 const METHOD_META: Record<
@@ -84,6 +88,7 @@ export const IdentityVerificationModal: React.FC<
   onContinue,
   defaultIssuingCountryRegion = "USA",
   startAtDetails = false,
+  requiredDocuments,
 }) => {
   const [step, setStep] = useState<"method" | "details">(
     startAtDetails ? "details" : "method",
@@ -329,7 +334,11 @@ export const IdentityVerificationModal: React.FC<
       dateOfBirth: dateOfBirth.trim(),
       email: email.trim(),
       phoneNumber: phoneNumber.trim(),
-      idDocument,
+      // include both specific documents when available
+      idDocument: idDocument ?? methodFiles[openMethod] ?? null,
+      // Attach explicit known documents
+      drivingLicenseDocument: methodFiles.driving_licence ?? null,
+      passportDocument: methodFiles.passport ?? null,
       digitalSignatureFile: methodFiles.digital_signature ?? null,
     });
     onClose();
@@ -654,56 +663,149 @@ export const IdentityVerificationModal: React.FC<
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Upload ID Document
+                    Upload ID Document(s)
                   </label>
-                  <input
-                    ref={idDocumentInputRef}
-                    type="file"
-                    accept={idDocumentAccept}
-                    multiple={false}
-                    className="hidden"
-                    onChange={(e) => setIdDocument(e.target.files?.[0] ?? null)}
-                  />
-                  <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => idDocumentInputRef.current?.click()}
-                      className="flex-1 text-left text-sm text-gray-600 truncate"
-                    >
-                      {idDocument ? (
-                        <span className="inline-flex items-center gap-2 text-gray-800">
+                  {requiredDocuments && requiredDocuments.length > 0 ? (
+                    <div className="space-y-3">
+                      {requiredDocuments.map((docKey) => {
+                        const label =
+                          docKey === "driving_licence"
+                            ? "Driving Licence"
+                            : docKey === "passport"
+                              ? "Passport"
+                              : docKey === "liability_document"
+                                ? "Liability Document"
+                                : "Document";
+                        return (
+                          <div key={docKey}>
+                            <input
+                              id={`file-${docKey}`}
+                              type="file"
+                              accept={idDocumentAccept}
+                              multiple={false}
+                              className="hidden"
+                              onChange={(e) =>
+                                setMethodFiles((prev) => ({
+                                  ...prev,
+                                  [docKey]: e.target.files?.[0] ?? null,
+                                }))
+                              }
+                            />
+                            <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  document
+                                    .getElementById(`file-${docKey}`)
+                                    ?.click()
+                                }
+                                className="flex-1 text-left text-sm text-gray-600 truncate"
+                              >
+                                {methodFiles[docKey] ? (
+                                  <span className="inline-flex items-center gap-2 text-gray-800">
+                                    <FileText className="w-4 h-4" aria-hidden />
+                                    <span className="truncate">
+                                      {methodFiles[docKey]?.name}
+                                    </span>
+                                  </span>
+                                ) : (
+                                  `Upload ${label}`
+                                )}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  document
+                                    .getElementById(`file-${docKey}`)
+                                    ?.click()
+                                }
+                                className="shrink-0 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                              >
+                                <FileText className="w-4 h-4" aria-hidden />
+                                Choose File
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setMethodFiles((prev) => ({
+                                    ...prev,
+                                    [docKey]: null,
+                                  }))
+                                }
+                                disabled={!methodFiles[docKey]}
+                                aria-disabled={!methodFiles[docKey]}
+                                className={`shrink-0 inline-flex items-center justify-center rounded-md px-2 py-2 transition-colors ${
+                                  methodFiles[docKey]
+                                    ? "text-gray-700 hover:bg-gray-50"
+                                    : "text-gray-300 cursor-not-allowed"
+                                }`}
+                                title="Clear file"
+                              >
+                                <RotateCw className="w-5 h-5" aria-hidden />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        ref={idDocumentInputRef}
+                        type="file"
+                        accept={idDocumentAccept}
+                        multiple={false}
+                        className="hidden"
+                        onChange={(e) =>
+                          setIdDocument(e.target.files?.[0] ?? null)
+                        }
+                      />
+                      <div className="w-full border border-gray-300 rounded-lg px-3 py-2.5 flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => idDocumentInputRef.current?.click()}
+                          className="flex-1 text-left text-sm text-gray-600 truncate"
+                        >
+                          {idDocument ? (
+                            <span className="inline-flex items-center gap-2 text-gray-800">
+                              <FileText className="w-4 h-4" aria-hidden />
+                              <span className="truncate">
+                                {idDocument.name}
+                              </span>
+                            </span>
+                          ) : (
+                            "Passport/ Driver’s License / National ID"
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => idDocumentInputRef.current?.click()}
+                          className="shrink-0 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                        >
                           <FileText className="w-4 h-4" aria-hidden />
-                          <span className="truncate">{idDocument.name}</span>
-                        </span>
-                      ) : (
-                        "Passport/ Driver’s License / National ID"
-                      )}
-                    </button>
+                          Choose File
+                        </button>
 
-                    <button
-                      type="button"
-                      onClick={() => idDocumentInputRef.current?.click()}
-                      className="shrink-0 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                      <FileText className="w-4 h-4" aria-hidden />
-                      Choose File
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={clearIdDocument}
-                      disabled={!idDocument}
-                      aria-disabled={!idDocument}
-                      className={`shrink-0 inline-flex items-center justify-center rounded-md px-2 py-2 transition-colors ${
-                        idDocument
-                          ? "text-gray-700 hover:bg-gray-50"
-                          : "text-gray-300 cursor-not-allowed"
-                      }`}
-                      title="Clear file"
-                    >
-                      <RotateCw className="w-5 h-5" aria-hidden />
-                    </button>
-                  </div>
+                        <button
+                          type="button"
+                          onClick={clearIdDocument}
+                          disabled={!idDocument}
+                          aria-disabled={!idDocument}
+                          className={`shrink-0 inline-flex items-center justify-center rounded-md px-2 py-2 transition-colors ${
+                            idDocument
+                              ? "text-gray-700 hover:bg-gray-50"
+                              : "text-gray-300 cursor-not-allowed"
+                          }`}
+                          title="Clear file"
+                        >
+                          <RotateCw className="w-5 h-5" aria-hidden />
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <button
