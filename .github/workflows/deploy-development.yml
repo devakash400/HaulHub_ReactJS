@@ -1,0 +1,46 @@
+name: Deploy Frontend Demo
+
+on:
+  push:
+    branches:
+      - HAULHUB_DEV
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy frontend on VPS
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh-keyscan -p ${{ secrets.VPS_PORT }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            set -e
+
+            cd /var/www/HaulHub_ReactJS
+
+            git fetch origin HAULHUB_DEV
+            git checkout HAULHUB_DEV
+            git reset --hard origin/HAULHUB_DEV
+
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+
+            rm -rf build
+            npm run build
+
+            sudo nginx -t
+            sudo systemctl reload nginx
+
+            echo "Frontend deployed successfully"
+          EOF
