@@ -26,6 +26,7 @@ jobs:
 
             cd /var/www/HaulHub_ReactJS
 
+            git pull
             git fetch origin HAULHUB_DEV
             git checkout HAULHUB_DEV
             git reset --hard origin/HAULHUB_DEV
