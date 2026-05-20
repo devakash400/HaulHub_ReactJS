@@ -9,8 +9,8 @@ import App from "./App.tsx";
 
 import reportWebVitals from "./reportWebVitals";
 import { store } from "./store/index.ts";
-import { loadTokensFromStorage } from "./api/api.ts";
-import { logout } from "./store/authSlice.ts";
+import { loadTokensFromStorage, clearTokens } from "./api/api.ts";
+import { logout, initFromToken } from "./store/authSlice.ts";
 import {
   resetSessionExpiredGuard,
   setSessionExpiredHandler,
@@ -24,9 +24,13 @@ if (!rootElement) {
 
 // Initialize tokens from localStorage (if present) before app renders
 loadTokensFromStorage();
+// Populate Redux auth state from stored token (if any)
+store.dispatch(initFromToken(localStorage.getItem("accessToken")));
 
 setSessionExpiredHandler(() => {
   store.dispatch(logout());
+  // Ensure tokens are removed from storage when session expires
+  clearTokens();
   if (typeof window === "undefined") return;
 
   toast.error("Your session has expired. Please sign in again.");
@@ -70,7 +74,7 @@ root.render(
         </>
       </BrowserRouter>
     </Provider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 reportWebVitals();

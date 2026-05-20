@@ -39,8 +39,10 @@ const Contact: React.FC = () => {
       <div className="mx-auto w-full">
         <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:gap-6">
           {/* Left Image */}
-          <div className="w-full overflow-hidden 
-          rounded-[24px] lg:w-[46%] lg:min-w-0 shrink-0">
+          <div
+            className="w-full overflow-hidden 
+          rounded-[24px] lg:w-[46%] lg:min-w-0 shrink-0"
+          >
             <img
               src={images.Contact}
               alt="Dump trailer at dealership"
