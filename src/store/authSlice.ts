@@ -6,9 +6,7 @@ const readStoredToken = (key: "accessToken" | "refreshToken") => {
 };
 
 const decodeBase64Url = (input: string) => {
-  // JWT uses base64url, where "-" => "+" and "_" => "/"
   const base64 = input.replace(/-/g, "+").replace(/_/g, "/");
-  // Pad to multiple of 4 for atob
   const pad = base64.length % 4 === 0 ? "" : "=".repeat(4 - (base64.length % 4));
   return window.atob(base64 + pad);
 };
@@ -44,29 +42,16 @@ export interface AuthState {
   ownerTrailersCount: number;
 }
 
-const initialAccessToken = readStoredToken("accessToken");
-const initialRefreshToken = readStoredToken("refreshToken");
-const initialJwtPayload = decodeJwtPayload(initialAccessToken);
-const initialTrailorRaw = initialJwtPayload?.trailor;
-const initialTrailor = Array.isArray(initialTrailorRaw)
-  ? String(initialTrailorRaw[0] ?? "")
-  : initialTrailorRaw
-    ? String(initialTrailorRaw)
-    : null;
-const initialEmailRaw = initialJwtPayload?.email;
-const initialEmail = initialEmailRaw ? String(initialEmailRaw) : null;
+// Note: do not read tokens here. Use `initFromToken` after load.
 
+// Do not read localStorage at module import time. Initialize with empty defaults
+// and populate later via `initFromToken` to avoid race conditions.
 const initialState: AuthState = {
-  isAuthenticated: Boolean(initialAccessToken),
-  user: initialTrailor || initialEmail
-    ? {
-        email: initialEmail || undefined,
-        trailor: initialTrailor || undefined,
-      }
-    : null,
-  accessToken: initialAccessToken,
-  refreshToken: initialRefreshToken,
-  userType: initialTrailor,
+  isAuthenticated: false,
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  userType: null,
   ownerTrailersCount: 0,
 };
 
@@ -74,6 +59,61 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    // Initialize auth state from an access token (optionally provided).
+    // If `accessToken` is not provided, the reducer will attempt to read
+    // it from localStorage. This avoids reading localStorage at module
+    // import time and prevents role/side mixups after reload.
+    initFromToken(state, action: PayloadAction<string | null | undefined>) {
+      const token =
+        action.payload ?? (typeof window !== "undefined" ? readStoredToken("accessToken") : null);
+
+      const payload = decodeJwtPayload(token ?? null) ?? {};
+
+      // JWT claim may use different keys depending on backend: 'trailor', 'role', 'roles', or nested under 'user'.
+      const userObj =
+        payload && typeof payload === "object" && "user" in payload && payload.user && typeof payload.user === "object"
+          ? (payload.user as Record<string, any>)
+          : undefined;
+
+      const maybeRoleCandidates: any[] = [
+        (payload as any).trailor,
+        (payload as any).role,
+        (payload as any).roles,
+        userObj && (userObj.role ?? userObj.trailor ?? userObj.roles),
+      ];
+
+      let found: string | null = null;
+      for (const c of maybeRoleCandidates) {
+        if (!c) continue;
+        if (Array.isArray(c) && c.length > 0) {
+          found = String(c[0]);
+          break;
+        }
+        if (typeof c === "string") {
+          found = c;
+          break;
+        }
+      }
+
+      const normalizeToTrailor = (raw: string | null | undefined) => {
+        if (!raw) return null;
+        const s = String(raw).trim().toLowerCase();
+        if (s.includes("owner")) return "Owner";
+        if (s.includes("renter")) return "Renter";
+        return null;
+      };
+
+      const trailor = normalizeToTrailor(found);
+      const emailRaw = ((payload as any).email ?? (userObj && userObj.email)) as unknown;
+      const email = emailRaw ? String(emailRaw) : null;
+
+      state.isAuthenticated = Boolean(token);
+      state.accessToken = token ?? null;
+      state.refreshToken = readStoredToken("refreshToken");
+      state.userType = trailor;
+      state.user = trailor || email ? { email: email || undefined, trailor: trailor || undefined } : null;
+      state.ownerTrailersCount = trailor === "Owner" ? state.ownerTrailersCount : 0;
+    },
     loginSuccess(
       state,
       action: PayloadAction<{
@@ -119,7 +159,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginSuccess, signUpSuccess, logout, addOwnerTrailer } =
+export const { initFromToken, loginSuccess, signUpSuccess, logout, addOwnerTrailer } =
   authSlice.actions;
 export default authSlice.reducer;
 

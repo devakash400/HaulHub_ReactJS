@@ -1528,7 +1528,27 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       <span className="text-[11px] text-[#757171]">
                         Didn&apos;t get Code ?{" "}
                       </span>
-                      <span className="text-[11px] underline text-[#389131]">
+                      <span
+                        className="
+    text-[11px]
+    text-[#389131]
+    underline
+    underline-offset-[2px]
+    decoration-[1px]
+    decoration-[#389131]
+  "
+                        style={{
+                          fontFamily: "Lexend",
+                          fontWeight: 300,
+                          fontSize: "11px",
+                          lineHeight: "100%",
+                          letterSpacing: "-0.3px",
+                          textDecoration: "underline",
+                          textDecorationStyle: "solid",
+                          textDecorationColor: "#389131",
+                          color: "#389131",
+                        }}
+                      >
                         Resend
                       </span>
                     </button>

@@ -235,10 +235,14 @@ const Navbar: React.FC = () => {
 
             {isDrawerOpen && (
               <div
-                className="absolute right-0 top-full z-[60] mt-2 rounded-lg bg-white py-2"
+                className="absolute right-0 
+                top-full z-[60] 
+                mt-2 rounded-lg 
+                bg-white py-2 
+                
+                max-h-[calc(100vh-140px)] overflow-y-auto"
                 style={{
                   width: "161px",
-                  height: "197px",
                   opacity: 1,
                   border: "1px solid #00000033",
                 }}

@@ -123,8 +123,7 @@ const Profile: React.FC = () => {
   };
 
   const displayName =
-    profile?.fullName?.trim() ||
-    `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+    profile?.legalName?.trim() || profile?.fullName?.trim() || "";
 
   const initials = displayName
     .split(" ")
@@ -196,31 +195,24 @@ const Profile: React.FC = () => {
         {/* Profile Section */}
         {/* Profile Section */}
         <section className="mt-3 flex flex-col items-center border-b border-[#D9D9D9] pb-8">
-          {/* Profile Image Wrapper */}
-          <div className="relative flex flex-col items-center">
+          {/* Avatar Wrapper */}
+          <div className="relative w-[156px] h-[156px]">
             {/* Profile Circle */}
-            <div
-              className="rounded-full bg-[#D9D9D9] shadow-md flex items-center justify-center overflow-hidden"
-              style={{
-                width: "156px",
-                height: "156px",
-              }}
-            >
+            <div className="w-full h-full rounded-full bg-[#D9D9D9] shadow-md overflow-hidden flex items-center justify-center">
               {profilePictureUrl ? (
                 <img
                   src={profilePictureUrl}
                   alt="Profile"
-                  className="h-full w-full object-cover"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <span
-                  style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 600,
-                    fontSize: "48px",
-                    lineHeight: "100%",
-                    color: "#2F4A6D",
-                  }}
+                  className="
+            text-[48px]
+            font-semibold
+            text-[#2F4A6D]
+            leading-none
+          "
                 >
                   {initials}
                 </span>
@@ -232,17 +224,23 @@ const Profile: React.FC = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto}
-              className="absolute flex items-center justify-center rounded-full shadow-md"
-              style={{
-                width: "42px",
-                height: "42px",
-                background: "#4A9B3D",
-                right: "-6px",
-                bottom: "42px",
-              }}
               aria-label="Change profile photo"
+              className="
+        absolute
+        bottom-2
+        right-0
+        w-[44px]
+        h-[44px]
+        rounded-full
+        bg-[#4A9B3D]
+        flex
+        items-center
+        justify-center
+        shadow-lg
+      
+      "
             >
-              <Camera className="w-[20px] h-[20px] text-white" />
+              <Camera className="w-5 h-5 text-white" />
             </button>
 
             {/* Hidden File Input */}
@@ -254,21 +252,21 @@ const Profile: React.FC = () => {
               onChange={(ev) => void handlePhotoChange(ev)}
               disabled={uploadingPhoto}
             />
-
-            {/* Name */}
-            <p
-              className="mt-4"
-              style={{
-                fontFamily: "Lexend",
-                fontWeight: 600,
-                fontSize: "20px",
-                lineHeight: "100%",
-                color: "#000000",
-              }}
-            >
-              {displayName}
-            </p>
           </div>
+
+          {/* Name */}
+          <p
+            className="
+      mt-5
+      text-[20px]
+      font-semibold
+      text-black
+      text-center
+      break-words
+    "
+          >
+            {displayName}
+          </p>
         </section>
 
         {/* Menu Items */}
