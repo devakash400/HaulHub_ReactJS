@@ -5,8 +5,14 @@ import { toast } from "react-toastify";
 import {
   getTrailerTypeLabel,
   type TrailerDetail,
+  type TrailerReview,
 } from "../../../assets/data/trailers.ts";
-import { resolveTrailerForRoute } from "../../../api/trailersApi.ts";
+import {
+  resolveTrailerForRoute,
+  fetchTrailerReviews,
+} from "../../../api/trailersApi.ts";
+import { API_BASE_URL } from "../../../api/api.ts";
+import { resolveMediaUrl } from "../../../api/media.ts";
 import { openAuthModal } from "../../../app/authModal.ts";
 import {
   TrailerTitleSection,
@@ -101,6 +107,7 @@ const Trailer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
+  const [backendReviews, setBackendReviews] = useState<TrailerReview[]>([]);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
     "loading",
   );
@@ -165,6 +172,30 @@ const Trailer: React.FC = () => {
     };
   }, [id]);
 
+  const resolveAvatarUrl = (path?: string): string => {
+    return resolveMediaUrl(path, "");
+  };
+
+  const mapApiReview = (review: {
+    _id: string;
+    trailerId: string;
+    bookingId: string;
+    userId: { _id: string; fullName: string; profilePicture?: string };
+    rating: number;
+    message: string;
+    createdAt: string;
+  }): TrailerReview => ({
+    avatar: resolveAvatarUrl(review.userId.profilePicture),
+    name: review.userId.fullName || "Guest",
+    stars: review.rating || 5,
+    context: new Date(review.createdAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    text: review.message || "",
+  });
+
   useEffect(() => {
     if (!id) {
       setTrailer(null);
@@ -189,6 +220,28 @@ const Trailer: React.FC = () => {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      setBackendReviews([]);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const result = await fetchTrailerReviews(id);
+      if (cancelled) return;
+      if (result) {
+        setBackendReviews(result.map(mapApiReview));
+      } else if (trailer?.reviews?.length) {
+        setBackendReviews(trailer.reviews);
+      } else {
+        setBackendReviews([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, trailer?.reviews]);
 
   if (loadState === "loading") {
     return (
@@ -447,7 +500,9 @@ const Trailer: React.FC = () => {
 
           <RevealSection delayMs={100} variant="soft">
             <ReviewsSection
-              reviews={trailer.reviews}
+              reviews={
+                backendReviews.length > 0 ? backendReviews : trailer.reviews
+              }
               onShowAll={() => {
                 if (!isAuthenticated) {
                   openAuthModal("login");

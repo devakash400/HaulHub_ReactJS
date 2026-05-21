@@ -13,8 +13,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 }) => {
   let displayReviews = reviews.slice(0, 6);
 
-  // Fill 6 cards if less reviews
-  if (displayReviews.length > 0 && displayReviews.length < 6) {
+  // Fill 6 cards only when there is more than one review
+  if (displayReviews.length > 1 && displayReviews.length < 6) {
     const extra = [...displayReviews];
     let i = 0;
 

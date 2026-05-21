@@ -1,19 +1,37 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Star } from "lucide-react";
+import { type TrailerDetail } from "../../../assets/data/trailers.ts";
 import {
-  type TrailerDetail,
-} from "../../../assets/data/trailers.ts";
-import { resolveTrailerForRoute } from "../../../api/trailersApi.ts";
+  resolveTrailerForRoute,
+  fetchTrailerReviews,
+  type ApiTrailerReview,
+} from "../../../api/trailersApi.ts";
+import { resolveMediaUrl } from "../../../api/media.ts";
+import {
+  getUserProfile,
+  type UserProfileApiData,
+} from "../../../api/userApi.ts";
+import { RootState } from "../../../store";
 
 const TrailerReviews: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
+  const [reviews, setReviews] = useState<ApiTrailerReview[]>([]);
+  const [reviewLoadState, setReviewLoadState] = useState<
+    "loading" | "ready" | "error"
+  >("loading");
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
     "loading",
   );
   const pageSize = 5;
   const [currentPage, setCurrentPage] = useState(1);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
+  const [currentUserProfile, setCurrentUserProfile] =
+    useState<UserProfileApiData | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -41,10 +59,119 @@ const TrailerReviews: React.FC = () => {
   }, [id]);
 
   useEffect(() => {
+    if (!id) {
+      setReviews([]);
+      setReviewLoadState("error");
+      return;
+    }
+    let cancelled = false;
+    setReviewLoadState("loading");
+    setReviews([]);
+    void (async () => {
+      const result = await fetchTrailerReviews(id);
+      if (cancelled) return;
+      if (result) {
+        setReviews(result);
+        setReviewLoadState("ready");
+      } else {
+        setReviews([]);
+        setReviewLoadState("ready");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCurrentUserProfile(null);
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const profile = await getUserProfile();
+        if (cancelled) return;
+        setCurrentUserProfile(profile);
+      } catch {
+        if (!cancelled) {
+          setCurrentUserProfile(null);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
     setCurrentPage(1);
   }, [id]);
 
-  const allReviews = useMemo(() => trailer?.reviews ?? [], [trailer?.reviews]);
+  type ReviewView = {
+    id: string;
+    name: string;
+    avatar?: string;
+    context: string;
+    text: string;
+    rating: number;
+  };
+
+  const resolveAvatarUrl = (path?: string) => {
+    if (!path?.trim()) return undefined;
+    return resolveMediaUrl(path, "") || undefined;
+  };
+
+  const normalizeName = (value?: string): string =>
+    value?.trim().toLowerCase() ?? "";
+
+  const currentUserNameVariants = [
+    normalizeName(currentUserProfile?.fullName),
+    normalizeName(currentUserProfile?.legalName),
+    normalizeName(currentUserProfile?.preferredFirstName),
+  ].filter(Boolean);
+
+  const resolveReviewAvatar = (
+    review: ApiTrailerReview,
+  ): string | undefined => {
+    const currentUserId = currentUserProfile?._id ?? null;
+    const reviewUserId = review.userId._id ?? null;
+    const ownProfilePicture = currentUserProfile?.profilePicture;
+    const reviewName = normalizeName(review.userId.fullName);
+
+    if (
+      currentUserId &&
+      reviewUserId &&
+      String(currentUserId) === String(reviewUserId)
+    ) {
+      return resolveAvatarUrl(
+        ownProfilePicture ?? review.userId.profilePicture,
+      );
+    }
+
+    if (reviewName && currentUserNameVariants.includes(reviewName)) {
+      return resolveAvatarUrl(
+        ownProfilePicture ?? review.userId.profilePicture,
+      );
+    }
+
+    return resolveAvatarUrl(review.userId.profilePicture);
+  };
+
+  const displayReviews = useMemo<ReviewView[]>(() => {
+    return reviews.map((review) => ({
+      id: review._id,
+      name: review.userId.fullName || "Guest",
+      avatar: resolveReviewAvatar(review),
+      context: new Date(review.createdAt).toLocaleDateString(),
+      text: review.message,
+      rating: review.rating ?? 5,
+    }));
+  }, [reviews, currentUserProfile]);
+
+  const allReviews = displayReviews;
   const totalPages = Math.max(1, Math.ceil(allReviews.length / pageSize));
 
   const paginatedReviews = useMemo(() => {
@@ -55,7 +182,7 @@ const TrailerReviews: React.FC = () => {
   if (loadState === "loading") {
     return (
       <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3 px-4">
-        <p className="text-gray-600 text-sm">Loading reviews…</p>
+        <p className="text-gray-600 text-sm">Loading trailer details…</p>
       </div>
     );
   }
@@ -63,7 +190,9 @@ const TrailerReviews: React.FC = () => {
   if (loadState === "error" || !trailer) {
     return (
       <div className="min-h-[40vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="text-gray-800 font-medium">We couldn&apos;t load this trailer.</p>
+        <p className="text-gray-800 font-medium">
+          We couldn&apos;t load this trailer.
+        </p>
         <Link
           to="/"
           className="text-[#389131] font-medium underline hover:no-underline"
@@ -89,7 +218,8 @@ const TrailerReviews: React.FC = () => {
 
         {allReviews.length === 0 ? (
           <p className="text-sm text-gray-600 py-8 text-center">
-            No reviews yet for &ldquo;{trailer.title}&rdquo;. Reviews will appear here after renters complete trips.
+            No reviews yet for &ldquo;{trailer.title}&rdquo;. Reviews will
+            appear here after renters complete trips.
           </p>
         ) : (
           <section className="space-y-6 pb-6">
