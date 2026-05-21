@@ -9,9 +9,17 @@ export type BookingStatus =
   | "accepted"
   | "rejected"
   | "active"
+  | "in_use"
   | "overdue"
   | "return";
-export type FilterStatus = "all" | BookingStatus;
+export type FilterStatus =
+  | "all"
+  | "pending"
+  | "accepted"
+  | "rejected"
+  | "active"
+  | "overdue"
+  | "return";
 
 export type BookingItem = {
   id: string;
@@ -45,6 +53,7 @@ const statusStyles: Record<string, { label: string; className: string }> = {
   accepted: { label: "Accepted", className: "bg-[#389131] text-white" },
   rejected: { label: "Rejected", className: "bg-red-500 text-white" },
   active: { label: "Active", className: "bg-[#389131] text-white" },
+  in_use: { label: "Active", className: "bg-[#389131] text-white" },
   overdue: { label: "Overdue", className: "bg-gray-500 text-white" },
   return: { label: "Return", className: "bg-red-500 text-white" },
 };
@@ -71,7 +80,11 @@ const BookingScreen: React.FC = () => {
   const filteredBookings =
     filterStatus === "all"
       ? bookings
-      : bookings.filter((b) => b.status === filterStatus);
+      : bookings.filter((b) =>
+          filterStatus === "active"
+            ? b.status === "active" || b.status === "in_use"
+            : b.status === filterStatus,
+        );
 
   useEffect(() => {
     let mounted = true;
@@ -229,12 +242,17 @@ const BookingScreen: React.FC = () => {
                         <button
                           type="button"
                           onClick={() =>
-                            navigate("/prescreening", {
-                              state: {
-                                bookingId: booking._id,
-                                backgroundLocation: location,
+                            navigate(
+                              `/prescreening?bookingId=${encodeURIComponent(
+                                booking._id,
+                              )}`,
+                              {
+                                state: {
+                                  bookingId: booking._id,
+                                  backgroundLocation: location,
+                                },
                               },
-                            })
+                            )
                           }
                           className="px-3 py-1.5 rounded-lg bg-[#389131] text-white text-sm font-medium hover:bg-[#2e6f26]"
                         >

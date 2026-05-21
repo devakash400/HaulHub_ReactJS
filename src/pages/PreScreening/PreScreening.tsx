@@ -3,7 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import Navbar from "../../../src/components/Navbar/Navbar.tsx";
 import BottomBar from "../../components/BottomBar/BottomBar.tsx";
-import { completePreScreening } from "../../../src/api/preScreeningApi.ts";
+import {
+  completePreScreening,
+  getPreScreeningStatus,
+} from "../../../src/api/preScreeningApi.ts";
 
 const stepDefinitions = [
   { label: "Pre-Screening" },
@@ -82,9 +85,13 @@ const PreScreening: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = (location.state ?? {}) as BookingState;
+  const queryBookingId = useMemo(
+    () => new URLSearchParams(location.search).get("bookingId") ?? undefined,
+    [location.search],
+  );
   const bookingId = useMemo(
-    () => state.bookingId ?? makeBookingId(),
-    [state.bookingId],
+    () => state.bookingId ?? queryBookingId ?? makeBookingId(),
+    [state.bookingId, queryBookingId],
   );
   const [stepIndex, setStepIndex] = useState(0);
   const [checkedItems, setCheckedItems] = useState<boolean[]>(
@@ -177,6 +184,41 @@ const PreScreening: React.FC = () => {
   const [preScreeningSubmitting, setPreScreeningSubmitting] = useState(false);
   const [step0Error, setStep0Error] = useState<string>("");
   const [apiError, setApiError] = useState<string>("");
+
+  useEffect(() => {
+    const fetchPreScreeningStatus = async () => {
+      const id = state.bookingId ?? bookingId;
+      if (!id) return;
+
+      try {
+        const response = await getPreScreeningStatus(id);
+        if (response?.success && response.data) {
+          const { identityVerified, licenseVerified, agreementConfirmed } =
+            response.data;
+
+          if (identityVerified && licenseVerified && agreementConfirmed) {
+            setCheckedItems(checklistItems.map(() => true));
+            setLiabilityAccepted(true);
+            setStep0Error("");
+          } else {
+            setCheckedItems((prev) => [
+              identityVerified,
+              licenseVerified,
+              prev[2],
+              prev[3],
+              prev[4],
+            ]);
+            setLiabilityAccepted(agreementConfirmed);
+          }
+        }
+      } catch (fetchError) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to load pre-screening status:", fetchError);
+      }
+    };
+
+    void fetchPreScreeningStatus();
+  }, [bookingId, state.bookingId]);
 
   const submitPreScreening = async () => {
     const id = state.bookingId ?? bookingId;
