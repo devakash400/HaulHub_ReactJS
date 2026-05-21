@@ -1,4 +1,5 @@
-import api, { API_BASE_URL } from "./api.ts";
+import api, { API_BASE_URL } from "../api/api.ts";
+import { resolveMediaUrl } from "../api/media.ts";
 import { images } from "../assets/images/index.ts";
 import type {
   TrailerDetail,
@@ -8,6 +9,8 @@ import type {
   TrailerType,
 } from "../assets/data/trailers.ts";
 import { getTrailerById } from "../assets/data/trailers.ts";
+
+export { API_BASE_URL };
 
 export type ApiTrailer = {
   _id: string;
@@ -34,12 +37,7 @@ type TrailersListResponse = {
 
 const FALLBACK_IMAGE = images.Catimg;
 
-function resolveMediaUrl(path: string | undefined): string {
-  if (!path?.trim()) return FALLBACK_IMAGE;
-  const p = path.trim();
-  if (/^https?:\/\//i.test(p)) return p;
-  return `${API_BASE_URL}/${p.replace(/^\//, "")}`;
-}
+// reuse shared resolver
 
 /** Main card image: profile picture first, then gallery, then takePhoto. */
 function pickTrailerImage(t: ApiTrailer): string {
@@ -234,6 +232,42 @@ const defaultApiMetrics: TrailerMetric[] = [
   { label: "Cost Efficiency", score: 4.5, icon: "cost" },
   { label: "Accessibility", score: 4.5, icon: "accessibility" },
 ];
+
+export type ApiTrailerReview = {
+  _id: string;
+  trailerId: string;
+  bookingId: string;
+  userId: {
+    _id: string;
+    fullName: string;
+    profilePicture?: string;
+  };
+  rating: number;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+type TrailerReviewsResponse = {
+  success: boolean;
+  data: ApiTrailerReview[];
+};
+
+export async function fetchTrailerReviews(
+  trailerId: string,
+): Promise<ApiTrailerReview[] | null> {
+  try {
+    const res = await api.get<TrailerReviewsResponse>(
+      `/api/reviews/trailer/${encodeURIComponent(trailerId)}`,
+    );
+    const body = res.data;
+    if (!body?.success || !Array.isArray(body.data)) return null;
+    return body.data;
+  } catch {
+    return null;
+  }
+}
 
 export async function fetchTrailerById(
   id: string,
