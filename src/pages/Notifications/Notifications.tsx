@@ -1,68 +1,91 @@
-import React, { useEffect } from "react";
-import NotificationCard from "../../components/NotificationCard.tsx";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 import { RootState } from "../../store";
-import { toast } from "react-toastify";
-import {
-  acceptOwnerRequest,
-  rejectOwnerRequest,
-} from "../../store/notificationSlice.ts";
+import api from "../../api/api.ts";
+
+type ApiNotification = {
+  _id: string;
+  userId: string;
+  actorId: {
+    _id: string;
+    fullName: string;
+    profilePicture?: string;
+  };
+  bookingId: string;
+  trailerId: {
+    _id: string;
+    title: string;
+    images: string[];
+  };
+  type: string;
+  title: string;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type NotificationsResponse = {
+  success: boolean;
+  data: {
+    notifications: ApiNotification[];
+    total: number;
+    unreadCount: number;
+    page: number;
+    limit: number;
+  };
+};
 
 const Notifications: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
-  const user = useSelector((state: RootState) => state.auth.user);
-  const userType = useSelector((state: RootState) => state.auth.userType);
-  const isOwner =
-    isAuthenticated && (user?.trailor === "Owner" || userType === "Owner");
-  const ownerRequests = useSelector(
-    (state: RootState) => state.notifications.ownerRequests,
-  );
-  const renterNotifications = useSelector(
-    (state: RootState) => state.notifications.renterNotifications,
-  );
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [notifications, setNotifications] = useState<ApiNotification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { backgroundLocation: location } });
-    }
-  }, [isAuthenticated, location, navigate]);
-
-  const handleAccept = (id: number) => {
-    const selected = ownerRequests.find((n) => n.id === id);
-    if (!selected) return;
-
-    if (isOwner) {
-      dispatch(acceptOwnerRequest(id));
-      navigate("/trailor-condition", {
-        state: {
-          bookingId: `#TR-2026-${String(id).padStart(5, "0")}`,
-          trailorName: selected.trailerTitle,
-          renterName: selected.renterName,
-          pickupDate: selected.pickupDate,
-        },
-      });
-      toast.success("Order accepted. Renter has been notified.");
+      navigate("/login");
       return;
     }
 
-    navigate("/return", {
-      state: {
-        bookingId: `#TR-2026-${String(id).padStart(5, "0")}`,
-      },
-    });
-  };
+    const fetchNotifications = async () => {
+      setLoading(true);
+      setError(null);
 
-  const handleReject = (id: number) => {
-    if (!isOwner) return;
-    dispatch(rejectOwnerRequest(id));
-    toast.info("Order rejected. Renter has been notified.");
-  };
+      try {
+        const response = await api.get<NotificationsResponse>(
+          "/api/notifications",
+          {
+            params: {
+              page: 1,
+              limit: 20,
+              unreadOnly: false,
+            },
+          },
+        );
+
+        if (response.data?.success) {
+          setNotifications(response.data.data.notifications);
+          return;
+        }
+
+        throw new Error("Unable to load notifications");
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("Notification fetch error:", err);
+        setError(
+          "Unable to load notifications. Please refresh the page or try again later.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchNotifications();
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen flex justify-center bg-[#F9F8F3] px-4 py-10">
@@ -72,110 +95,100 @@ const Notifications: React.FC = () => {
           Notifications
         </h1>
 
-        {isOwner ? (
-          <div className="space-y-4">
-            <div className="rounded-xl border border-gray-200 bg-[#F9F8F3] px-4 py-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-800">
-                Order Status
-              </p>
-              <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                  ownerRequests.length > 0
-                    ? "bg-[#E7F6E6] text-[#2F7A29]"
-                    : "bg-[#FDECEC] text-[#B42318]"
-                }`}
-              >
-                {ownerRequests.length > 0
-                  ? `Order Available (${ownerRequests.length})`
-                  : "No Order Available"}
-              </span>
+        <div className="space-y-4">
+          {loading && (
+            <div className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-6 text-center text-sm text-gray-600">
+              Loading notifications...
             </div>
+          )}
 
-            {ownerRequests.map((n) => (
-              <NotificationCard
-                key={n.id}
-                id={n.id}
-                imageUrl={n.image}
-                title={n.trailerTitle}
-                model={n.trailerModel}
-                price={n.price}
-                rating={n.rating}
-                reviewsCount={n.reviews}
-                onAccept={handleAccept}
-                onReject={handleReject}
-              />
-            ))}
+          {error && (
+            <div className="rounded-2xl border border-red-200 bg-[#FEF3F2] p-6 text-center text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-            {ownerRequests.length === 0 && (
-              <p className="text-center text-sm text-gray-500">
-                No notifications right now.
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {renterNotifications.map((notification) => (
-              <div
-                key={notification.id}
-                className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-5 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-base font-semibold text-gray-900">
-                      Owner {notification.status.toLowerCase()} your order
-                    </p>
-                    <p className="mt-1 text-sm text-gray-700">
-                      Your booking request for {notification.trailerTitle}{" "}
-                      (Model {notification.trailerModel}) has been{" "}
-                      {notification.status.toLowerCase()}.
-                    </p>
-                    <p className="mt-2 text-xs font-medium text-gray-500">
-                      Booking ID: {notification.bookingId}
-                    </p>
+          {!loading && !error && notifications.length === 0 && (
+            <div className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-6 text-center text-sm text-gray-600">
+              No notifications available.
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            notifications.map((notification) => {
+              const imageUrl = notification.trailerId.images?.[0] || "";
+              const createdAt = new Date(
+                notification.createdAt,
+              ).toLocaleString();
+              const isRequestSent =
+                /booking request sent/i.test(notification.type) ||
+                /booking request sent/i.test(notification.title) ||
+                /booking request sent/i.test(notification.message);
+              const isBookingAccepted =
+                /booking accepted/i.test(notification.type) ||
+                /booking accepted/i.test(notification.title) ||
+                /booking accepted/i.test(notification.message);
+
+              return (
+                <div
+                  key={notification._id}
+                  className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-5 shadow-sm"
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex gap-4">
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={notification.trailerId.title}
+                          className="h-20 w-28 rounded-2xl object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-20 w-28 items-center justify-center rounded-2xl bg-gray-200 text-sm text-gray-500">
+                          No image
+                        </div>
+                      )}
+
+                      <div>
+                        <p className="text-base font-semibold text-gray-900">
+                          {notification.title}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-700">
+                          {notification.message}
+                        </p>
+                        <p className="mt-2 text-xs font-medium text-gray-500">
+                          Booking ID: {notification.bookingId}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-start gap-3 text-right sm:items-end">
+                      <span className="inline-flex items-center rounded-full bg-[#E7F6E6] px-3 py-1 text-xs font-semibold text-[#2F7A29]">
+                        {notification.title}
+                      </span>
+                      <p className="text-xs text-gray-500">{createdAt}</p>
+                      <Link
+                        to={
+                          isBookingAccepted
+                            ? "/prescreening"
+                            : isRequestSent
+                              ? "/booking"
+                              : `/booking/${notification.bookingId}`
+                        }
+                        className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                      >
+                        {isBookingAccepted
+                          ? "Start pre screening"
+                          : isRequestSent
+                            ? "View request status"
+                            : "View details"}
+                      </Link>
+                    </div>
                   </div>
-
-                  <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                      notification.status === "Accepted"
-                        ? "bg-[#E7F6E6] text-[#2F7A29]"
-                        : "bg-[#FDECEC] text-[#B42318]"
-                    }`}
-                  >
-                    {notification.status}
-                  </span>
                 </div>
-
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate(
-                        notification.status === "Accepted"
-                          ? "/booking"
-                          : "/notifications",
-                      )
-                    }
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors ${
-                      notification.status === "Accepted"
-                        ? "bg-[#389131] hover:bg-[#2f7a29]"
-                        : "bg-[#475467] hover:bg-[#344054]"
-                    }`}
-                  >
-                    {notification.status === "Accepted"
-                      ? "View booking details"
-                      : "View request status"}
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {renterNotifications.length === 0 && (
-              <p className="text-center text-sm text-gray-500">
-                No notifications right now.
-              </p>
-            )}
-          </div>
-        )}
+              );
+            })}
+        </div>
       </div>
     </div>
   );

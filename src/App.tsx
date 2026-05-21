@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, type Location } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar.tsx";
 import BottomBar from "./components/BottomBar/BottomBar.tsx";
 import Home from "./pages/Dashboard/Home.tsx";
@@ -19,6 +19,9 @@ import RequestToBookPage from "./pages/RequestToBookPage.tsx";
 import BookingScreen from "./pages/BookingScreen/BookingScreen.tsx";
 import LiabilityAgreement from "./pages/LiabilityAgreement/LiabilityAgreement.tsx";
 import PaymentReceipt from "./pages/PaymentReceipt/PaymentReceipt.tsx";
+import BookingSent from "./pages/BookingSent/BookingSent.tsx";
+import VerifyIdentity from "./pages/VerifyIdentity/VerifyIdentity.tsx";
+import PreScreening from "./pages/PreScreening/PreScreening.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
 import AccountSettings from "./pages/AccountSettings/AccountSettings.tsx";
 import Wishlist from "./pages/Wishlist/Wishlist.tsx";
@@ -34,14 +37,22 @@ import ForgotPasswordPage from "./pages/Auth/ForgotPassword/ForgotPasswordPage.t
 import OtpPage from "./pages/Auth/Otp/OtpPage.tsx";
 import NewPasswordPage from "./pages/Auth/NewPassword/NewPasswordPage.tsx";
 
+type LocationState = {
+  backgroundLocation?: Location;
+};
+
 const App: React.FC = () => {
-  const location = useLocation();
+  const currentLocation = useLocation();
+  const state = currentLocation.state as LocationState | null;
+  const backgroundLocation = state?.backgroundLocation ?? currentLocation;
+  const effectivePathname = backgroundLocation.pathname;
   const hideNavFooter =
-    location.pathname === "/request-to-book" ||
-    location.pathname === "/liability-agreement";
+    effectivePathname === "/request-to-book" ||
+    effectivePathname === "/prescreening" ||
+    effectivePathname === "/liability-agreement";
   const contentTopPadding = hideNavFooter
     ? ""
-    : location.pathname === "/"
+    : effectivePathname === "/"
       ? "pt-[124px] sm:pt-[76px]"
       : "pt-[76px]";
 
@@ -49,7 +60,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden min-w-0">
       <ScrollToTop /> {!hideNavFooter && <Navbar />}
       <main className={contentTopPadding}>
-        <Routes>
+        <Routes location={backgroundLocation}>
           <Route path="/" element={<Home />} />
           {/* Auth routes (login/signup/forgot/otp/new-password) */}
 
@@ -134,6 +145,9 @@ const App: React.FC = () => {
           <Route path="/trailer/:id/reviews" element={<TrailerReviews />} />
           <Route path="/request-to-book" element={<RequestToBookPage />} />
           <Route path="/liability-agreement" element={<LiabilityAgreement />} />
+          <Route path="/prescreening" element={<PreScreening />} />
+          <Route path="/verify-identity" element={<VerifyIdentity />} />
+          <Route path="/booking-sent" element={<BookingSent />} />
           <Route path="/payment-receipt" element={<PaymentReceipt />} />
           <Route path="/booking" element={<BookingScreen />} />
           <Route path="/why-choose" element={<WhyChooseHaulHub />} />
@@ -141,6 +155,37 @@ const App: React.FC = () => {
           <Route path="/get-help" element={<GetHelp />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
         </Routes>
+        {state?.backgroundLocation && (
+          <Routes>
+            <Route
+              path="/verify-identity"
+              element={
+                <div className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+                  <div className="w-full max-w-[1100px] max-h-[90vh] overflow-auto">
+                    <VerifyIdentity />
+                  </div>
+                </div>
+              }
+            />
+            <Route
+              path="/prescreening"
+              element={
+                <div
+                  className="modal-overlay 
+                fixed inset-0 z-[100] flex 
+                items-center justify-center bg-black/50"
+                >
+                  <div
+                    className="w-full h-full 
+                   overflow-auto"
+                  >
+                    <PreScreening />
+                  </div>
+                </div>
+              }
+            />
+          </Routes>
+        )}
       </main>
       {!hideNavFooter && <BottomBar />}
     </div>
