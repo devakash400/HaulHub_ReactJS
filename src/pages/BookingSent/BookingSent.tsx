@@ -91,7 +91,7 @@ const BookingSent: React.FC = () => {
             </button>
 
             <button
-              onClick={() => navigate("/bookings")}
+              onClick={() => navigate("/booking")}
               className="w-full mt-6 text-[#389131] font-semibold text-2xl"
             >
               View My Bookings →

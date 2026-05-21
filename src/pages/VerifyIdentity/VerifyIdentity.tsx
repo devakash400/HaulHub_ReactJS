@@ -1,153 +1,12 @@
-// import React, { useState } from "react";
-// import { useLocation, useNavigate } from "react-router-dom";
-// import { toast } from "react-toastify";
-// import {
-//   createBooking,
-//   getBookingErrorMessage,
-// } from "../../../src/api/bookingsApi.ts";
-
-// const VerifyIdentity: React.FC = () => {
-//   const location = useLocation();
-//   const navigate = useNavigate();
-//   const state = (location.state ?? {}) as Record<string, unknown>;
-
-//   const trailerId = String(state.trailerId ?? "");
-//   const initialCheckIn = String(state.checkIn ?? state.checkIn ?? "");
-//   const initialCheckOut = String(state.checkOut ?? state.checkOut ?? "");
-//   const [drivingLicense, setDrivingLicense] = useState<File | null>(null);
-//   const [passport, setPassport] = useState<File | null>(null);
-//   const [pickupDate, setPickupDate] = useState(initialCheckIn);
-//   const [returnDate, setReturnDate] = useState(initialCheckOut);
-//   const [sending, setSending] = useState(false);
-
-//   const handleSend = async () => {
-//     if (!pickupDate || !returnDate) {
-//       toast.error("Please enter pickup and return dates.");
-//       return;
-//     }
-//     if (returnDate < pickupDate) {
-//       toast.error("Return date must be on or after pickup date.");
-//       return;
-//     }
-//     if (!drivingLicense) {
-//       toast.error("Please upload your driving license.");
-//       return;
-//     }
-//     if (!passport) {
-//       toast.error("Please upload your passport.");
-//       return;
-//     }
-//     if (!trailerId) {
-//       toast.error("Missing trailer id. Please open this from a listing.");
-//       return;
-//     }
-
-//     setSending(true);
-//     try {
-//       await createBooking({
-//         trailerId,
-//         startDate: pickupDate,
-//         endDate: returnDate,
-//         drivingLicenseDocuments: [drivingLicense],
-//         passportDocuments: [passport],
-//       } as any);
-
-//       toast.success("Booking request sent.");
-//       navigate("/booking-sent", {
-//         state: { ...state, startDate: pickupDate, endDate: returnDate },
-//       });
-//     } catch (err: unknown) {
-//       toast.error(getBookingErrorMessage(err));
-//     } finally {
-//       setSending(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-white p-6">
-//       <div className="max-w-2xl w-full bg-white border rounded-lg p-6">
-//         <h1 className="text-xl font-semibold mb-4">Identify Verification</h1>
-//         <p className="text-gray-600 mb-4">
-//           Verify your identity to continue — upload license and passport, then
-//           send booking request.
-//         </p>
-
-//         <div className="space-y-4">
-//           <div>
-//             <label className="block text-sm font-medium text-gray-700 mb-1">
-//               Upload License
-//             </label>
-//             <input
-//               type="file"
-//               accept="image/*,application/pdf"
-//               onChange={(e) => setDrivingLicense(e.target.files?.[0] ?? null)}
-//             />
-//             {drivingLicense && (
-//               <div className="mt-1 text-sm text-gray-700">
-//                 {drivingLicense.name}
-//               </div>
-//             )}
-//           </div>
-
-//           <div>
-//             <label className="block text-sm font-medium text-gray-700 mb-1">
-//               Upload Passport
-//             </label>
-//             <input
-//               type="file"
-//               accept="image/*,application/pdf"
-//               onChange={(e) => setPassport(e.target.files?.[0] ?? null)}
-//             />
-//             {passport && (
-//               <div className="mt-1 text-sm text-gray-700">{passport.name}</div>
-//             )}
-//           </div>
-
-//           <div className="grid grid-cols-2 gap-4">
-//             <div>
-//               <label className="block text-sm font-medium text-gray-700 mb-1">
-//                 Pickup Date
-//               </label>
-//               <input
-//                 type="date"
-//                 value={pickupDate}
-//                 onChange={(e) => setPickupDate(e.target.value)}
-//                 className="w-full border rounded px-3 py-2"
-//               />
-//             </div>
-//             <div>
-//               <label className="block text-sm font-medium text-gray-700 mb-1">
-//                 Return Date
-//               </label>
-//               <input
-//                 type="date"
-//                 value={returnDate}
-//                 onChange={(e) => setReturnDate(e.target.value)}
-//                 className="w-full border rounded px-3 py-2"
-//               />
-//             </div>
-//           </div>
-
-//           <div className="mt-4">
-//             <button
-//               type="button"
-//               onClick={handleSend}
-//               disabled={sending}
-//               className="w-full bg-[#389131] text-white py-3 rounded"
-//             >
-//               {sending ? "Sending..." : "Send Booking Request"}
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default VerifyIdentity;
-import React, { useRef, useState } from "react";
+﻿import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, Upload, CalendarDays } from "lucide-react";
+import {
+  ChevronLeft,
+  Upload,
+  CalendarDays,
+  CreditCard,
+  Car,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import {
   createBooking,
@@ -157,6 +16,25 @@ import {
 const parseISODate = (value: string): Date | null => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
+};
+
+type MethodKey = "driving_licence" | "passport";
+
+const METHOD_META: Record<
+  MethodKey,
+  {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }
+> = {
+  driving_licence: {
+    label: "Driving licence",
+    icon: Car,
+  },
+  passport: {
+    label: "Passport",
+    icon: CreditCard,
+  },
 };
 
 const VerifyIdentity: React.FC = () => {
@@ -170,45 +48,53 @@ const VerifyIdentity: React.FC = () => {
   const initialCheckIn = String(state.checkIn ?? "");
   const initialCheckOut = String(state.checkOut ?? "");
 
+  const [openMethod, setOpenMethod] = useState<MethodKey>("driving_licence");
+
   const [drivingLicense, setDrivingLicense] = useState<File | null>(null);
+
   const [passport, setPassport] = useState<File | null>(null);
 
   const [pickupDate, setPickupDate] = useState(initialCheckIn);
+
   const [returnDate, setReturnDate] = useState(initialCheckOut);
 
   const [sending, setSending] = useState(false);
 
   const licenseInputRef = useRef<HTMLInputElement>(null);
+
   const passportInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = async () => {
     if (!pickupDate) {
-      toast.error("Please enter a pickup date.");
+      toast.error("Please enter pickup date.");
       return;
     }
+
     if (!returnDate) {
-      toast.error("Please enter a return date.");
+      toast.error("Please enter return date.");
       return;
     }
 
     const pickup = parseISODate(pickupDate);
     const returnAt = parseISODate(returnDate);
+
     if (!pickup || !returnAt) {
-      toast.error("Please enter valid pickup and return dates.");
+      toast.error("Please enter valid dates.");
       return;
     }
+
     if (returnAt < pickup) {
       toast.error("Return date must be on or after pickup date.");
       return;
     }
 
     if (!drivingLicense) {
-      toast.error("Please upload your driving license.");
+      toast.error("Please upload driving licence.");
       return;
     }
 
     if (!passport) {
-      toast.error("Please upload your passport.");
+      toast.error("Please upload passport.");
       return;
     }
 
@@ -220,6 +106,13 @@ const VerifyIdentity: React.FC = () => {
     setSending(true);
 
     try {
+      console.log("VerifyIdentity: sending booking", {
+        trailerId,
+        pickupDate,
+        returnDate,
+        drivingLicense,
+        passport,
+      });
       await createBooking({
         trailerId,
         startDate: pickupDate,
@@ -229,15 +122,22 @@ const VerifyIdentity: React.FC = () => {
       } as any);
 
       toast.success("Booking request sent.");
+      // Prevent carrying over any backgroundLocation from the modal state
+      const { backgroundLocation, ...stateWithoutBackground } =
+        (state as Record<string, unknown>) ?? {};
 
+      // replace history so modal/back stack is cleared
       navigate("/booking-sent", {
+        replace: true,
         state: {
-          ...state,
+          ...stateWithoutBackground,
           startDate: pickupDate,
           endDate: returnDate,
         },
       });
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
+      console.error("createBooking error:", err);
       toast.error(getBookingErrorMessage(err));
     } finally {
       setSending(false);
@@ -245,14 +145,15 @@ const VerifyIdentity: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3">
       <div
         className="
+          relative
           w-full
-          max-w-[460px]
+          max-w-[380px]
           overflow-hidden
-          rounded-[18px]
-          bg-white
+          rounded-[14px]
+          bg-[#F8F8F8]
           shadow-2xl
         "
       >
@@ -270,15 +171,19 @@ const VerifyIdentity: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="absolute left-4"
+            className="
+              absolute
+              left-3
+              top-1/2
+              -translate-y-1/2
+            "
           >
-            <ChevronLeft className="h-6 w-6 text-white" />
+            <ChevronLeft className="h-5 w-5 text-white" />
           </button>
 
           <h1
             className="
-              font-lexend
-              text-[24px]
+              text-[15px]
               font-semibold
               text-white
             "
@@ -288,245 +193,212 @@ const VerifyIdentity: React.FC = () => {
         </div>
 
         {/* Body */}
-        <div className="px-5 py-5">
+        <div className="px-4 pt-4 pb-5">
           <h2
             className="
               text-center
-              font-lexend
-              text-[15px]
+              text-[14px]
               font-semibold
-              text-[#1B1B1B]
+              text-black
             "
           >
-            Verify Your Identity to Continue
+            Which Method Would You Like To Use?
           </h2>
 
           <p
             className="
-              mt-2
+              mt-3
               text-center
-              font-lexend
               text-[10px]
-              font-light
-              text-[#5E5E5E]
+              leading-[16px]
+              text-[#666666]
             "
           >
-            Please upload your license and passport to verify your identity.
+            We’ll use this to verify your identity and won’t share it with other
+            trailer.
           </p>
 
-          {/* Upload License */}
-          <div className="mt-6">
-            <label
-              className="
-                mb-2
-                block
-                font-lexend
-                text-[12px]
-                font-medium
-                text-[#1B1B1B]
-              "
-            >
-              Upload License
-            </label>
+          {/* Hidden Inputs */}
+          <input
+            ref={licenseInputRef}
+            type="file"
+            accept="image/*,application/pdf"
+            className="hidden"
+            onChange={(e) => setDrivingLicense(e.target.files?.[0] ?? null)}
+          />
 
-            <input
-              ref={licenseInputRef}
-              type="file"
-              accept="image/*,application/pdf"
-              className="hidden"
-              onChange={(e) => setDrivingLicense(e.target.files?.[0] ?? null)}
-            />
+          <input
+            ref={passportInputRef}
+            type="file"
+            accept="image/*,application/pdf"
+            className="hidden"
+            onChange={(e) => setPassport(e.target.files?.[0] ?? null)}
+          />
 
-            <button
-              type="button"
-              onClick={() => licenseInputRef.current?.click()}
-              className="
-                flex
-                h-[44px]
-                w-full
-                items-center
-                justify-center
-                gap-2
-                rounded-[4px]
-                border
-                border-dashed
-                border-[#CFCFCF]
-                bg-white
-              "
-            >
-              <Upload
-                className="h-[13px] w-[13px] text-[#3E3E3E]"
-                strokeWidth={2}
-              />
+          {/* Methods */}
+          <div className="mt-5 space-y-3">
+            {(Object.keys(METHOD_META) as MethodKey[]).map((key) => {
+              const meta = METHOD_META[key];
+              const Icon = meta.icon;
 
-              <span
-                className="
-                  font-lexend
-                  text-[12px]
-                  font-light
-                  text-[#3E3E3E]
-                "
-              >
-                {drivingLicense ? drivingLicense.name : "Upload License"}
-              </span>
-            </button>
-          </div>
+              const isActive = openMethod === key;
 
-          {/* Upload Passport */}
-          <div className="mt-5">
-            <label
-              className="
-                mb-2
-                block
-                font-lexend
-                text-[12px]
-                font-medium
-                text-[#1B1B1B]
-              "
-            >
-              Upload Passport
-            </label>
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setOpenMethod(key);
 
-            <input
-              ref={passportInputRef}
-              type="file"
-              accept="image/*,application/pdf"
-              className="hidden"
-              onChange={(e) => setPassport(e.target.files?.[0] ?? null)}
-            />
+                    if (key === "driving_licence") {
+                      licenseInputRef.current?.click();
+                    } else {
+                      passportInputRef.current?.click();
+                    }
+                  }}
+                  className={`
+                      w-full
+                      h-[42px]
+                      border
+                      rounded-[3px]
+                      px-3
+                      flex
+                      items-center
+                      justify-between
+                      transition-all
+                      ${
+                        isActive
+                          ? "border-[#389131] bg-white"
+                          : "border-[#DCDCDC] bg-white"
+                      }
+                    `}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 text-black" />
 
-            <button
-              type="button"
-              onClick={() => passportInputRef.current?.click()}
-              className="
-                flex
-                h-[44px]
-                w-full
-                items-center
-                justify-center
-                gap-2
-                rounded-[4px]
-                border
-                border-dashed
-                border-[#CFCFCF]
-                bg-white
-              "
-            >
-              <Upload
-                className="h-[13px] w-[13px] text-[#3E3E3E]"
-                strokeWidth={2}
-              />
+                    <span
+                      className="
+                          text-[12px]
+                          font-medium
+                          text-black
+                        "
+                    >
+                      {key === "driving_licence"
+                        ? drivingLicense?.name || meta.label
+                        : passport?.name || meta.label}
+                    </span>
+                  </div>
 
-              <span
-                className="
-                  font-lexend
-                  text-[12px]
-                  font-light
-                  text-[#3E3E3E]
-                "
-              >
-                {passport ? passport.name : "Upload Passport"}
-              </span>
-            </button>
+                  <Upload className="w-3.5 h-3.5 text-black" />
+                </button>
+              );
+            })}
           </div>
 
           {/* Dates */}
-          <div className="mt-6 grid grid-cols-2 gap-4">
+          <div
+            className="
+              mt-3
+              grid
+              grid-cols-2
+              overflow-hidden
+              rounded-[3px]
+              border
+              border-[#DCDCDC]
+              bg-white
+            "
+          >
             {/* Pickup */}
-            <div>
-              <label
-                className="
-                  mb-2
-                  block
-                  font-lexend
-                  text-[12px]
-                  font-medium
-                  text-[#1B1B1B]
-                "
-              >
-                Pickup Date
-              </label>
+            <div className="border-r border-[#DCDCDC] p-3">
+              <div className="mb-2 flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-black" />
+
+                <span
+                  className="
+                    text-[11px]
+                    font-medium
+                    text-black
+                  "
+                >
+                  Pickup Date
+                </span>
+              </div>
 
               <div className="relative">
-                <CalendarDays
-                  className="
-                    absolute
-                    left-3
-                    top-1/2
-                    h-[14px]
-                    w-[14px]
-                    -translate-y-1/2
-                    text-[#707070]
-                  "
-                />
-
                 <input
                   type="date"
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
                   className="
-                    h-[40px]
+                    h-[30px]
                     w-full
-                    rounded-[4px]
+                    rounded-[3px]
                     border
-                    border-[#D6D6D6]
-                    bg-white
-                    pl-10
-                    pr-3
-                    font-lexend
-                    text-[12px]
-                    font-light
+                    border-[#DCDCDC]
+                    px-2
+                    pr-8
+                    text-[10px]
                     outline-none
+                  "
+                />
+
+                <CalendarDays
+                  className="
+                    absolute
+                    right-2
+                    top-1/2
+                    h-3.5
+                    w-3.5
+                    -translate-y-1/2
+                    text-[#777777]
                   "
                 />
               </div>
             </div>
 
             {/* Return */}
-            <div>
-              <label
-                className="
-                  mb-2
-                  block
-                  font-lexend
-                  text-[12px]
-                  font-medium
-                  text-[#1B1B1B]
-                "
-              >
-                Return Date
-              </label>
+            <div className="p-3">
+              <div className="mb-2 flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-black" />
+
+                <span
+                  className="
+                    text-[11px]
+                    font-medium
+                    text-black
+                  "
+                >
+                  Return Date
+                </span>
+              </div>
 
               <div className="relative">
-                <CalendarDays
-                  className="
-                    absolute
-                    left-3
-                    top-1/2
-                    h-[14px]
-                    w-[14px]
-                    -translate-y-1/2
-                    text-[#707070]
-                  "
-                />
-
                 <input
                   type="date"
                   value={returnDate}
                   onChange={(e) => setReturnDate(e.target.value)}
                   className="
-                    h-[40px]
+                    h-[30px]
                     w-full
-                    rounded-[4px]
+                    rounded-[3px]
                     border
-                    border-[#D6D6D6]
-                    bg-white
-                    pl-10
-                    pr-3
-                    font-lexend
-                    text-[12px]
-                    font-light
+                    border-[#DCDCDC]
+                    px-2
+                    pr-8
+                    text-[10px]
                     outline-none
+                  "
+                />
+
+                <CalendarDays
+                  className="
+                    absolute
+                    right-2
+                    top-1/2
+                    h-3.5
+                    w-3.5
+                    -translate-y-1/2
+                    text-[#777777]
                   "
                 />
               </div>
@@ -539,12 +411,11 @@ const VerifyIdentity: React.FC = () => {
             onClick={handleSend}
             disabled={sending}
             className="
-              mt-7
-              h-[44px]
+              mt-5
+              h-[40px]
               w-full
               rounded-[4px]
               bg-[#389131]
-              font-lexend
               text-[14px]
               font-semibold
               text-white

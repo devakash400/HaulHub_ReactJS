@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { SelectRentalDatesModal } from "./SelectRentalDatesModal.tsx";
@@ -37,6 +37,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   trailerId,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
@@ -128,6 +129,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     navigate("/verify-identity", {
       state: {
         trailerId: trailerId != null ? String(trailerId) : "",
+        backgroundLocation: location,
         ...bookingState,
       },
     });
@@ -154,6 +156,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     navigate("/verify-identity", {
       state: {
         trailerId: trailerId != null ? String(trailerId) : "",
+        backgroundLocation: location,
         ...bookingState,
       },
     });
@@ -266,6 +269,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
         navigate("/verify-identity", {
           state: {
             trailerId: trailerId != null ? String(trailerId) : "",
+            backgroundLocation: location,
             ...pendingBookingState,
           },
         });
@@ -459,10 +463,11 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
         onClose={() => setIsLoginOpen(false)}
         onSuccess={() => {
           setIsLoginOpen(false);
-          // After login, continue booking flow: go to verify page
+          // After login, continue booking flow: go to verify-identity page
           navigate("/verify-identity", {
             state: {
               trailerId: trailerId != null ? String(trailerId) : "",
+              backgroundLocation: location,
               ...pendingBookingState,
             },
           });

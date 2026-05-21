@@ -296,14 +296,27 @@ const Navbar: React.FC = () => {
                           </Link>
                         </li>
                         {isAuthenticated ? (
-                          <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                            onClick={() => setIsLogoutConfirmOpen(true)}
-                          >
-                            <span className="text-inherit no-underline cursor-pointer block w-full">
-                              Logout
-                            </span>
-                          </li>
+                          <>
+                            <li
+                              className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                              onClick={handleDrawerLinkRowClick}
+                            >
+                              <Link
+                                to="/notifications"
+                                className="text-inherit no-underline cursor-pointer block w-full"
+                              >
+                                Notifications
+                              </Link>
+                            </li>
+                            <li
+                              className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                              onClick={() => setIsLogoutConfirmOpen(true)}
+                            >
+                              <span className="text-inherit no-underline cursor-pointer block w-full">
+                                Logout
+                              </span>
+                            </li>
+                          </>
                         ) : (
                           <li
                             className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
@@ -406,6 +419,12 @@ const Navbar: React.FC = () => {
                           onClick={handleDrawerLinkRowClick}
                         >
                           <Link to="/booking">Booking Screen</Link>
+                        </li>
+                        <li
+                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                          onClick={handleDrawerLinkRowClick}
+                        >
+                          <Link to="/notifications">Notifications</Link>
                         </li>
                         <li
                           className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { useLocation, useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Heart, Share2 } from "lucide-react";
 import {
   getTrailerTypeLabel,
@@ -23,7 +23,6 @@ const PLACEHOLDER = assetImages.Catimg;
 const AllTrailerPhotos: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
     "loading",
@@ -198,7 +197,7 @@ const AllTrailerPhotos: React.FC = () => {
         isOpen={wishlistModalOpen}
         onClose={() => setWishlistModalOpen(false)}
         onLoginClick={() => {
-          navigate("/login", { state: { backgroundLocation: location } });
+          navigate("/login");
         }}
       />
     </div>
