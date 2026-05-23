@@ -47,11 +47,10 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? null : date;
   };
-
+  const today = new Date().toISOString().split("T")[0];
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
-
   const validateBookingDates = (
     pickupDate: string,
     returnDate: string,
@@ -60,6 +59,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       setValidationError("Please select pickup date.");
       return false;
     }
+
     if (!returnDate) {
       setValidationError("Please select return date.");
       return false;
@@ -67,12 +67,21 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
 
     const pickup = parseISODate(pickupDate);
     const returnAt = parseISODate(returnDate);
+
     if (!pickup || !returnAt) {
       setValidationError("Please select valid pickup and return dates.");
       return false;
     }
+
+    // Prevent same dates
+    if (pickupDate === returnDate) {
+      setValidationError("Pickup date and return date cannot be the same.");
+      return false;
+    }
+
+    // Prevent return before pickup
     if (returnAt < pickup) {
-      setValidationError("Return date must be on or after pickup date.");
+      setValidationError("Return date must be after pickup date.");
       return false;
     }
 
@@ -372,20 +381,21 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 <input
                   type="date"
                   value={checkIn}
+                  min={today}
                   onChange={(e) => {
                     setCheckIn(e.target.value);
                     setValidationError(null);
                   }}
                   className="
-              mt-1 w-full
-              bg-transparent
-              text-[14px]
-              text-[#8C8C8C]
-              focus:outline-none
-              appearance-none
-              [&::-webkit-calendar-picker-indicator]:opacity-100
-              [&::-webkit-calendar-picker-indicator]:cursor-pointer
-            "
+    mt-1 w-full
+    bg-transparent
+    text-[14px]
+    text-[#8C8C8C]
+    focus:outline-none
+    appearance-none
+    [&::-webkit-calendar-picker-indicator]:opacity-100
+    [&::-webkit-calendar-picker-indicator]:cursor-pointer
+  "
                 />
               </div>
 
@@ -407,6 +417,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 <input
                   type="date"
                   value={checkOut}
+                  min={today}
                   onChange={(e) => {
                     setCheckOut(e.target.value);
                     setValidationError(null);

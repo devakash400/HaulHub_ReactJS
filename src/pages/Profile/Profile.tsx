@@ -24,9 +24,12 @@ import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
 import { RootState } from "../../store";
 
-import { getUserProfile, type UserProfileApiData } from "../../api/userApi.ts";
+import {
+  getUserProfile,
+  type UserProfileApiData,
+  updateUserProfile,
+} from "../../api/userApi.ts";
 import uploadProfilePhoto from "../../api/uploadApi.ts";
-import { updateUserProfile } from "../../api/profileApi.ts";
 
 type ProfileUpdateErrorBody = {
   message?: string;
