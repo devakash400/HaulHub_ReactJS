@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { SelectRentalDatesModal } from "./SelectRentalDatesModal.tsx";
@@ -37,12 +37,57 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   trailerId,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
+
+  const parseISODate = (value: string): Date | null => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+  const today = new Date().toISOString().split("T")[0];
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const validateBookingDates = (
+    pickupDate: string,
+    returnDate: string,
+  ): boolean => {
+    if (!pickupDate) {
+      setValidationError("Please select pickup date.");
+      return false;
+    }
+
+    if (!returnDate) {
+      setValidationError("Please select return date.");
+      return false;
+    }
+
+    const pickup = parseISODate(pickupDate);
+    const returnAt = parseISODate(returnDate);
+
+    if (!pickup || !returnAt) {
+      setValidationError("Please select valid pickup and return dates.");
+      return false;
+    }
+
+    // Prevent same dates
+    if (pickupDate === returnDate) {
+      setValidationError("Pickup date and return date cannot be the same.");
+      return false;
+    }
+
+    // Prevent return before pickup
+    if (returnAt < pickup) {
+      setValidationError("Return date must be after pickup date.");
+      return false;
+    }
+
+    setValidationError(null);
+    return true;
+  };
   const [dispatcher, setDispatcher] = useState("");
   const [showRentalDatesModal, setShowRentalDatesModal] = useState(false);
   const [showIdentityModal, setShowIdentityModal] = useState(false);
@@ -66,42 +111,12 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   }, [isAuthenticated]);
 
   const handleReserve = () => {
-    const dates =
-      checkIn && checkOut
-        ? `${checkIn} – ${checkOut}`
-        : checkIn || checkOut
-          ? `${checkIn || ""} – ${checkOut || ""}`
-          : "";
-
-    setPendingBookingState({
-      title: trailer?.title ?? "Gooseneck Trailer - Texas, USA",
-      subtitle:
-        trailer?.subtitle ??
-        "25FT Flatbed · Dual Axle · Industrial Steel Frame",
-      image: trailer?.image ?? "",
-      totalPrice: price,
-      dates: dates || "",
-      checkIn: checkIn,
-      checkOut: checkOut,
-    });
-
-    if (!isAuthenticated) {
-      setIsLoginOpen(true);
+    if (!validateBookingDates(checkIn, checkOut)) {
       return;
     }
 
-    // Authenticated users: skip the rental dates modal and go straight to identity verification
-    setShowIdentityModal(true);
-  };
-
-  const handleRentalDatesNext = (pickupDate: string, returnDate: string) => {
-    const dates =
-      pickupDate && returnDate
-        ? `${pickupDate} – ${returnDate}`
-        : checkIn && checkOut
-          ? `${checkIn} – ${checkOut}`
-          : "17-15 March 2026";
-    setPendingBookingState({
+    const dates = `${checkIn} – ${checkOut}`;
+    const bookingState = {
       title: trailer?.title ?? "Gooseneck Trailer - Texas, USA",
       subtitle:
         trailer?.subtitle ??
@@ -109,10 +124,51 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       image: trailer?.image ?? "",
       totalPrice: price,
       dates,
-      checkIn: pickupDate || checkIn,
-      checkOut: returnDate || checkOut,
+      checkIn,
+      checkOut,
+    };
+
+    setPendingBookingState(bookingState);
+
+    if (!isAuthenticated) {
+      setIsLoginOpen(true);
+      return;
+    }
+    // Authenticated users: navigate to verify-identity page where user uploads documents
+    navigate("/verify-identity", {
+      state: {
+        trailerId: trailerId != null ? String(trailerId) : "",
+        backgroundLocation: location,
+        ...bookingState,
+      },
     });
-    setShowIdentityModal(true);
+  };
+
+  const handleRentalDatesNext = (pickupDate: string, returnDate: string) => {
+    if (!validateBookingDates(pickupDate, returnDate)) {
+      return;
+    }
+
+    const dates = `${pickupDate} – ${returnDate}`;
+    const bookingState = {
+      title: trailer?.title ?? "Gooseneck Trailer - Texas, USA",
+      subtitle:
+        trailer?.subtitle ??
+        "25FT Flatbed · Dual Axle · Industrial Steel Frame",
+      image: trailer?.image ?? "",
+      totalPrice: price,
+      dates,
+      checkIn: pickupDate,
+      checkOut: returnDate,
+    };
+    setPendingBookingState(bookingState);
+    navigate("/verify-identity", {
+      state: {
+        trailerId: trailerId != null ? String(trailerId) : "",
+        backgroundLocation: location,
+        ...bookingState,
+      },
+    });
   };
 
   const handleIdentityContinue = async (data: IdentityVerificationData) => {
@@ -140,10 +196,20 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
 
     bookingInFlight.current = true;
     try {
-      await createBooking({ trailerId: tid, startDate, endDate });
+      // include uploaded documents if provided
+      const payload: any = { trailerId: tid, startDate, endDate };
+      const dl = data.drivingLicenseDocument
+        ? [data.drivingLicenseDocument]
+        : undefined;
+      const pp = data.passportDocument ? [data.passportDocument] : undefined;
+      if (dl) payload.drivingLicenseDocuments = dl;
+      if (pp) payload.passportDocuments = pp;
+
+      await createBooking(payload);
       toast.success("Booking submitted successfully.");
       setShowIdentityModal(false);
-      navigate("/liability-agreement", {
+      // navigate to a simple booking sent confirmation page
+      navigate("/booking-sent", {
         state: {
           ...pendingBookingState,
           identityVerification: data,
@@ -208,8 +274,14 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       if (normalizedTrailor === "Owner") {
         navigate("/");
       } else {
-        // After sign-up, proceed to identity verification (skip rental dates modal)
-        setShowIdentityModal(true);
+        // After sign-up, proceed to identity verification page
+        navigate("/verify-identity", {
+          state: {
+            trailerId: trailerId != null ? String(trailerId) : "",
+            backgroundLocation: location,
+            ...pendingBookingState,
+          },
+        });
       }
     } catch (err: any) {
       // eslint-disable-next-line no-console
@@ -309,17 +381,21 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 <input
                   type="date"
                   value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
+                  min={today}
+                  onChange={(e) => {
+                    setCheckIn(e.target.value);
+                    setValidationError(null);
+                  }}
                   className="
-              mt-1 w-full
-              bg-transparent
-              text-[14px]
-              text-[#8C8C8C]
-              focus:outline-none
-              appearance-none
-              [&::-webkit-calendar-picker-indicator]:opacity-100
-              [&::-webkit-calendar-picker-indicator]:cursor-pointer
-            "
+    mt-1 w-full
+    bg-transparent
+    text-[14px]
+    text-[#8C8C8C]
+    focus:outline-none
+    appearance-none
+    [&::-webkit-calendar-picker-indicator]:opacity-100
+    [&::-webkit-calendar-picker-indicator]:cursor-pointer
+  "
                 />
               </div>
 
@@ -341,7 +417,11 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 <input
                   type="date"
                   value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
+                  min={today}
+                  onChange={(e) => {
+                    setCheckOut(e.target.value);
+                    setValidationError(null);
+                  }}
                   className="
               mt-1 w-full
               bg-transparent
@@ -358,6 +438,10 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
 
             {/* Dispatch */}
           </div>
+
+          {validationError ? (
+            <p className="mt-3 text-sm text-[#E65C4F]">{validationError}</p>
+          ) : null}
 
           {/* Button */}
           <button
@@ -390,8 +474,14 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
         onClose={() => setIsLoginOpen(false)}
         onSuccess={() => {
           setIsLoginOpen(false);
-          // After login, continue booking flow: open identity verification
-          setShowIdentityModal(true);
+          // After login, continue booking flow: go to verify-identity page
+          navigate("/verify-identity", {
+            state: {
+              trailerId: trailerId != null ? String(trailerId) : "",
+              backgroundLocation: location,
+              ...pendingBookingState,
+            },
+          });
         }}
         onOpenSignUp={() => {
           setIsLoginOpen(false);
@@ -416,6 +506,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
         }}
         onContinue={handleIdentityContinue}
         startAtDetails={true}
+        requiredDocuments={["driving_licence", "passport"]}
       />
     </>
   );

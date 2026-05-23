@@ -4,6 +4,7 @@ import settingsIcon from "../../assets/images/Personalinfo.png";
 import privacyicon from "../../assets/images/privacypolicy.png";
 import termsicon from "../../assets/images/termscondition.png";
 import transactionicon from "../../assets/images/transactionhistory.png";
+import chevronDown from "../../assets/images/Dorpdown.png";
 import {
   ChevronRight,
   Settings,
@@ -29,6 +30,96 @@ import {
   type UserProfileApiData,
 } from "../../api/userApi.ts";
 
+type CountryOption = {
+  code: string;
+  name: string;
+  dialCode: string;
+  flagUrl: string;
+};
+
+const COUNTRY_OPTIONS: CountryOption[] = [
+  {
+    code: "US",
+    name: "United States",
+    dialCode: "+1",
+    flagUrl: "https://flagcdn.com/w20/us.png",
+  },
+  {
+    code: "CA",
+    name: "Canada",
+    dialCode: "+1",
+    flagUrl: "https://flagcdn.com/w20/ca.png",
+  },
+  {
+    code: "GB",
+    name: "United Kingdom",
+    dialCode: "+44",
+    flagUrl: "https://flagcdn.com/w20/gb.png",
+  },
+  {
+    code: "IN",
+    name: "India",
+    dialCode: "+91",
+    flagUrl: "https://flagcdn.com/w20/in.png",
+  },
+  {
+    code: "AU",
+    name: "Australia",
+    dialCode: "+61",
+    flagUrl: "https://flagcdn.com/w20/au.png",
+  },
+  {
+    code: "DE",
+    name: "Germany",
+    dialCode: "+49",
+    flagUrl: "https://flagcdn.com/w20/de.png",
+  },
+  {
+    code: "FR",
+    name: "France",
+    dialCode: "+33",
+    flagUrl: "https://flagcdn.com/w20/fr.png",
+  },
+];
+
+const parsePhoneNumber = (phone?: string | null) => {
+  const raw = String(phone ?? "").trim();
+  if (!raw) {
+    return { country: COUNTRY_OPTIONS[0], localNumber: "" };
+  }
+  const matched = COUNTRY_OPTIONS.find((country) =>
+    raw.startsWith(country.dialCode),
+  );
+  if (matched) {
+    return {
+      country: matched,
+      localNumber: raw.slice(matched.dialCode.length).replace(/\D/g, ""),
+    };
+  }
+  return { country: COUNTRY_OPTIONS[0], localNumber: raw.replace(/\D/g, "") };
+};
+
+const validatePhoneDigits = (value: string) => {
+  if (value && !/^\d+$/.test(value)) {
+    return "Phone number can only contain digits.";
+  }
+  if (value && value.length !== 10) {
+    return "Phone number must be exactly 10 digits.";
+  }
+  return null;
+};
+
+const validateEmail = (value: string) => {
+  const email = value.trim();
+  if (!email) return "Enter an email address.";
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!isValidEmail) return "Enter a valid email address.";
+  if (!email.toLowerCase().endsWith("@gmail.com")) {
+    return "Email must be a Gmail address.";
+  }
+  return null;
+};
+
 const isFilled = (v?: string | null) => Boolean(v && String(v).trim());
 
 const emergencyHasData = (ec?: EmergencyContactPayload | null) =>
@@ -38,27 +129,34 @@ const emergencyHasData = (ec?: EmergencyContactPayload | null) =>
 
 const residentialFromProfile = (p: UserProfileApiData | null): string => {
   if (!p) return "";
-  if (isFilled(p.residentialAddress))
-    return String(p.residentialAddress).trim();
-  if (isFilled(p.address)) return String(p.address).trim();
-  const list = p.addresses;
-  if (Array.isArray(list) && list.length > 0) {
-    const first = list[0];
-    if (typeof first === "string") return first.trim();
-    if (first && typeof first === "object") {
-      const o = first as Record<string, unknown>;
-      const s =
-        o.formattedAddress ??
-        o.address ??
-        o.addressLine ??
-        o.addressLine1 ??
-        o.street ??
-        o.line1 ??
-        o.city;
-      if (typeof s === "string" && s.trim()) return s.trim();
-    }
-  }
-  return "";
+
+  const addressLine = isFilled(p.residentialAddress)
+    ? String(p.residentialAddress).trim()
+    : isFilled(p.address)
+      ? String(p.address).trim()
+      : (() => {
+          const list = p.addresses;
+          if (Array.isArray(list) && list.length > 0) {
+            const first = list[0];
+            if (typeof first === "string") return first.trim();
+            if (first && typeof first === "object") {
+              const o = first as Record<string, unknown>;
+              const s =
+                o.formattedAddress ??
+                o.address ??
+                o.addressLine ??
+                o.addressLine1 ??
+                o.street ??
+                o.line1 ??
+                o.city;
+              if (typeof s === "string" && s.trim()) return s.trim();
+            }
+          }
+          return "";
+        })();
+
+  const locationParts = [p.state?.trim(), p.country?.trim()].filter(isFilled);
+  return [addressLine, ...locationParts].filter(isFilled).join(", ");
 };
 
 const legalDisplay = (p: UserProfileApiData | null) => {
@@ -181,11 +279,27 @@ const Profile: React.FC = () => {
   const [draftLegal, setDraftLegal] = useState("");
   const [draftPreferred, setDraftPreferred] = useState("");
   const [draftPhone, setDraftPhone] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
+    COUNTRY_OPTIONS[0],
+  );
   const [draftEmail, setDraftEmail] = useState("");
-  const [draftResidential, setDraftResidential] = useState("");
+  const [draftResidentialCountry, setDraftResidentialCountry] = useState("");
+  const [draftResidentialState, setDraftResidentialState] = useState("");
+  const [draftResidentialLine1, setDraftResidentialLine1] = useState("");
   const [draftEcName, setDraftEcName] = useState("");
   const [draftEcEmail, setDraftEcEmail] = useState("");
   const [draftEcPhone, setDraftEcPhone] = useState("");
+  const [selectedEmergencyCountry, setSelectedEmergencyCountry] =
+    useState<CountryOption>(COUNTRY_OPTIONS[0]);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emergencyPhoneError, setEmergencyPhoneError] = useState<string | null>(
+    null,
+  );
+  const [emergencyEmailError, setEmergencyEmailError] = useState<string | null>(
+    null,
+  );
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   const loadProfile = useCallback(async () => {
     if (!isAuthenticated) {
@@ -224,16 +338,31 @@ const Profile: React.FC = () => {
     } else if (field === "preferredFirstName") {
       setDraftPreferred(profile.preferredFirstName?.trim() ?? "");
     } else if (field === "phoneNumber") {
-      setDraftPhone(profile.phoneNumber?.trim() ?? "");
+      const parsed = parsePhoneNumber(profile.phoneNumber?.trim() ?? "");
+      setSelectedCountry(parsed.country);
+      setDraftPhone(parsed.localNumber);
     } else if (field === "email") {
       setDraftEmail(profile.email?.trim() ?? "");
     } else if (field === "residentialAddress") {
-      setDraftResidential(residentialFromProfile(profile));
+      setDraftResidentialLine1(
+        profile.residentialAddress?.trim() ?? profile.address?.trim() ?? "",
+      );
+      setDraftResidentialState(profile.state?.trim() ?? "");
+      setDraftResidentialCountry(profile.country?.trim() ?? "");
     } else if (field === "emergencyContact") {
       setDraftEcName(profile.emergencyContact?.name?.trim() ?? "");
       setDraftEcEmail(profile.emergencyContact?.email?.trim() ?? "");
-      setDraftEcPhone(profile.emergencyContact?.phoneNumber?.trim() ?? "");
+      const parsed = parsePhoneNumber(
+        profile.emergencyContact?.phoneNumber?.trim() ?? "",
+      );
+      setSelectedEmergencyCountry(parsed.country);
+      setDraftEcPhone(parsed.localNumber);
     }
+    setPhoneError(null);
+    setEmailError(null);
+    setEmergencyPhoneError(null);
+    setEmergencyEmailError(null);
+    setGeneralError(null);
     setEditField(field);
   };
 
@@ -250,17 +379,32 @@ const Profile: React.FC = () => {
     } else if (editField === "preferredFirstName") {
       setDraftPreferred(profile.preferredFirstName?.trim() ?? "");
     } else if (editField === "phoneNumber") {
-      setDraftPhone(profile.phoneNumber?.trim() ?? "");
+      const parsed = parsePhoneNumber(profile.phoneNumber?.trim() ?? "");
+      setSelectedCountry(parsed.country);
+      setDraftPhone(parsed.localNumber);
     } else if (editField === "email") {
       setDraftEmail(profile.email?.trim() ?? "");
     } else if (editField === "residentialAddress") {
-      setDraftResidential(residentialFromProfile(profile));
+      setDraftResidentialLine1(
+        profile.residentialAddress?.trim() ?? profile.address?.trim() ?? "",
+      );
+      setDraftResidentialState(profile.state?.trim() ?? "");
+      setDraftResidentialCountry(profile.country?.trim() ?? "");
     } else if (editField === "emergencyContact") {
       setDraftEcName(profile.emergencyContact?.name?.trim() ?? "");
       setDraftEcEmail(profile.emergencyContact?.email?.trim() ?? "");
-      setDraftEcPhone(profile.emergencyContact?.phoneNumber?.trim() ?? "");
+      const parsed = parsePhoneNumber(
+        profile.emergencyContact?.phoneNumber?.trim() ?? "",
+      );
+      setSelectedEmergencyCountry(parsed.country);
+      setDraftEcPhone(parsed.localNumber);
     }
 
+    setPhoneError(null);
+    setEmailError(null);
+    setEmergencyPhoneError(null);
+    setEmergencyEmailError(null);
+    setGeneralError(null);
     closeEditor();
   };
 
@@ -310,40 +454,72 @@ const Profile: React.FC = () => {
       return;
     }
     if (editField === "phoneNumber") {
-      const v = draftPhone.trim();
-      if (!v) {
-        toast.error("Enter a phone number");
+      const raw = draftPhone.trim();
+      const error = validatePhoneDigits(raw);
+      if (!raw) {
+        setPhoneError("Enter a phone number.");
         return;
       }
-      void persist({ phoneNumber: v });
+      if (error) {
+        setPhoneError(error);
+        return;
+      }
+      const fullPhone = raw.startsWith("+")
+        ? raw
+        : `${selectedCountry.dialCode}${raw}`;
+      void persist({ phoneNumber: fullPhone });
       return;
     }
     if (editField === "email") {
       const v = draftEmail.trim();
-      if (!v) {
-        toast.error("Enter an email");
+      const error = validateEmail(v);
+      if (error) {
+        setEmailError(error);
         return;
       }
       void persist({ email: v });
       return;
     }
     if (editField === "residentialAddress") {
-      const v = draftResidential.trim();
-      if (!v) {
-        toast.error("Enter an address");
+      const line1 = draftResidentialLine1.trim();
+      if (!line1) {
+        toast.error("Enter address line 1");
         return;
       }
-      void persist({ residentialAddress: v });
+      void persist({
+        residentialAddress: line1,
+        country: draftResidentialCountry.trim(),
+        state: draftResidentialState.trim(),
+      });
       return;
     }
     if (editField === "emergencyContact") {
       const name = draftEcName.trim();
       const email = draftEcEmail.trim();
-      const phoneNumber = draftEcPhone.trim();
-      if (!name && !email && !phoneNumber) {
-        toast.error("Add at least one emergency contact detail");
+      const phoneRaw = draftEcPhone.trim();
+      if (!name && !email && !phoneRaw) {
+        setGeneralError("Add at least one emergency contact detail.");
         return;
       }
+      if (phoneRaw) {
+        const phoneErrorText = validatePhoneDigits(phoneRaw);
+        if (phoneErrorText) {
+          setEmergencyPhoneError(phoneErrorText);
+          return;
+        }
+      }
+      if (email) {
+        const emailErrorText = validateEmail(email);
+        if (emailErrorText) {
+          setEmergencyEmailError(emailErrorText);
+          return;
+        }
+      }
+      const phoneNumber = phoneRaw
+        ? phoneRaw.startsWith("+")
+          ? phoneRaw
+          : `${selectedEmergencyCountry.dialCode}${phoneRaw}`
+        : "";
       void persist({
         emergencyContact: { name, email, phoneNumber },
       });
@@ -658,34 +834,142 @@ const Profile: React.FC = () => {
                           )}
 
                           {row.key === "phoneNumber" && (
-                            <input
-                              value={draftPhone}
-                              onChange={(e) => setDraftPhone(e.target.value)}
-                              className={inputEditClass}
-                              placeholder="Phone number"
-                            />
+                            <>
+                              <div className="w-full h-[44px] border border-[#8B8B8B] rounded-[8px] bg-white flex items-center px-3 focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/10 transition-all gap-2">
+                                <div className="relative flex items-center gap-1 min-w-[60px]">
+                                  <img
+                                    src={selectedCountry.flagUrl}
+                                    alt={selectedCountry.name}
+                                    className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                                  />
+                                  <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
+                                    {selectedCountry.dialCode}
+                                  </span>
+                                  <div className="flex items-center">
+                                    <img
+                                      src={chevronDown}
+                                      alt="dropdown"
+                                      className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
+                                    />
+                                  </div>
+                                  <select
+                                    className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
+                                    value={selectedCountry.code}
+                                    onChange={(e) => {
+                                      const next = COUNTRY_OPTIONS.find(
+                                        (c) => c.code === e.target.value,
+                                      );
+                                      if (next) setSelectedCountry(next);
+                                    }}
+                                    style={{
+                                      WebkitAppearance: "none",
+                                      MozAppearance: "none",
+                                      appearance: "none",
+                                    }}
+                                  >
+                                    {COUNTRY_OPTIONS.map((country) => (
+                                      <option
+                                        key={country.code}
+                                        value={country.code}
+                                      >
+                                        {country.name} {country.dialCode}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <input
+                                  type="tel"
+                                  value={draftPhone}
+                                  onChange={(e) => {
+                                    const digits = e.target.value.replace(
+                                      /\D/g,
+                                      "",
+                                    );
+                                    setDraftPhone(digits);
+                                    setPhoneError(validatePhoneDigits(digits));
+                                    setGeneralError(null);
+                                  }}
+                                  maxLength={10}
+                                  className="flex-1 bg-transparent outline-none text-[15px] text-black custom-placeholder placeholder:text-[#9B989E] font-normal"
+                                  placeholder="Phone number"
+                                />
+                              </div>
+                              {phoneError && (
+                                <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                  {phoneError}
+                                </p>
+                              )}
+                            </>
                           )}
 
                           {row.key === "email" && (
-                            <input
-                              type="email"
-                              value={draftEmail}
-                              onChange={(e) => setDraftEmail(e.target.value)}
-                              className={inputEditClass}
-                              placeholder="Email"
-                            />
+                            <>
+                              <input
+                                type="email"
+                                value={draftEmail}
+                                onChange={(e) => {
+                                  setDraftEmail(e.target.value);
+                                  setEmailError(validateEmail(e.target.value));
+                                  setGeneralError(null);
+                                }}
+                                className={inputEditClass}
+                                placeholder="Email"
+                              />
+                              {emailError && (
+                                <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                  {emailError}
+                                </p>
+                              )}
+                            </>
                           )}
 
                           {row.key === "residentialAddress" && (
-                            <textarea
-                              value={draftResidential}
-                              onChange={(e) =>
-                                setDraftResidential(e.target.value)
-                              }
-                              rows={3}
-                              className={`${inputEditClass} resize-none`}
-                              placeholder="Street, city, state, ZIP"
-                            />
+                            <div className="space-y-3">
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                  <label className="mb-2 block text-[13px] font-medium text-black">
+                                    Country
+                                  </label>
+                                  <input
+                                    value={draftResidentialCountry}
+                                    onChange={(e) =>
+                                      setDraftResidentialCountry(e.target.value)
+                                    }
+                                    className={inputEditClass}
+                                    placeholder="Country"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="mb-2 block text-[13px] font-medium text-black">
+                                    State
+                                  </label>
+                                  <input
+                                    value={draftResidentialState}
+                                    onChange={(e) =>
+                                      setDraftResidentialState(e.target.value)
+                                    }
+                                    className={inputEditClass}
+                                    placeholder="State"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="mb-2 block text-[13px] font-medium text-black">
+                                  Address line 1
+                                </label>
+                                <textarea
+                                  value={draftResidentialLine1}
+                                  onChange={(e) =>
+                                    setDraftResidentialLine1(e.target.value)
+                                  }
+                                  rows={3}
+                                  className={`${inputEditClass} resize-none`}
+                                  placeholder="Street address, city, ZIP"
+                                />
+                              </div>
+                            </div>
                           )}
 
                           {row.key === "emergencyContact" && (
@@ -700,22 +984,97 @@ const Profile: React.FC = () => {
                               <input
                                 type="email"
                                 value={draftEcEmail}
-                                onChange={(e) =>
-                                  setDraftEcEmail(e.target.value)
-                                }
+                                onChange={(e) => {
+                                  setDraftEcEmail(e.target.value);
+                                  setEmergencyEmailError(
+                                    validateEmail(e.target.value),
+                                  );
+                                  setGeneralError(null);
+                                }}
                                 className={inputEmergencyFieldClass}
                                 placeholder="Contact email"
                               />
+                              {emergencyEmailError && (
+                                <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                  {emergencyEmailError}
+                                </p>
+                              )}
 
-                              <input
-                                value={draftEcPhone}
-                                onChange={(e) =>
-                                  setDraftEcPhone(e.target.value)
-                                }
-                                className={inputEmergencyFieldClass}
-                                placeholder="Contact phone"
-                              />
+                              <div className="w-full h-[44px] border border-[#8B8B8B] rounded-[8px] bg-white flex items-center px-3 focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/10 transition-all gap-2">
+                                <div className="relative flex items-center gap-1 min-w-[60px]">
+                                  <img
+                                    src={selectedEmergencyCountry.flagUrl}
+                                    alt={selectedEmergencyCountry.name}
+                                    className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                                  />
+                                  <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
+                                    {selectedEmergencyCountry.dialCode}
+                                  </span>
+                                  <div className="flex items-center">
+                                    <img
+                                      src={chevronDown}
+                                      alt="dropdown"
+                                      className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
+                                    />
+                                  </div>
+                                  <select
+                                    className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
+                                    value={selectedEmergencyCountry.code}
+                                    onChange={(e) => {
+                                      const next = COUNTRY_OPTIONS.find(
+                                        (c) => c.code === e.target.value,
+                                      );
+                                      if (next)
+                                        setSelectedEmergencyCountry(next);
+                                    }}
+                                    style={{
+                                      WebkitAppearance: "none",
+                                      MozAppearance: "none",
+                                      appearance: "none",
+                                    }}
+                                  >
+                                    {COUNTRY_OPTIONS.map((country) => (
+                                      <option
+                                        key={country.code}
+                                        value={country.code}
+                                      >
+                                        {country.name} {country.dialCode}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <input
+                                  type="tel"
+                                  value={draftEcPhone}
+                                  onChange={(e) => {
+                                    const digits = e.target.value.replace(
+                                      /\D/g,
+                                      "",
+                                    );
+                                    setDraftEcPhone(digits);
+                                    setEmergencyPhoneError(
+                                      validatePhoneDigits(digits),
+                                    );
+                                    setGeneralError(null);
+                                  }}
+                                  maxLength={10}
+                                  className="flex-1 bg-transparent outline-none text-[15px] text-black custom-placeholder placeholder:text-[#9B989E] font-normal"
+                                  placeholder="Contact phone"
+                                />
+                              </div>
+                              {emergencyPhoneError && (
+                                <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                  {emergencyPhoneError}
+                                </p>
+                              )}
                             </div>
+                          )}
+
+                          {generalError && (
+                            <p className="mb-3 text-[13px] font-medium text-[#E74C3C]">
+                              {generalError}
+                            </p>
                           )}
 
                           <div className="mt-3 flex items-center gap-3">

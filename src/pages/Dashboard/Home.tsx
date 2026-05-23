@@ -151,7 +151,13 @@ const Home: React.FC = () => {
   const visibleOwnerTrailers = ownerTrailerCards.slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
+    <div
+      style={{
+        background: "#fff",
+        boxShadow: "0px 40px 40px 0px #000000",
+      }}
+      className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden"
+    >
       <RevealBlock>
         <Container />
       </RevealBlock>
@@ -159,22 +165,82 @@ const Home: React.FC = () => {
       {isOwnerWithNoTrailers ? (
         /* Empty state below container - no trailer listings shown */
         <RevealBlock delayMs={120}>
-          <div className="flex flex-col items-center justify-center px-6 py-16 sm:py-24 text-center">
-            <div className="relative w-full rounded-xl bg-white shadow-lg border border-gray-200 border-l-0 sm:w-[70%] sm:max-w-[920px]">
+          <div
+            className="flex flex-col items-center
+           justify-center px-6 py-16 sm:py-24 text-center"
+          >
+            <div
+              className="
+    relative w-full rounded-xl
+    bg-[#FFFFFF]
+    border border-[#00000040]
+    border-l-0
+    shadow-[4px_4px_4px_4px_#00000026]
+    sm:w-[70%] sm:max-w-[920px]
+  "
+            >
               <div className="flex flex-col items-center justify-center px-6 py-12 sm:py-16 text-center">
-                <p className="text-lg font-semibold text-gray-900 mb-2">
+                <p
+                  className="
+    mb-2
+    font-lexend
+    text-[30px]
+    font-medium
+    leading-[100%]
+    tracking-[0%]
+    align-middle
+    text-black
+  "
+                >
                   You haven&apos;t added any trailers yet.
                 </p>
-                <p className="text-base text-gray-700 mb-6 max-w-sm leading-relaxed">
+                <p
+                  className=" mt-4
+    mb-6
+    max-w-sm
+    text-center
+    font-lexend
+    text-[18px]
+    font-normal
+    leading-[100%]
+    tracking-[0px]
+    text-black
+  "
+                >
                   Start by adding your first trailer so renters can view and
                   book it.
                 </p>
                 <button
                   type="button"
                   onClick={() => setAddTrailerOpen(true)}
-                  className="inline-flex items-center justify-center px-8 py-3.5 rounded-lg bg-[#389131] text-white font-semibold hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+                  className="
+    inline-flex items-center justify-center
+    w-[213px] h-[56px]
+    rounded-[5px]
+    pt-[13px] pr-[67px] pb-[14px] pl-[68px]
+    gap-[10px]
+    bg-[#389131]
+    font-lexend
+    font-semibold
+    text-white
+    transition-all duration-300
+    hover:opacity-90 hover:-translate-y-0.5
+    active:translate-y-0
+  "
                 >
-                  Add
+                  <span
+                    className="
+    font-lexend
+    text-[23px]
+    font-semibold
+    leading-[100%]
+    tracking-[0px]
+    text-center
+    text-white
+  "
+                  >
+                    Add
+                  </span>
                 </button>
               </div>
             </div>

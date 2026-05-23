@@ -26,10 +26,10 @@ import { RootState } from "../../store";
 
 import {
   getUserProfile,
-  resolveProfilePictureUrl,
-  updateUserProfilePicture,
   type UserProfileApiData,
+  updateUserProfile,
 } from "../../api/userApi.ts";
+import uploadProfilePhoto from "../../api/uploadApi.ts";
 
 type ProfileUpdateErrorBody = {
   message?: string;
@@ -88,6 +88,17 @@ const Profile: React.FC = () => {
       const data = await getUserProfile();
       setProfile(data);
       setProfilePicturePath(data.profilePicture ?? null);
+      // If the last uploaded publicId matches this profile's publicId, prefer its URL
+      try {
+        const last = getLastUpload();
+        const lastId = sanitizePublicId(last?.publicId ?? null);
+        const dataId = sanitizePublicId(data.profilePicture ?? null);
+        if (lastId && dataId && lastId === dataId) {
+          setUploadedPreviewUrl(last?.url ?? null);
+        }
+      } catch {
+        // ignore
+      }
     } catch {
       setProfile(null);
       setProfilePicturePath(null);
@@ -98,7 +109,81 @@ const Profile: React.FC = () => {
     void loadProfilePicture();
   }, [loadProfilePicture]);
 
-  const profilePictureUrl = resolveProfilePictureUrl(profilePicturePath);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(
+    null,
+  );
+
+  const LAST_UPLOAD_KEY = "haulhub_profile_image_last";
+
+  const getLastUpload = (): {
+    publicId?: string;
+    url?: string;
+    ts?: number;
+  } | null => {
+    try {
+      const raw = localStorage.getItem(LAST_UPLOAD_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw) as {
+        publicId?: string;
+        url?: string;
+        ts?: number;
+      };
+    } catch {
+      return null;
+    }
+  };
+
+  const setLastUpload = (publicId?: string | null, url?: string | null) => {
+    try {
+      if (!publicId || !url) {
+        localStorage.removeItem(LAST_UPLOAD_KEY);
+        return;
+      }
+      const cleanId = sanitizePublicId(publicId) ?? String(publicId);
+      const data = { publicId: cleanId, url, ts: Date.now() };
+      localStorage.setItem(LAST_UPLOAD_KEY, JSON.stringify(data));
+    } catch {
+      // ignore
+    }
+  };
+
+  const sanitizePublicId = (p?: string | null): string | null => {
+    if (!p) return null;
+    let s = String(p).trim();
+    // Remove surrounding quotes and common encoding residues like %22
+    s = s.replace(/^\s*["']+|["']+\s*$/g, "");
+    s = s.replace(/%22/g, "");
+    s = s.replace(/^\/+|\/+$/g, "");
+    return s || null;
+  };
+
+  const cloudinaryBase = "https://res.cloudinary.com/dpsy0wq7d/image/upload";
+
+  const sanitizedProfilePicture = sanitizePublicId(
+    profile?.profilePicture ?? profilePicturePath,
+  );
+
+  const defaultProfileDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="100%" height="100%" fill="#E6EEF5"/><text x="50%" y="52%" font-size="120" text-anchor="middle" fill="#2F4A6D" font-family="Arial, Helvetica, sans-serif" dy=".35em">?</text></svg>',
+  )}`;
+
+  let profilePictureUrl: string;
+  if (uploadedPreviewUrl) {
+    profilePictureUrl = uploadedPreviewUrl;
+  } else if (sanitizedProfilePicture) {
+    if (
+      /^https?:\/\//i.test(sanitizedProfilePicture) ||
+      /^data:/i.test(sanitizedProfilePicture)
+    ) {
+      profilePictureUrl = sanitizedProfilePicture;
+    } else {
+      profilePictureUrl = `${cloudinaryBase}/${sanitizedProfilePicture}.jpg`;
+    }
+  } else {
+    profilePictureUrl = defaultProfileDataUrl;
+  }
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -110,9 +195,30 @@ const Profile: React.FC = () => {
     setUploadingPhoto(true);
 
     try {
-      const next = await updateUserProfilePicture(file);
+      // First upload the photo to the uploads API
+      const uploadResp = await uploadProfilePhoto(file);
+      if (!uploadResp || !uploadResp.success)
+        throw new Error("Image upload failed");
 
-      setProfilePicturePath(next.profilePicture ?? null);
+      const publicId = uploadResp.data.publicId;
+      const uploadedUrl = uploadResp.data.url;
+
+      // Immediately show the uploaded (versioned) URL so the user sees the new image right away
+      setUploadedPreviewUrl(uploadedUrl);
+      // persist last upload mapping so it survives refreshes
+      try {
+        setLastUpload(publicId, uploadedUrl);
+      } catch {
+        // ignore
+      }
+      setImgError(false);
+      setImgLoaded(false);
+
+      // Then PATCH the profile with the returned publicId
+      const updated = await updateUserProfile({ profilePicture: publicId });
+
+      setProfile(updated);
+      setProfilePicturePath(updated.profilePicture ?? null);
 
       toast.success("Profile photo updated");
     } catch (err) {
@@ -123,8 +229,7 @@ const Profile: React.FC = () => {
   };
 
   const displayName =
-    profile?.fullName?.trim() ||
-    `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+    profile?.legalName?.trim() || profile?.fullName?.trim() || "";
 
   const initials = displayName
     .split(" ")
@@ -196,34 +301,50 @@ const Profile: React.FC = () => {
         {/* Profile Section */}
         {/* Profile Section */}
         <section className="mt-3 flex flex-col items-center border-b border-[#D9D9D9] pb-8">
-          {/* Profile Image Wrapper */}
-          <div className="relative flex flex-col items-center">
+          {/* Avatar Wrapper */}
+          <div className="relative w-[156px] h-[156px]">
             {/* Profile Circle */}
-            <div
-              className="rounded-full bg-[#D9D9D9] shadow-md flex items-center justify-center overflow-hidden"
-              style={{
-                width: "156px",
-                height: "156px",
-              }}
-            >
-              {profilePictureUrl ? (
+            <div className="w-full h-full rounded-full bg-[#D9D9D9] shadow-md overflow-hidden flex items-center justify-center relative">
+              {!imgLoaded && !imgError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100/60">
+                  <svg
+                    className="animate-spin h-8 w-8 text-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    ></path>
+                  </svg>
+                </div>
+              )}
+
+              {imgError ? (
+                <span className="text-[48px] font-semibold text-[#2F4A6D] leading-none">
+                  {initials}
+                </span>
+              ) : (
                 <img
                   src={profilePictureUrl}
                   alt="Profile"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span
-                  style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 600,
-                    fontSize: "48px",
-                    lineHeight: "100%",
-                    color: "#2F4A6D",
+                  className="w-full h-full object-cover"
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => {
+                    setImgError(true);
+                    setImgLoaded(false);
                   }}
-                >
-                  {initials}
-                </span>
+                />
               )}
             </div>
 
@@ -232,17 +353,23 @@ const Profile: React.FC = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto}
-              className="absolute flex items-center justify-center rounded-full shadow-md"
-              style={{
-                width: "42px",
-                height: "42px",
-                background: "#4A9B3D",
-                right: "-6px",
-                bottom: "42px",
-              }}
               aria-label="Change profile photo"
+              className="
+        absolute
+        bottom-2
+        right-0
+        w-[44px]
+        h-[44px]
+        rounded-full
+        bg-[#4A9B3D]
+        flex
+        items-center
+        justify-center
+        shadow-lg
+      
+      "
             >
-              <Camera className="w-[20px] h-[20px] text-white" />
+              <Camera className="w-5 h-5 text-white" />
             </button>
 
             {/* Hidden File Input */}
@@ -254,21 +381,21 @@ const Profile: React.FC = () => {
               onChange={(ev) => void handlePhotoChange(ev)}
               disabled={uploadingPhoto}
             />
-
-            {/* Name */}
-            <p
-              className="mt-4"
-              style={{
-                fontFamily: "Lexend",
-                fontWeight: 600,
-                fontSize: "20px",
-                lineHeight: "100%",
-                color: "#000000",
-              }}
-            >
-              {displayName}
-            </p>
           </div>
+
+          {/* Name */}
+          <p
+            className="
+      mt-5
+      text-[20px]
+      font-semibold
+      text-black
+      text-center
+      break-words
+    "
+          >
+            {displayName}
+          </p>
         </section>
 
         {/* Menu Items */}

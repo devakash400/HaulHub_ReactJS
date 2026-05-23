@@ -235,10 +235,14 @@ const Navbar: React.FC = () => {
 
             {isDrawerOpen && (
               <div
-                className="absolute right-0 top-full z-[60] mt-2 rounded-lg bg-white py-2"
+                className="absolute right-0 
+                top-full z-[60] 
+                mt-2 rounded-lg 
+                bg-white py-2 
+                
+                max-h-[calc(100vh-140px)] overflow-y-auto"
                 style={{
                   width: "161px",
-                  height: "197px",
                   opacity: 1,
                   border: "1px solid #00000033",
                 }}
@@ -292,14 +296,27 @@ const Navbar: React.FC = () => {
                           </Link>
                         </li>
                         {isAuthenticated ? (
-                          <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                            onClick={() => setIsLogoutConfirmOpen(true)}
-                          >
-                            <span className="text-inherit no-underline cursor-pointer block w-full">
-                              Logout
-                            </span>
-                          </li>
+                          <>
+                            <li
+                              className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                              onClick={handleDrawerLinkRowClick}
+                            >
+                              <Link
+                                to="/notifications"
+                                className="text-inherit no-underline cursor-pointer block w-full"
+                              >
+                                Notifications
+                              </Link>
+                            </li>
+                            <li
+                              className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                              onClick={() => setIsLogoutConfirmOpen(true)}
+                            >
+                              <span className="text-inherit no-underline cursor-pointer block w-full">
+                                Logout
+                              </span>
+                            </li>
+                          </>
                         ) : (
                           <li
                             className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
@@ -402,6 +419,12 @@ const Navbar: React.FC = () => {
                           onClick={handleDrawerLinkRowClick}
                         >
                           <Link to="/booking">Booking Screen</Link>
+                        </li>
+                        <li
+                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                          onClick={handleDrawerLinkRowClick}
+                        >
+                          <Link to="/notifications">Notifications</Link>
                         </li>
                         <li
                           className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"

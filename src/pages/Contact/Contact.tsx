@@ -25,9 +25,52 @@ const Contact: React.FC = () => {
   const [serviceType, setServiceType] = useState("");
   const [budget, setBudget] = useState("");
   const [message, setMessage] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [serviceError, setServiceError] = useState<string | null>(null);
+  const [budgetError, setBudgetError] = useState<string | null>(null);
+  const [messageError, setMessageError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    let ok = true;
+    if (!name.trim()) {
+      setNameError("Enter your name");
+      ok = false;
+    }
+    if (!email.trim()) {
+      setEmailError("Enter your email");
+      ok = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Enter a valid email address");
+      ok = false;
+    }
+    if (!serviceType.trim()) {
+      setServiceError("Select a service type");
+      ok = false;
+    }
+    if (!budget.trim()) {
+      setBudgetError("Select a budget range");
+      ok = false;
+    }
+    if (!message.trim()) {
+      setMessageError("Enter a message");
+      ok = false;
+    }
+
+    if (!ok) return;
+
+    // TODO: submit form
+    setName("");
+    setEmail("");
+    setServiceType("");
+    setBudget("");
+    setMessage("");
+    setNameError(null);
+    setEmailError(null);
+    setServiceError(null);
+    setBudgetError(null);
+    setMessageError(null);
   };
 
   return (
@@ -39,8 +82,10 @@ const Contact: React.FC = () => {
       <div className="mx-auto w-full">
         <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:gap-6">
           {/* Left Image */}
-          <div className="w-full overflow-hidden 
-          rounded-[24px] lg:w-[46%] lg:min-w-0 shrink-0">
+          <div
+            className="w-full overflow-hidden 
+          rounded-[24px] lg:w-[46%] lg:min-w-0 shrink-0"
+          >
             <img
               src={images.Contact}
               alt="Dump trailer at dealership"
@@ -89,7 +134,13 @@ const Contact: React.FC = () => {
                   type="text"
                   placeholder="Enter your Name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (nameError) setNameError(null);
+                  }}
+                  onBlur={() => {
+                    if (!name.trim()) setNameError("Enter your name");
+                  }}
                   className="w-full rounded-[2px] border border-[#dbdbdb] px-3.5 text-sm text-neutral-800 placeholder:font-['Lexend'] placeholder:font-light placeholder:text-[15px] placeholder:leading-[100%] placeholder:tracking-[0%] placeholder:text-[#B2B2B2] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   style={{
                     background: "#FFFFFF",
@@ -97,6 +148,9 @@ const Contact: React.FC = () => {
                     height: "46px",
                   }}
                 />
+                {nameError && (
+                  <p className="mt-2 text-sm text-[#E74C3C]">{nameError}</p>
+                )}
               </div>
 
               {/* Email */}
@@ -122,7 +176,15 @@ const Contact: React.FC = () => {
                   type="email"
                   placeholder="Enter your Email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailError) setEmailError(null);
+                  }}
+                  onBlur={() => {
+                    if (!email.trim()) setEmailError("Enter your email");
+                    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+                      setEmailError("Enter a valid email address");
+                  }}
                   className="w-full rounded-[2px] border border-[#dbdbdb] px-3.5 text-sm text-neutral-800 placeholder:font-['Lexend'] placeholder:font-light placeholder:text-[15px] placeholder:leading-[100%] placeholder:tracking-[0%] placeholder:text-[#B2B2B2] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   style={{
                     background: "#FFFFFF",
@@ -130,6 +192,9 @@ const Contact: React.FC = () => {
                     height: "46px",
                   }}
                 />
+                {emailError && (
+                  <p className="mt-2 text-sm text-[#E74C3C]">{emailError}</p>
+                )}
               </div>
 
               {/* Service */}
@@ -152,7 +217,14 @@ const Contact: React.FC = () => {
                 <select
                   id="contact-service"
                   value={serviceType}
-                  onChange={(e) => setServiceType(e.target.value)}
+                  onChange={(e) => {
+                    setServiceType(e.target.value);
+                    if (serviceError) setServiceError(null);
+                  }}
+                  onBlur={() => {
+                    if (!serviceType.trim())
+                      setServiceError("Select a service type");
+                  }}
                   className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   style={{
                     background: "#FFFFFF",
@@ -184,6 +256,10 @@ const Contact: React.FC = () => {
                   ))}
                 </select>
 
+                {serviceError && (
+                  <p className="mt-2 text-sm text-[#E74C3C]">{serviceError}</p>
+                )}
+
                 <span className="pointer-events-none absolute bottom-[17px] right-3 text-neutral-700">
                   <ChevronDown className="h-5 w-5" aria-hidden />
                 </span>
@@ -210,7 +286,13 @@ const Contact: React.FC = () => {
                 <select
                   id="contact-budget"
                   value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
+                  onChange={(e) => {
+                    setBudget(e.target.value);
+                    if (budgetError) setBudgetError(null);
+                  }}
+                  onBlur={() => {
+                    if (!budget.trim()) setBudgetError("Select a budget range");
+                  }}
                   className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   style={{
                     background: "#FFFFFF",
@@ -242,6 +324,10 @@ const Contact: React.FC = () => {
                   ))}
                 </select>
 
+                {budgetError && (
+                  <p className="mt-2 text-sm text-[#E74C3C]">{budgetError}</p>
+                )}
+
                 <span className="pointer-events-none absolute bottom-[17px] right-3 text-neutral-700">
                   <ChevronDown className="h-5 w-5" aria-hidden />
                 </span>
@@ -269,7 +355,13 @@ const Contact: React.FC = () => {
                   id="contact-message"
                   placeholder="Enter your Message"
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    if (messageError) setMessageError(null);
+                  }}
+                  onBlur={() => {
+                    if (!message.trim()) setMessageError("Enter a message");
+                  }}
                   rows={5}
                   className="w-full resize-none rounded-[2px] border border-[#dbdbdb] px-3.5 py-2.5 text-sm text-neutral-800 placeholder:font-['Lexend'] placeholder:font-light placeholder:text-[15px] placeholder:leading-[100%] placeholder:tracking-[0%] placeholder:text-[#B2B2B2] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                   style={{
@@ -278,6 +370,9 @@ const Contact: React.FC = () => {
                     height: "165px",
                   }}
                 />
+                {messageError && (
+                  <p className="mt-2 text-sm text-[#E74C3C]">{messageError}</p>
+                )}
               </div>
 
               {/* Submit */}

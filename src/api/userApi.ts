@@ -15,6 +15,7 @@ export type EmergencyContactPayload = {
 };
 
 export type UserProfileApiData = {
+  _id?: string;
   fullName?: string;
   legalName?: string;
   preferredFirstName?: string;
@@ -80,9 +81,9 @@ export const updateUserProfilePicture = async (
 ): Promise<UserProfileApiData> => {
   const formData = new FormData();
   formData.append("profilePicture", file);
-  const res = await api.patch<ProfileResponse>("/api/user/profile", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  // Do not set the Content-Type header manually; let the browser set the
+  // multipart boundary automatically so the server can parse the form data.
+  const res = await api.patch<ProfileResponse>("/api/user/profile", formData);
   if (!res.data?.success) {
     throw new Error("Unable to update profile picture");
   }
