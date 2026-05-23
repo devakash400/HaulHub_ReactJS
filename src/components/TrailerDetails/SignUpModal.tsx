@@ -20,6 +20,7 @@ export interface SignUpModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: SignUpData) => void;
+  submitError?: string | null;
 }
 
 const onlyAlphabetsRegex = /^[A-Za-z\s]+$/;
@@ -89,6 +90,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  submitError,
 }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -101,6 +103,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
     COUNTRY_OPTIONS[3],
   );
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const countryDropdownRef = useRef<HTMLDivElement | null>(null);
   const [agreed, setAgreed] = useState(false);
 
   const [firstNameTouched, setFirstNameTouched] = useState(false);
@@ -678,7 +682,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   >
                     Phone Number
                   </label>
-                  <div className="relative">
+                  <div className="relative" ref={countryDropdownRef}>
                     <div
                       className="w-full h-[44px] 
                     border border-[#8B8B8B] rounded-[8px]
@@ -687,62 +691,26 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                        focus-within:ring-2 focus-within:ring-[#389131]/10 
                        transition-all gap-2"
                     >
-                      {/* Country Selector */}
-                      <div className="relative flex items-center gap-1 min-w-[60px]">
-                        {/* Flag */}
+                      <button
+                        type="button"
+                        onClick={() => setCountryDropdownOpen((prev) => !prev)}
+                        className="flex items-center gap-2 rounded-[5px] bg-transparent px-1 py-1 text-left outline-none"
+                      >
                         <img
                           src={selectedCountry.flagUrl}
                           alt={selectedCountry.name}
                           className="w-[20px] h-[12px] object-cover rounded-[1px]"
                         />
-
-                        {/* Country Code */}
                         <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
                           {selectedCountry.dialCode}
                         </span>
+                        <img
+                          src={chevronDown}
+                          alt="dropdown"
+                          className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
+                        />
+                      </button>
 
-                        <div className="flex items-center">
-                          <img
-                            src={chevronDown}
-                            alt="dropdown"
-                            className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
-                          />
-                        </div>
-
-                        {/* Select */}
-                        <select
-                          className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
-                          value={selectedCountry.code}
-                          onChange={(e) => {
-                            const next = COUNTRY_OPTIONS.find(
-                              (c) => c.code === e.target.value,
-                            );
-                            if (next) setSelectedCountry(next);
-                          }}
-                          style={{
-                            WebkitAppearance: "none",
-                            MozAppearance: "none",
-                            appearance: "none",
-                          }}
-                        >
-                          {COUNTRY_OPTIONS.map((country) => (
-                            <option
-                              key={country.code}
-                              value={country.code}
-                              style={{
-                                padding: "12px",
-                                fontSize: "14px",
-                                color: "#222",
-                                background: "#fff",
-                              }}
-                            >
-                              {country.name} {country.dialCode}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Input */}
                       <input
                         type="tel"
                         placeholder="Enter Your Phone Number"
@@ -763,6 +731,34 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         }}
                       />
                     </div>
+
+                    {countryDropdownOpen && (
+                      <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-[10px] border border-[#D1D5DB] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+                        {COUNTRY_OPTIONS.map((country) => (
+                          <button
+                            type="button"
+                            key={country.code}
+                            onClick={() => {
+                              setSelectedCountry(country);
+                              setCountryDropdownOpen(false);
+                            }}
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#111827] hover:bg-[#F3F4F6]"
+                          >
+                            <img
+                              src={country.flagUrl}
+                              alt={country.name}
+                              className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                            />
+                            <span className="flex-1 truncate">
+                              {country.name}
+                            </span>
+                            <span className="text-[13px] text-[#6B7280]">
+                              {country.dialCode}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   {phoneTouched && !isPhoneValid && (
                     <p className="mt-1 text-xs text-red-600">
@@ -885,6 +881,10 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 </div>
               </div>
               {/* </div> */}
+
+              {submitError && (
+                <p className="mt-3 text-xs text-red-600">{submitError}</p>
+              )}
 
               {/* <div className="px-6 pb-6 sm:px-10 sm:pb-8 border-t border-gray-200"> */}
               <button

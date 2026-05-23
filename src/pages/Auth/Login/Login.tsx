@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, MouseEvent } from "react";
+import React, { useEffect, useMemo, useRef, useState, MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { images } from "../../../assets/images/index.ts";
@@ -129,11 +129,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
     COUNTRY_OPTIONS[0],
   );
+  const [countryMenuOpen, setCountryMenuOpen] = useState(false);
+  const countryDropdownRef = useRef<HTMLDivElement | null>(null);
   const [step, setStep] = useState<Step>(initialStep ?? "email");
   const [password, setPassword] = useState("");
-  const [loginTrailor, setLoginTrailor] = useState<"Renter" | "Owner">(
-    "Renter",
-  );
+  const [loginTrailor, setLoginTrailor] = useState<"Renter" | "Owner">("Owner");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -145,6 +145,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [otp, setOtp] = useState("");
   const [otpSeconds, setOtpSeconds] = useState(59);
   const [otpError, setOtpError] = useState<string | null>(null);
+  const [resetError, setResetError] = useState<string | null>(null);
 
   // New password flow
   const [newPassword, setNewPassword] = useState("");
@@ -195,6 +196,25 @@ const LoginModal: React.FC<LoginModalProps> = ({
   }, [step]);
 
   useEffect(() => {
+    const handleOutsideClick = (event: Event) => {
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setCountryMenuOpen(false);
+      }
+    };
+
+    if (countryMenuOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () => {
+        document.removeEventListener("mousedown", handleOutsideClick);
+      };
+    }
+    return undefined;
+  }, [countryMenuOpen]);
+
+  useEffect(() => {
     if (!isOpen || !isAuthenticated) return;
     onSuccess();
   }, [isOpen, isAuthenticated, onSuccess]);
@@ -206,6 +226,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
     // When modal opens, clear transient auth errors from any previous attempt
     setLoginError(null);
     setEmailError(null);
+    setResetError(null);
     setPassword("");
     setIsSubmitting(false);
     setNewPassword("");
@@ -275,7 +296,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
         if (!exists) {
           const msg = "This email is not registered. Please check or sign up.";
           setEmailError(msg);
-          toast.error(msg);
           return;
         }
       } else {
@@ -303,7 +323,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
           const msg =
             "This phone number is not registered. Please check or sign up.";
           setEmailError(msg);
-          toast.error(msg);
           return;
         }
       }
@@ -313,7 +332,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
     } catch (err) {
       const msg = "Unable to verify. Please try again.";
       setEmailError(msg);
-      toast.error(msg);
     } finally {
       setIsCheckingEmail(false);
     }
@@ -407,12 +425,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         "Unable to login. Please try again.";
       // eslint-disable-next-line no-console
       console.error("login error:", err?.response?.data ?? err);
-      const toastOnly =
-        typeof msg === "string" &&
-        (msg.toLowerCase().includes("not registered as") ||
-          msg.toLowerCase().includes("registered as"));
-      setLoginError(toastOnly ? null : msg);
-      toast.error(msg);
+      setLoginError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -448,12 +461,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
     const isEmail = emailRegex.test(resetEmail.trim());
 
     if (!isPhone && !isEmail) {
-      toast.error("Please enter a valid phone number or email.");
+      setResetError("Please enter a valid phone number or email.");
       return;
     }
 
     setOtp("");
     setOtpError(null);
+    setResetError(null);
     setStep("otp"); // Directly opens OTP screen
   };
   const handleResendOtp = () => {
@@ -466,7 +480,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
     if (otp.trim() !== STATIC_RESET_OTP) {
       const msg = "Invalid OTP. Please try again.";
       setOtpError(msg);
-      toast.error(msg);
       return;
     }
     setOtpError(null);
@@ -576,61 +589,68 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <span className="text-red-500">*</span>
               </label>
               {usePhoneOnly ? (
-                <div className="w-full">
-                  <div className="relative">
-                    <div className=" h-[40px] bg-white border border-black rounded-[5px] flex items-center px-3 gap-2">
-                      {/* Country Selector */}
-                      <div className="relative flex items-center gap-1 min-w-[6px]">
-                        <img
-                          src={selectedCountry.flagUrl}
-                          alt={selectedCountry.name}
-                          className="w-[20px] h-[12px] object-cover rounded-[1px]"
-                        />
-
-                        <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
-                          {selectedCountry.dialCode}
-                        </span>
-
-                        <div className="flex items-center">
-                          <img
-                            src={chevronDown}
-                            alt="dropdown"
-                            className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
-                          />
-                        </div>
-
-                        <select
-                          className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
-                          value={selectedCountry.code}
-                          onChange={(e) => {
-                            const next = COUNTRY_OPTIONS.find(
-                              (c) => c.code === e.target.value,
-                            );
-                            if (next) setSelectedCountry(next);
-                          }}
-                        >
-                          {COUNTRY_OPTIONS.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.name} {country.dialCode}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Input */}
-                      <input
-                        type="tel"
-                        placeholder="Phone Number"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          setEmailError(null);
-                        }}
-                        maxLength={10}
-                        className="flex-1 bg-transparent outline-none text-[15px] text-black custom-placeholder placeholder:text-[#9B989E] font-normal"
+                <div className="relative w-full" ref={countryDropdownRef}>
+                  <div className="h-[40px] bg-white border border-black rounded-[5px] flex items-center px-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCountryMenuOpen((prev) => !prev)}
+                      className="flex items-center gap-2 rounded-[5px] bg-transparent px-1 py-1 text-left outline-none"
+                    >
+                      <img
+                        src={selectedCountry.flagUrl}
+                        alt={selectedCountry.name}
+                        className="w-[20px] h-[12px] object-cover rounded-[1px]"
                       />
-                    </div>
+                      <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
+                        {selectedCountry.dialCode}
+                      </span>
+                      <img
+                        src={chevronDown}
+                        alt="dropdown"
+                        className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
+                      />
+                    </button>
+
+                    <input
+                      type="tel"
+                      placeholder="Phone Number"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setEmailError(null);
+                      }}
+                      maxLength={10}
+                      className="flex-1 bg-transparent outline-none text-[15px] text-black custom-placeholder placeholder:text-[#9B989E] font-normal"
+                    />
                   </div>
+
+                  {countryMenuOpen && (
+                    <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-[10px] border border-[#D1D5DB] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+                      {COUNTRY_OPTIONS.map((country) => (
+                        <button
+                          type="button"
+                          key={country.code}
+                          onClick={() => {
+                            setSelectedCountry(country);
+                            setCountryMenuOpen(false);
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#111827] hover:bg-[#F3F4F6]"
+                        >
+                          <img
+                            src={country.flagUrl}
+                            alt={country.name}
+                            className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                          />
+                          <span className="flex-1 truncate">
+                            {country.name}
+                          </span>
+                          <span className="text-[13px] text-[#6B7280]">
+                            {country.dialCode}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <input
@@ -1085,7 +1105,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   {/* Country Selector */}
                   <div
                     className="relative flex
-                   items-center gap-1 flex-shrink-0"
+                   items-center gap-2 flex-shrink-0 min-w-[60px]"
                   >
                     <img
                       src={selectedCountry.flagUrl}
@@ -1137,7 +1157,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   <input
                     type="tel"
                     value={resetPhone}
-                    onChange={(e) => setResetPhone(e.target.value)}
+                    onChange={(e) => {
+                      setResetPhone(e.target.value);
+                      setResetError(null);
+                    }}
                     placeholder="Phone Number"
                     maxLength={10}
                     className="flex-1 min-w-0 bg-transparent
@@ -1175,7 +1198,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
                 <input
                   value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
+                  onChange={(e) => {
+                    setResetEmail(e.target.value);
+                    setResetError(null);
+                  }}
                   placeholder="Enter Your Email"
                   className="w-full rounded-[5px] border border-black px-4 outline-none focus:outline-none focus:ring-0 custom-placeholder placeholder:text-[#9B989E]"
                   style={{
@@ -1187,6 +1213,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     letterSpacing: "0%",
                   }}
                 />
+                {resetError && (
+                  <p className="mt-2 text-xs text-red-600">{resetError}</p>
+                )}
               </div>
               <button
                 type="button"

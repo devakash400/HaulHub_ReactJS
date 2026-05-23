@@ -151,7 +151,13 @@ const Home: React.FC = () => {
   const visibleOwnerTrailers = ownerTrailerCards.slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden">
+    <div
+      style={{
+        background: "#fff",
+        boxShadow: "0px 40px 40px 0px #000000",
+      }}
+      className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden"
+    >
       <RevealBlock>
         <Container />
       </RevealBlock>
