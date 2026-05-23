@@ -4,11 +4,13 @@ import {
   isPublicAuthRequest,
 } from "./sessionExpired.ts";
 
+declare const process: { env: { REACT_APP_API_URL?: string } };
+
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 /** Override with e.g. `REACT_APP_API_URL=http://localhost:5100` for local backend. */
 export const API_BASE_URL = (
-  process.env.REACT_APP_API_URL ?? "https://api.renthaulhub.com/"
+  process.env.REACT_APP_API_URL ?? "http://localhost:5100/"
 ).replace(/\/$/, "");
 
 const BASE_URL = API_BASE_URL;

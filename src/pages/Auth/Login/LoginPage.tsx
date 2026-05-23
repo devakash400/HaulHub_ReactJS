@@ -15,6 +15,7 @@ import { signUpSuccess } from "../../../store/authSlice.ts";
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
@@ -43,8 +44,13 @@ const LoginPage: React.FC = () => {
       {isSignUpOpen && (
         <SignUpModal
           isOpen={isSignUpOpen}
-          onClose={() => setIsSignUpOpen(false)}
+          submitError={submitError}
+          onClose={() => {
+            setIsSignUpOpen(false);
+            setSubmitError(null);
+          }}
           onSubmit={async (data: SignUpData) => {
+            setSubmitError(null);
             try {
               const res = await register({
                 fullName: `${data.firstName} ${data.lastName}`.trim(),
@@ -104,7 +110,7 @@ const LoginPage: React.FC = () => {
                 "Unable to create account. Please try again.";
               // eslint-disable-next-line no-console
               console.error("register api error:", err?.response?.data ?? err);
-              toast.error(message);
+              setSubmitError(message);
             }
           }}
         />

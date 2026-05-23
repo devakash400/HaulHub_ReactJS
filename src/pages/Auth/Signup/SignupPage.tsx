@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/index.ts";
@@ -13,6 +13,7 @@ import { signUpSuccess } from "../../../store/authSlice.ts";
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
@@ -26,8 +27,13 @@ const SignupPage: React.FC = () => {
   return (
     <SignUpModal
       isOpen
-      onClose={() => navigate(-1)}
+      submitError={submitError}
+      onClose={() => {
+        setSubmitError(null);
+        navigate(-1);
+      }}
       onSubmit={async (data: SignUpData) => {
+        setSubmitError(null);
         try {
           const res = await register({
             fullName: `${data.firstName} ${data.lastName}`.trim(),
@@ -81,7 +87,7 @@ const SignupPage: React.FC = () => {
             err?.message ||
             "Unable to create account. Please try again.";
           console.error("register api error:", err?.response?.data ?? err);
-          toast.error(message);
+          setSubmitError(message);
         }
       }}
     />

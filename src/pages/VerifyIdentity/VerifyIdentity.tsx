@@ -19,7 +19,7 @@ const parseISODate = (value: string): Date | null => {
 };
 
 type MethodKey = "driving_licence" | "passport";
-
+const today = new Date().toISOString().split("T")[0];
 const METHOD_META: Record<
   MethodKey,
   {
@@ -145,12 +145,15 @@ const VerifyIdentity: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3">
+    <div
+      className="fixed inset-0 z-50 
+    flex items-center justify-center bg-black/40 px-3"
+    >
       <div
         className="
           relative
           w-full
-          max-w-[380px]
+          max-w-[600px]
           overflow-hidden
           rounded-[14px]
           bg-[#F8F8F8]
@@ -183,12 +186,16 @@ const VerifyIdentity: React.FC = () => {
 
           <h1
             className="
-              text-[15px]
-              font-semibold
-              text-white
-            "
+    font-['Lexend']
+    font-bold
+    text-[23px]
+    leading-[100%]
+    tracking-[0px]
+    text-center
+    text-white
+  "
           >
-            Identify Verification
+            Identity Verification
           </h1>
         </div>
 
@@ -196,23 +203,29 @@ const VerifyIdentity: React.FC = () => {
         <div className="px-4 pt-4 pb-5">
           <h2
             className="
-              text-center
-              text-[14px]
-              font-semibold
-              text-black
-            "
+    font-['Lexend']
+    font-normal
+    text-[20px]
+    leading-[100%]
+    tracking-[0px]
+    text-center
+    capitalize
+    text-black
+  "
           >
             Which Method Would You Like To Use?
           </h2>
 
           <p
             className="
-              mt-3
-              text-center
-              text-[10px]
-              leading-[16px]
-              text-[#666666]
-            "
+    mt-5
+    font-['Lexend']
+    font-light
+    text-[14px]
+    leading-[100%]
+    tracking-[0px]
+    text-[#000000]
+  "
           >
             We’ll use this to verify your identity and won’t share it with other
             trailer.
@@ -256,32 +269,39 @@ const VerifyIdentity: React.FC = () => {
                       passportInputRef.current?.click();
                     }
                   }}
-                  className={`
-                      w-full
-                      h-[42px]
-                      border
-                      rounded-[3px]
-                      px-3
-                      flex
-                      items-center
-                      justify-between
-                      transition-all
-                      ${
-                        isActive
-                          ? "border-[#389131] bg-white"
-                          : "border-[#DCDCDC] bg-white"
-                      }
-                    `}
+                  className="
+    w-full
+    h-[52px]
+    rounded-[3px]
+    border
+    border-[#00000030]
+    bg-white
+    px-3
+    flex
+    items-center
+    justify-between
+    transition-all
+  "
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 text-black" />
+                    <Icon
+                      className="
+        w-[15.75px]
+        h-[20.5625px]
+        text-black
+      "
+                    />
 
                     <span
                       className="
-                          text-[12px]
-                          font-medium
-                          text-black
-                        "
+        font-['Lexend']
+        font-normal
+        text-[13px]
+        leading-[100%]
+        tracking-[0px]
+        text-center
+        text-black
+      "
                     >
                       {key === "driving_licence"
                         ? drivingLicense?.name || meta.label
@@ -289,7 +309,7 @@ const VerifyIdentity: React.FC = () => {
                     </span>
                   </div>
 
-                  <Upload className="w-3.5 h-3.5 text-black" />
+                  <Upload className="h-3.5 w-3.5 text-black" />
                 </button>
               );
             })}
@@ -298,110 +318,112 @@ const VerifyIdentity: React.FC = () => {
           {/* Dates */}
           <div
             className="
-              mt-3
-              grid
-              grid-cols-2
-              overflow-hidden
-              rounded-[3px]
-              border
-              border-[#DCDCDC]
-              bg-white
-            "
+    mt-3
+    grid
+    grid-cols-2
+    overflow-hidden
+    rounded-[3px]
+    border
+    border-[#DCDCDC]
+    bg-white
+  "
           >
             {/* Pickup */}
             <div className="border-r border-[#DCDCDC] p-3">
               <div className="mb-2 flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-black" />
+                <CalendarDays
+                  className="
+          w-[15.75px]
+          h-[20.5625px]
+          text-black
+        "
+                />
 
                 <span
                   className="
-                    text-[11px]
-                    font-medium
-                    text-black
-                  "
+          font-['Lexend']
+          font-normal
+          text-[13px]
+          leading-[100%]
+          tracking-[0px]
+          text-center
+          text-black
+        "
                 >
                   Pickup Date
                 </span>
               </div>
 
-              <div className="relative">
-                <input
-                  type="date"
-                  value={pickupDate}
-                  onChange={(e) => setPickupDate(e.target.value)}
-                  className="
-                    h-[30px]
-                    w-full
-                    rounded-[3px]
-                    border
-                    border-[#DCDCDC]
-                    px-2
-                    pr-8
-                    text-[10px]
-                    outline-none
-                  "
-                />
-
-                <CalendarDays
-                  className="
-                    absolute
-                    right-2
-                    top-1/2
-                    h-3.5
-                    w-3.5
-                    -translate-y-1/2
-                    text-[#777777]
-                  "
-                />
-              </div>
+              <input
+                type="date"
+                min={today}
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+                className="
+    h-[30px]
+    w-full
+    rounded-[3px]
+    border
+    border-[#DCDCDC]
+    px-2
+    font-['Lexend']
+    text-[13px]
+    font-normal
+    leading-[100%]
+    tracking-[0px]
+    text-black
+    outline-none
+  "
+              />
             </div>
 
             {/* Return */}
             <div className="p-3">
               <div className="mb-2 flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-black" />
+                <CalendarDays
+                  className="
+          w-[15.75px]
+          h-[20.5625px]
+          text-black
+        "
+                />
 
                 <span
                   className="
-                    text-[11px]
-                    font-medium
-                    text-black
-                  "
+          font-['Lexend']
+          font-normal
+          text-[13px]
+          leading-[100%]
+          tracking-[0px]
+          text-center
+          text-black
+        "
                 >
                   Return Date
                 </span>
               </div>
 
-              <div className="relative">
-                <input
-                  type="date"
-                  value={returnDate}
-                  onChange={(e) => setReturnDate(e.target.value)}
-                  className="
-                    h-[30px]
-                    w-full
-                    rounded-[3px]
-                    border
-                    border-[#DCDCDC]
-                    px-2
-                    pr-8
-                    text-[10px]
-                    outline-none
-                  "
-                />
-
-                <CalendarDays
-                  className="
-                    absolute
-                    right-2
-                    top-1/2
-                    h-3.5
-                    w-3.5
-                    -translate-y-1/2
-                    text-[#777777]
-                  "
-                />
-              </div>
+              <input
+                type="date"
+                min={today}
+                value={returnDate}
+                onChange={(e) => setReturnDate(e.target.value)}
+                className="
+        h-[30px]
+        w-full
+        rounded-[3px]
+        border
+        border-[#DCDCDC]
+        px-2
+        font-['Lexend']
+        text-[13px]
+        font-normal
+        leading-[100%]
+        tracking-[0px]
+        text-black
+        outline-none
+      "
+              />
             </div>
           </div>
 
@@ -411,15 +433,18 @@ const VerifyIdentity: React.FC = () => {
             onClick={handleSend}
             disabled={sending}
             className="
-              mt-5
-              h-[40px]
-              w-full
-              rounded-[4px]
-              bg-[#389131]
-              text-[14px]
-              font-semibold
-              text-white
-            "
+    mt-5
+    h-[43px]
+    w-full
+    rounded-[5px]
+    bg-[#389131]
+    font-['Lexend']
+    text-[16px]
+    font-semibold
+    leading-[100%]
+    tracking-[0.03em]
+    text-white
+  "
           >
             {sending ? "Sending..." : "Send Booking Request"}
           </button>
