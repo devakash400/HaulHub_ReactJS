@@ -10,7 +10,7 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 /** Override with e.g. `REACT_APP_API_URL=http://localhost:5100` for local backend. */
 export const API_BASE_URL = (
-  process.env.REACT_APP_API_URL ?? "http://localhost:5100/"
+  process.env.REACT_APP_API_URL ?? "https://api.renthaulhub.com/"
 ).replace(/\/$/, "");
 
 const BASE_URL = API_BASE_URL;
