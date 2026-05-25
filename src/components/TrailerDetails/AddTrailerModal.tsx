@@ -8,10 +8,10 @@ import { addOwnerTrailer } from "../../store/authSlice.ts";
 import { toast } from "react-toastify";
 
 const TRAILER_TYPES = [
-  "Heavy-Duty Gooseneck",
+  "gooseneck",
   "Bumper Pull",
-  "Flatbed",
-  "Car Hauler",
+  "flatbed",
+  "car_hauler",
   "Enclosed Cargo",
   "Dump Trailer",
   "Utility",
@@ -54,7 +54,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
   const [usageRestrictions, setUsageRestrictions] = useState("");
 
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  const [takePhoto, setTakePhoto] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const [errors, setErrors] = useState<Errors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -86,7 +86,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     setAvailabilityDate("");
     setUsageRestrictions("");
     setProfilePhoto(null);
-    setTakePhoto(null);
+    setPhotos([]);
     setSelectedDimensionPreset("");
     setErrors({});
     setTouched({});
@@ -125,7 +125,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     };
   }, []);
 
-  const validate = () => {
+  const validate = (photoList: string[] = photos) => {
     const newErrors: Errors = {};
 
     if (!title.trim()) {
@@ -162,6 +162,12 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
     if (!availabilityDate.trim()) {
       newErrors.availabilityDate = "Availability date is required";
+    }
+
+    if (photoList.length < 4) {
+      newErrors.photos = "Please upload at least 4 photos";
+    } else if (photoList.length > 20) {
+      newErrors.photos = "You can upload up to 20 photos";
     }
 
     setErrors(newErrors);
@@ -260,6 +266,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
           }
           onClose={onClose}
           variant="close"
+          closeOnRight
           titleId="add-trailer-title"
         />
 
@@ -531,20 +538,29 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
               </div>
 
               <div>
-                <label className={fieldLabelClass}>Take Photo</label>
+                <label className={fieldLabelClass}>Upload Images</label>
 
                 <input
                   ref={takePhotoInputRef}
                   type="file"
                   className="hidden"
                   accept="image/*"
-                  capture="environment"
+                  multiple
                   onChange={(e) => {
-                    const file = e.target.files?.[0];
+                    const files = e.target.files
+                      ? Array.from(e.target.files)
+                      : [];
 
-                    if (file) {
-                      setTakePhoto(URL.createObjectURL(file));
+                    if (!files.length) {
+                      return;
                     }
+
+                    const photoUrls = files.map((file) =>
+                      URL.createObjectURL(file),
+                    );
+                    setPhotos(photoUrls);
+                    setTouched((prev) => ({ ...prev, photos: true }));
+                    validate(photoUrls);
                   }}
                 />
 
@@ -579,10 +595,16 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
         text-black
       "
                     >
-                      {takePhoto ? "Photo Added" : "Take Photo"}
+                      {photos.length
+                        ? `${photos.length} Photos Added`
+                        : "Upload Images"}
                     </span>
                   </div>
                 </button>
+
+                {touched.photos && errors.photos && (
+                  <p className="mt-2 text-sm text-red-500">{errors.photos}</p>
+                )}
               </div>
             </div>
 

@@ -31,15 +31,27 @@ const BookingSent: React.FC = () => {
 
           {/* Heading */}
           <div className="text-center mt-6">
-            <h1 className="text-[42px] font-bold text-black">Booking Sent!</h1>
+            <h1
+              className="text-[30px] font-bold text-black 
+              leading-[100%] align-middle tracking-[0.1em]"
+              style={{ fontFamily: "Lexend" }}
+            >
+              Booking Sent!
+            </h1>
 
-            <p className="text-gray-500 mt-4 text-lg">
+            <p
+              className="mt-4 text-[22px] font-light leading-[20px] tracking-[0px] text-black align-middle"
+              style={{ fontFamily: "Lexend" }}
+            >
               Your booking request has been submitted successfully.
             </p>
-
-            <p className="text-gray-500 text-lg">
+            <p
+              className="mt-4 text-[22px] font-light leading-[20px] tracking-[0px] text-black align-middle"
+              style={{ fontFamily: "Lexend" }}
+            >
               The owner will review and respond shortly.
             </p>
+            <p className="text-gray-500 text-lg"></p>
           </div>
 
           {/* Details Card */}
@@ -92,7 +104,8 @@ const BookingSent: React.FC = () => {
 
             <button
               onClick={() => navigate("/booking")}
-              className="w-full mt-6 text-[#389131] font-semibold text-2xl"
+              className="w-full mt-6 text-[#389131]
+               font-semibold text-1xl"
             >
               View My Bookings →
             </button>
