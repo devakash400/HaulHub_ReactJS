@@ -133,7 +133,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const countryDropdownRef = useRef<HTMLDivElement | null>(null);
   const [step, setStep] = useState<Step>(initialStep ?? "email");
   const [password, setPassword] = useState("");
-  const [loginTrailor, setLoginTrailor] = useState<"Renter" | "Owner">("Owner");
+  const [loginTrailor, setLoginTrailor] = useState<"Renter" | "Owner">(
+    "Renter",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
