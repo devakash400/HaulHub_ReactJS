@@ -284,6 +284,57 @@ export async function fetchTrailerById(
   }
 }
 
+export async function createTrailer(trailerData: any): Promise<boolean> {
+  // Validate required fields
+  if (!trailerData?.title?.trim()) {
+    console.error("createTrailer: title is required");
+    return false;
+  }
+
+  if (!trailerData?.trailerType?.trim()) {
+    console.error("createTrailer: trailerType is required");
+    return false;
+  }
+
+  // Safety: do not allow blob/object URLs to be sent to the server.
+  const isBlobUrl = (v: unknown) => typeof v === "string" && v.startsWith("blob:");
+  if (isBlobUrl(trailerData?.profilePicture)) {
+    console.warn("createTrailer: profilePicture is a blob URL (local preview). Proceeding without it.");
+    trailerData.profilePicture = "";
+  }
+  
+  if (Array.isArray(trailerData?.images)) {
+    const blobImages = trailerData.images.filter(isBlobUrl);
+    if (blobImages.length > 0) {
+      console.warn(`createTrailer: ${blobImages.length} image(s) are blob URLs (local previews). Removing them.`);
+      trailerData.images = trailerData.images.filter((img: string) => !isBlobUrl(img));
+    }
+  }
+
+  try {
+    const res = await api.post("/api/trailers", trailerData);
+    const body = res.data;
+    
+    if (body?.success === true) {
+      console.log("Trailer created successfully:", body.data);
+      return true;
+    } else if (body?.success === false) {
+      console.error("Server returned success: false", body.message || body.error);
+      return false;
+    } else {
+      console.warn("Unexpected response format:", body);
+      return res.status === 201 || res.status === 200;
+    }
+  } catch (error: any) {
+    console.error("Error creating trailer:", {
+      message: error?.message,
+      status: error?.response?.status,
+      data: error?.response?.data,
+    });
+    return false;
+  }
+}
+
 export function mapApiTrailerDetailToTrailerDetail(
   data: ApiTrailerDetail,
 ): TrailerDetail {
