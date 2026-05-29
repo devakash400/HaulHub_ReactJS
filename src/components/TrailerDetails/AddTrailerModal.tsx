@@ -5,6 +5,8 @@ import { ChevronDown, Upload } from "lucide-react";
 import { ModalHeader } from "../ModalHeader.tsx";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import { addOwnerTrailer } from "../../store/authSlice.ts";
+import { createTrailer } from "../../api/trailersApi.ts";
+import uploadProfilePhoto from "../../api/uploadApi.ts";
 import { toast } from "react-toastify";
 
 const TRAILER_TYPES = [
@@ -18,7 +20,7 @@ const TRAILER_TYPES = [
   "Other",
 ];
 
-const HITCH_TYPES = ["Ball Hitch", "Gooseneck", "Fifth Wheel", "Other"];
+const HITCH_TYPES = ["Ball Hitch", "gooseneck", "Fifth Wheel", "Other"];
 
 const DIMENSION_PRESETS = [
   { label: "12x6x5 ft", length: "12", width: "6", height: "5" },
@@ -50,11 +52,19 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
   const [width, setWidth] = useState("");
   const [height, setHeight] = useState("");
   const [price, setPrice] = useState("");
-  const [availabilityDate, setAvailabilityDate] = useState("");
+  const [availabilityStartDate, setAvailabilityStartDate] = useState("");
+  const [availabilityEndDate, setAvailabilityEndDate] = useState("");
   const [usageRestrictions, setUsageRestrictions] = useState("");
 
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [locationState, setLocationState] = useState("");
+  const [zipCode, setZipCode] = useState("");
+
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
 
   const [errors, setErrors] = useState<Errors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -62,7 +72,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
   const [typeOpen, setTypeOpen] = useState(false);
   const [hitchOpen, setHitchOpen] = useState(false);
   const [dimensionPresetOpen, setDimensionPresetOpen] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDimensionPreset, setSelectedDimensionPreset] = useState("");
 
   const typeRef = useRef<HTMLDivElement>(null);
@@ -83,10 +93,19 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     setWidth("");
     setHeight("");
     setPrice("");
-    setAvailabilityDate("");
+    setAvailabilityStartDate("");
+    setAvailabilityEndDate("");
     setUsageRestrictions("");
-    setProfilePhoto(null);
+    setAddress("");
+    setCity("");
+    setLocationState("");
+    setZipCode("");
+    setProfilePhotoUrl(null);
+    setProfilePhotoFile(null);
+    if (profileInputRef.current) profileInputRef.current.value = "";
+    if (takePhotoInputRef.current) takePhotoInputRef.current.value = "";
     setPhotos([]);
+    setPhotoFiles([]);
     setSelectedDimensionPreset("");
     setErrors({});
     setTouched({});
@@ -160,8 +179,32 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       newErrors.price = "Price is required";
     }
 
-    if (!availabilityDate.trim()) {
-      newErrors.availabilityDate = "Availability date is required";
+    if (!availabilityStartDate.trim()) {
+      newErrors.availabilityStartDate = "Start date is required";
+    }
+
+    if (!availabilityEndDate.trim()) {
+      newErrors.availabilityEndDate = "End date is required";
+    }
+
+    if (!profilePhotoUrl?.trim()) {
+      newErrors.profilePhoto = "Profile photo is required";
+    }
+
+    if (!address.trim()) {
+      newErrors.address = "Address is required";
+    }
+
+    if (!city.trim()) {
+      newErrors.city = "City is required";
+    }
+
+    if (!locationState.trim()) {
+      newErrors.locationState = "State is required";
+    }
+
+    if (!zipCode.trim()) {
+      newErrors.zipCode = "Zip code is required";
     }
 
     if (photoList.length < 4) {
@@ -184,7 +227,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     validate();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validate()) {
@@ -192,12 +235,79 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       return;
     }
 
-    dispatch(addOwnerTrailer());
+    setIsSubmitting(true);
 
-    toast.success("Trailer saved successfully");
+    try {
+      const uploadImageFile = async (file: File): Promise<string> => {
+        const uploadResp = await uploadProfilePhoto(file);
+        if (!uploadResp || !uploadResp.success) {
+          throw new Error("Image upload failed");
+        }
+        return uploadResp.data.url || uploadResp.data.publicId;
+      };
 
-    onClose();
-    onSuccess?.();
+      const profilePictureUrl = profilePhotoFile
+        ? await uploadImageFile(profilePhotoFile)
+        : profilePhotoUrl || "";
+
+      const uploadedImages = await Promise.all(
+        photoFiles.map((file) => uploadImageFile(file)),
+      );
+
+      const trailerData = {
+        title: title.trim(),
+        name: title.trim(),
+        model: "",
+        description: "",
+        trailerType: trailerType.trim(),
+        weight: parseInt(weight) || 0,
+        hitchType: hitchType.trim(),
+        dimensions: `${length}ft x ${width}ft`,
+        length: parseFloat(length) || 0,
+        width: parseFloat(width) || 0,
+        height: parseFloat(height) || 0,
+        pricePerDay: parseFloat(price) || 0,
+        usageRestrictions: usageRestrictions.trim() || "",
+        profilePicture: profilePictureUrl,
+        images: uploadedImages,
+        securityDepositAmount: 0,
+        isFeatured: false,
+        features: [],
+        location: {
+          address: address.trim(),
+          city: city.trim(),
+          state: locationState.trim(),
+          zipCode: zipCode.trim(),
+          country: "USA",
+        },
+        availability:
+          availabilityStartDate && availabilityEndDate
+            ? [
+                {
+                  startDate: availabilityStartDate,
+                  endDate: availabilityEndDate,
+                  isAvailable: true,
+                },
+              ]
+            : [],
+      };
+
+      const success = await createTrailer(trailerData);
+
+      if (success) {
+        dispatch(addOwnerTrailer());
+        toast.success("Trailer saved successfully");
+        onClose();
+        onSuccess?.();
+      } else {
+        toast.error("Failed to save trailer. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting trailer:", error);
+      toast.error("An error occurred while saving the trailer.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputBase = `
@@ -495,7 +605,9 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                     const file = e.target.files?.[0];
 
                     if (file) {
-                      setProfilePhoto(URL.createObjectURL(file));
+                      setProfilePhotoFile(file);
+                      setProfilePhotoUrl(URL.createObjectURL(file));
+                      setTouched((prev) => ({ ...prev, profilePhoto: true }));
                     }
                   }}
                 />
@@ -531,10 +643,15 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
         text-black
       "
                     >
-                      {profilePhoto ? "Photo Added" : "Upload Photo"}
+                      {profilePhotoUrl ? "Photo Added" : "Upload Photo"}
                     </span>
                   </div>
                 </button>
+                {touched.profilePhoto && errors.profilePhoto && (
+                  <p className="mt-2 text-sm text-red-500">
+                    {errors.profilePhoto}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -558,6 +675,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                     const photoUrls = files.map((file) =>
                       URL.createObjectURL(file),
                     );
+                    setPhotoFiles(files);
                     setPhotos(photoUrls);
                     setTouched((prev) => ({ ...prev, photos: true }));
                     validate(photoUrls);
@@ -622,14 +740,16 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
             </div>
 
             {/* Availability */}
-            <div>
-              <label className={fieldLabelClass}>Availability Calendar</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={fieldLabelClass}>Availability Start</label>
 
-              <input
-                type="date"
-                value={availabilityDate}
-                onChange={(e) => setAvailabilityDate(e.target.value)}
-                className={`
+                <input
+                  type="date"
+                  value={availabilityStartDate}
+                  onChange={(e) => setAvailabilityStartDate(e.target.value)}
+                  onBlur={() => handleBlur("availabilityStartDate")}
+                  className={`
     ${inputBase}
 
     font-lexend
@@ -638,21 +758,67 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     leading-[100%]
     tracking-[0%]
 
-    ${availabilityDate ? "text-black" : "text-[#9B989E]"}
+    ${availabilityStartDate ? "text-black" : "text-[#9B989E]"}
 
     [&::-webkit-datetime-edit]:font-lexend
     [&::-webkit-datetime-edit]:font-light
     [&::-webkit-datetime-edit]:text-[12px]
 
     ${
-      availabilityDate
+      availabilityStartDate
         ? "[&::-webkit-datetime-edit]:text-black"
         : "[&::-webkit-datetime-edit]:text-[#9B989E]"
     }
 
     [&::-webkit-calendar-picker-indicator]:opacity-100
   `}
-              />
+                />
+                {touched.availabilityStartDate &&
+                  errors.availabilityStartDate && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.availabilityStartDate}
+                    </p>
+                  )}
+              </div>
+
+              <div>
+                <label className={fieldLabelClass}>Availability End</label>
+
+                <input
+                  type="date"
+                  value={availabilityEndDate}
+                  onChange={(e) => setAvailabilityEndDate(e.target.value)}
+                  onBlur={() => handleBlur("availabilityEndDate")}
+                  className={`
+    ${inputBase}
+
+    font-lexend
+    font-light
+    text-[12px]
+    leading-[100%]
+    tracking-[0%]
+
+    ${availabilityEndDate ? "text-black" : "text-[#9B989E]"}
+
+    [&::-webkit-datetime-edit]:font-lexend
+    [&::-webkit-datetime-edit]:font-light
+    [&::-webkit-datetime-edit]:text-[12px]
+
+    ${
+      availabilityEndDate
+        ? "[&::-webkit-datetime-edit]:text-black"
+        : "[&::-webkit-datetime-edit]:text-[#9B989E]"
+    }
+
+    [&::-webkit-calendar-picker-indicator]:opacity-100
+  `}
+                />
+                {touched.availabilityEndDate && errors.availabilityEndDate && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.availabilityEndDate}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Restrictions */}
@@ -667,14 +833,121 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                 className={inputBase}
               />
             </div>
+
+            {/* Location Fields */}
+            <div>
+              <label className={fieldLabelClass}>Address</label>
+
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                onBlur={() => handleBlur("address")}
+                placeholder="Enter Street Address"
+                className={`${inputBase} ${
+                  touched.address && errors.address ? inputError : ""
+                }`}
+              />
+              {touched.address && errors.address && (
+                <p className="mt-1 text-sm text-red-500">{errors.address}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={fieldLabelClass}>City</label>
+
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  onBlur={() => handleBlur("city")}
+                  placeholder="City"
+                  className={`${inputBase} ${
+                    touched.city && errors.city ? inputError : ""
+                  }`}
+                />
+                {touched.city && errors.city && (
+                  <p className="mt-1 text-sm text-red-500">{errors.city}</p>
+                )}
+              </div>
+
+              <div>
+                <label className={fieldLabelClass}>State</label>
+
+                <input
+                  type="text"
+                  value={locationState}
+                  onChange={(e) => setLocationState(e.target.value)}
+                  onBlur={() => handleBlur("locationState")}
+                  placeholder="State"
+                  className={`${inputBase} ${
+                    touched.locationState && errors.locationState
+                      ? inputError
+                      : ""
+                  }`}
+                />
+                {touched.locationState && errors.locationState && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.locationState}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className={fieldLabelClass}>Zip Code</label>
+
+              <input
+                type="text"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                onBlur={() => handleBlur("zipCode")}
+                placeholder="Zip Code"
+                className={`${inputBase} ${
+                  touched.zipCode && errors.zipCode ? inputError : ""
+                }`}
+              />
+              {touched.zipCode && errors.zipCode && (
+                <p className="mt-1 text-sm text-red-500">{errors.zipCode}</p>
+              )}
+            </div>
           </div>
 
           <div className="border-t border-gray-200 px-6 py-4 sm:px-8">
             <button
               type="submit"
-              className="h-[40px] w-full rounded-[5px] bg-[#389131] font-lexend text-[14px] font-semibold text-white"
+              disabled={isSubmitting}
+              className={`h-[40px] w-full rounded-[5px] font-lexend text-[14px] font-semibold text-white flex items-center justify-center gap-2
+    ${isSubmitting ? "bg-[#2f6f2a] opacity-80 cursor-not-allowed" : "bg-[#389131]"}
+  `}
             >
-              Save
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="h-4 w-4 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="white"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="white"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    />
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                "Save"
+              )}
             </button>
           </div>
         </form>

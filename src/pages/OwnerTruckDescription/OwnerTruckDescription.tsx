@@ -1,6 +1,16 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { getTrailerById, trailersData } from "../../assets/data/trailers.ts";
+import {
+  getTrailerById,
+  trailersData,
+  type TrailerDetail,
+  type TrailerType,
+} from "../../assets/data/trailers.ts";
+import {
+  fetchTrailerById,
+  mapApiTrailerDetailToTrailerDetail,
+  updateTrailer,
+} from "../../api/trailersApi.ts";
 import { toast } from "react-toastify";
 import { X } from "lucide-react";
 
@@ -19,7 +29,7 @@ type EditableTruckDetails = {
   location: string;
   specs: string;
   price: string;
-  type: string;
+  type: TrailerType;
 };
 
 const demoBookings: OwnerBooking[] = [
@@ -55,38 +65,80 @@ const statusClassMap: Record<BookingStatus, string> = {
 const OwnerTruckDescription: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
-  const trailer = getTrailerById(Number(id));
+  const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
   const isBookedFromState = Boolean(
     (location.state as { isBooked?: boolean } | null)?.isBooked,
   );
+  const parsedId = id ? Number(id) : NaN;
+  const isNumericId = Number.isInteger(parsedId) && !Number.isNaN(parsedId);
   const isTruckBooked =
-    isBookedFromState || (Number(id) > 0 && Number(id) % 3 === 2);
+    isBookedFromState || (isNumericId && parsedId % 3 === 2);
   const [isAvailable, setIsAvailable] = useState(!isTruckBooked);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPhotosOpen, setIsPhotosOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [truckDetails, setTruckDetails] = useState<EditableTruckDetails | null>(
-    trailer
-      ? {
-          title: trailer.title,
-          location: trailer.location,
-          specs: trailer.specs,
-          price: trailer.price,
-          type: trailer.type,
-        }
-      : null,
+    null,
   );
   const [draftDetails, setDraftDetails] = useState<EditableTruckDetails | null>(
-    trailer
-      ? {
-          title: trailer.title,
-          location: trailer.location,
-          specs: trailer.specs,
-          price: trailer.price,
-          type: trailer.type,
-        }
-      : null,
+    null,
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!id) {
+      setLoadError(true);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setLoadError(false);
+
+    (async () => {
+      try {
+        const apiTrailer = await fetchTrailerById(id);
+        if (cancelled) return;
+
+        let resolvedTrailer: TrailerDetail | null = null;
+        if (apiTrailer) {
+          resolvedTrailer = mapApiTrailerDetailToTrailerDetail(apiTrailer);
+        } else if (isNumericId) {
+          resolvedTrailer = getTrailerById(parsedId) ?? null;
+        }
+
+        if (resolvedTrailer) {
+          setTrailer(resolvedTrailer);
+          const initialDetails = {
+            title: resolvedTrailer.title,
+            location: resolvedTrailer.location,
+            specs: resolvedTrailer.specs,
+            price: resolvedTrailer.price,
+            type: resolvedTrailer.type,
+          };
+          setTruckDetails(initialDetails);
+          setDraftDetails(initialDetails);
+        } else {
+          setLoadError(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadError(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isNumericId, parsedId]);
 
   const earnings = useMemo(() => {
     return {
@@ -109,7 +161,22 @@ const OwnerTruckDescription: React.FC = () => {
     return unique.slice(0, 9);
   }, [trailer]);
 
-  if (!trailer) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F8F3] px-4 py-10">
+        <div className="mx-auto max-w-4xl rounded-2xl bg-white border border-gray-200 p-8 text-center">
+          <p className="text-xl font-semibold text-gray-900">
+            Loading truck details...
+          </p>
+          <p className="mt-2 text-sm text-gray-600">
+            Please wait while we fetch the latest trailer information.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError || !trailer) {
     return (
       <div className="min-h-screen bg-[#F9F8F3] px-4 py-10">
         <div className="mx-auto max-w-4xl rounded-2xl bg-white border border-gray-200 p-8 text-center">
@@ -142,13 +209,52 @@ const OwnerTruckDescription: React.FC = () => {
     setIsEditOpen(false);
   };
 
-  const handleSaveDetails = () => {
-    if (!draftDetails) return;
+  const parsePricePerDay = (price: string) => {
+    const cleaned = String(price).replace(/[^0-9.]/g, "");
+    const parsed = Number(cleaned);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+
+  const handleSaveDetails = async () => {
+    if (!draftDetails || !id) return;
     if (!draftDetails.title.trim() || !draftDetails.location.trim()) {
       toast.error("Title and location are required");
       return;
     }
+
+    const payload: Record<string, unknown> = {
+      title: draftDetails.title.trim(),
+      trailerType: draftDetails.type.trim(),
+    };
+
+    const pricePerDay = parsePricePerDay(draftDetails.price);
+    if (pricePerDay !== undefined) {
+      payload.pricePerDay = pricePerDay;
+    }
+
+    if (draftDetails.specs.trim()) {
+      payload.description = draftDetails.specs.trim();
+    }
+
+    const success = await updateTrailer(id, payload);
+    if (!success) {
+      toast.error("Unable to update trailer details. Please try again.");
+      return;
+    }
+
     setTruckDetails(draftDetails);
+    setTrailer((prev) =>
+      prev
+        ? {
+            ...prev,
+            title: draftDetails.title,
+            location: draftDetails.location,
+            specs: draftDetails.specs,
+            price: draftDetails.price,
+            type: draftDetails.type as TrailerType,
+          }
+        : prev,
+    );
     setIsEditOpen(false);
     toast.success("Truck details updated");
   };
@@ -395,7 +501,9 @@ const OwnerTruckDescription: React.FC = () => {
                   value={draftDetails.type}
                   onChange={(event) =>
                     setDraftDetails((prev) =>
-                      prev ? { ...prev, type: event.target.value } : prev,
+                      prev
+                        ? { ...prev, type: event.target.value as TrailerType }
+                        : prev,
                     )
                   }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"

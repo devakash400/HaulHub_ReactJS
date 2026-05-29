@@ -90,6 +90,9 @@ const Home: React.FC = () => {
     carHaulers: TrailerListItem[];
   } | null>(null);
   const [listingsLoadError, setListingsLoadError] = useState(false);
+  const [ownerTrailers, setOwnerTrailers] = useState<TrailerListItem[] | null>(
+    null,
+  );
   const user = useSelector((state: RootState) => state.auth.user);
   const userType = useSelector((state: RootState) => state.auth.userType);
   const ownerTrailersCount = useSelector(
@@ -139,15 +142,51 @@ const Home: React.FC = () => {
     };
   }, [showRenterCategories]);
 
+  useEffect(() => {
+    if (!isOwnerWithTrailers) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const grouped = await fetchTrailersList({ page: 1, limit: 100 });
+        if (cancelled) return;
+
+        setOwnerTrailers([
+          ...grouped.gooseneck,
+          ...grouped.bumper_pull,
+          ...grouped.flatbed,
+          ...grouped.car_hauler,
+        ]);
+      } catch {
+        if (!cancelled) {
+          setOwnerTrailers([]);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOwnerWithTrailers]);
+
   const gooseneckItems = getGooseneckListItems();
-  const ownerTrailerCards = gooseneckItems;
+  const ownerTrailerCards =
+    ownerTrailers !== null ? ownerTrailers : gooseneckItems;
 
   const gooseneckSectionItems = renterListings?.gooseneck ?? [];
   const bumperPullSectionItems = renterListings?.bumperPull ?? [];
   const flatbedSectionItems = renterListings?.flatbed ?? [];
   const carHaulersSectionItems = renterListings?.carHaulers ?? [];
   const listingsStillLoading = showRenterCategories && renterListings === null;
-  const isBookedTrailer = (truckId: number) => truckId % 3 === 2;
+  const isBookedTrailer = (truckId: string | number) => {
+    const numericId = typeof truckId === "number" ? truckId : Number(truckId);
+    return (
+      Number.isInteger(numericId) &&
+      !Number.isNaN(numericId) &&
+      numericId % 3 === 2
+    );
+  };
   const visibleOwnerTrailers = ownerTrailerCards.slice(0, 4);
 
   return (
@@ -352,7 +391,7 @@ const Home: React.FC = () => {
               text-black
             "
                           >
-                            Gooseneck Trailor
+                            {item.titleLabel ?? item.modelLabel}
                           </p>
 
                           {/* Rating + Model */}
@@ -397,7 +436,7 @@ const Home: React.FC = () => {
                 text-black
               "
                             >
-                              FMAX208
+                              {item.modelLabel.replace(/^Model:\s*/i, "")}
                             </span>
                           </div>
 
