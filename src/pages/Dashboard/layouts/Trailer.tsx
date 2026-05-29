@@ -56,6 +56,7 @@ const RevealSection: React.FC<RevealSectionProps> = ({
     ) {
       return;
     }
+
     setReduceMotion(
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     );
