@@ -117,6 +117,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const dateInputRef = useRef<HTMLInputElement | null>(null);
   const todayIso = new Date().toISOString().split("T")[0];
 
+  const hasEmailSubmitError =
+    typeof submitError === "string" && /email|email address/i.test(submitError);
+  const hasPhoneSubmitError =
+    typeof submitError === "string" && /(phone|mobile)/i.test(submitError);
+
   useEffect(() => {
     if (!isOpen) return;
     setFirstName("");
@@ -510,6 +515,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       Enter valid email
                     </p>
                   )}
+                  {hasEmailSubmitError && (
+                    <p className="mt-1 text-xs text-red-600">{submitError}</p>
+                  )}
                 </div>
 
                 <div>
@@ -765,6 +773,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       Phone number must be exactly 10 digits
                     </p>
                   )}
+                  {hasPhoneSubmitError && (
+                    <p className="mt-1 text-xs text-red-600">{submitError}</p>
+                  )}
                 </div>
 
                 <div className="flex items-start gap-2 mt-2 pb-4 px-0.5">
@@ -882,7 +893,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
               </div>
               {/* </div> */}
 
-              {submitError && (
+              {!hasEmailSubmitError && !hasPhoneSubmitError && submitError && (
                 <p className="mt-3 text-xs text-red-600">{submitError}</p>
               )}
 

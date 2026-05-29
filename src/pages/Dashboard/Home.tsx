@@ -99,14 +99,19 @@ const Home: React.FC = () => {
     (state: RootState) => state.auth.ownerTrailersCount,
   );
 
-  const isOwnerWithNoTrailers =
-    (user?.trailor === "Owner" || userType === "Owner") &&
-    ownerTrailersCount === 0;
-  const isOwnerWithTrailers =
-    (user?.trailor === "Owner" || userType === "Owner") &&
-    ownerTrailersCount > 0;
+  const isOwner = user?.trailor === "Owner" || userType === "Owner";
 
-  const showRenterCategories = !isOwnerWithNoTrailers && !isOwnerWithTrailers;
+  // ownerTrailers is null while loading; once fetched it's an array (possibly empty).
+  const ownerHasTrailers =
+    ownerTrailersCount > 0 ||
+    (ownerTrailers !== null && ownerTrailers.length > 0);
+  const ownerHasNoTrailers =
+    isOwner &&
+    ownerTrailers !== null &&
+    ownerTrailers.length === 0 &&
+    ownerTrailersCount === 0;
+
+  const showRenterCategories = !isOwner;
 
   useEffect(() => {
     if (!showRenterCategories) return;
@@ -143,7 +148,7 @@ const Home: React.FC = () => {
   }, [showRenterCategories]);
 
   useEffect(() => {
-    if (!isOwnerWithTrailers) return;
+    if (!isOwner) return;
 
     let cancelled = false;
 
@@ -168,7 +173,7 @@ const Home: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [isOwnerWithTrailers]);
+  }, [isOwner]);
 
   const gooseneckItems = getGooseneckListItems();
   const ownerTrailerCards =
@@ -201,7 +206,7 @@ const Home: React.FC = () => {
         <Container />
       </RevealBlock>
 
-      {isOwnerWithNoTrailers ? (
+      {ownerHasNoTrailers ? (
         /* Empty state below container - no trailer listings shown */
         <RevealBlock delayMs={120}>
           <div
@@ -285,7 +290,7 @@ const Home: React.FC = () => {
             </div>
           </div>
         </RevealBlock>
-      ) : isOwnerWithTrailers ? (
+      ) : ownerHasTrailers ? (
         <RevealBlock delayMs={120}>
           <div className="w-full px-10 pb-6 pt-1">
             <div className="w-full">
