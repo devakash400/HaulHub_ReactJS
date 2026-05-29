@@ -357,6 +357,7 @@ export function getTrailerTypeLabel(type: TrailerType): string {
 export type TrailerListItem = {
   id: string | number;
   image: string;
+  titleLabel?: string;
   modelLabel: string;
   priceLabel: string;
   badgeLabel?: string;

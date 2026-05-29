@@ -92,6 +92,7 @@ export function apiTrailerToListItem(t: ApiTrailer): TrailerListItem {
   return {
     id: t._id,
     image: pickTrailerImage(t),
+    titleLabel: t.title?.trim() || t.name?.trim() || modelName,
     modelLabel: `Model: ${modelName}`,
     priceLabel: formatPricePerDay(t.pricePerDay),
     badgeLabel: t.isFeatured ? "Featured" : undefined,
@@ -327,6 +328,39 @@ export async function createTrailer(trailerData: any): Promise<boolean> {
     }
   } catch (error: any) {
     console.error("Error creating trailer:", {
+      message: error?.message,
+      status: error?.response?.status,
+      data: error?.response?.data,
+    });
+    return false;
+  }
+}
+
+export async function updateTrailer(
+  id: string,
+  trailerData: Record<string, unknown>,
+): Promise<boolean> {
+  if (!id?.trim()) {
+    console.error("updateTrailer: id is required");
+    return false;
+  }
+
+  try {
+    const res = await api.patch(
+      `/api/trailers/${encodeURIComponent(id)}`,
+      trailerData,
+    );
+    const body = res.data;
+    if (body?.success === true) {
+      return true;
+    }
+    if (body?.success === false) {
+      console.error("Server returned success: false", body.message || body.error);
+      return false;
+    }
+    return res.status === 200 || res.status === 204;
+  } catch (error: any) {
+    console.error("Error updating trailer:", {
       message: error?.message,
       status: error?.response?.status,
       data: error?.response?.data,
