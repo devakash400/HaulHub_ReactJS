@@ -382,8 +382,15 @@ const Trailer: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#ffffff] w-full min-w-0 overflow-x-hidden scroll-smooth">
-      <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-5 lg:py-5 w-full min-w-0">
+    <div
+      className="min-h-screen bg-[#ffffff]
+     w-full min-w-0 overflow-x-hidden scroll-smooth"
+    >
+      <div
+        className="max-w-container mx-auto px-10 sm:px-6
+       lg:px-10 py-5 lg:py-5 w-full min-w-0"
+        style={{ paddingBottom: "5px" }}
+      >
         <TrailerTitleSection
           title={trailer.title}
           location={locationText}
@@ -444,51 +451,65 @@ const Trailer: React.FC = () => {
           </div>
         </RevealSection>
 
-        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
-          <div className="lg:col-span-2 space-y-8">
-            <RevealSection variant="soft">
-              <RatingSummaryCard
-                rating={trailer.rating}
-                description={trailer.ratingDescription}
-                reviewCount={trailer.reviewCount}
-              />
-            </RevealSection>
+        <RevealSection delayMs={80} variant="soft">
+          <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-0">
+            <div
+              style={{
+                boxShadow: "0px 4px 4px 0px #00000040",
+              }}
+              className="px-10 lg:grid lg:grid-cols-3 lg:gap-6"
+            >
+              <div className="lg:col-span-2 space-y-8">
+                <RevealSection variant="soft">
+                  <RatingSummaryCard
+                    rating={trailer.rating}
+                    description={trailer.ratingDescription}
+                    reviewCount={trailer.reviewCount}
+                  />
+                </RevealSection>
 
-            <RevealSection delayMs={100} variant="soft">
-              <FeatureIconsSection features={trailer.features} />
-            </RevealSection>
+                <RevealSection delayMs={100} variant="soft">
+                  <FeatureIconsSection features={trailer.features} />
+                </RevealSection>
 
-            {/* <GuestFavouriteSection
+                {/* <GuestFavouriteSection
               rating={trailer.guestFavouriteRating}
               title="Guest Favourite"
               description={trailer.guestFavouriteDescription}
               metrics={trailer.metrics}
             /> */}
 
-            {/* <ReviewsSection reviews={trailer.reviews} /> */}
+                {/* <ReviewsSection reviews={trailer.reviews} /> */}
 
-            {/* <PolicySection /> */}
-          </div>
+                {/* <PolicySection /> */}
+              </div>
 
-          <div className="lg:col-span-1 mt-8 lg:mt-0">
-            <RevealSection delayMs={140} variant="soft">
-              <StickyPricingCard
-                trailerId={id ?? String(trailer.id)}
-                price={trailer.price}
-                trailer={{
-                  title: locationText,
-                  subtitle: trailer.specs,
-                  image: trailer.images[0] ?? "",
-                  price: trailer.price,
-                }}
-              />
-            </RevealSection>
+              <div
+                style={{ paddingBottom: "20px" }}
+                className="lg:col-span-1 mt-8 lg:mt-0"
+              >
+                <RevealSection delayMs={140} variant="soft">
+                  <StickyPricingCard
+                    trailerId={id ?? String(trailer.id)}
+                    price={trailer.price}
+                    trailer={{
+                      title: locationText,
+                      subtitle: trailer.specs,
+                      image: trailer.images[0] ?? "",
+                      price: trailer.price,
+                    }}
+                  />
+                </RevealSection>
+              </div>
+            </div>
           </div>
-        </div>
+        </RevealSection>
 
         {/* bottom section  */}
 
-        <div className="mt-4 space-y-4">
+        {/* bottom section */}
+
+        <div className="mt-4 -mx-4 sm:-mx-6 lg:-mx-8 w-auto">
           <RevealSection variant="soft">
             <GuestFavouriteSection
               rating={trailer.guestFavouriteRating}
@@ -501,9 +522,6 @@ const Trailer: React.FC = () => {
 
           <RevealSection delayMs={100} variant="soft">
             <ReviewsSection
-              reviews={
-                backendReviews.length > 0 ? backendReviews : trailer.reviews
-              }
               onShowAll={() => {
                 if (!isAuthenticated) {
                   openAuthModal("login");

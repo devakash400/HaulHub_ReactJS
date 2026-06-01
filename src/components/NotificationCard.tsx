@@ -72,4 +72,3 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 };
 
 export default NotificationCard;
-

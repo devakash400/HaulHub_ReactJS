@@ -33,17 +33,19 @@ export const PolicySection: React.FC = () => {
     -ml-[50vw] -mr-[50vw]
     w-screen
 
-    bg-[#FFFFFF]
-    border-t border-b border-[#D9D9D9]
+    
+  
     shadow-[0px_4px_4px_0px_#00000040]
 
-    px-6 py-5
+    px-1 py-5
     mb-0
   "
+      style={{ paddingBottom: "20px" }}
     >
       <div
         className="
-      max-w-[1200px]
+      max-w-full
+      px-10
       mx-auto
       grid grid-cols-1 md:grid-cols-3
       gap-y-8 md:gap-x-16
@@ -55,32 +57,36 @@ export const PolicySection: React.FC = () => {
               src={icon}
               alt={title}
               className="
-            w-[34px] h-[34px]
+            w-[58px] h-[58px]
             object-contain
             mb-3
           "
             />
 
             <h3
-              className="
-            text-[16px]
-            font-semibold
-            text-[#222]
-            leading-none
-            mb-2
-          "
+              style={{
+                fontFamily: "Lexend",
+                fontWeight: 400,
+                fontSize: "27px",
+                lineHeight: "100%",
+                letterSpacing: "0%",
+                color: "#000000",
+                marginBottom: "8px",
+              }}
             >
               {title}
             </h3>
-
             <p
-              className="
-            text-[12px]
-            leading-[1.45]
-            text-[#555]
-            max-w-[260px]
-            m-0
-          "
+              style={{
+                fontFamily: "Lexend",
+                fontWeight: 300,
+                fontSize: "18px",
+                lineHeight: "120%",
+                letterSpacing: "0%",
+                color: "#000000",
+                margin: 0,
+                maxWidth: "260px",
+              }}
             >
               {description}
             </p>

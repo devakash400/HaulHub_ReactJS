@@ -294,10 +294,13 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
 
   return (
     <>
-      <div className="w-full min-w-0 self-start flex justify-center">
+      <div
+        className="w-full min-w-0 self-start
+       flexjcenter justify-start"
+      >
         <div
           className="
-      w-full max-w-[403px]
+      w-full max-w-[463px]
       bg-[#F8F8F8]
       border border-[#D7D7D7]
       rounded-[14px]
@@ -447,7 +450,9 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
           <button
             type="button"
             onClick={handleReserve}
-            className="w-full mt-4 h-[53px] flex items-center justify-center text-white hover:opacity-90 transition"
+            className="w-full mt-4 h-[53px] 
+            flex items-center justify-center text-white 
+            over:opacity-90 transition"
             style={{
               background: "#389131",
               paddingTop: "12px",
