@@ -26,6 +26,7 @@ import Profile from "./pages/Profile/Profile.tsx";
 import AccountSettings from "./pages/AccountSettings/AccountSettings.tsx";
 import Wishlist from "./pages/Wishlist/Wishlist.tsx";
 import Notifications from "./pages/Notifications/Notifications.tsx";
+import BookingDetails from "./pages/Notifications/BookingDetails.tsx";
 import BookingRequestAction from "./pages/BookingRequestAction.tsx";
 import TrailorCondition from "./pages/TrailorCondition/TrailorCondition.tsx";
 import TrailorConditionAfter from "./pages/TrailorCondition/TrailorConditionAfter.tsx";
@@ -125,6 +126,10 @@ const App: React.FC = () => {
           />
           <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route
+            path="/notifications/booking/:bookingId"
+            element={<BookingDetails />}
+          />
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/about" element={<About />} />

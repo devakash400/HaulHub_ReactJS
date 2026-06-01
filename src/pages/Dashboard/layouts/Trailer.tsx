@@ -310,34 +310,48 @@ const Trailer: React.FC = () => {
     const trailerId = String(trailer.id);
     const exists = current.some((item) => item.id === trailerId);
 
-    if (!exists) {
+    if (exists) {
+      // remove from wishlist
       try {
-        await addWishlistItem(trailerId);
-        toast.success("Added to wishlist");
+        await deleteWishlistItem(trailerId);
+        toast.success("Removed from wishlist");
       } catch (error) {
-        toast.error("Could not add trailer to wishlist.");
+        toast.error("Could not remove trailer from wishlist.");
         return;
       }
+      const next = current.filter((item) => item.id !== trailerId);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("wishlistItems", JSON.stringify(next));
+      }
+      setWishlistItems(next);
+      return;
     }
 
-    const next: WishlistItem[] = exists
-      ? current
-      : [
-          ...current,
-          {
-            id: trailerId,
-            title: trailer.title,
-            subtitle: trailer.specs,
-            imageUrl: trailer.images[0] ?? "",
-          },
-        ];
+    // add to wishlist
+    try {
+      await addWishlistItem(trailerId);
+      toast.success("Added to wishlist");
+    } catch (error) {
+      toast.error("Could not add trailer to wishlist.");
+      return;
+    }
+
+    const next: WishlistItem[] = [
+      ...current,
+      {
+        id: trailerId,
+        title: trailer.title,
+        subtitle: trailer.specs,
+        imageUrl: trailer.images[0] ?? "",
+      },
+    ];
 
     if (typeof window !== "undefined") {
       localStorage.setItem("wishlistItems", JSON.stringify(next));
     }
 
     setWishlistItems(next);
-    setWishlistOpen(true);
+    setWishlistOpen(false);
   };
 
   const handleRemoveItem = async (itemId: string) => {
@@ -397,6 +411,9 @@ const Trailer: React.FC = () => {
           specs={trailer.specs}
           onShareClick={() => setShareModalOpen(true)}
           onSaveClick={handleSaveClick}
+          isSaved={wishlistItems.some(
+            (w) => String(w.id) === String(trailer.id),
+          )}
         />
 
         <ShareTrailerModal
