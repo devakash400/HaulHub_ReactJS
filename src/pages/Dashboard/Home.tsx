@@ -197,10 +197,11 @@ const Home: React.FC = () => {
   return (
     <div
       style={{
-        background: "#fff",
-        boxShadow: "0px 40px 40px 0px #000000",
+        background: "#FFFFFF",
+        boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)",
+        marginBottom: "10px",
       }}
-      className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden"
+      className="min-h-screen w-full min-w-0 overflow-x-hidden"
     >
       <RevealBlock>
         <Container />
@@ -215,12 +216,13 @@ const Home: React.FC = () => {
           >
             <div
               className="
-    relative w-full rounded-xl
+    relative w-[calc(100%+32px)] sm:w-[calc(100%+48px)] lg:w-[calc(100%+64px)]
+    -mx-4 sm:-mx-6 lg:-mx-8
+    px-10 py-5
     bg-[#FFFFFF]
     border border-[#00000040]
-    border-l-0
-    shadow-[4px_4px_4px_4px_#00000026]
-    sm:w-[70%] sm:max-w-[920px]
+    shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]
+    sm:w-[70%] sm:max-w-full
   "
             >
               <div className="flex flex-col items-center justify-center px-6 py-12 sm:py-16 text-center">

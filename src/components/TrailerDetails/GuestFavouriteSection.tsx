@@ -118,12 +118,23 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
   };
 
   return (
-    <section ref={sectionRef} className="text-center space-y-3">
+    <section
+      ref={sectionRef}
+      className="
+    mt-4
+    text-center
+    bg-white
+    py-10
+    w-[calc(100%+32px)] sm:w-[calc(100%+48px)] lg:w-[calc(100%+64px)]
+    -mx-4 sm:-mx-6 lg:-mx-8
+    shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]
+  "
+    >
       <div className="mx-auto relative flex items-center justify-center w-[242px] h-[242px]">
         <img
           src={guestFavouriteIcon}
           alt="Guest favourite rating wreath"
-          className={`w-full h-full object-contain transition-all 
+          className={`w-full h-full mt-10 object-contain transition-all 
       duration-700 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
         isInView
           ? "opacity-100 scale-100 rotate-0"
@@ -160,6 +171,7 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
           lineHeight: "100%",
           letterSpacing: "0%",
           verticalAlign: "middle",
+          textAlign: "center",
         }}
       >
         {title}

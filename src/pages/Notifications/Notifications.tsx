@@ -40,10 +40,66 @@ const Notifications: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
+  const user = useSelector((state: RootState) => state.auth.user);
+  const userType = useSelector((state: RootState) => state.auth.userType);
+  const isOwner =
+    isAuthenticated && (user?.trailor === "Owner" || userType === "Owner");
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<ApiNotification[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [processedRequests, setProcessedRequests] = useState<
+    Record<string, "Accepted" | "Rejected">
+  >({});
+  const [processingRequests, setProcessingRequests] = useState<
+    Record<string, boolean>
+  >({});
+
+  const handleAcceptRequest = async (bookingId: string) => {
+    setProcessingRequests((prev) => ({ ...prev, [bookingId]: true }));
+    setError(null);
+
+    try {
+      await api.patch(`/api/bookings/${bookingId}/accept`);
+      setProcessedRequests((prev) => ({
+        ...prev,
+        [bookingId]: "Accepted",
+      }));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Accept booking error:", err);
+      setError("Unable to accept booking request. Please try again.");
+    } finally {
+      setProcessingRequests((prev) => {
+        const nextState = { ...prev };
+        delete nextState[bookingId];
+        return nextState;
+      });
+    }
+  };
+
+  const handleRejectRequest = async (bookingId: string) => {
+    setProcessingRequests((prev) => ({ ...prev, [bookingId]: true }));
+    setError(null);
+
+    try {
+      await api.patch(`/api/bookings/${bookingId}/reject`);
+      setProcessedRequests((prev) => ({
+        ...prev,
+        [bookingId]: "Rejected",
+      }));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Reject booking error:", err);
+      setError("Unable to reject booking request. Please try again.");
+    } finally {
+      setProcessingRequests((prev) => {
+        const nextState = { ...prev };
+        delete nextState[bookingId];
+        return nextState;
+      });
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -129,6 +185,14 @@ const Notifications: React.FC = () => {
                 /booking accepted/i.test(notification.type) ||
                 /booking accepted/i.test(notification.title) ||
                 /booking accepted/i.test(notification.message);
+              const isNewRentalRequest =
+                /new rental request/i.test(notification.title) ||
+                /rental request/i.test(notification.title) ||
+                /rental request/i.test(notification.message) ||
+                /new rental request/i.test(notification.message);
+              const isRequestProcessing = Boolean(
+                processingRequests[notification.bookingId],
+              );
 
               return (
                 <div
@@ -167,22 +231,68 @@ const Notifications: React.FC = () => {
                         {notification.title}
                       </span>
                       <p className="text-xs text-gray-500">{createdAt}</p>
-                      <Link
-                        to={
-                          isBookingAccepted
-                            ? "/prescreening"
+                      {isOwner && isNewRentalRequest ? (
+                        processedRequests[notification.bookingId] ? (
+                          <span
+                            className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${
+                              processedRequests[notification.bookingId] ===
+                              "Accepted"
+                                ? "bg-[#E7F6E6] text-[#2F7A29]"
+                                : "bg-[#FEE2E2] text-[#991B1B]"
+                            }`}
+                          >
+                            {processedRequests[notification.bookingId]}
+                          </span>
+                        ) : (
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                void handleAcceptRequest(notification.bookingId)
+                              }
+                              disabled={isRequestProcessing}
+                              className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                                isRequestProcessing
+                                  ? "bg-[#84b884] cursor-not-allowed"
+                                  : "bg-[#389131] hover:bg-[#2f7a29]"
+                              }`}
+                            >
+                              {isRequestProcessing ? "Processing..." : "Accept"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                void handleRejectRequest(notification.bookingId)
+                              }
+                              disabled={isRequestProcessing}
+                              className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
+                                isRequestProcessing
+                                  ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
+                                  : "border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
+                              }`}
+                            >
+                              {isRequestProcessing ? "Processing..." : "Reject"}
+                            </button>
+                          </div>
+                        )
+                      ) : (
+                        <Link
+                          to={
+                            isBookingAccepted
+                              ? "/prescreening"
+                              : isRequestSent
+                                ? "/booking"
+                                : `/booking/${notification.bookingId}`
+                          }
+                          className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          {isBookingAccepted
+                            ? "Start pre screening"
                             : isRequestSent
-                              ? "/booking"
-                              : `/booking/${notification.bookingId}`
-                        }
-                        className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
-                      >
-                        {isBookingAccepted
-                          ? "Start pre screening"
-                          : isRequestSent
-                            ? "View request status"
-                            : "View details"}
-                      </Link>
+                              ? "View request status"
+                              : "View details"}
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

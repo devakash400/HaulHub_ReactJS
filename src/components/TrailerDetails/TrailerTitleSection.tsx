@@ -1,6 +1,7 @@
 import React from "react";
 import { Heart, Share2 } from "lucide-react";
-
+import shareIcon from "../../assets/icons/Share_icon.png";
+import saveIcon from "../../assets/icons/Save_icon.png";
 type TrailerTitleSectionProps = {
   title: string;
   location: string;
@@ -40,9 +41,10 @@ export const TrailerTitleSection: React.FC<TrailerTitleSectionProps> = ({
           className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
           aria-label="Share"
         >
-          <Share2
-            className="w-[16.5px] h-[18px] text-black"
-            style={{ strokeWidth: 1.5 }}
+          <img
+            src={shareIcon}
+            alt="Share"
+            className="w-[16.5px] h-[18px] object-contain"
           />
           <span
             className="font-normal text-[16px] leading-[100%] tracking-[0%] underline text-black"
@@ -57,9 +59,10 @@ export const TrailerTitleSection: React.FC<TrailerTitleSectionProps> = ({
           className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
           aria-label="Save"
         >
-          <Heart
-            className="w-[16.5px] h-[18px] text-black"
-            style={{ strokeWidth: 1.5 }}
+          <img
+            src={saveIcon}
+            alt="Save"
+            className="w-[16.5px] h-[18px] object-contain"
           />
           <span
             className="font-normal text-[16px] leading-[100%] tracking-[0%] underline text-black"
