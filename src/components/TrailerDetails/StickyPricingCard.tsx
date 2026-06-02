@@ -299,9 +299,10 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
        flexjcenter justify-start"
       >
         <div
+          style={{ backgroundColor: "#FFFFFF" }}
           className="
       w-full max-w-[463px]
-      bg-[#F8F8F8]
+    
       border border-[#D7D7D7]
       rounded-[14px]
       shadow-[0px_2px_8px_rgba(0,0,0,0.12)]

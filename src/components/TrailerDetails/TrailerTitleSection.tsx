@@ -8,12 +8,14 @@ type TrailerTitleSectionProps = {
   specs: string;
   onShareClick?: () => void;
   onSaveClick?: () => void;
+  isSaved?: boolean;
 };
 
 export const TrailerTitleSection: React.FC<TrailerTitleSectionProps> = ({
   title,
   onShareClick,
   onSaveClick,
+  isSaved = false,
 }) => {
   return (
     <section className="flex flex-row flex-wrap items-start justify-between gap-4 mb-3 min-w-0">
@@ -56,19 +58,20 @@ export const TrailerTitleSection: React.FC<TrailerTitleSectionProps> = ({
         <button
           type="button"
           onClick={onSaveClick}
-          className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-colors hover:text-[#389131] hover:underline"
-          aria-label="Save"
+          className="flex items-center gap-2 text-sm font-medium transition-colors hover:underline"
+          aria-label={isSaved ? "Unsave" : "Save"}
         >
-          <img
-            src={saveIcon}
-            alt="Save"
-            className="w-[16.5px] h-[18px] object-contain"
+          <Heart
+            size={18}
+            strokeWidth={2.2}
+            color={isSaved ? "#E03A3A" : "#8B8B8B"}
+            fill={isSaved ? "#E03A3A" : "none"}
           />
           <span
             className="font-normal text-[16px] leading-[100%] tracking-[0%] underline text-black"
             style={{ fontFamily: "Lexend", verticalAlign: "middle" }}
           >
-            Save
+            {isSaved ? "Unsave" : "Save"}
           </span>
         </button>
       </div>

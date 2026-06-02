@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { RootState } from "../../store";
 import api from "../../api/api.ts";
 
@@ -45,6 +45,7 @@ const Notifications: React.FC = () => {
   const isOwner =
     isAuthenticated && (user?.trailor === "Owner" || userType === "Owner");
   const navigate = useNavigate();
+  const location = useLocation();
   const [notifications, setNotifications] = useState<ApiNotification[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +104,7 @@ const Notifications: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate("/login", { state: { backgroundLocation: location } });
       return;
     }
 
@@ -244,36 +245,16 @@ const Notifications: React.FC = () => {
                             {processedRequests[notification.bookingId]}
                           </span>
                         ) : (
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                void handleAcceptRequest(notification.bookingId)
-                              }
-                              disabled={isRequestProcessing}
-                              className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors ${
-                                isRequestProcessing
-                                  ? "bg-[#84b884] cursor-not-allowed"
-                                  : "bg-[#389131] hover:bg-[#2f7a29]"
-                              }`}
-                            >
-                              {isRequestProcessing ? "Processing..." : "Accept"}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                void handleRejectRequest(notification.bookingId)
-                              }
-                              disabled={isRequestProcessing}
-                              className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
-                                isRequestProcessing
-                                  ? "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
-                                  : "border-gray-300 bg-white text-gray-800 hover:bg-gray-100"
-                              }`}
-                            >
-                              {isRequestProcessing ? "Processing..." : "Reject"}
-                            </button>
-                          </div>
+                          <Link
+                            to={`/notifications/booking/${notification.bookingId}`}
+                            state={{
+                              renterFullName: notification.actorId?.fullName,
+                              renterEmail: undefined,
+                            }}
+                            className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                          >
+                            View details
+                          </Link>
                         )
                       ) : (
                         <Link
