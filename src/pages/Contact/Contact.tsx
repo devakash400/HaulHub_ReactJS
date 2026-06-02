@@ -89,7 +89,7 @@ const Contact: React.FC = () => {
             <img
               src={images.Contact}
               alt="Dump trailer at dealership"
-              className="h-[300px] w-[594px] object-cover object-center sm:h-[420px] lg:h-[800px]"
+              className="h-[300px] w-full object-cover object-center sm:h-[420px] lg:h-[800px]"
             />
           </div>
 
@@ -198,84 +198,83 @@ const Contact: React.FC = () => {
               </div>
 
               {/* Service */}
-              <div className="relative">
+              <div>
                 <label
                   htmlFor="contact-service"
                   style={{
                     fontFamily: "Lexend",
                     fontWeight: 400,
-                    fontStyle: "normal",
                     fontSize: "16px",
                     lineHeight: "100%",
-                    letterSpacing: "0%",
                     color: "#000000",
                   }}
                   className="mb-4.5 block"
                 >
                   What service are you interested in
                 </label>
-                <select
-                  id="contact-service"
-                  value={serviceType}
-                  onChange={(e) => {
-                    setServiceType(e.target.value);
-                    if (serviceError) setServiceError(null);
-                  }}
-                  onBlur={() => {
-                    if (!serviceType.trim())
-                      setServiceError("Select a service type");
-                  }}
-                  className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
-                  style={{
-                    background: "#FFFFFF",
-                    boxShadow: "0px 4px 4px 0px #00000040",
-                    height: "46px",
-                    fontFamily: "Lexend",
-                    fontWeight: 300,
-                    fontSize: "15px",
-                    lineHeight: "100%",
-                    letterSpacing: "0%",
-                    color: serviceType ? "#000000" : "#B2B2B2",
-                  }}
-                >
-                  <option value="" disabled hidden>
-                    Select Service type
-                  </option>
 
-                  {SERVICE_OPTIONS.map((opt) => (
-                    <option
-                      key={opt}
-                      value={opt}
-                      style={{
-                        color: "#000000",
-                        fontFamily: "Lexend",
-                      }}
-                    >
-                      {opt}
+                <div className="relative">
+                  <select
+                    id="contact-service"
+                    value={serviceType}
+                    onChange={(e) => {
+                      setServiceType(e.target.value);
+                      if (serviceError) setServiceError(null);
+                    }}
+                    onBlur={() => {
+                      if (!serviceType.trim()) {
+                        setServiceError("Select a service type");
+                      }
+                    }}
+                    className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                    style={{
+                      background: "#FFFFFF",
+                      boxShadow: "0px 4px 4px 0px #00000040",
+                      height: "46px",
+                      fontFamily: "Lexend",
+                      fontWeight: 300,
+                      fontSize: "15px",
+                      lineHeight: "100%",
+                      color: serviceType ? "#000000" : "#B2B2B2",
+                    }}
+                  >
+                    <option value="" disabled hidden>
+                      Select Service type
                     </option>
-                  ))}
-                </select>
+
+                    {SERVICE_OPTIONS.map((opt) => (
+                      <option
+                        key={opt}
+                        value={opt}
+                        style={{
+                          color: "#000000",
+                          fontFamily: "Lexend",
+                        }}
+                      >
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-700">
+                    <ChevronDown className="h-5 w-5" aria-hidden />
+                  </span>
+                </div>
 
                 {serviceError && (
                   <p className="mt-2 text-sm text-[#E74C3C]">{serviceError}</p>
                 )}
-
-                <span className="pointer-events-none absolute bottom-[17px] right-3 text-neutral-700">
-                  <ChevronDown className="h-5 w-5" aria-hidden />
-                </span>
               </div>
 
               {/* Budget */}
-              <div className="relative">
+              <div>
                 <label
                   htmlFor="contact-budget"
                   style={{
                     fontFamily: "Lexend",
                     fontWeight: 400,
-                    fontStyle: "normal",
                     fontSize: "16px",
                     lineHeight: "100%",
-                    letterSpacing: "0%",
                     color: "#000000",
                   }}
                   className="mb-4.5 block"
@@ -283,54 +282,57 @@ const Contact: React.FC = () => {
                   Budget
                 </label>
 
-                <select
-                  id="contact-budget"
-                  value={budget}
-                  onChange={(e) => {
-                    setBudget(e.target.value);
-                    if (budgetError) setBudgetError(null);
-                  }}
-                  onBlur={() => {
-                    if (!budget.trim()) setBudgetError("Select a budget range");
-                  }}
-                  className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
-                  style={{
-                    background: "#FFFFFF",
-                    boxShadow: "0px 4px 4px 0px #00000040",
-                    height: "46px",
-                    fontFamily: "Lexend",
-                    fontWeight: 300,
-                    fontSize: "15px",
-                    lineHeight: "100%",
-                    letterSpacing: "0%",
-                    color: budget ? "#000000" : "#B2B2B2",
-                  }}
-                >
-                  <option value="" disabled hidden>
-                    Select project budget
-                  </option>
-
-                  {BUDGET_OPTIONS.map((opt) => (
-                    <option
-                      key={opt}
-                      value={opt}
-                      style={{
-                        color: "#000000",
-                        fontFamily: "Lexend",
-                      }}
-                    >
-                      {opt}
+                <div className="relative">
+                  <select
+                    id="contact-budget"
+                    value={budget}
+                    onChange={(e) => {
+                      setBudget(e.target.value);
+                      if (budgetError) setBudgetError(null);
+                    }}
+                    onBlur={() => {
+                      if (!budget.trim()) {
+                        setBudgetError("Select a budget range");
+                      }
+                    }}
+                    className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                    style={{
+                      background: "#FFFFFF",
+                      boxShadow: "0px 4px 4px 0px #00000040",
+                      height: "46px",
+                      fontFamily: "Lexend",
+                      fontWeight: 300,
+                      fontSize: "15px",
+                      lineHeight: "100%",
+                      color: budget ? "#000000" : "#B2B2B2",
+                    }}
+                  >
+                    <option value="" disabled hidden>
+                      Select project budget
                     </option>
-                  ))}
-                </select>
+
+                    {BUDGET_OPTIONS.map((opt) => (
+                      <option
+                        key={opt}
+                        value={opt}
+                        style={{
+                          color: "#000000",
+                          fontFamily: "Lexend",
+                        }}
+                      >
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-700">
+                    <ChevronDown className="h-5 w-5" aria-hidden />
+                  </span>
+                </div>
 
                 {budgetError && (
                   <p className="mt-2 text-sm text-[#E74C3C]">{budgetError}</p>
                 )}
-
-                <span className="pointer-events-none absolute bottom-[17px] right-3 text-neutral-700">
-                  <ChevronDown className="h-5 w-5" aria-hidden />
-                </span>
               </div>
 
               {/* Message */}

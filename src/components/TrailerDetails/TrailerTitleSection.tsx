@@ -44,9 +44,10 @@ export const TrailerTitleSection: React.FC<TrailerTitleSectionProps> = ({
           aria-label="Share"
         >
           <img
+            style={{ color: "000000" }}
             src={shareIcon}
             alt="Share"
-            className="w-[16.5px] h-[18px] object-contain"
+            className="w-[16px] h-[16px] object-contain"
           />
           <span
             className="font-normal text-[16px] leading-[100%] tracking-[0%] underline text-black"
@@ -62,9 +63,9 @@ export const TrailerTitleSection: React.FC<TrailerTitleSectionProps> = ({
           aria-label={isSaved ? "Unsave" : "Save"}
         >
           <Heart
-            size={18}
+            size={16}
             strokeWidth={2.2}
-            color={isSaved ? "#E03A3A" : "#8B8B8B"}
+            color={isSaved ? "#E03A3A" : "#000000"}
             fill={isSaved ? "#E03A3A" : "none"}
           />
           <span

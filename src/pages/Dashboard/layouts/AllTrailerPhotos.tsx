@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import useModalNavigate from "../../../hooks/useModalNavigate.ts";
 import { ChevronLeft, Heart, Share2 } from "lucide-react";
 import {
   getTrailerTypeLabel,
@@ -23,6 +24,7 @@ const PLACEHOLDER = assetImages.Catimg;
 const AllTrailerPhotos: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const modalNavigate = useModalNavigate();
   const [trailer, setTrailer] = useState<TrailerDetail | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
     "loading",
@@ -197,7 +199,7 @@ const AllTrailerPhotos: React.FC = () => {
         isOpen={wishlistModalOpen}
         onClose={() => setWishlistModalOpen(false)}
         onLoginClick={() => {
-          navigate("/login");
+          modalNavigate("/login");
         }}
       />
     </div>

@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  type Location,
+} from "react-router-dom";
+import useModalNavigate from "../../hooks/useModalNavigate.ts";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Menu, Search } from "lucide-react";
 import { images } from "../../assets/images/index.ts";
+import { resolveMediaUrl } from "../../api/media.ts";
 import { RootState } from "../../store";
 import { logout } from "../../store/authSlice.ts";
 import { clearWishlist } from "../../store/wishlistSlice.ts";
@@ -11,7 +18,12 @@ import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../Auth/LogoutConfirmModal.tsx";
 
 function profileInitial(
-  user: { firstName?: string; lastName?: string; email?: string } | null,
+  user: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    profilePicture?: string;
+  } | null,
 ): string {
   if (!user) return "U";
   const first = user.firstName?.trim();
@@ -33,10 +45,15 @@ const Navbar: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
+  const modalNavigate = useModalNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const userType = useSelector((state: RootState) => state.auth.userType);
   const isOwner =
     (user?.trailor === "Owner" || userType === "Owner") && isAuthenticated;
+  const profilePictureUrl = resolveMediaUrl(
+    user?.profilePicture ?? undefined,
+    "",
+  );
 
   const toggleDrawer = () => setIsDrawerOpen((p) => !p);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -52,23 +69,26 @@ const Navbar: React.FC = () => {
   };
 
   const location = useLocation();
-  const isTrailerScreen = location.pathname.startsWith("/trailer/");
+  const backgroundLocation =
+    (location.state as { backgroundLocation?: Location })?.backgroundLocation ??
+    location;
+  const isTrailerScreen = backgroundLocation.pathname.startsWith("/trailer/");
 
-  useEffect(() => setIsDrawerOpen(false), [location.pathname]);
+  useEffect(() => setIsDrawerOpen(false), [backgroundLocation.pathname]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const shouldOpen = window.sessionStorage.getItem("openLoginAfterLogout");
     if (shouldOpen === "1") {
       window.sessionStorage.removeItem("openLoginAfterLogout");
-      navigate("/login");
+      modalNavigate("/login");
     }
   }, [location.pathname, navigate]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const isHome = location.pathname === "/";
+    const isHome = backgroundLocation.pathname === "/";
     if (!isHome) {
       setIsSearchCompact(false);
       return;
@@ -113,14 +133,14 @@ const Navbar: React.FC = () => {
     const handler = (e: Event) => {
       // @ts-ignore
       const type = (e as CustomEvent).detail as "login" | "signup" | string;
-      if (type === "signup") navigate("/signup");
-      else if (type === "login") navigate("/login");
+      if (type === "signup") modalNavigate("/signup");
+      else if (type === "login") modalNavigate("/login");
     };
 
     window.addEventListener("openAuthModal", handler as EventListener);
     return () =>
       window.removeEventListener("openAuthModal", handler as EventListener);
-  }, [navigate]);
+  }, [modalNavigate]);
 
   const handleLogout = async () => {
     closeDrawer();
@@ -139,7 +159,7 @@ const Navbar: React.FC = () => {
   const handleProtectedDrawerNavigate = (path: string) => {
     closeDrawer();
     if (!isAuthenticated) {
-      navigate("/login");
+      modalNavigate("/login");
       return;
     }
     navigate(path);
@@ -194,7 +214,7 @@ const Navbar: React.FC = () => {
                 <Link
                   to="/profile"
                   onClick={closeDrawer}
-                  className="flex w-[41px] h-[41px] rounded-[20.5px] bg-[#585858] text-white font-['Myriad_Pro'] font-normal text-[32px] leading-[100%] tracking-[0em] items-center justify-center no-underline hover:opacity-90 focus-visible:outline-none"
+                  className="flex w-[41px] h-[41px] rounded-[20.5px] overflow-hidden bg-[#585858] text-white font-['Myriad_Pro'] font-normal text-[32px] leading-[100%] tracking-[0em] items-center justify-center no-underline hover:opacity-90 focus-visible:outline-none"
                   aria-label={
                     user?.firstName
                       ? `Profile: ${user.firstName}`
@@ -203,7 +223,21 @@ const Navbar: React.FC = () => {
                         : "Profile"
                   }
                 >
-                  {profileInitial(user)}
+                  {profilePictureUrl ? (
+                    <img
+                      src={profilePictureUrl}
+                      alt={
+                        user?.firstName
+                          ? `${user.firstName} profile photo`
+                          : user?.email
+                            ? `${user.email} profile photo`
+                            : "Profile photo"
+                      }
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    profileInitial(user)
+                  )}
                 </Link>
                 <button
                   type="button"
@@ -322,7 +356,7 @@ const Navbar: React.FC = () => {
                             className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={() => {
                               closeDrawer();
-                              navigate("/login");
+                              modalNavigate("/login");
                             }}
                           >
                             <span className="text-inherit no-underline cursor-pointer block w-full">
@@ -400,7 +434,7 @@ const Navbar: React.FC = () => {
                           className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
                           onClick={() => {
                             closeDrawer();
-                            navigate("/login");
+                            modalNavigate("/login");
                           }}
                         >
                           <span>Login / Sign Up</span>

@@ -119,6 +119,21 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     return unlock;
   }, [isOpen]);
 
+  // DEBUG: Monitor state changes for image files
+  useEffect(() => {
+    if (photoFiles.length > 0 || photos.length > 0) {
+      console.log("STATE UPDATE - Image files changed:", {
+        photoFilesCount: photoFiles.length,
+        photosCount: photos.length,
+        photoFiles: photoFiles.map((f) => ({
+          name: f.name,
+          size: f.size,
+          type: f.type,
+        })),
+      });
+    }
+  }, [photoFiles, photos]);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (typeRef.current && !typeRef.current.contains(e.target as Node)) {
@@ -238,21 +253,70 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     setIsSubmitting(true);
 
     try {
+      // DEBUG: Log state at submission time
+      console.log("=== FORM SUBMISSION DEBUG ===");
+      console.log("profilePhotoFile:", profilePhotoFile);
+      console.log("photoFiles array length:", photoFiles.length);
+      console.log("photoFiles array:", photoFiles);
+      console.log("photos array (URLs) length:", photos.length);
+      console.log("photos array (URLs):", photos);
+
       const uploadImageFile = async (file: File): Promise<string> => {
+        console.log("Uploading file:", {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          lastModified: file.lastModified,
+        });
+
         const uploadResp = await uploadProfilePhoto(file);
+
+        console.log("Upload response for", file.name, ":", uploadResp);
+
         if (!uploadResp || !uploadResp.success) {
           throw new Error("Image upload failed");
         }
-        return uploadResp.data.url || uploadResp.data.publicId;
+
+        const uploadedUrl = uploadResp.data.url || uploadResp.data.publicId;
+        console.log("Uploaded URL:", uploadedUrl);
+
+        return uploadedUrl;
       };
 
+      // Upload profile picture
+      console.log("--- Starting profile picture upload ---");
       const profilePictureUrl = profilePhotoFile
         ? await uploadImageFile(profilePhotoFile)
         : profilePhotoUrl || "";
+      console.log("Final profilePictureUrl:", profilePictureUrl);
 
-      const uploadedImages = await Promise.all(
-        photoFiles.map((file) => uploadImageFile(file)),
-      );
+      // Upload gallery images - CRITICAL: Create a fresh snapshot of photoFiles
+      console.log("--- Starting gallery images upload ---");
+      console.log("Number of gallery images to upload:", photoFiles.length);
+
+      const uploadedImages: string[] = [];
+
+      // Upload images sequentially with logging instead of Promise.all
+      // This prevents closure issues and makes debugging easier
+      if (photoFiles.length > 0) {
+        for (let i = 0; i < photoFiles.length; i++) {
+          console.log(`Uploading gallery image ${i + 1}/${photoFiles.length}`);
+          const file = photoFiles[i];
+
+          // Verify file before upload
+          if (!file || !(file instanceof File)) {
+            console.error(`Invalid file at index ${i}:`, file);
+            throw new Error(`Invalid file at index ${i}`);
+          }
+
+          const uploadedUrl = await uploadImageFile(file);
+          uploadedImages.push(uploadedUrl);
+          console.log(`Gallery image ${i + 1} uploaded:`, uploadedUrl);
+        }
+      }
+
+      console.log("Final uploadedImages array:", uploadedImages);
+      console.log("uploadedImages length:", uploadedImages.length);
 
       const trailerData = {
         title: title.trim(),
@@ -291,6 +355,13 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
               ]
             : [],
       };
+
+      console.log("Final trailerData.images:", trailerData.images);
+      console.log(
+        "Final trailerData.profilePicture:",
+        trailerData.profilePicture,
+      );
+      console.log("=== DEBUG END ===");
 
       const success = await createTrailer(trailerData);
 
@@ -604,10 +675,23 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                   onChange={(e) => {
                     const file = e.target.files?.[0];
 
-                    if (file) {
+                    console.log("Profile photo selected:", {
+                      name: file?.name,
+                      size: file?.size,
+                      type: file?.type,
+                    });
+
+                    if (file && file instanceof File) {
                       setProfilePhotoFile(file);
-                      setProfilePhotoUrl(URL.createObjectURL(file));
+                      const objectUrl = URL.createObjectURL(file);
+                      setProfilePhotoUrl(objectUrl);
                       setTouched((prev) => ({ ...prev, profilePhoto: true }));
+                      console.log(
+                        "Profile photo state updated with:",
+                        file.name,
+                      );
+                    } else {
+                      console.warn("Invalid profile photo file:", file);
                     }
                   }}
                 />
@@ -668,17 +752,75 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                       ? Array.from(e.target.files)
                       : [];
 
+                    console.log("Gallery photos selected:", {
+                      count: files.length,
+                      files: files.map((f) => ({
+                        name: f.name,
+                        size: f.size,
+                        type: f.type,
+                        lastModified: f.lastModified,
+                      })),
+                    });
+
                     if (!files.length) {
+                      console.warn("No files selected");
                       return;
                     }
 
-                    const photoUrls = files.map((file) =>
-                      URL.createObjectURL(file),
+                    // Validate each file
+                    const validFiles = files.filter((file) => {
+                      if (!(file instanceof File)) {
+                        console.error("Invalid file object:", file);
+                        return false;
+                      }
+                      return true;
+                    });
+
+                    if (validFiles.length !== files.length) {
+                      console.warn(
+                        `Filtered out ${files.length - validFiles.length} invalid files`,
+                      );
+                    }
+
+                    // Create object URLs and ensure files array is properly captured
+                    const photoUrls = validFiles.map((file) => {
+                      const url = URL.createObjectURL(file);
+                      console.log(
+                        "Created object URL for",
+                        file.name,
+                        ":",
+                        url,
+                      );
+                      return url;
+                    });
+
+                    // Store the actual File objects with explicit array creation
+                    // This prevents reference issues
+                    const filesSnapshot = [...validFiles];
+                    const urlsSnapshot = [...photoUrls];
+
+                    console.log(
+                      "Before setState - filesSnapshot length:",
+                      filesSnapshot.length,
                     );
-                    setPhotoFiles(files);
-                    setPhotos(photoUrls);
+                    console.log(
+                      "Before setState - urlsSnapshot length:",
+                      urlsSnapshot.length,
+                    );
+
+                    setPhotoFiles(filesSnapshot);
+                    setPhotos(urlsSnapshot);
                     setTouched((prev) => ({ ...prev, photos: true }));
-                    validate(photoUrls);
+
+                    // Validation after state update
+                    setTimeout(() => {
+                      validate(urlsSnapshot);
+                    }, 0);
+
+                    // Reset input to allow re-selecting same files
+                    e.target.value = "";
+
+                    console.log("Gallery photos state updated successfully");
                   }}
                 />
 
