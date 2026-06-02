@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, useLocation, type Location } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar.tsx";
 import BottomBar from "./components/BottomBar/BottomBar.tsx";
@@ -38,12 +39,25 @@ import SignupPage from "./pages/Auth/Signup/SignupPage.tsx";
 import ForgotPasswordPage from "./pages/Auth/ForgotPassword/ForgotPasswordPage.tsx";
 import OtpPage from "./pages/Auth/Otp/OtpPage.tsx";
 import NewPasswordPage from "./pages/Auth/NewPassword/NewPasswordPage.tsx";
+import Terms from "./pages/Terms.tsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import { RootState } from "./store/index.ts";
+import { updateUser } from "./store/authSlice.ts";
+import { getUserProfile } from "./api/userApi.ts";
 
 type LocationState = {
   backgroundLocation?: Location;
 };
 
 const App: React.FC = () => {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
+  const profilePicture = useSelector(
+    (state: RootState) => state.auth.user?.profilePicture,
+  );
+
   const currentLocation = useLocation();
   const state = currentLocation.state as LocationState | null;
   const backgroundLocation = state?.backgroundLocation ?? currentLocation;
@@ -58,6 +72,24 @@ const App: React.FC = () => {
       ? "pt-[124px] sm:pt-[76px]"
       : "pt-[76px]";
 
+  // Sync profile picture from backend on app init if authenticated but missing picture
+  useEffect(() => {
+    if (!isAuthenticated || profilePicture) return;
+
+    const syncProfilePicture = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile?.profilePicture) {
+          dispatch(updateUser({ profilePicture: profile.profilePicture }));
+        }
+      } catch {
+        // silently ignore if fetch fails
+      }
+    };
+
+    void syncProfilePicture();
+  }, [isAuthenticated, profilePicture, dispatch]);
+
   return (
     <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden min-w-0">
       <ScrollToTop /> {!hideNavFooter && <Navbar />}
@@ -66,64 +98,11 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           {/* Auth routes (login/signup/forgot/otp/new-password) */}
 
-          <Route
-            path="/signup"
-            element={
-              <>
-                <Home />
-                <SignupPage />
-              </>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <>
-                <Home />
-                <LoginPage />
-              </>
-            }
-          />
-
-          <Route
-            path="/signup"
-            element={
-              <>
-                <Home />
-                <SignupPage />
-              </>
-            }
-          />
-
-          <Route
-            path="/reset-password"
-            element={
-              <>
-                <Home />
-                <ForgotPasswordPage />
-              </>
-            }
-          />
-
-          <Route
-            path="/otp"
-            element={
-              <>
-                <Home />
-                <OtpPage />
-              </>
-            }
-          />
-
-          <Route
-            path="/Newpassword"
-            element={
-              <>
-                <Home />
-                <NewPasswordPage />
-              </>
-            }
-          />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/reset-password" element={<ForgotPasswordPage />} />
+          <Route path="/otp" element={<OtpPage />} />
+          <Route path="/Newpassword" element={<NewPasswordPage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route
@@ -164,6 +143,8 @@ const App: React.FC = () => {
           <Route path="/trust-safety" element={<TrustSafety />} />
           <Route path="/get-help" element={<GetHelp />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
         {state?.backgroundLocation && (
           <Routes>
@@ -180,20 +161,20 @@ const App: React.FC = () => {
             <Route
               path="/prescreening"
               element={
-                <div
-                  className="modal-overlay 
-                fixed inset-0 z-[100] flex 
-                items-center justify-center bg-black/50"
-                >
-                  <div
-                    className="w-full h-full 
-                   overflow-auto"
-                  >
+                <div className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+                  <div className="w-full h-full overflow-auto">
                     <PreScreening />
                   </div>
                 </div>
               }
             />
+
+            {/* Auth modals — render over the current background location */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/reset-password" element={<ForgotPasswordPage />} />
+            <Route path="/otp" element={<OtpPage />} />
+            <Route path="/Newpassword" element={<NewPasswordPage />} />
           </Routes>
         )}
       </main>

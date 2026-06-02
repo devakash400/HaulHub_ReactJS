@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import useModalNavigate from "../hooks/useModalNavigate.ts";
 import { ChevronLeft } from "lucide-react";
 import { images } from "../assets/images/index.ts";
 import { BookingStepCard } from "../components/RequestToBook/BookingStepCard.tsx";
@@ -19,6 +20,7 @@ const defaultBookingSummary: BookingSummary = {
 
 const RequestToBookPage: React.FC = () => {
   const navigate = useNavigate();
+  const modalNavigate = useModalNavigate();
   const location = useLocation();
   const state = location.state as
     | {
@@ -85,7 +87,7 @@ const RequestToBookPage: React.FC = () => {
               title="Log in or sign Up"
               showContinueButton
               onContinue={() => {
-                navigate("/login");
+                modalNavigate("/login");
               }}
             />
             <BookingStepCard title="Add Payment method" />

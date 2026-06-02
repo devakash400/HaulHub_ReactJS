@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, type Location } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/index.ts";
 import { toast } from "react-toastify";
@@ -12,8 +12,21 @@ import {
 import { register, roleToTrailor } from "../../../api/authApi.ts";
 import { signUpSuccess } from "../../../store/authSlice.ts";
 
+type AuthModalLocationState = {
+  backgroundLocation?: Location;
+  modalStep?: "email" | "password" | "reset" | "otp" | "newPassword";
+  loginIdentifier?: string;
+  usePhoneOnly?: boolean;
+  selectedCountryCode?: string;
+  loginTrailor?: "Renter" | "Owner";
+};
+
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as AuthModalLocationState | null;
+  const backgroundLocation = locationState?.backgroundLocation ?? null;
+  const loginState = locationState ?? null;
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const dispatch = useDispatch();
@@ -23,9 +36,19 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/", { replace: true });
+      if (backgroundLocation) {
+        navigate(
+          `${backgroundLocation.pathname}${backgroundLocation.search}`,
+          {
+            replace: true,
+            state: backgroundLocation.state ?? null,
+          },
+        );
+      } else {
+        navigate("/", { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, backgroundLocation]);
 
   if (isAuthenticated) {
     return null;
@@ -36,8 +59,25 @@ const LoginPage: React.FC = () => {
       {!isSignUpOpen && (
         <LoginModal
           isOpen
+          initialStep={loginState?.modalStep}
+          initialIdentifier={loginState?.loginIdentifier}
+          initialUsePhoneOnly={loginState?.usePhoneOnly}
+          initialCountryCode={loginState?.selectedCountryCode}
+          initialTrailor={loginState?.loginTrailor}
           onClose={() => navigate(-1)}
-          onSuccess={() => navigate("/")}
+          onSuccess={() => {
+            if (backgroundLocation) {
+              navigate(
+                `${backgroundLocation.pathname}${backgroundLocation.search}`,
+                {
+                  replace: true,
+                  state: backgroundLocation.state ?? null,
+                },
+              );
+            } else {
+              navigate("/");
+            }
+          }}
           onOpenSignUp={() => setIsSignUpOpen(true)}
         />
       )}

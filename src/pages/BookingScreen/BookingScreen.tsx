@@ -173,8 +173,13 @@ const BookingScreen: React.FC = () => {
           ) : error ? (
             <li className="text-center py-8 text-red-500">{error}</li>
           ) : filteredBookings.length === 0 ? (
-            <li className="text-center py-8 text-gray-500">
-              No bookings found.
+            <li className="py-12 text-center">
+              <p className="text-[20px] font-semibold text-gray-700">
+                No bookings found
+              </p>
+              <p className="mt-2 text-[14px] text-gray-500">
+                Your upcoming bookings will appear here.
+              </p>
             </li>
           ) : (
             filteredBookings.map((booking) => {
@@ -205,9 +210,19 @@ const BookingScreen: React.FC = () => {
                 ? new Date(booking.endDate).toLocaleDateString()
                 : undefined;
 
+              const trailerId = booking.trailerId?._id;
+              const trailerUrl = trailerId
+                ? `/trailer/${trailerId}`
+                : undefined;
+
               return (
                 <li key={booking._id}>
-                  <article className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow">
+                  <article
+                    onClick={() => {
+                      if (trailerUrl) navigate(trailerUrl);
+                    }}
+                    className="cursor-pointer flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow"
+                  >
                     {/* Thumbnail */}
                     <img
                       src={image}
@@ -241,7 +256,8 @@ const BookingScreen: React.FC = () => {
                       {String(booking.status).toLowerCase() === "accepted" && (
                         <button
                           type="button"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             navigate(
                               `/prescreening?bookingId=${encodeURIComponent(
                                 booking._id,
@@ -252,8 +268,8 @@ const BookingScreen: React.FC = () => {
                                   backgroundLocation: location,
                                 },
                               },
-                            )
-                          }
+                            );
+                          }}
                           className="px-3 py-1.5 rounded-lg bg-[#389131] text-white text-sm font-medium hover:bg-[#2e6f26]"
                         >
                           Start Pre Screening

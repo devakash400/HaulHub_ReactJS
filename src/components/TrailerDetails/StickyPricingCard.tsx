@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import calendarIcon from "../../assets/icons/Calendar (2).png";
 import { SelectRentalDatesModal } from "./SelectRentalDatesModal.tsx";
 import {
   IdentityVerificationModal,
@@ -382,25 +383,39 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                   Pick Up Date
                 </p>
 
-                <input
-                  type="date"
-                  value={checkIn}
-                  min={today}
-                  onChange={(e) => {
-                    setCheckIn(e.target.value);
-                    setValidationError(null);
-                  }}
-                  className="
-    mt-1 w-full
-    bg-transparent
-    text-[14px]
-    text-[#8C8C8C]
-    focus:outline-none
-    appearance-none
-    [&::-webkit-calendar-picker-indicator]:opacity-100
-    [&::-webkit-calendar-picker-indicator]:cursor-pointer
-  "
-                />
+                <div className="relative w-full">
+                  <input
+                    type="date"
+                    value={checkIn}
+                    min={today}
+                    onChange={(e) => {
+                      setCheckIn(e.target.value);
+                      setValidationError(null);
+                    }}
+                    className="
+      mt-1
+      w-full
+      bg-transparent
+      text-[14px]
+      text-[#8C8C8C]
+      focus:outline-none
+      appearance-none
+      pr-10
+      [&::-webkit-calendar-picker-indicator]:opacity-0
+      [&::-webkit-calendar-picker-indicator]:absolute
+      [&::-webkit-calendar-picker-indicator]:right-0
+      [&::-webkit-calendar-picker-indicator]:w-full
+      [&::-webkit-calendar-picker-indicator]:h-full
+      [&::-webkit-calendar-picker-indicator]:cursor-pointer
+    "
+                  />
+
+                  <img
+                    src={calendarIcon}
+                    alt="Calendar"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                  />
+                </div>
               </div>
 
               {/* Check Out */}
@@ -418,25 +433,39 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                   Return Date
                 </p>
 
-                <input
-                  type="date"
-                  value={checkOut}
-                  min={today}
-                  onChange={(e) => {
-                    setCheckOut(e.target.value);
-                    setValidationError(null);
-                  }}
-                  className="
-              mt-1 w-full
-              bg-transparent
-              text-[14px]
-              text-[#8C8C8C]
-              focus:outline-none
-              appearance-none
-              [&::-webkit-calendar-picker-indicator]:opacity-100
-              [&::-webkit-calendar-picker-indicator]:cursor-pointer
-            "
-                />
+                <div className="relative w-full">
+                  <input
+                    type="date"
+                    value={checkOut}
+                    min={today}
+                    onChange={(e) => {
+                      setCheckOut(e.target.value);
+                      setValidationError(null);
+                    }}
+                    className="
+      mt-1
+      w-full
+      bg-transparent
+      text-[14px]
+      text-[#8C8C8C]
+      focus:outline-none
+      appearance-none
+      pr-10
+      [&::-webkit-calendar-picker-indicator]:opacity-0
+      [&::-webkit-calendar-picker-indicator]:absolute
+      [&::-webkit-calendar-picker-indicator]:right-0
+      [&::-webkit-calendar-picker-indicator]:w-full
+      [&::-webkit-calendar-picker-indicator]:h-full
+      [&::-webkit-calendar-picker-indicator]:cursor-pointer
+    "
+                  />
+
+                  <img
+                    src={calendarIcon}
+                    alt="Calendar"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                  />
+                </div>
               </div>
             </div>
 
