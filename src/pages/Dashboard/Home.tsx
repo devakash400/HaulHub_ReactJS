@@ -99,14 +99,19 @@ const Home: React.FC = () => {
     (state: RootState) => state.auth.ownerTrailersCount,
   );
 
-  const isOwnerWithNoTrailers =
-    (user?.trailor === "Owner" || userType === "Owner") &&
-    ownerTrailersCount === 0;
-  const isOwnerWithTrailers =
-    (user?.trailor === "Owner" || userType === "Owner") &&
-    ownerTrailersCount > 0;
+  const isOwner = user?.trailor === "Owner" || userType === "Owner";
 
-  const showRenterCategories = !isOwnerWithNoTrailers && !isOwnerWithTrailers;
+  // ownerTrailers is null while loading; once fetched it's an array (possibly empty).
+  const ownerHasTrailers =
+    ownerTrailersCount > 0 ||
+    (ownerTrailers !== null && ownerTrailers.length > 0);
+  const ownerHasNoTrailers =
+    isOwner &&
+    ownerTrailers !== null &&
+    ownerTrailers.length === 0 &&
+    ownerTrailersCount === 0;
+
+  const showRenterCategories = !isOwner;
 
   useEffect(() => {
     if (!showRenterCategories) return;
@@ -143,7 +148,7 @@ const Home: React.FC = () => {
   }, [showRenterCategories]);
 
   useEffect(() => {
-    if (!isOwnerWithTrailers) return;
+    if (!isOwner) return;
 
     let cancelled = false;
 
@@ -168,7 +173,7 @@ const Home: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [isOwnerWithTrailers]);
+  }, [isOwner]);
 
   const gooseneckItems = getGooseneckListItems();
   const ownerTrailerCards =
@@ -192,16 +197,17 @@ const Home: React.FC = () => {
   return (
     <div
       style={{
-        background: "#fff",
-        boxShadow: "0px 40px 40px 0px #000000",
+        background: "#FFFFFF",
+        boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)",
+        marginBottom: "10px",
       }}
-      className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden"
+      className="min-h-screen w-full min-w-0 overflow-x-hidden"
     >
       <RevealBlock>
         <Container />
       </RevealBlock>
 
-      {isOwnerWithNoTrailers ? (
+      {ownerHasNoTrailers ? (
         /* Empty state below container - no trailer listings shown */
         <RevealBlock delayMs={120}>
           <div
@@ -210,12 +216,13 @@ const Home: React.FC = () => {
           >
             <div
               className="
-    relative w-full rounded-xl
+    relative w-[calc(100%+32px)] sm:w-[calc(100%+48px)] lg:w-[calc(100%+64px)]
+    -mx-4 sm:-mx-6 lg:-mx-8
+    px-10 py-5
     bg-[#FFFFFF]
     border border-[#00000040]
-    border-l-0
-    shadow-[4px_4px_4px_4px_#00000026]
-    sm:w-[70%] sm:max-w-[920px]
+    shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]
+    sm:w-[70%] sm:max-w-full
   "
             >
               <div className="flex flex-col items-center justify-center px-6 py-12 sm:py-16 text-center">
@@ -285,7 +292,7 @@ const Home: React.FC = () => {
             </div>
           </div>
         </RevealBlock>
-      ) : isOwnerWithTrailers ? (
+      ) : ownerHasTrailers ? (
         <RevealBlock delayMs={120}>
           <div className="w-full px-10 pb-6 pt-1">
             <div className="w-full">

@@ -960,21 +960,35 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 Password
               </label>
               {/* Password Input */}
-              <input
-                type="password"
-                value={password}
-                placeholder="Enter your Password"
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setLoginError(null);
-                }}
-                className="rounded-[5px] border border-black px-4 focus:outline-none focus:ring-0 custom-placeholder placeholder:text-[#9B989E]"
-                style={{
-                  height: "40px",
-                  fontFamily: "Lexend",
-                  fontWeight: 400,
-                }}
-              />
+              <div className="relative">
+                <input
+                  type={showLoginPwd ? "text" : "password"}
+                  value={password}
+                  placeholder="Enter your Password"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setLoginError(null);
+                  }}
+                  className="w-full rounded-[5px] border border-black px-4 pr-10 focus:outline-none focus:ring-0 custom-placeholder placeholder:text-[#9B989E]"
+                  style={{
+                    height: "40px",
+                    fontFamily: "Lexend",
+                    fontWeight: 400,
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPwd((prev) => !prev)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  aria-label={showLoginPwd ? "Hide password" : "Show password"}
+                >
+                  {showLoginPwd ? (
+                    <Eye className="w-5 h-5" aria-hidden="true" />
+                  ) : (
+                    <EyeOff className="w-5 h-5" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
 
               {loginError && (
                 <p className="mt-2 text-xs text-red-600">{loginError}</p>

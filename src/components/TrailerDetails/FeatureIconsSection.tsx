@@ -23,12 +23,13 @@ export const FeatureIconsSection: React.FC<FeatureIconsSectionProps> = ({
 }) => {
   return (
     <section
-      className="grid grid-cols-1 md:
-    grid-cols-3 gap-5 text-center justify-items-center"
+      className="flex items-start
+     justify-between w-[682px] ml-0 mr-auto px-0"
     >
       {features.map(({ icon, label }, index) => {
         const iconSrc = iconMap[icon];
         const isSecondIcon = index === 1;
+
         const displayText =
           label === "Foldable loading ramps"
             ? "Commercial Grade Strength"
@@ -37,37 +38,49 @@ export const FeatureIconsSection: React.FC<FeatureIconsSectionProps> = ({
               : label === "Reinforced steel chassis"
                 ? "Enhanced Road Stability"
                 : label;
+
         const displayWords = displayText.split(" ");
-        const renderLabel =
-          [
-            "Commercial Grade Strength",
-            "Maximum Towing Stability",
-            "Enhanced Road Stability",
-          ].includes(displayText) && displayWords.length > 1 ? (
-            <>
-              {displayWords[0]}
-              <br />
-              {displayWords.slice(1).join(" ")}
-            </>
-          ) : (
-            displayText
-          );
+
+        const renderLabel = [
+          "Commercial Grade Strength",
+          "Maximum Towing Stability",
+          "Enhanced Road Stability",
+        ].includes(displayText) ? (
+          <>
+            {displayWords[0]}
+            <br />
+            {displayWords.slice(1).join(" ")}
+          </>
+        ) : (
+          displayText
+        );
+
         return (
-          <div key={label}>
+          <div
+            key={label}
+            style={{ paddingBottom: "100px" }}
+            className="flex flex-col items-center
+             text-center w-auto"
+          >
             <img
               src={iconSrc}
               alt={displayText}
-              className={`w-[62px] h-[74px] mx-auto mb-3 object-contain ${isSecondIcon ? "scale-110" : ""}`}
+              className={`w-[62px] h-[74px] object-contain mb-3 mx-auto ${
+                isSecondIcon ? "scale-110" : ""
+              }`}
             />
+
             <p
-              className="text-black font-normal leading-[100%]"
               style={{
                 fontFamily: "Lexend",
+                fontWeight: 400,
                 fontSize: "24px",
-                fontStyle: "normal",
+                lineHeight: "100%",
                 letterSpacing: "0%",
+                color: "#000000",
                 verticalAlign: "middle",
-                marginLeft: index === 0 ? "2px" : undefined,
+                margin: 0,
+                textAlign: "center",
               }}
             >
               {renderLabel}
