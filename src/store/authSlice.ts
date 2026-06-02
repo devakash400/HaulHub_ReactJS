@@ -30,6 +30,7 @@ export interface AuthUser {
   phoneNumber?: string;
   gender?: string;
   dateOfBirth?: string;
+  profilePicture?: string;
   trailor?: string; // Renter, Owner, Both, Dealer
 }
 
@@ -106,12 +107,19 @@ const authSlice = createSlice({
       const trailor = normalizeToTrailor(found);
       const emailRaw = ((payload as any).email ?? (userObj && userObj.email)) as unknown;
       const email = emailRaw ? String(emailRaw) : null;
+      const profilePictureRaw =
+        (payload as any).profilePicture ??
+        (payload as any).profile_picture ??
+        (userObj && ((userObj.profilePicture ?? userObj.profile_picture) as unknown));
+      const profilePicture = profilePictureRaw ? String(profilePictureRaw) : undefined;
 
       state.isAuthenticated = Boolean(token);
       state.accessToken = token ?? null;
       state.refreshToken = readStoredToken("refreshToken");
       state.userType = trailor;
-      state.user = trailor || email ? { email: email || undefined, trailor: trailor || undefined } : null;
+      state.user = trailor || email
+        ? { email: email || undefined, trailor: trailor || undefined, profilePicture }
+        : null;
       state.ownerTrailersCount = trailor === "Owner" ? state.ownerTrailersCount : 0;
     },
     loginSuccess(
@@ -145,6 +153,16 @@ const authSlice = createSlice({
       state.userType = action.payload.userType ?? action.payload.user.trailor ?? null;
       state.ownerTrailersCount = state.userType === "Owner" ? 0 : state.ownerTrailersCount;
     },
+    updateUser(state, action: PayloadAction<Partial<AuthUser>>) {
+      if (!state.user) {
+        state.user = { ...action.payload } as AuthUser;
+      } else {
+        state.user = {
+          ...state.user,
+          ...action.payload,
+        };
+      }
+    },
     addOwnerTrailer(state) {
       state.ownerTrailersCount += 1;
     },
@@ -159,7 +177,13 @@ const authSlice = createSlice({
   },
 });
 
-export const { initFromToken, loginSuccess, signUpSuccess, logout, addOwnerTrailer } =
-  authSlice.actions;
+export const {
+  initFromToken,
+  loginSuccess,
+  signUpSuccess,
+  updateUser,
+  logout,
+  addOwnerTrailer,
+} = authSlice.actions;
 export default authSlice.reducer;
 

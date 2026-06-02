@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, MouseEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import useModalNavigate from "../../../hooks/useModalNavigate.ts";
 import { createPortal } from "react-dom";
 import { images } from "../../../assets/images/index.ts";
 import { Eye, EyeOff, Mail, Smartphone, ChevronDown } from "lucide-react";
@@ -24,6 +25,10 @@ type LoginModalProps = {
   onSuccess: () => void;
   onOpenSignUp?: () => void;
   initialStep?: Step;
+  initialIdentifier?: string;
+  initialUsePhoneOnly?: boolean;
+  initialCountryCode?: string;
+  initialTrailor?: "Renter" | "Owner";
 };
 
 type Step = "email" | "password" | "reset" | "otp" | "newPassword";
@@ -101,6 +106,16 @@ const getApiErrorMessage = (err: any): string | null => {
   if (typeof data === "string") return data;
   if (typeof data?.message === "string") return data.message;
   if (typeof data?.error === "string") return data.error;
+  if (typeof data?.detail === "string") return data.detail;
+  if (typeof data?.details === "string") return data.details;
+  // Handle nested data object with message
+  if (
+    typeof data?.data === "object" &&
+    data.data !== null &&
+    typeof data.data.message === "string"
+  ) {
+    return data.data.message;
+  }
   if (
     Array.isArray(data?.errors) &&
     typeof data.errors[0]?.message === "string"
@@ -109,6 +124,9 @@ const getApiErrorMessage = (err: any): string | null => {
   }
   if (Array.isArray(data?.errors) && typeof data.errors[0]?.msg === "string") {
     return data.errors[0].msg;
+  }
+  if (Array.isArray(data?.errors) && typeof data.errors[0] === "string") {
+    return data.errors[0];
   }
   return null;
 };
@@ -119,22 +137,29 @@ const LoginModal: React.FC<LoginModalProps> = ({
   onSuccess,
   onOpenSignUp,
   initialStep,
+  initialIdentifier,
+  initialUsePhoneOnly,
+  initialCountryCode,
+  initialTrailor,
 }) => {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
-  const [email, setEmail] = useState("");
-  const [usePhoneOnly, setUsePhoneOnly] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
-    COUNTRY_OPTIONS[0],
+  const [email, setEmail] = useState(initialIdentifier ?? "");
+  const [usePhoneOnly, setUsePhoneOnly] = useState(
+    initialUsePhoneOnly ?? false,
   );
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(() => {
+    const country = COUNTRY_OPTIONS.find((c) => c.code === initialCountryCode);
+    return country ?? COUNTRY_OPTIONS[0];
+  });
   const [countryMenuOpen, setCountryMenuOpen] = useState(false);
   const countryDropdownRef = useRef<HTMLDivElement | null>(null);
   const [step, setStep] = useState<Step>(initialStep ?? "email");
   const [password, setPassword] = useState("");
   const [loginTrailor, setLoginTrailor] = useState<"Renter" | "Owner">(
-    "Renter",
+    initialTrailor ?? "Renter",
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -248,6 +273,57 @@ const LoginModal: React.FC<LoginModalProps> = ({
     };
   }, [isOpen]);
 
+  // ============================================
+  // Sync modal step with URL pathname
+  // Browser back/forward updates the step correctly
+  // ============================================
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const pathname = location.pathname;
+    const locationState = location.state as {
+      modalStep?: Step;
+      loginIdentifier?: string;
+      usePhoneOnly?: boolean;
+      selectedCountryCode?: string;
+      loginTrailor?: "Renter" | "Owner";
+    } | null;
+
+    // Map pathname to step state
+    if (pathname === "/reset-password") {
+      setStep("reset");
+    } else if (pathname === "/Newpassword") {
+      setStep("newPassword");
+    } else if (pathname === "/otp") {
+      setStep("otp");
+    } else if (pathname === "/login" && locationState?.modalStep) {
+      setStep(locationState.modalStep);
+    } else {
+      // For /login or any other path, reset to email step
+      setStep(initialStep ?? "email");
+    }
+
+    if (pathname === "/login" && locationState) {
+      if (locationState.loginIdentifier !== undefined) {
+        setEmail(locationState.loginIdentifier);
+      }
+      if (locationState.usePhoneOnly !== undefined) {
+        setUsePhoneOnly(locationState.usePhoneOnly);
+      }
+      if (locationState.selectedCountryCode) {
+        const country = COUNTRY_OPTIONS.find(
+          (c) => c.code === locationState.selectedCountryCode,
+        );
+        if (country) setSelectedCountry(country);
+      }
+      if (locationState.loginTrailor) {
+        setLoginTrailor(locationState.loginTrailor);
+      }
+    }
+  }, [location.pathname, location.state, isOpen, initialStep]);
+
   const handleOverlayClick = () => {
     onClose();
   };
@@ -257,8 +333,39 @@ const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   const navigate = useNavigate();
+  const modalNavigate = useModalNavigate();
 
   const goBack = () => {
+    const currentState = location.state as Record<string, unknown> | null;
+
+    if (location.pathname === "/reset-password") {
+      navigate("/login", {
+        replace: true,
+        state: {
+          ...currentState,
+          modalStep: "password",
+        },
+      });
+      return;
+    }
+
+    if (location.pathname === "/otp") {
+      navigate("/reset-password", {
+        replace: true,
+        state: currentState,
+      });
+      return;
+    }
+
+    if (location.pathname === "/Newpassword") {
+      navigate("/otp", {
+        replace: true,
+        state: currentState,
+      });
+      return;
+    }
+
+    // Internal step navigation (only on /login route)
     if (step === "password") setStep("email");
     else if (step === "reset") setStep("password");
     else if (step === "otp") {
@@ -332,7 +439,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
       setLoginError(null);
       setStep("password");
     } catch (err) {
-      const msg = "Unable to verify. Please try again.";
+      let msg =
+        getApiErrorMessage(err) || "Unable to verify. Please try again.";
+      // Replace technical E.164 format error with user-friendly message
+      if (
+        msg.toLowerCase().includes("e.164") ||
+        msg.toLowerCase().includes("valid international")
+      ) {
+        msg = "This phone number is not registered. Please check or sign up.";
+      }
       setEmailError(msg);
     } finally {
       setIsCheckingEmail(false);
@@ -374,6 +489,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         phoneNumber?: string | string[];
         gender?: string;
         dateOfBirth?: string;
+        profilePicture?: string;
         trailor?: string | string[];
         role?: string;
       };
@@ -411,6 +527,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
             phoneNumber: normalizedPhone,
             gender: userWithShape.gender,
             dateOfBirth: userWithShape.dateOfBirth,
+            profilePicture:
+              typeof userWithShape.profilePicture === "string"
+                ? userWithShape.profilePicture
+                : undefined,
             trailor: normalizedTrailor,
           },
           accessToken: loginRes.accessToken,
@@ -421,21 +541,40 @@ const LoginModal: React.FC<LoginModalProps> = ({
       toast.success("Logged in successfully");
       onSuccess();
     } catch (err: any) {
-      const msg =
+      const rawMsg =
         getApiErrorMessage(err) ||
         err?.message ||
         "Unable to login. Please try again.";
+      const normalizedMsg = rawMsg.toString().toLowerCase();
+      const isCredentialError =
+        normalizedMsg.includes("invalid email") ||
+        normalizedMsg.includes("invalid phone") ||
+        normalizedMsg.includes("invalid phone number") ||
+        normalizedMsg.includes("invalid password") ||
+        normalizedMsg.includes("email or password") ||
+        normalizedMsg.includes("phone or password") ||
+        normalizedMsg.includes("incorrect password") ||
+        normalizedMsg.includes("password is incorrect");
+      const displayMsg = isCredentialError ? "Password is incorrect" : rawMsg;
       // eslint-disable-next-line no-console
       console.error("login error:", err?.response?.data ?? err);
-      setLoginError(msg);
+      setLoginError(displayMsg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleOpenReset = () => {
-    // Navigate to the dedicated reset-password route so the URL reflects the flow
-    navigate("/reset-password");
+    const currentState = location.state as Record<string, unknown> | null;
+    modalNavigate("/reset-password", {
+      state: {
+        ...currentState,
+        loginIdentifier: email,
+        usePhoneOnly,
+        selectedCountryCode: selectedCountry.code,
+        loginTrailor,
+      },
+    });
   };
 
   /** Static forgot-password flow â€” no API; Continue opens OTP step. */
@@ -866,7 +1005,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 Don&apos;t have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => navigate("/signup")}
+                  onClick={() => modalNavigate("/signup")}
                   className="cursor-pointer text-[#389131] underline"
                   style={{
                     fontFamily: "Lexend",
@@ -889,6 +1028,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 You agree with{" "}
                 <button
                   type="button"
+                  onClick={() => navigate("/terms")}
                   className="cursor-pointer text-[#389131] underline"
                   style={{
                     fontFamily: "Lexend",
@@ -908,6 +1048,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 and{" "}
                 <button
                   type="button"
+                  onClick={() => navigate("/privacy-policy")}
                   className="cursor-pointer text-[#389131] underline"
                   style={{
                     fontFamily: "Lexend",
@@ -1077,7 +1218,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             <div>
               <button
                 type="button"
-                onClick={() => setStep("password")}
+                onClick={goBack}
                 className="flex items-center gap-1 mb-5"
               >
                 <img
@@ -1257,7 +1398,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 }}
               >
                 You agree with{" "}
-                <span
+                <button
+                  type="button"
+                  onClick={() => navigate("/terms")}
                   className="cursor-pointer text-[#389131] underline"
                   style={{
                     fontFamily: "Lexend",
@@ -1270,9 +1413,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   }}
                 >
                   Terms & Conditions{"  "}
-                </span>
+                </button>
                 and{"  "}
-                <span
+                <button
+                  type="button"
+                  onClick={() => navigate("/privacy-policy")}
                   className="cursor-pointer text-[#389131] underline"
                   style={{
                     fontFamily: "Lexend",
@@ -1285,16 +1430,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   }}
                 >
                   Privacy Policy
-                </span>
+                </button>
               </div>
             </div>
           )}
-
           {step === "newPassword" && (
             <div>
               <button
                 type="button"
-                onClick={() => setStep("otp")}
+                onClick={goBack}
                 className="flex items-center gap-1 mb-5"
               >
                 <img
@@ -1318,6 +1462,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   onBlur={() => setNewPasswordTouched(true)}
+                  placeholder="Enter New Password"
                   className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
                 <button
@@ -1373,6 +1518,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
                   onBlur={() => setConfirmNewPasswordTouched(true)}
+                  placeholder="Enter Confirm New Password"
                   className="w-full border border-gray-400 rounded-lg px-4 py-3 text-sm pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                 />
                 <button
@@ -1420,7 +1566,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 }}
               >
                 You agree with{" "}
-                <span
+                <button
+                  type="button"
+                  onClick={() => navigate("/terms")}
                   className="cursor-pointer text-[#389131] underline"
                   style={{
                     fontFamily: "Lexend",
@@ -1436,9 +1584,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   }}
                 >
                   Terms & Conditions
-                </span>
+                </button>
                 and{"  "}
-                <span
+                <button
+                  type="button"
+                  onClick={() => navigate("/privacy-policy")}
                   className="cursor-pointer text-[#389131] underline"
                   style={{
                     fontFamily: "Lexend",
@@ -1451,7 +1601,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   }}
                 >
                   Privacy Policy
-                </span>
+                </button>
               </div>
             </div>
           )}

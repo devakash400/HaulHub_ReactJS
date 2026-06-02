@@ -18,7 +18,7 @@ import transactionicon from "../../assets/images/transactionhistory.png";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 
-import { logout } from "../../store/authSlice.ts";
+import { logout, updateUser } from "../../store/authSlice.ts";
 import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
@@ -169,7 +169,7 @@ const Profile: React.FC = () => {
     '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="100%" height="100%" fill="#E6EEF5"/><text x="50%" y="52%" font-size="120" text-anchor="middle" fill="#2F4A6D" font-family="Arial, Helvetica, sans-serif" dy=".35em">?</text></svg>',
   )}`;
 
-  let profilePictureUrl: string;
+  let profilePictureUrl: string | null = null;
   if (uploadedPreviewUrl) {
     profilePictureUrl = uploadedPreviewUrl;
   } else if (sanitizedProfilePicture) {
@@ -181,9 +181,9 @@ const Profile: React.FC = () => {
     } else {
       profilePictureUrl = `${cloudinaryBase}/${sanitizedProfilePicture}.jpg`;
     }
-  } else {
-    profilePictureUrl = defaultProfileDataUrl;
   }
+
+  const hasProfilePicture = Boolean(profilePictureUrl);
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -214,11 +214,14 @@ const Profile: React.FC = () => {
       setImgError(false);
       setImgLoaded(false);
 
-      // Then PATCH the profile with the returned publicId
-      const updated = await updateUserProfile({ profilePicture: publicId });
+      // Then PATCH the profile with the Cloudinary URL
+      const updated = await updateUserProfile({ profilePicture: uploadedUrl });
 
       setProfile(updated);
       setProfilePicturePath(updated.profilePicture ?? null);
+      dispatch(
+        updateUser({ profilePicture: updated.profilePicture ?? undefined }),
+      );
 
       toast.success("Profile photo updated");
     } catch (err) {
@@ -237,6 +240,9 @@ const Profile: React.FC = () => {
     .slice(0, 2)
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
+
+  const firstName = displayName.split(" ")[0] || "";
+  const firstNameInitial = firstName ? firstName.charAt(0).toUpperCase() : "";
 
   const menuItems = [
     {
@@ -305,7 +311,7 @@ const Profile: React.FC = () => {
           <div className="relative w-[156px] h-[156px]">
             {/* Profile Circle */}
             <div className="w-full h-full rounded-full bg-[#D9D9D9] shadow-md overflow-hidden flex items-center justify-center relative">
-              {!imgLoaded && !imgError && (
+              {hasProfilePicture && !imgLoaded && !imgError && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-100/60">
                   <svg
                     className="animate-spin h-8 w-8 text-gray-500"
@@ -330,13 +336,13 @@ const Profile: React.FC = () => {
                 </div>
               )}
 
-              {imgError ? (
+              {imgError || !hasProfilePicture ? (
                 <span className="text-[48px] font-semibold text-[#2F4A6D] leading-none">
-                  {initials}
+                  {firstNameInitial || initials}
                 </span>
               ) : (
                 <img
-                  src={profilePictureUrl}
+                  src={profilePictureUrl ?? undefined}
                   alt="Profile"
                   className="w-full h-full object-cover"
                   onLoad={() => setImgLoaded(true)}
@@ -386,13 +392,17 @@ const Profile: React.FC = () => {
           {/* Name */}
           <p
             className="
-      mt-5
-      text-[20px]
-      font-semibold
-      text-black
-      text-center
-      break-words
-    "
+    mt-5
+    text-[20px]
+    font-semibold
+    text-black
+    text-center
+    max-w-[30ch]
+    mx-auto
+    overflow-hidden
+    text-ellipsis
+    whitespace-nowrap
+  "
           >
             {displayName}
           </p>

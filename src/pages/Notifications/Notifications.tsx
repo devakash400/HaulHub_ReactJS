@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useModalNavigate from "../../hooks/useModalNavigate.ts";
 import { RootState } from "../../store";
 import api from "../../api/api.ts";
 
@@ -45,7 +46,7 @@ const Notifications: React.FC = () => {
   const isOwner =
     isAuthenticated && (user?.trailor === "Owner" || userType === "Owner");
   const navigate = useNavigate();
-  const location = useLocation();
+  const modalNavigate = useModalNavigate();
   const [notifications, setNotifications] = useState<ApiNotification[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +105,7 @@ const Notifications: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { backgroundLocation: location } });
+      modalNavigate("/login");
       return;
     }
 

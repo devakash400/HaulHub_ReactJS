@@ -17,7 +17,7 @@
 //   return (
 //     <footer className="bg-[#F9F7F0] pt-10 pb-0 px-10 font-sans w-full overflow-x-hidden mb-[10px]">      <div className="w-full px-10 mx-auto flex flex-wrap items-start justify-between gap-8 min-w-0 w-full">
 //       {/* Left side: Explore & Company columns */}
-//       <div className="flex flex-wrap gap-8 sm:gap-12 
+//       <div className="flex flex-wrap gap-8 sm:gap-12
 //       flex-1 min-w-0 sm:min-w-[260px]">
 //         <div>
 //           <h3 className="m-0 mb-8 text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
@@ -129,7 +129,7 @@
 //       {/* Right side: Logo above row of store buttons */}
 //       {/* Right side: Logo + store buttons */}
 //       <div
-//         className="flex flex-col items-center gap-4 
+//         className="flex flex-col items-center gap-4
 //   w-full sm:w-auto shrink-0"
 //       >
 //         {/* Logo centered */}
@@ -238,7 +238,7 @@
 
 //           <div className="flex w-full shrink-0 items-center justify-center gap-2.5 sm:w-auto sm:justify-self-end sm:justify-end">
 //             <span
-//               className="font-['Lexend'] 
+//               className="font-['Lexend']
 //             font-normal text-[18px] leading-[1.1] text-[#504E4E]"
 //             >
 //               Join Us
@@ -294,22 +294,17 @@ const BottomBar: React.FC = () => {
 
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const userType = useSelector(
-    (state: RootState) => state.auth.userType,
-  );
+  const userType = useSelector((state: RootState) => state.auth.userType);
 
   const isOwner =
-    (user?.trailor === "Owner" || userType === "Owner") &&
-    isAuthenticated;
+    (user?.trailor === "Owner" || userType === "Owner") && isAuthenticated;
 
   const year = new Date().getFullYear();
 
   return (
     <footer className="bg-[#F9F7F0] pt-10 pb-0 px-10 font-sans w-full overflow-x-hidden mb-[10px]">
-
       {/* TOP SECTION */}
       <div className="w-full flex flex-wrap items-start justify-between gap-8 min-w-0">
-
         {/* LEFT SIDE */}
         <div
           className="
@@ -323,7 +318,6 @@ const BottomBar: React.FC = () => {
             </h3>
 
             <ul className="list-none p-0 m-0 flex flex-col gap-[21px] text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
-
               <li>
                 <Link
                   to="/wishlist"
@@ -389,15 +383,16 @@ const BottomBar: React.FC = () => {
             </h3>
 
             <ul className="list-none p-0 m-0 flex flex-col gap-[21px] text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
-
-              <li>
-                <Link
-                  to="/list-trailer"
-                  className="no-underline text-black transition-colors hover:text-[#389131]"
-                >
-                  List Trailer
-                </Link>
-              </li>
+              {isOwner && (
+                <li>
+                  <Link
+                    to="/list-trailer"
+                    className="no-underline text-black transition-colors hover:text-[#389131]"
+                  >
+                    List Trailer
+                  </Link>
+                </li>
+              )}
 
               <li>
                 <Link
@@ -447,7 +442,6 @@ const BottomBar: React.FC = () => {
 
           {/* STORE BUTTONS */}
           <div className="flex items-center justify-center gap-4 w-full">
-
             {/* APP STORE */}
             <a
               href="https://www.apple.com/app-store/"
@@ -536,25 +530,20 @@ const BottomBar: React.FC = () => {
             "
           >
             @ {year} HaulHub,{" "}
-
             <Link
               className="text-inherit no-underline hover:text-[#389131] hover:underline"
               to="/trust-safety"
             >
               Privacy
             </Link>
-
             {", "}
-
             <Link
               className="text-inherit no-underline hover:text-[#389131] hover:underline"
               to="/trust-safety"
             >
               Terms
             </Link>
-
             {" & "}
-
             <Link
               className="text-inherit no-underline hover:text-[#389131] hover:underline"
               to="/about"
@@ -565,13 +554,11 @@ const BottomBar: React.FC = () => {
 
           {/* SOCIALS */}
           <div className="flex w-full shrink-0 items-center justify-center gap-2.5 sm:w-auto sm:justify-self-end sm:justify-end">
-
             <span className="font-['Lexend'] text-[18px] leading-[1.1] text-[#504E4E]">
               Join Us
             </span>
 
             <div className="flex items-center gap-2">
-
               <a
                 href="https://www.facebook.com"
                 aria-label="Facebook"

@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import useModalNavigate from "../hooks/useModalNavigate.ts";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -32,6 +33,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   items,
 }) => {
   const navigate = useNavigate();
+  const modalNavigate = useModalNavigate();
   const dispatch = useDispatch();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -470,7 +472,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         isOpen={wishlistLoginOpen}
         onClose={() => setWishlistLoginOpen(false)}
         onLoginClick={() => {
-          navigate("/login");
+          modalNavigate("/login");
         }}
       />
     </section>

@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import settingsIcon from "../../assets/images/Personalinfo.png";
 import privacyicon from "../../assets/images/privacypolicy.png";
@@ -282,6 +288,8 @@ const Profile: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
     COUNTRY_OPTIONS[0],
   );
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const countryDropdownRef = useRef<HTMLDivElement | null>(null);
   const [draftEmail, setDraftEmail] = useState("");
   const [draftResidentialCountry, setDraftResidentialCountry] = useState("");
   const [draftResidentialState, setDraftResidentialState] = useState("");
@@ -289,8 +297,27 @@ const Profile: React.FC = () => {
   const [draftEcName, setDraftEcName] = useState("");
   const [draftEcEmail, setDraftEcEmail] = useState("");
   const [draftEcPhone, setDraftEcPhone] = useState("");
+  const [draftLegalError, setDraftLegalError] = useState<string | null>(null);
+  const [draftPreferredError, setDraftPreferredError] = useState<string | null>(
+    null,
+  );
+  const [residentialCountryError, setResidentialCountryError] = useState<
+    string | null
+  >(null);
+  const [residentialStateError, setResidentialStateError] = useState<
+    string | null
+  >(null);
+  const [residentialLine1Error, setResidentialLine1Error] = useState<
+    string | null
+  >(null);
+  const [draftEcNameError, setDraftEcNameError] = useState<string | null>(null);
+  const [draftEcPhoneError, setDraftEcPhoneError] = useState<string | null>(
+    null,
+  );
   const [selectedEmergencyCountry, setSelectedEmergencyCountry] =
     useState<CountryOption>(COUNTRY_OPTIONS[0]);
+  const [emergencyCountryOpen, setEmergencyCountryOpen] = useState(false);
+  const emergencyDropdownRef = useRef<HTMLDivElement | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emergencyPhoneError, setEmergencyPhoneError] = useState<string | null>(
@@ -357,12 +384,18 @@ const Profile: React.FC = () => {
       );
       setSelectedEmergencyCountry(parsed.country);
       setDraftEcPhone(parsed.localNumber);
+      setDraftEcNameError(null);
+      setDraftEcPhoneError(null);
     }
     setPhoneError(null);
     setEmailError(null);
     setEmergencyPhoneError(null);
     setEmergencyEmailError(null);
     setGeneralError(null);
+    setDraftLegalError(null);
+    setDraftPreferredError(null);
+    setResidentialCountryError(null);
+    setResidentialStateError(null);
     setEditField(field);
   };
 
@@ -405,6 +438,11 @@ const Profile: React.FC = () => {
     setEmergencyPhoneError(null);
     setEmergencyEmailError(null);
     setGeneralError(null);
+    setDraftLegalError(null);
+    setDraftPreferredError(null);
+    setResidentialCountryError(null);
+    setResidentialStateError(null);
+    setResidentialLine1Error(null);
     closeEditor();
   };
 
@@ -416,6 +454,34 @@ const Profile: React.FC = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [editField]);
+
+  useEffect(() => {
+    if (!countryDropdownOpen) return;
+    const handle = (e: MouseEvent) => {
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(e.target as Node)
+      ) {
+        setCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [countryDropdownOpen]);
+
+  useEffect(() => {
+    if (!emergencyCountryOpen) return;
+    const handle = (e: MouseEvent) => {
+      if (
+        emergencyDropdownRef.current &&
+        !emergencyDropdownRef.current.contains(e.target as Node)
+      ) {
+        setEmergencyCountryOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [emergencyCountryOpen]);
 
   /** PATCH only the keys sent here — do not merge empty strings for other fields (server validates the body). */
   const persist = async (patch: UpdateUserProfilePayload) => {
@@ -435,21 +501,42 @@ const Profile: React.FC = () => {
 
   const handleSaveField = () => {
     if (!profile || !editField) return;
+    const nameRegex = /^[A-Za-z\s]+$/;
     if (editField === "legalName") {
       const v = draftLegal.trim();
       if (!v) {
-        toast.error("Enter a legal name");
+        setDraftLegalError("Enter a legal name");
         return;
       }
+      if (v.length < 2 || v.length > 100) {
+        setDraftLegalError("Legal name must be between 2 and 100 characters");
+        return;
+      }
+      if (!nameRegex.test(v)) {
+        setDraftLegalError("Name must contain only letters and spaces");
+        return;
+      }
+      setDraftLegalError(null);
       void persist({ legalName: v });
       return;
     }
     if (editField === "preferredFirstName") {
       const pf = draftPreferred.trim();
       if (!pf) {
-        toast.error("Enter a preferred first name (1–50 characters)");
+        setDraftPreferredError("Enter a preferred first name");
         return;
       }
+      if (pf.length < 2 || pf.length > 100) {
+        setDraftPreferredError(
+          "Preferred first name must be between 2 and 100 characters",
+        );
+        return;
+      }
+      if (!nameRegex.test(pf)) {
+        setDraftPreferredError("Name must contain only letters and spaces");
+        return;
+      }
+      setDraftPreferredError(null);
       void persist({ preferredFirstName: pf });
       return;
     }
@@ -482,14 +569,47 @@ const Profile: React.FC = () => {
     }
     if (editField === "residentialAddress") {
       const line1 = draftResidentialLine1.trim();
+      const country = draftResidentialCountry.trim();
+      const state = draftResidentialState.trim();
+      let hasError = false;
+
       if (!line1) {
-        toast.error("Enter address line 1");
+        setResidentialLine1Error("Enter address line 1");
+        hasError = true;
+      } else {
+        setResidentialLine1Error(null);
+      }
+
+      if (!country) {
+        setResidentialCountryError("Enter country");
+        hasError = true;
+      } else if (!nameRegex.test(country)) {
+        setResidentialCountryError(
+          "Country must contain only letters and spaces",
+        );
+        hasError = true;
+      } else {
+        setResidentialCountryError(null);
+      }
+
+      if (!state) {
+        setResidentialStateError("Enter state");
+        hasError = true;
+      } else if (!nameRegex.test(state)) {
+        setResidentialStateError("State must contain only letters and spaces");
+        hasError = true;
+      } else {
+        setResidentialStateError(null);
+      }
+
+      if (hasError) {
         return;
       }
+
       void persist({
         residentialAddress: line1,
-        country: draftResidentialCountry.trim(),
-        state: draftResidentialState.trim(),
+        country: country,
+        state: state,
       });
       return;
     }
@@ -497,17 +617,30 @@ const Profile: React.FC = () => {
       const name = draftEcName.trim();
       const email = draftEcEmail.trim();
       const phoneRaw = draftEcPhone.trim();
-      if (!name && !email && !phoneRaw) {
-        setGeneralError("Add at least one emergency contact detail.");
+      // Require name and phone for emergency contact; validate name letters-only
+      const nameRegex = /^[A-Za-z\s]+$/;
+      if (!name) {
+        setDraftEcNameError("Enter the emergency contact name");
         return;
       }
-      if (phoneRaw) {
-        const phoneErrorText = validatePhoneDigits(phoneRaw);
-        if (phoneErrorText) {
-          setEmergencyPhoneError(phoneErrorText);
-          return;
-        }
+      if (!nameRegex.test(name)) {
+        setDraftEcNameError("Name must contain only letters and spaces");
+        return;
       }
+      setDraftEcNameError(null);
+
+      if (!phoneRaw) {
+        setDraftEcPhoneError("Enter the Emergency contact number");
+        return;
+      }
+      const phoneDigits = phoneRaw.replace(/\D/g, "");
+      const phoneErrorText = validatePhoneDigits(phoneDigits);
+      if (phoneErrorText) {
+        setDraftEcPhoneError(phoneErrorText);
+        return;
+      }
+      setDraftEcPhoneError(null);
+
       if (email) {
         const emailErrorText = validateEmail(email);
         if (emailErrorText) {
@@ -515,11 +648,10 @@ const Profile: React.FC = () => {
           return;
         }
       }
-      const phoneNumber = phoneRaw
-        ? phoneRaw.startsWith("+")
-          ? phoneRaw
-          : `${selectedEmergencyCountry.dialCode}${phoneRaw}`
-        : "";
+
+      const phoneNumber = phoneRaw.startsWith("+")
+        ? phoneRaw
+        : `${selectedEmergencyCountry.dialCode}${phoneRaw}`;
       void persist({
         emergencyContact: { name, email, phoneNumber },
       });
@@ -813,69 +945,102 @@ const Profile: React.FC = () => {
                           </p>
 
                           {row.key === "legalName" && (
-                            <input
-                              value={draftLegal}
-                              onChange={(e) => setDraftLegal(e.target.value)}
-                              className={inputEditClass}
-                              placeholder="Legal name as on ID"
-                              autoComplete="name"
-                            />
+                            <>
+                              <input
+                                value={draftLegal}
+                                onChange={(e) => {
+                                  setDraftLegal(e.target.value);
+                                  setDraftLegalError(null);
+                                  setGeneralError(null);
+                                }}
+                                className={inputEditClass}
+                                placeholder="Legal name as on ID"
+                                autoComplete="name"
+                              />
+                              {draftLegalError && (
+                                <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                  {draftLegalError}
+                                </p>
+                              )}
+                            </>
                           )}
 
                           {row.key === "preferredFirstName" && (
-                            <input
-                              value={draftPreferred}
-                              onChange={(e) =>
-                                setDraftPreferred(e.target.value)
-                              }
-                              className={inputEditClass}
-                              placeholder="Preferred first name"
-                            />
+                            <>
+                              <input
+                                value={draftPreferred}
+                                onChange={(e) => {
+                                  setDraftPreferred(e.target.value);
+                                  setDraftPreferredError(null);
+                                  setGeneralError(null);
+                                }}
+                                className={inputEditClass}
+                                placeholder="Preferred first name"
+                              />
+                              {draftPreferredError && (
+                                <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                  {draftPreferredError}
+                                </p>
+                              )}
+                            </>
                           )}
 
                           {row.key === "phoneNumber" && (
                             <>
                               <div className="w-full h-[44px] border border-[#8B8B8B] rounded-[8px] bg-white flex items-center px-3 focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/10 transition-all gap-2">
-                                <div className="relative flex items-center gap-1 min-w-[60px]">
-                                  <img
-                                    src={selectedCountry.flagUrl}
-                                    alt={selectedCountry.name}
-                                    className="w-[20px] h-[12px] object-cover rounded-[1px]"
-                                  />
-                                  <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
-                                    {selectedCountry.dialCode}
-                                  </span>
-                                  <div className="flex items-center">
+                                <div
+                                  className="relative flex items-center gap-1 min-w-[60px]"
+                                  ref={countryDropdownRef}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setCountryDropdownOpen((p) => !p)
+                                    }
+                                    className="flex items-center gap-2 rounded-[4px] bg-transparent px-1 py-1 text-left outline-none"
+                                  >
+                                    <img
+                                      src={selectedCountry.flagUrl}
+                                      alt={selectedCountry.name}
+                                      className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                                    />
+                                    <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
+                                      {selectedCountry.dialCode}
+                                    </span>
                                     <img
                                       src={chevronDown}
                                       alt="dropdown"
                                       className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
                                     />
-                                  </div>
-                                  <select
-                                    className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
-                                    value={selectedCountry.code}
-                                    onChange={(e) => {
-                                      const next = COUNTRY_OPTIONS.find(
-                                        (c) => c.code === e.target.value,
-                                      );
-                                      if (next) setSelectedCountry(next);
-                                    }}
-                                    style={{
-                                      WebkitAppearance: "none",
-                                      MozAppearance: "none",
-                                      appearance: "none",
-                                    }}
-                                  >
-                                    {COUNTRY_OPTIONS.map((country) => (
-                                      <option
-                                        key={country.code}
-                                        value={country.code}
-                                      >
-                                        {country.name} {country.dialCode}
-                                      </option>
-                                    ))}
-                                  </select>
+                                  </button>
+
+                                  {countryDropdownOpen && (
+                                    <div className="absolute left-0 top-full z-50 mt-1 w-[220px] overflow-hidden rounded-[10px] border border-[#D1D5DB] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+                                      {COUNTRY_OPTIONS.map((country) => (
+                                        <button
+                                          key={country.code}
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedCountry(country);
+                                            setCountryDropdownOpen(false);
+                                          }}
+                                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#111827] hover:bg-[#F3F4F6]"
+                                        >
+                                          <img
+                                            src={country.flagUrl}
+                                            alt={country.name}
+                                            className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                                          />
+                                          <span className="flex-1 truncate">
+                                            {country.name}
+                                          </span>
+                                          <span className="text-[13px] text-[#6B7280]">
+                                            {country.dialCode}
+                                          </span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
 
                                 <input
@@ -933,12 +1098,21 @@ const Profile: React.FC = () => {
                                   </label>
                                   <input
                                     value={draftResidentialCountry}
-                                    onChange={(e) =>
-                                      setDraftResidentialCountry(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                      setDraftResidentialCountry(
+                                        e.target.value,
+                                      );
+                                      setResidentialCountryError(null);
+                                      setGeneralError(null);
+                                    }}
                                     className={inputEditClass}
                                     placeholder="Country"
                                   />
+                                  {residentialCountryError && (
+                                    <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                      {residentialCountryError}
+                                    </p>
+                                  )}
                                 </div>
                                 <div>
                                   <label className="mb-2 block text-[13px] font-medium text-black">
@@ -946,12 +1120,19 @@ const Profile: React.FC = () => {
                                   </label>
                                   <input
                                     value={draftResidentialState}
-                                    onChange={(e) =>
-                                      setDraftResidentialState(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                      setDraftResidentialState(e.target.value);
+                                      setResidentialStateError(null);
+                                      setGeneralError(null);
+                                    }}
                                     className={inputEditClass}
                                     placeholder="State"
                                   />
+                                  {residentialStateError && (
+                                    <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                      {residentialStateError}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
 
@@ -961,13 +1142,20 @@ const Profile: React.FC = () => {
                                 </label>
                                 <textarea
                                   value={draftResidentialLine1}
-                                  onChange={(e) =>
-                                    setDraftResidentialLine1(e.target.value)
-                                  }
+                                  onChange={(e) => {
+                                    setDraftResidentialLine1(e.target.value);
+                                    setResidentialLine1Error(null);
+                                    setGeneralError(null);
+                                  }}
                                   rows={3}
                                   className={`${inputEditClass} resize-none`}
                                   placeholder="Street address, city, ZIP"
                                 />
+                                {residentialLine1Error && (
+                                  <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                    {residentialLine1Error}
+                                  </p>
+                                )}
                               </div>
                             </div>
                           )}
@@ -976,10 +1164,20 @@ const Profile: React.FC = () => {
                             <div className="mt-2 space-y-2">
                               <input
                                 value={draftEcName}
-                                onChange={(e) => setDraftEcName(e.target.value)}
+                                onChange={(e) => {
+                                  setDraftEcName(e.target.value);
+                                  setDraftEcNameError(null);
+                                  setGeneralError(null);
+                                }}
                                 className={inputEmergencyFieldClass}
                                 placeholder="Contact name"
                               />
+
+                              {draftEcNameError && (
+                                <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                  {draftEcNameError}
+                                </p>
+                              )}
 
                               <input
                                 type="email"
@@ -1001,47 +1199,61 @@ const Profile: React.FC = () => {
                               )}
 
                               <div className="w-full h-[44px] border border-[#8B8B8B] rounded-[8px] bg-white flex items-center px-3 focus-within:border-[#389131] focus-within:ring-2 focus-within:ring-[#389131]/10 transition-all gap-2">
-                                <div className="relative flex items-center gap-1 min-w-[60px]">
-                                  <img
-                                    src={selectedEmergencyCountry.flagUrl}
-                                    alt={selectedEmergencyCountry.name}
-                                    className="w-[20px] h-[12px] object-cover rounded-[1px]"
-                                  />
-                                  <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
-                                    {selectedEmergencyCountry.dialCode}
-                                  </span>
-                                  <div className="flex items-center">
+                                <div
+                                  className="relative flex items-center gap-1 min-w-[60px]"
+                                  ref={emergencyDropdownRef}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setEmergencyCountryOpen((p) => !p)
+                                    }
+                                    className="flex items-center gap-2 rounded-[4px] bg-transparent px-1 py-1 text-left outline-none"
+                                  >
+                                    <img
+                                      src={selectedEmergencyCountry.flagUrl}
+                                      alt={selectedEmergencyCountry.name}
+                                      className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                                    />
+                                    <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
+                                      {selectedEmergencyCountry.dialCode}
+                                    </span>
                                     <img
                                       src={chevronDown}
                                       alt="dropdown"
                                       className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
                                     />
-                                  </div>
-                                  <select
-                                    className="absolute inset-0 opacity-0 cursor-pointer appearance-none"
-                                    value={selectedEmergencyCountry.code}
-                                    onChange={(e) => {
-                                      const next = COUNTRY_OPTIONS.find(
-                                        (c) => c.code === e.target.value,
-                                      );
-                                      if (next)
-                                        setSelectedEmergencyCountry(next);
-                                    }}
-                                    style={{
-                                      WebkitAppearance: "none",
-                                      MozAppearance: "none",
-                                      appearance: "none",
-                                    }}
-                                  >
-                                    {COUNTRY_OPTIONS.map((country) => (
-                                      <option
-                                        key={country.code}
-                                        value={country.code}
-                                      >
-                                        {country.name} {country.dialCode}
-                                      </option>
-                                    ))}
-                                  </select>
+                                  </button>
+
+                                  {emergencyCountryOpen && (
+                                    <div className="absolute left-0 top-full z-50 mt-1 w-[220px] overflow-hidden rounded-[10px] border border-[#D1D5DB] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
+                                      {COUNTRY_OPTIONS.map((country) => (
+                                        <button
+                                          key={country.code}
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedEmergencyCountry(
+                                              country,
+                                            );
+                                            setEmergencyCountryOpen(false);
+                                          }}
+                                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#111827] hover:bg-[#F3F4F6]"
+                                        >
+                                          <img
+                                            src={country.flagUrl}
+                                            alt={country.name}
+                                            className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                                          />
+                                          <span className="flex-1 truncate">
+                                            {country.name}
+                                          </span>
+                                          <span className="text-[13px] text-[#6B7280]">
+                                            {country.dialCode}
+                                          </span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
 
                                 <input
@@ -1053,6 +1265,7 @@ const Profile: React.FC = () => {
                                       "",
                                     );
                                     setDraftEcPhone(digits);
+                                    setDraftEcPhoneError(null);
                                     setEmergencyPhoneError(
                                       validatePhoneDigits(digits),
                                     );
@@ -1063,6 +1276,11 @@ const Profile: React.FC = () => {
                                   placeholder="Contact phone"
                                 />
                               </div>
+                              {draftEcPhoneError && (
+                                <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
+                                  {draftEcPhoneError}
+                                </p>
+                              )}
                               {emergencyPhoneError && (
                                 <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
                                   {emergencyPhoneError}
