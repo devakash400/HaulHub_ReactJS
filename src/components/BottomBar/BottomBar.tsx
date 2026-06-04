@@ -296,7 +296,7 @@ const BottomBar: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const userType = useSelector((state: RootState) => state.auth.userType);
-
+  //Bottom Bar
   const isOwner =
     (user?.trailor === "Owner" || userType === "Owner") && isAuthenticated;
 
