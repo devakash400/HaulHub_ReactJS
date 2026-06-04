@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, type Location } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/index.ts";
 import { toast } from "react-toastify";
@@ -10,13 +10,20 @@ import {
 import { register, roleToTrailor } from "../../../api/authApi.ts";
 import { signUpSuccess } from "../../../store/authSlice.ts";
 
+type BackgroundLocationState = {
+  backgroundLocation?: Location;
+};
+
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
+  const backgroundState = location.state as BackgroundLocationState | null;
+  const backgroundLocation = backgroundState?.backgroundLocation;
 
   useEffect(() => {
     if (isAuthenticated) navigate("/", { replace: true });
@@ -30,7 +37,11 @@ const SignupPage: React.FC = () => {
       submitError={submitError}
       onClose={() => {
         setSubmitError(null);
-        navigate(-1);
+        if (backgroundLocation) {
+          navigate(backgroundLocation, { replace: true });
+        } else {
+          navigate(-1);
+        }
       }}
       onSubmit={async (data: SignUpData) => {
         setSubmitError(null);

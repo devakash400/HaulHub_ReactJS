@@ -181,14 +181,27 @@
 // export default WhyChooseHaulHub;
 
 import React from "react";
-import {
-  CheckCircle2,
-  ShieldCheck,
-  Truck,
-  Headphones,
-} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
+import useModalNavigate from "../../hooks/useModalNavigate.ts";
+import { CheckCircle2, ShieldCheck, Truck, Headphones } from "lucide-react";
 
 const WhyChooseHaulHub: React.FC = () => {
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
+
+  const userType = useSelector((state: RootState) => state.auth.userType);
+
+  const isRenter = isAuthenticated && userType === "Renter";
+  const isOwner = isAuthenticated && userType === "Owner";
+  const modalNavigate = useModalNavigate();
+
+  const handleGuestLogin = () => {
+    modalNavigate("/login");
+  };
+
   return (
     <div className="w-full bg-[#F6F3EB] overflow-hidden">
       <main className="w-full px-10 mx-auto py-10 md:py-14">
@@ -196,25 +209,27 @@ const WhyChooseHaulHub: React.FC = () => {
         <section className="grid lg:grid-cols-[1.15fr,0.85fr] gap-10 items-start">
           {/* Left Content */}
           <div>
-          <p className="mb-7 text-[#389131] font-normal text-[24px] leading-none tracking-normal">
-  Why choose HaulHub
-</p>
+            <p className="mb-7 text-[#389131] font-normal text-[24px] leading-none tracking-normal">
+              Why choose HaulHub
+            </p>
 
-<h1 className="text-[40px] font-normal leading-none tracking-normal
- text-black ">
-  The easier way to{" "}
-  <span className="text-[#389131]">
-    find, book, and manage
-  </span>{" "}
-  trailers.
-</h1>
+            <h1
+              className="text-[40px] font-normal leading-none tracking-normal
+ text-black "
+            >
+              The easier way to{" "}
+              <span className="text-[#389131]">find, book, and manage</span>{" "}
+              trailers.
+            </h1>
 
-<p className="mt-5 text-[20px] font-light leading-[120%] tracking-normal 
-text-black max-w-[770px]">
-  HaulHub connects contractors, logistics teams, and owners with
-  the right trailers — on demand. Transparent pricing, verified
-  equipment, and support from first click to final drop-off.
-</p>
+            <p
+              className="mt-5 text-[20px] font-light leading-[120%] tracking-normal 
+text-black max-w-[770px]"
+            >
+              HaulHub connects contractors, logistics teams, and owners with the
+              right trailers — on demand. Transparent pricing, verified
+              equipment, and support from first click to final drop-off.
+            </p>
             {/* Features */}
             <div className="mt-8 flex flex-col sm:flex-row gap-7">
               {/* Item */}
@@ -242,8 +257,10 @@ text-black max-w-[770px]">
                 </div>
 
                 <div>
-                  <h3 className="font-medium text-[16px] leading-none t
-                  racking-normal text-[#389131]">
+                  <h3
+                    className="font-medium text-[16px] leading-none t
+                  racking-normal text-[#389131]"
+                  >
                     Minutes, not days
                   </h3>
 
@@ -257,30 +274,71 @@ text-black max-w-[770px]">
 
             {/* Buttons */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
-            <button className="h-[42px] w-[151px] px-6 rounded-[10px] bg-[#4D9A45] text-white text-[15px] font-medium hover:opacity-90 transition whitespace-nowrap">
-  Browse Trailer
-</button>
+              {(!isAuthenticated || isRenter) &&
+                (isRenter ? (
+                  <Link
+                    to="/"
+                    className="inline-flex h-[42px] items-center justify-center w-[151px] px-6 rounded-[10px] bg-[#4D9A45] text-white text-[15px] font-medium hover:opacity-90 transition whitespace-nowrap"
+                  >
+                    Browse Trailer
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleGuestLogin}
+                    className="inline-flex h-[42px] items-center justify-center w-[151px] px-6 rounded-[10px] bg-[#4D9A45] text-white text-[15px] font-medium hover:opacity-90 transition whitespace-nowrap"
+                  >
+                    Browse Trailer
+                  </button>
+                ))}
 
-<button className="h-[42px] px-6 rounded-[10px] border border-[#D7D7D7] bg-white text-black text-[14px] font-medium hover:bg-[#FAFAFA] transition whitespace-nowrap">
-  List your Trailer
-</button>
+              {(!isAuthenticated || isOwner) &&
+                (isOwner ? (
+                  <Link
+                    to="/list-trailer"
+                    className="inline-flex h-[42px] items-center justify-center px-6 rounded-[10px] border border-[#D7D7D7] bg-white text-black text-[14px] font-medium hover:bg-[#FAFAFA] transition whitespace-nowrap"
+                  >
+                    List your Trailer
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleGuestLogin}
+                    className="inline-flex h-[42px] items-center justify-center px-6 rounded-[10px] border border-[#D7D7D7] bg-white text-black text-[14px] font-medium hover:bg-[#FAFAFA] transition whitespace-nowrap"
+                  >
+                    List your Trailer
+                  </button>
+                ))}
             </div>
           </div>
 
           {/* Right Box */}
           <div className="w-full">
-            <div className="bg-white border border-[#E5E5E5] rounded-[18px] shadow-[0_4px_18px_rgba(0,0,0,0.05)] overflow-hidden">
+            <div
+              className="
+    bg-white
+    border
+    border-[#0000003D]
+    rounded-[18px]
+    shadow-[0px_4px_4px_rgba(0,0,0,0.15)]
+    overflow-hidden
+  "
+            >
               {/* Top Stats */}
               <div className="px-7 py-6">
-              <p className="font-light text-[16px] leading-none
-               tracking-normal uppercase text-black mb-6">
-  HaulHub at a glance
-</p>
+                <p
+                  className="font-light text-[16px] leading-none
+               tracking-normal uppercase text-black mb-6"
+                >
+                  HaulHub at a glance
+                </p>
 
                 <div className="grid grid-cols-3 gap-5">
                   <div>
-                    <h3 className="font-medium text-[16px] leading-none 
-                    tracking-normal text-black  uppercase mb-2">
+                    <h3
+                      className="font-medium text-[16px] leading-none 
+                    tracking-normal text-black  uppercase mb-2"
+                    >
                       3k+
                     </h3>
                     <p className="font-light text-[12px] leading-none tracking-normal text-black capitalize">
@@ -289,8 +347,10 @@ text-black max-w-[770px]">
                   </div>
 
                   <div>
-                    <h3 className="font-medium text-[16px] leading-none 
-                    tracking-normal text-black  uppercase mb-2">
+                    <h3
+                      className="font-medium text-[16px] leading-none 
+                    tracking-normal text-black  uppercase mb-2"
+                    >
                       4.9
                     </h3>
                     <p className="font-light text-[12px] leading-none tracking-normal text-black capitalize">
@@ -299,8 +359,10 @@ text-black max-w-[770px]">
                   </div>
 
                   <div>
-                    <h3 className="font-medium text-[16px] leading-none tracking-normal
-                     text-black  uppercase mb-2">
+                    <h3
+                      className="font-medium text-[16px] leading-none tracking-normal
+                     text-black  uppercase mb-2"
+                    >
                       24/7
                     </h3>
                     <p className="font-light text-[12px] leading-none tracking-normal text-black capitalize">
@@ -310,7 +372,11 @@ text-black max-w-[770px]">
                 </div>
 
                 {/* Inner Card */}
-                <div className="mt-6 rounded-[14px] border border-[#ECECEC] bg-[#FAFAFA] px-4 py-4 flex items-start gap-3">
+                <div
+                  className="mt-6 rounded-[14px]
+                 border border-[#ECECEC] bg-[#FAFAFA]
+                  px-4 py-4 flex items-start gap-3"
+                >
                   <div className="min-w-[38px] h-[38px] rounded-full bg-[#E5F4E4] flex items-center justify-center">
                     <Truck className="w-[18px] h-[18px] text-[#389131]" />
                   </div>
@@ -330,9 +396,22 @@ text-black max-w-[770px]">
             </div>
 
             {/* Bottom Small Cards */}
-            <div className="grid sm:grid-cols-2 gap-4 mt-5">
+            <div className="grid sm:grid-cols-2 gap-30 mt-5">
               {/* Card */}
-              <div className="bg-white border border-[#E5E5E5] rounded-[14px] px-4 py-4 flex items-start gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+              <div
+                className="
+    bg-white
+    border
+    border-[#0000003D]
+    rounded-[14px]
+    px-4
+    py-4
+    flex
+    items-start
+    gap-3
+    shadow-[0px_4px_4px_0px_#00000026]
+  "
+              >
                 <div className="min-w-[34px] h-[34px] rounded-full bg-[#EEF5FF] flex items-center justify-center">
                   <ShieldCheck className="w-[16px] h-[16px] text-[#3B82F6]" />
                 </div>
@@ -350,7 +429,20 @@ text-black max-w-[770px]">
               </div>
 
               {/* Card */}
-              <div className="bg-white border border-[#E5E5E5] rounded-[14px] px-4 py-4 flex items-start gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+              <div
+                className="
+    bg-white
+    border
+    border-[#0000003D]
+    rounded-[14px]
+    px-4
+    py-4
+    flex
+    items-start
+    gap-3
+    shadow-[0px_4px_4px_0px_#00000026]
+  "
+              >
                 <div className="min-w-[34px] h-[34px] rounded-full bg-[#FFF3E8] flex items-center justify-center">
                   <Headphones className="w-[16px] h-[16px] text-[#E07A2F]" />
                 </div>
@@ -372,50 +464,52 @@ text-black max-w-[770px]">
 
         {/* Bottom Section */}
         <section className="mt-12">
-          <div className="bg-white border border-[#E8E8E8] rounded-[20px] px-6 md:px-8 py-7 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
-          <h2 className="font-normal text-[40px] leading-none tracking-normal text-black">
-  Why teams rely on HaulHub
-</h2>
+          <div className="bg-white border border-[#0000003D] rounded-[20px] px-6 md:px-8 py-7 shadow-[0px_4px_4px_0px_#00000026]">
+            <h2 className="font-normal text-[40px] leading-none tracking-normal text-black">
+              Why teams rely on HaulHub
+            </h2>
 
-<p className="mt-3 font-light text-[20px] leading-none tracking-normal 
-text-black ">
-  From owner-operators to nationwide fleets, HaulHub reduces
-  friction in every haul.
-</p>
+            <p
+              className="mt-3 font-light text-[20px] leading-none tracking-normal 
+text-black "
+            >
+              From owner-operators to nationwide fleets, HaulHub reduces
+              friction in every haul.
+            </p>
             <div className="mt-8 grid md:grid-cols-3 gap-5">
               {/* Box */}
-              <div className="border border-[#E6E6E6] rounded-[14px] p-5 bg-white">
-              <h3 className="font-normal text-[15px] leading-none tracking-normal text-black">
-  Clear, upfront pricing
-</h3>
+              <div className="border border-[#0000003D] rounded-[14px] p-5 bg-white shadow-[0px_4px_4px_0px_#00000026]">
+                <h3 className="font-normal text-[15px] leading-none tracking-normal text-black">
+                  Clear, upfront pricing
+                </h3>
 
-<p className="mt-3 font-light text-[15px] leading-none tracking-normal text-black">
-  See rate, fees, and terms before you book no surprise invoices
-  or last-minute add-ons.
-</p>
+                <p className="mt-3 font-light text-[15px] leading-none tracking-normal text-black">
+                  See rate, fees, and terms before you book no surprise invoices
+                  or last-minute add-ons.
+                </p>
               </div>
 
               {/* Box */}
-              <div className="border border-[#E6E6E6] rounded-[14px] p-5 bg-white">
-              <h3 className="font-normal text-[15px] leading-none tracking-normal text-black">
-  Flexible rental windows
-</h3>
+              <div className="border border-[#0000003D] rounded-[14px] p-5 bg-white shadow-[0px_4px_4px_0px_#00000026]">
+                <h3 className="font-normal text-[15px] leading-none tracking-normal text-black">
+                  Flexible rental windows
+                </h3>
 
-<p className="mt-3 font-light text-[15px] leading-none tracking-normal text-black">
-  Hourly, daily, or project-based bookings so you only pay for
-  what you actually use.
-</p>
+                <p className="mt-3 font-light text-[15px] leading-none tracking-normal text-black">
+                  Hourly, daily, or project-based bookings so you only pay for
+                  what you actually use.
+                </p>
               </div>
 
               {/* Box */}
-              <div className="border border-[#E6E6E6] rounded-[14px] p-5 bg-white">
-              <h3 className="font-normal text-[15px] leading-none tracking-normal text-black">
-  Designed for field teams
-</h3>
-<p className="mt-3 font-light text-[15px]  tracking-normal text-black">
-  Mobile-friendly flows, quick ID checks, and simple review
-  tools built for busy job sites.
-</p>
+              <div className="border border-[#0000003D] rounded-[14px] p-5 bg-white shadow-[0px_4px_4px_0px_#00000026]">
+                <h3 className="font-normal text-[15px] leading-none tracking-normal text-black">
+                  Designed for field teams
+                </h3>
+                <p className="mt-3 font-light text-[15px]  tracking-normal text-black">
+                  Mobile-friendly flows, quick ID checks, and simple review
+                  tools built for busy job sites.
+                </p>
               </div>
             </div>
           </div>

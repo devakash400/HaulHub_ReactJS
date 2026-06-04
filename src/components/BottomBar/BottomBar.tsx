@@ -286,6 +286,7 @@ import { Link } from "react-router-dom";
 import { images } from "../../assets/images/index.ts";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
+import useModalNavigate from "../../hooks/useModalNavigate.ts";
 
 const BottomBar: React.FC = () => {
   const isAuthenticated = useSelector(
@@ -298,6 +299,11 @@ const BottomBar: React.FC = () => {
 
   const isOwner =
     (user?.trailor === "Owner" || userType === "Owner") && isAuthenticated;
+
+  const isRenter =
+    isAuthenticated && (user?.trailor === "Renter" || userType === "Renter");
+
+  const modalNavigate = useModalNavigate();
 
   const year = new Date().getFullYear();
 
@@ -318,14 +324,16 @@ const BottomBar: React.FC = () => {
             </h3>
 
             <ul className="list-none p-0 m-0 flex flex-col gap-[21px] text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
-              <li>
-                <Link
-                  to="/wishlist"
-                  className="no-underline text-black transition-colors hover:text-[#389131]"
-                >
-                  Wishlist
-                </Link>
-              </li>
+              {isRenter && (
+                <li>
+                  <Link
+                    to="/wishlist"
+                    className="no-underline text-black transition-colors hover:text-[#389131]"
+                  >
+                    Wishlist
+                  </Link>
+                </li>
+              )}
 
               <li>
                 <Link
@@ -348,12 +356,26 @@ const BottomBar: React.FC = () => {
               )}
 
               <li>
-                <Link
-                  to="/booking"
-                  className="no-underline text-black transition-colors hover:text-[#389131]"
-                >
-                  Your Booked Trailers
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    to="/booking"
+                    className="no-underline text-black transition-colors hover:text-[#389131]"
+                  >
+                    Your Booked Trailers
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      modalNavigate("/login", {
+                        state: { returnTo: "/booking" },
+                      })
+                    }
+                    className="no-underline text-black transition-colors hover:text-[#389131] text-left"
+                  >
+                    Your Booked Trailers
+                  </button>
+                )}
               </li>
 
               <li>
