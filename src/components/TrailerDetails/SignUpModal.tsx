@@ -113,6 +113,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [genderTouched, setGenderTouched] = useState(false);
+  const [dateOfBirthTouched, setDateOfBirthTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const dateInputRef = useRef<HTMLInputElement | null>(null);
   const todayIso = new Date().toISOString().split("T")[0];
@@ -140,6 +141,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setPasswordTouched(false);
     setPhoneTouched(false);
     setGenderTouched(false);
+    setDateOfBirthTouched(false);
   }, [isOpen]);
 
   useEffect(() => {
@@ -247,7 +249,6 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="sign-up-title"
-        onClick={onClose}
       >
         <div
           className="relative w-full max-w-[554px]
@@ -366,6 +367,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       value={dateOfBirth}
                       min="1900-01-01"
                       max={todayIso}
+                      onBlur={() => setDateOfBirthTouched(true)}
                       onChange={(e) => {
                         const v = e.target.value;
 
@@ -401,7 +403,6 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         letterSpacing: "0%",
                       }}
                     />
-
                     <img
                       src={Calendar}
                       alt="calendar"
@@ -412,6 +413,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       }
                     />
                   </div>
+                  {dateOfBirthTouched && dateOfBirth.trim().length === 0 && (
+                    <p className="mt-1 text-xs text-red-600">
+                      Enter date of birth
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -498,7 +504,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       borderRadius: "5px",
                       border:
                         emailTouched && !isEmailValid
-                          ? "1px solid #f87171"
+                          ? "1px solid #7C7C7C"
                           : "1px solid #7C7C7C",
                       opacity: 1,
                       fontFamily: "Lexend",
@@ -655,14 +661,6 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         color: trailor ? "#000000" : "#929191",
                       }}
                     >
-                      <option
-                        value=""
-                        className="font-['Lexend'] font-light text-[12px] leading-[100%] tracking-[0%]"
-                        style={{ color: "#000000" }}
-                      >
-                        Select Your Category
-                      </option>
-
                       <option value="Renter" style={{ color: "#000000" }}>
                         Renter
                       </option>

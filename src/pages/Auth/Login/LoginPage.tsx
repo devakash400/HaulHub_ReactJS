@@ -12,21 +12,28 @@ import {
 import { register, roleToTrailor } from "../../../api/authApi.ts";
 import { signUpSuccess } from "../../../store/authSlice.ts";
 
-type AuthModalLocationState = {
-  backgroundLocation?: Location;
-  modalStep?: "email" | "password" | "reset" | "otp" | "newPassword";
-  loginIdentifier?: string;
-  usePhoneOnly?: boolean;
-  selectedCountryCode?: string;
-  loginTrailor?: "Renter" | "Owner";
-};
-
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const locationState = location.state as AuthModalLocationState | null;
-  const backgroundLocation = locationState?.backgroundLocation ?? null;
-  const loginState = locationState ?? null;
+  const locationState = location.state as
+    | ({ backgroundLocation?: Location; returnTo?: string } & Record<
+        string,
+        unknown
+      >)
+    | null;
+  const backgroundLocation = locationState?.backgroundLocation as
+    | Location
+    | undefined;
+  const returnTo = locationState?.returnTo as string | undefined;
+  const loginState =
+    (location.state as {
+      modalStep?: "email" | "password" | "reset" | "otp" | "newPassword";
+      loginIdentifier?: string;
+      usePhoneOnly?: boolean;
+      selectedCountryCode?: string;
+      loginTrailor?: "Renter" | "Owner";
+    } | null) ?? null;
+
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const dispatch = useDispatch();
@@ -35,20 +42,21 @@ const LoginPage: React.FC = () => {
   );
 
   useEffect(() => {
-    if (isAuthenticated) {
-      if (backgroundLocation) {
-        navigate(
-          `${backgroundLocation.pathname}${backgroundLocation.search}`,
-          {
-            replace: true,
-            state: backgroundLocation.state ?? null,
-          },
-        );
-      } else {
-        navigate("/", { replace: true });
-      }
+    if (!isAuthenticated) return;
+    if (returnTo) {
+      navigate(returnTo, { replace: true });
+      return;
     }
-  }, [isAuthenticated, navigate, backgroundLocation]);
+    if (backgroundLocation && typeof backgroundLocation.pathname === "string") {
+      const target = `${backgroundLocation.pathname || "/"}${backgroundLocation.search ?? ""}`;
+      navigate(target, {
+        replace: true,
+        state: backgroundLocation.state ?? null,
+      });
+    } else {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate, backgroundLocation, returnTo]);
 
   if (isAuthenticated) {
     return null;
@@ -66,14 +74,19 @@ const LoginPage: React.FC = () => {
           initialTrailor={loginState?.loginTrailor}
           onClose={() => navigate(-1)}
           onSuccess={() => {
-            if (backgroundLocation) {
-              navigate(
-                `${backgroundLocation.pathname}${backgroundLocation.search}`,
-                {
-                  replace: true,
-                  state: backgroundLocation.state ?? null,
-                },
-              );
+            if (returnTo) {
+              navigate(returnTo, { replace: true });
+              return;
+            }
+            if (
+              backgroundLocation &&
+              typeof backgroundLocation.pathname === "string"
+            ) {
+              const target = `${backgroundLocation.pathname || "/"}${backgroundLocation.search ?? ""}`;
+              navigate(target, {
+                replace: true,
+                state: backgroundLocation.state ?? null,
+              });
             } else {
               navigate("/");
             }

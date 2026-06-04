@@ -1,10 +1,8 @@
 import React, { useRef, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useDispatch } from "react-redux";
 import uploadProfilePhoto, { UploadResponse } from "../api/uploadApi";
 import updateUserProfile from "../api/profileApi";
-import { updateUser } from "../store/authSlice";
 
 type FormState = {
   legalName: string;
@@ -14,7 +12,6 @@ type FormState = {
 };
 
 const ProfileEdit: React.FC = () => {
-  const dispatch = useDispatch();
   const [form, setForm] = useState<FormState>({
     legalName: "",
     preferredFirstName: "",
@@ -60,10 +57,9 @@ const ProfileEdit: React.FC = () => {
           throw new Error("Upload failed");
         }
         // Show uploaded image URL from response
-        const uploadedUrl = uploadResp.data.url;
-        setUploadedUrl(uploadedUrl);
-        publicId = uploadedUrl;
-        setProfilePicture(uploadedUrl);
+        setUploadedUrl(uploadResp.data.url);
+        publicId = uploadResp.data.publicId;
+        setProfilePicture(publicId);
         toast.success("Profile image uploaded");
       }
 
@@ -75,10 +71,7 @@ const ProfileEdit: React.FC = () => {
         profilePicture: publicId,
       };
 
-      const result = await updateUserProfile(payload);
-      if (result?.success && result.data?.profilePicture) {
-        dispatch(updateUser({ profilePicture: result.data.profilePicture }));
-      }
+      await updateUserProfile(payload);
 
       toast.success("Profile updated successfully");
     } catch (err: any) {

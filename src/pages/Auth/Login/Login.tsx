@@ -18,6 +18,7 @@ import {
   checkPhone as checkPhoneApi,
 } from "../../../api/authApi.ts";
 import { toast } from "react-toastify";
+import { DEFAULT_COUNTRY_CODE } from "../../../app/defaults.ts";
 
 type LoginModalProps = {
   isOpen: boolean;
@@ -152,7 +153,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
   );
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(() => {
     const country = COUNTRY_OPTIONS.find((c) => c.code === initialCountryCode);
-    return country ?? COUNTRY_OPTIONS[0];
+    return (
+      country ??
+      COUNTRY_OPTIONS.find((c) => c.code === DEFAULT_COUNTRY_CODE) ??
+      COUNTRY_OPTIONS[0]
+    );
   });
   const [countryMenuOpen, setCountryMenuOpen] = useState(false);
   const countryDropdownRef = useRef<HTMLDivElement | null>(null);
