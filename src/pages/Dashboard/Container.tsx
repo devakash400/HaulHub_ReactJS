@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { images } from "../../assets/images/index.ts";
-import Containers1 from "../../assets/images/container.png";
-import Containers2 from "../../assets/images/Container2.png";
-import Containers3 from "../../assets/images/car_haulers.png";
+import Containers1 from "../../assets/images/HomePage1.png";
+import Containers2 from "../../assets/images/HomePage2.png";
+import Containers3 from "../../assets/images/HomePage3.png";
 const SLIDES = [
- 
   { src: Containers2, alt: "HaulHub trailer hero" },
-  
-  { src: Containers3, alt: "HaulHub trailer hero" },{ src: Containers1, alt: "HaulHub trailer hero" },
-];
 
+  { src: Containers3, alt: "HaulHub trailer hero" },
+  { src: Containers1, alt: "HaulHub trailer hero" },
+];
 
 const AUTO_PLAY_MS = 5000;
 

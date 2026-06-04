@@ -1,11 +1,16 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { type Location, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/index.ts";
 import LoginModal from "../Login/Login.tsx";
 
 const NewPasswordPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as
+    | ({ backgroundLocation?: Location } & Record<string, unknown>)
+    | null;
+  const backgroundLocation = locationState?.backgroundLocation;
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
@@ -20,7 +25,20 @@ const NewPasswordPage: React.FC = () => {
     <LoginModal
       isOpen
       initialStep="newPassword"
-      onClose={() => navigate(-1)}
+      onClose={() => {
+        if (
+          backgroundLocation &&
+          typeof backgroundLocation.pathname === "string"
+        ) {
+          const target = `${backgroundLocation.pathname || "/"}${backgroundLocation.search ?? ""}`;
+          navigate(target, {
+            replace: true,
+            state: backgroundLocation.state ?? null,
+          });
+        } else {
+          navigate(-1);
+        }
+      }}
       onSuccess={() => navigate("/")}
     />
   );
