@@ -185,7 +185,7 @@ const Navbar: React.FC = () => {
             />
           </Link>
 
-          {location.pathname === "/" && (
+          {backgroundLocation.pathname === "/" && (
             <div className="hidden min-w-0 flex-1 items-center justify-center px-4 sm:flex">
               <div
                 className={`flex items-center border border-gray-200 bg-[#FEFEFE] shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_26px_rgba(56,145,49,0.22)] motion-reduce:transition-none w-[549px] h-[73px] rounded-[21px] px-5`}

@@ -381,6 +381,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
     else onClose();
   };
 
+  // Header close (X) should immediately close modal on top-level.
+  const handleHeaderClose = () => {
+    onClose();
+  };
+
   const handleEmailContinue = async () => {
     if (!isEmailFilled || !isIdentifierValid || isCheckingEmail) return;
     setIsCheckingEmail(true);
@@ -614,7 +619,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setOtp("");
     setOtpError(null);
     setResetError(null);
-    setStep("otp"); // Directly opens OTP screen
+    const currentState = location.state as Record<string, unknown> | null;
+    modalNavigate("/otp", {
+      state: currentState,
+    });
   };
   const handleResendOtp = () => {
     setOtpSeconds(59);
@@ -629,7 +637,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
       return;
     }
     setOtpError(null);
-    setStep("newPassword");
+    const currentState = location.state as Record<string, unknown> | null;
+    modalNavigate("/Newpassword", {
+      state: currentState,
+    });
   };
 
   const passwordsMatch = useMemo(
@@ -714,8 +725,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   ? "Reset Password"
                   : "New Password"
           }
-          onClose={goBack}
-          variant={step === "email" ? "close" : "none"}
+          onClose={handleHeaderClose}
+          variant="close"
           closeOnRight={true}
         />
 
@@ -1632,7 +1643,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     Enter OTP
                   </span>
                 }
-                onClose={() => setStep("reset")}
+                onClose={handleHeaderClose}
                 variant="close"
                 closeOnRight={true}
               />
