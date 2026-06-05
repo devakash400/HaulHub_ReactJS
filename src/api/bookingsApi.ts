@@ -45,6 +45,11 @@ export async function getMyBookings(): Promise<unknown[]> {
   return res.data;
 }
 
+export async function returnBooking(bookingId: string) {
+  const res = await api.post(`/api/bookings/${bookingId}/return`);
+  return res.data;
+}
+
 export function getBookingErrorMessage(err: unknown): string {
   if (err instanceof AxiosError) {
     const data = err.response?.data as

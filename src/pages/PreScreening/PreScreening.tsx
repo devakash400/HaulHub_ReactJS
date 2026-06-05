@@ -338,30 +338,42 @@ const PreScreening: React.FC = () => {
               </div>
             </div>
             <div className="border-t border-slate-200 bg-slate-50 px-6 py-6 sm:px-8">
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className="flex items-center gap-4 sm:gap-6">
                 {stepDefinitions.map((step, index) => {
                   const completed = index < stepIndex;
-                  const active = index === stepIndex;
+                  const current = index === stepIndex;
                   return (
-                    <div
-                      key={step.label}
-                      className="flex flex-col items-center gap-3 text-center"
-                    >
-                      <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-full border text-sm font-semibold ${
-                          completed || active
-                            ? "bg-[#1F8A3D] text-white border-[#1F8A3D]"
-                            : "bg-white text-slate-500 border-slate-200"
-                        }`}
-                      >
-                        {completed ? "✓" : index + 1}
+                    <React.Fragment key={step.label}>
+                      <div className="flex flex-col items-center gap-3 text-center">
+                        <div
+                          className={`flex h-12 w-12 items-center justify-center rounded-full border text-sm font-semibold ${
+                            completed
+                              ? "bg-[#1F8A3D] text-white border-[#1F8A3D]"
+                              : current
+                                ? "bg-white text-slate-900 border-slate-300"
+                                : "bg-white text-slate-500 border-slate-200"
+                          }`}
+                        >
+                          {completed ? "✓" : index + 1}
+                        </div>
+                        <p
+                          className={`text-xs font-semibold uppercase tracking-[0.22em] ${
+                            completed || current
+                              ? "text-slate-900"
+                              : "text-slate-500"
+                          }`}
+                        >
+                          {step.label}
+                        </p>
                       </div>
-                      <p
-                        className={`text-xs font-semibold uppercase tracking-[0.22em] ${active ? "text-slate-900" : "text-slate-500"}`}
-                      >
-                        {step.label}
-                      </p>
-                    </div>
+                      {index < stepDefinitions.length - 1 && (
+                        <div
+                          className={`h-[2px] flex-1 rounded-full ${
+                            index < stepIndex ? "bg-[#1F8A3D]" : "bg-slate-300"
+                          }`}
+                        />
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </div>

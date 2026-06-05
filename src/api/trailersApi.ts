@@ -270,6 +270,20 @@ export async function fetchTrailerReviews(
   }
 }
 
+export type CreateTrailerReviewPayload = {
+  trailerId: string;
+  bookingId: string;
+  rating: number;
+  message: string;
+};
+
+export async function createTrailerReview(
+  payload: CreateTrailerReviewPayload,
+): Promise<unknown> {
+  const res = await api.post("/api/reviews", payload);
+  return res.data;
+}
+
 export async function fetchTrailerById(
   id: string,
 ): Promise<ApiTrailerDetail | null> {

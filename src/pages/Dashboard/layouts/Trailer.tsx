@@ -539,6 +539,7 @@ const Trailer: React.FC = () => {
 
           <RevealSection delayMs={100} variant="soft">
             <ReviewsSection
+              trailerId={id || ""}
               onShowAll={() => {
                 if (!isAuthenticated) {
                   openAuthModal("login");

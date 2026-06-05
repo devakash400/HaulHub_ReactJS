@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Star, CheckCircle } from "lucide-react";
 import { images } from "../../assets/images/index.ts";
-import { getMyBookings } from "../../api/bookingsApi.ts";
+import { getMyBookings, returnBooking } from "../../api/bookingsApi.ts";
+import {
+  createTrailerReview,
+  fetchTrailerReviews,
+} from "../../api/trailersApi.ts";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export type BookingStatus =
@@ -11,7 +15,8 @@ export type BookingStatus =
   | "active"
   | "in_use"
   | "overdue"
-  | "return";
+  | "return"
+  | "returned";
 export type FilterStatus =
   | "all"
   | "pending"
@@ -55,7 +60,8 @@ const statusStyles: Record<string, { label: string; className: string }> = {
   active: { label: "Active", className: "bg-[#389131] text-white" },
   in_use: { label: "Active", className: "bg-[#389131] text-white" },
   overdue: { label: "Overdue", className: "bg-gray-500 text-white" },
-  return: { label: "Return", className: "bg-red-500 text-white" },
+  return: { label: "Returned", className: "bg-red-500 text-white" },
+  returned: { label: "Returned", className: "bg-red-500 text-white" },
 };
 
 const FILTER_LABELS: Record<FilterStatus, string> = {
@@ -65,26 +71,52 @@ const FILTER_LABELS: Record<FilterStatus, string> = {
   rejected: "Rejected",
   active: "Active",
   overdue: "Overdue",
-  return: "Return",
+  return: "Returned",
 };
 
 const BookingScreen: React.FC = () => {
   const [bookings, setBookings] = useState<ApiBooking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [returnError, setReturnError] = useState<string | null>(null);
+  const [returnSubmitting, setReturnSubmitting] = useState<
+    Record<string, boolean>
+  >({});
+  const [reviewModalBooking, setReviewModalBooking] = useState<{
+    bookingId: string;
+    trailerId: string;
+    title: string;
+  } | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewMessage, setReviewMessage] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
+  const [reviewedBookings, setReviewedBookings] = useState<
+    Record<string, boolean>
+  >({});
   const navigate = useNavigate();
   const location = useLocation();
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
 
-  const filteredBookings =
-    filterStatus === "all"
-      ? bookings
-      : bookings.filter((b) =>
-          filterStatus === "active"
-            ? b.status === "active" || b.status === "in_use"
-            : b.status === filterStatus,
-        );
+  const filteredBookings = (() => {
+    if (filterStatus === "all") return bookings;
+    if (filterStatus === "active") {
+      return bookings.filter(
+        (b) => b.status === "active" || b.status === "in_use",
+      );
+    }
+    if (filterStatus === "return") {
+      // For returned view, only show bookings that came from backend (have a real trailer id)
+      return bookings.filter(
+        (b) =>
+          (b.status === "return" || b.status === "returned") &&
+          Boolean(b.trailerId && (b.trailerId as any)._id),
+      );
+    }
+    return bookings.filter((b) => b.status === filterStatus);
+  })();
 
   useEffect(() => {
     let mounted = true;
@@ -117,9 +149,115 @@ const BookingScreen: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const loadReviewedBookings = async () => {
+      const returnedBookings = bookings.filter((booking) =>
+        ["returned", "return"].includes(String(booking.status).toLowerCase()),
+      );
+      const trailerIds = Array.from(
+        new Set(
+          returnedBookings
+            .map((booking) => booking.trailerId?._id)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      );
+      if (trailerIds.length === 0) return;
+
+      const reviewed: Record<string, boolean> = {};
+      await Promise.all(
+        trailerIds.map(async (trailerId) => {
+          const reviews = await fetchTrailerReviews(trailerId);
+          if (!reviews) return;
+          reviews.forEach((review) => {
+            if (review.bookingId) {
+              reviewed[review.bookingId] = true;
+            }
+          });
+        }),
+      );
+
+      setReviewedBookings((prev) => ({ ...prev, ...reviewed }));
+    };
+
+    loadReviewedBookings();
+  }, [bookings]);
+
   const handleFilterSelect = (status: FilterStatus) => {
     setFilterStatus(status);
     setFilterOpen(false);
+  };
+
+  const openReviewModal = (
+    bookingId: string,
+    trailerId: string,
+    title: string,
+  ) => {
+    setReviewModalBooking({ bookingId, trailerId, title });
+    setReviewRating(5);
+    setReviewMessage("");
+    setReviewError(null);
+    setReviewSuccess(null);
+  };
+
+  const closeReviewModal = () => {
+    setReviewModalBooking(null);
+    setReviewError(null);
+    setReviewSuccess(null);
+  };
+
+  const handleReturnBooking = async (bookingId: string) => {
+    setReturnError(null);
+    setReturnSubmitting((prev) => ({ ...prev, [bookingId]: true }));
+
+    try {
+      await returnBooking(bookingId);
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking._id === bookingId
+            ? { ...booking, status: "return" }
+            : booking,
+        ),
+      );
+    } catch (err: any) {
+      console.error("Return booking error:", err);
+      setReturnError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Unable to return the trailer. Please try again.",
+      );
+    } finally {
+      setReturnSubmitting((prev) => ({ ...prev, [bookingId]: false }));
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewModalBooking) return;
+    setReviewSubmitting(true);
+    setReviewError(null);
+    setReviewSuccess(null);
+
+    try {
+      await createTrailerReview({
+        trailerId: reviewModalBooking.trailerId,
+        bookingId: reviewModalBooking.bookingId,
+        rating: reviewRating,
+        message: reviewMessage.trim(),
+      });
+      setReviewSuccess("Review submitted successfully.");
+      setReviewedBookings((prev) => ({
+        ...prev,
+        [reviewModalBooking.bookingId]: true,
+      }));
+    } catch (err: any) {
+      console.error("Review submit error:", err);
+      setReviewError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Unable to submit review.",
+      );
+    } finally {
+      setReviewSubmitting(false);
+    }
   };
 
   return (
@@ -166,6 +304,102 @@ const BookingScreen: React.FC = () => {
           </div>
         </div>
 
+        {returnError && (
+          <div className="mb-4 rounded-2xl border border-red-200 bg-[#FEF3F2] p-4 text-sm text-red-700">
+            {returnError}
+          </div>
+        )}
+
+        {reviewModalBooking && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm text-gray-500">Review</p>
+                  <h2 className="text-xl font-semibold text-black">
+                    {reviewModalBooking.title}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeReviewModal}
+                  className="text-gray-500 hover:text-gray-900"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Rating
+                  </p>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setReviewRating(value)}
+                        className="rounded-full p-2"
+                      >
+                        <Star
+                          className={`w-6 h-6 ${
+                            value <= reviewRating
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Review
+                  </label>
+                  <textarea
+                    value={reviewMessage}
+                    onChange={(e) => setReviewMessage(e.target.value)}
+                    rows={5}
+                    className="w-full rounded-2xl border border-gray-300 bg-white p-3 text-sm text-gray-900 outline-none transition focus:border-[#389131] focus:ring-2 focus:ring-[#389131]/20"
+                    placeholder="Share your experience with this trailer..."
+                  />
+                </div>
+
+                {reviewError && (
+                  <div className="rounded-2xl border border-red-200 bg-[#FEF3F2] p-3 text-sm text-red-700">
+                    {reviewError}
+                  </div>
+                )}
+                {reviewSuccess && (
+                  <div className="rounded-2xl border border-green-200 bg-[#ECFDF5] p-3 text-sm text-green-700">
+                    {reviewSuccess}
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={closeReviewModal}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={reviewSubmitting || !reviewMessage.trim()}
+                    onClick={handleSubmitReview}
+                    className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2e6f26] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Booking cards */}
         <ul className="list-none p-0 m-0 space-y-4">
           {loading ? (
@@ -186,6 +420,9 @@ const BookingScreen: React.FC = () => {
               const statusKey = (booking.status ?? "pending") as
                 | BookingStatus
                 | string;
+              const isReturnedBooking =
+                statusKey === "returned" || statusKey === "return";
+              const alreadyReviewed = Boolean(reviewedBookings[booking._id]);
               const status = (statusStyles as any)[
                 statusKey as BookingStatus
               ] ?? {
@@ -214,6 +451,9 @@ const BookingScreen: React.FC = () => {
               const trailerUrl = trailerId
                 ? `/trailer/${trailerId}`
                 : undefined;
+              const isReturnable =
+                statusKey === "active" || statusKey === "in_use";
+              const isReturnLoading = Boolean(returnSubmitting[booking._id]);
 
               return (
                 <li key={booking._id}>
@@ -275,6 +515,43 @@ const BookingScreen: React.FC = () => {
                           Start Pre Screening
                         </button>
                       )}
+                      {isReturnable && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReturnBooking(booking._id);
+                          }}
+                          disabled={isReturnLoading}
+                          className="px-3 py-1.5 rounded-lg bg-[#F97316] text-white text-sm font-medium hover:bg-[#dd6b14] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isReturnLoading ? "Returning..." : "Return Trailer"}
+                        </button>
+                      )}
+                      {isReturnedBooking &&
+                        (alreadyReviewed ? (
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700">
+                            <CheckCircle className="w-4 h-4" />
+                            Review Added
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (booking.trailerId?._id) {
+                                openReviewModal(
+                                  booking._id,
+                                  booking.trailerId._id,
+                                  title,
+                                );
+                              }
+                            }}
+                            className="px-3 py-1.5 rounded-lg border border-[#389131] bg-white text-[#389131] text-sm font-medium hover:bg-[#F5FBF5]"
+                          >
+                            Review
+                          </button>
+                        ))}
                     </div>
                   </article>
                 </li>

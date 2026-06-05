@@ -3,7 +3,9 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
+// @ts-expect-error CSS import
 import "react-toastify/dist/ReactToastify.css";
+// @ts-expect-error CSS import
 import "./index.css";
 import App from "./App.tsx";
 
@@ -34,16 +36,9 @@ setSessionExpiredHandler(() => {
   if (typeof window === "undefined") return;
 
   toast.error("Your session has expired. Please sign in again.");
-  window.sessionStorage.setItem("openLoginAfterLogout", "1");
 
-  // Open login modal without changing the current route
-  try {
-    window.dispatchEvent(new CustomEvent("openAuthModal", { detail: "login" }));
-  } catch (e) {
-    // fallback
-    // @ts-ignore
-    window.__OPEN_AUTH_MODAL__ = "login";
-  }
+  // Redirect to home page
+  window.location.href = "/";
 });
 
 // Allow a new session after successful sign-in

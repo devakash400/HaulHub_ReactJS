@@ -134,63 +134,104 @@
 //     </section>
 //   );
 // };
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import type { TrailerReview } from "../../assets/data/trailers.ts";
+import {
+  fetchTrailerReviews,
+  type ApiTrailerReview,
+} from "../../api/trailersApi.ts";
+import { resolveMediaUrl } from "../../api/media.ts";
 
 type ReviewsSectionProps = {
+  trailerId: string;
   onShowAll?: () => void;
 };
 
-const staticReviews: TrailerReview[] = [
-  {
-    avatar: "",
-    name: "Jason",
-    stars: 5,
-    context: "Excellent condition",
-    text: "Outstanding trailer. The ZSFT flatbed was perfect for hauling my heavy equipment and the dual axle setup made towing very stable even on long highways. The industrial steel frame feels extremely strong and is lasted. Highly recommend this gooseneck trailer in Texas.",
-  },
-  {
-    avatar: "",
-    name: "Anthony",
-    stars: 5,
-    context: "Excellent condition",
-    text: "This trailer exceeded expectations. Strong build quality and very well maintained. I was hauling construction materials, and it handled the weight without any concerns. Trucos.",
-  },
-  {
-    avatar: "",
-    name: "Robert",
-    stars: 5,
-    context: "5 years renting trailers",
-    text: "The Gooseneck trailer had plenty of space for my equipment, and the dual axle setup made towing very stable even on long highways. The industrial steel frame feels extremely strong and is lasted. Highly recommend this gooseneck trailer in Texas.",
-  },
-  {
-    avatar: "",
-    name: "Chris",
-    stars: 5,
-    context: "10 years renting trailers",
-    text: "One of the best trailers. The dual axle setup makes a big difference in stability, especially on longer routes. The ZSFT flatbed is spacious and practical. Everything was clean, functional, and ready to go. Will definitely book again.",
-  },
-  {
-    avatar: "",
-    name: "Mark",
-    stars: 5,
-    context: "5 years renting trailers",
-    text: "Excellent gooseneck trailer. The ZSFT flatbed gave me more than enough room for transporting equipment. Dual axle setup kept everything balanced and secure during towing. The industrial steel frame feels heavy-duty and built for serious work. Very smooth rental experience.",
-  },
-  {
-    avatar: "",
-    name: "Brian",
-    stars: 5,
-    context: "5 years renting trailers",
-    text: "Fantastic experience from start to finish. The ZSFT flatbed was perfect for transport and the dual axle provided excellent balance and control while towing the farm equipment, and the dual axle provided excellent balance and control while towing my farm equipment. Will definitely book again for heavy duty use.",
-  },
-];
-
 export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
+  trailerId,
   onShowAll,
 }) => {
-  let displayReviews = staticReviews.slice(0, 6);
+  const [reviews, setReviews] = useState<TrailerReview[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const apiReviews = await fetchTrailerReviews(trailerId);
+
+        if (!apiReviews || apiReviews.length === 0) {
+          setReviews([]);
+          return;
+        }
+
+        // Transform API reviews to component format
+        const transformedReviews: TrailerReview[] = apiReviews.map(
+          (review: ApiTrailerReview) => ({
+            avatar: review.userId.profilePicture
+              ? resolveMediaUrl(review.userId.profilePicture)
+              : "",
+            name: review.userId.fullName,
+            stars: review.rating,
+            context: new Date(review.createdAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+            }),
+            text: review.message,
+          }),
+        );
+
+        setReviews(transformedReviews);
+      } catch (err) {
+        console.error("Failed to load reviews:", err);
+        setError("Failed to load reviews");
+        setReviews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (trailerId) {
+      loadReviews();
+    }
+  }, [trailerId]);
+
+  // Handle loading state
+  if (loading) {
+    return (
+      <section className="w-[calc(100%+32px)] sm:w-[calc(100%+48px)] lg:w-[calc(100%+64px)] -mx-4 sm:-mx-6 lg:-mx-8 px-10 py-5 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+        <div className="px-10 py-8 text-center text-gray-500">
+          Loading reviews...
+        </div>
+      </section>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <section className="w-[calc(100%+32px)] sm:w-[calc(100%+48px)] lg:w-[calc(100%+64px)] -mx-4 sm:-mx-6 lg:-mx-8 px-10 py-5 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+        <div className="px-10 py-8 text-center text-red-500">{error}</div>
+      </section>
+    );
+  }
+
+  // Handle empty reviews
+  if (reviews.length === 0) {
+    return (
+      <section className="w-[calc(100%+32px)] sm:w-[calc(100%+48px)] lg:w-[calc(100%+64px)] -mx-4 sm:-mx-6 lg:-mx-8 px-10 py-5 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+        <div className="px-10 py-8 text-center text-gray-500">
+          No reviews yet
+        </div>
+      </section>
+    );
+  }
+
+  let displayReviews = reviews.slice(0, 6);
 
   // Fill 6 cards only when there is more than one review
   if (displayReviews.length > 1 && displayReviews.length < 6) {
