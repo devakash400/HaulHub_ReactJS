@@ -5,7 +5,8 @@ import api from "../../api/api.ts";
 import { RootState } from "../../store";
 
 type BookingDetailsLocationState = {
-  renterFullName?: string;
+  renterFirstName?: string;
+  renterLastName?: string;
   renterEmail?: string;
 };
 
@@ -191,15 +192,48 @@ const BookingDetails: React.FC = () => {
       .toUpperCase();
   };
 
+  const formatName = (
+    first?: string,
+    last?: string,
+    full?: string,
+  ): string => {
+    const combined = [first?.trim(), last?.trim()].filter(Boolean).join(" ");
+    return combined || (full?.trim() ?? "");
+  };
+
   const renterName =
-    booking?.user?.fullName ??
-    booking?.userId?.fullName ??
-    booking?.renter?.fullName ??
-    booking?.renterId?.fullName ??
-    booking?.requester?.fullName ??
-    booking?.bookedBy?.fullName ??
-    booking?.renterName ??
-    state?.renterFullName ??
+    formatName(
+      booking?.user?.firstName,
+      booking?.user?.lastName,
+      booking?.user?.fullName,
+    ) ||
+    formatName(
+      booking?.userId?.firstName,
+      booking?.userId?.lastName,
+      booking?.userId?.fullName,
+    ) ||
+    formatName(
+      booking?.renter?.firstName,
+      booking?.renter?.lastName,
+      booking?.renter?.fullName,
+    ) ||
+    formatName(
+      booking?.renterId?.firstName,
+      booking?.renterId?.lastName,
+      booking?.renterId?.fullName,
+    ) ||
+    formatName(
+      booking?.requester?.firstName,
+      booking?.requester?.lastName,
+      booking?.requester?.fullName,
+    ) ||
+    formatName(
+      booking?.bookedBy?.firstName,
+      booking?.bookedBy?.lastName,
+      booking?.bookedBy?.fullName,
+    ) ||
+    booking?.renterName ||
+    formatName(state?.renterFirstName, state?.renterLastName) ||
     "Unknown";
 
   const renterEmail =

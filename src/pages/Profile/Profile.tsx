@@ -231,8 +231,27 @@ const Profile: React.FC = () => {
     }
   };
 
+  const fallbackFirstName =
+    profile?.firstName?.trim() ||
+    profile?.legalName?.trim()?.split(" ").filter(Boolean)[0] ||
+    profile?.fullName?.trim()?.split(" ").filter(Boolean)[0] ||
+    "";
+
+  const fallbackLastName =
+    profile?.lastName?.trim() ||
+    profile?.preferredFirstName?.trim() ||
+    (() => {
+      const full = profile?.fullName?.trim();
+      if (!full) return "";
+      const parts = full.split(/\s+/).filter(Boolean);
+      return parts.length > 1 ? parts.slice(1).join(" ") : "";
+    })();
+
   const displayName =
-    profile?.legalName?.trim() || profile?.fullName?.trim() || "";
+    [fallbackFirstName, fallbackLastName].filter(Boolean).join(" ").trim() ||
+    profile?.legalName?.trim() ||
+    profile?.fullName?.trim() ||
+    "";
 
   const initials = displayName
     .split(" ")
@@ -241,7 +260,7 @@ const Profile: React.FC = () => {
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
 
-  const firstName = displayName.split(" ")[0] || "";
+  const firstName = fallbackFirstName || displayName.split(" ")[0] || "";
   const firstNameInitial = firstName ? firstName.charAt(0).toUpperCase() : "";
 
   const menuItems = [
