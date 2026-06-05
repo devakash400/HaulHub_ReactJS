@@ -112,24 +112,6 @@ const Wishlist: React.FC = () => {
         {/* Wishlist Items */}
         {hasItems ? (
           <>
-            <div className="flex justify-end mb-8">
-              <button
-                onClick={() => dispatch(clearWishlist())}
-                className="
-                  border
-                  border-[#D7D7D7]
-                  px-5
-                  py-2.5
-                  rounded-full
-                  text-sm
-                  hover:bg-white
-                  transition
-                "
-              >
-                Clear all
-              </button>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {validItems.map((item) => (
                 <div

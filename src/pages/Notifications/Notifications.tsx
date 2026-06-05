@@ -14,11 +14,11 @@ type ApiNotification = {
     profilePicture?: string;
   };
   bookingId: string;
-  trailerId: {
+  trailerId?: {
     _id: string;
-    title: string;
-    images: string[];
-  };
+    title?: string;
+    images?: string[];
+  } | null;
   type: string;
   title: string;
   message: string;
@@ -175,7 +175,7 @@ const Notifications: React.FC = () => {
           {!loading &&
             !error &&
             notifications.map((notification) => {
-              const imageUrl = notification.trailerId.images?.[0] || "";
+              const imageUrl = notification.trailerId?.images?.[0] ?? "";
               const createdAt = new Date(
                 notification.createdAt,
               ).toLocaleString();
@@ -187,6 +187,13 @@ const Notifications: React.FC = () => {
                 /booking accepted/i.test(notification.type) ||
                 /booking accepted/i.test(notification.title) ||
                 /booking accepted/i.test(notification.message);
+              const isBookingAcceptedByOwner =
+                /your booking for .* is accepted by/i.test(
+                  notification.title,
+                ) ||
+                /your booking for .* is accepted by/i.test(
+                  notification.message,
+                );
               const isNewRentalRequest =
                 /new rental request/i.test(notification.title) ||
                 /rental request/i.test(notification.title) ||
@@ -195,6 +202,13 @@ const Notifications: React.FC = () => {
               const isRequestProcessing = Boolean(
                 processingRequests[notification.bookingId],
               );
+              const isBookingReturned =
+                /returned/i.test(notification.type) ||
+                /returned/i.test(notification.title) ||
+                /returned/i.test(notification.message);
+              const isBookingUpdated =
+                /your booking for .* was updated/i.test(notification.title) ||
+                /your booking for .* was updated/i.test(notification.message);
 
               return (
                 <div
@@ -206,7 +220,7 @@ const Notifications: React.FC = () => {
                       {imageUrl ? (
                         <img
                           src={imageUrl}
-                          alt={notification.trailerId.title}
+                          alt={notification.trailerId?.title ?? ""}
                           className="h-20 w-28 rounded-2xl object-cover"
                         />
                       ) : (
@@ -260,19 +274,29 @@ const Notifications: React.FC = () => {
                       ) : (
                         <Link
                           to={
-                            isBookingAccepted
-                              ? "/prescreening"
-                              : isRequestSent
+                            isBookingAcceptedByOwner
+                              ? "/booking"
+                              : isBookingReturned || isBookingUpdated
                                 ? "/booking"
-                                : `/booking/${notification.bookingId}`
+                                : isBookingAccepted
+                                  ? "/prescreening"
+                                  : isRequestSent
+                                    ? "/booking"
+                                    : `/booking/${notification.bookingId}`
                           }
                           className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
-                          {isBookingAccepted
-                            ? "Start pre screening"
-                            : isRequestSent
-                              ? "View request status"
-                              : "View details"}
+                          {isBookingAcceptedByOwner
+                            ? "View details"
+                            : isBookingReturned || isBookingUpdated
+                              ? isBookingReturned
+                                ? "View status"
+                                : "View bookings"
+                              : isBookingAccepted
+                                ? "Start pre screening"
+                                : isRequestSent
+                                  ? "View request status"
+                                  : "View details"}
                         </Link>
                       )}
                     </div>

@@ -296,7 +296,7 @@ const BottomBar: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const userType = useSelector((state: RootState) => state.auth.userType);
-
+  //Bottom Bar
   const isOwner =
     (user?.trailor === "Owner" || userType === "Owner") && isAuthenticated;
 
@@ -355,28 +355,30 @@ const BottomBar: React.FC = () => {
                 </li>
               )}
 
-              <li>
-                {isAuthenticated ? (
-                  <Link
-                    to="/booking"
-                    className="no-underline text-black transition-colors hover:text-[#389131]"
-                  >
-                    Your Booked Trailers
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      modalNavigate("/login", {
-                        state: { returnTo: "/booking" },
-                      })
-                    }
-                    className="no-underline text-black transition-colors hover:text-[#389131] text-left"
-                  >
-                    Your Booked Trailers
-                  </button>
-                )}
-              </li>
+              {isRenter && (
+                <li>
+                  {isAuthenticated ? (
+                    <Link
+                      to="/booking"
+                      className="no-underline text-black transition-colors hover:text-[#389131]"
+                    >
+                      Your Booked Trailers
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        modalNavigate("/login", {
+                          state: { returnTo: "/booking" },
+                        })
+                      }
+                      className="no-underline text-black transition-colors hover:text-[#389131] text-left"
+                    >
+                      Your Booked Trailers
+                    </button>
+                  )}
+                </li>
+              )}
 
               <li>
                 <Link
@@ -405,17 +407,6 @@ const BottomBar: React.FC = () => {
             </h3>
 
             <ul className="list-none p-0 m-0 flex flex-col gap-[21px] text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
-              {isOwner && (
-                <li>
-                  <Link
-                    to="/list-trailer"
-                    className="no-underline text-black transition-colors hover:text-[#389131]"
-                  >
-                    List Trailer
-                  </Link>
-                </li>
-              )}
-
               <li>
                 <Link
                   to="/how-it-works"

@@ -17,6 +17,8 @@ export type EmergencyContactPayload = {
 export type UserProfileApiData = {
   _id?: string;
   fullName?: string;
+  firstName?: string;
+  lastName?: string;
   legalName?: string;
   preferredFirstName?: string;
   email?: string;
@@ -40,6 +42,8 @@ export type UserProfileApiData = {
 export type UpdateUserProfilePayload = {
   profilePicture?: string;
   fullName?: string;
+  firstName?: string;
+  lastName?: string;
   legalName?: string;
   preferredFirstName?: string;
   email?: string;
@@ -67,7 +71,18 @@ export const getUserProfile = async (): Promise<UserProfileApiData> => {
 export const updateUserProfile = async (
   payload: UpdateUserProfilePayload
 ): Promise<UserProfileApiData> => {
-  const res = await api.patch<ProfileResponse>("/api/user/profile", payload);
+  const normalizedPayload: UpdateUserProfilePayload = {
+    ...payload,
+    ...(payload.firstName != null ? { legalName: payload.firstName } : {}),
+    ...(payload.lastName != null
+      ? { preferredFirstName: payload.lastName }
+      : {}),
+  };
+
+  const res = await api.patch<ProfileResponse>(
+    '/api/user/profile',
+    normalizedPayload,
+  );
   if (!res.data?.success) {
     throw new Error("Unable to update profile");
   }
