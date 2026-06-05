@@ -393,11 +393,11 @@ const Profile: React.FC = () => {
         shadow-lg
       
       "
+              /// The button is intentinally
             >
               <Camera className="w-5 h-5 text-white" />
             </button>
 
-            {/* Hidden File Input */}
             <input
               ref={fileInputRef}
               type="file"
