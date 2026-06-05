@@ -165,10 +165,26 @@ const residentialFromProfile = (p: UserProfileApiData | null): string => {
   return [addressLine, ...locationParts].filter(isFilled).join(", ");
 };
 
-const legalDisplay = (p: UserProfileApiData | null) => {
+const firstNameDisplay = (p: UserProfileApiData | null) => {
   if (!p) return "";
+  if (isFilled(p.firstName)) return String(p.firstName).trim();
   if (isFilled(p.legalName)) return String(p.legalName).trim();
-  if (isFilled(p.fullName)) return String(p.fullName).trim();
+  if (isFilled(p.fullName)) {
+    const parts = String(p.fullName).trim().split(" ").filter(Boolean);
+    return parts[0] ?? "";
+  }
+  return "";
+};
+
+const lastNameDisplay = (p: UserProfileApiData | null) => {
+  if (!p) return "";
+  if (isFilled(p.lastName)) return String(p.lastName).trim();
+  if (isFilled(p.preferredFirstName))
+    return String(p.preferredFirstName).trim();
+  if (isFilled(p.fullName)) {
+    const parts = String(p.fullName).trim().split(" ").filter(Boolean);
+    return parts.length > 1 ? parts.slice(1).join(" ") : "";
+  }
   return "";
 };
 
@@ -361,9 +377,9 @@ const Profile: React.FC = () => {
   const openEditor = (field: EditField) => {
     if (!profile) return;
     if (field === "legalName") {
-      setDraftLegal(legalDisplay(profile) || "");
+      setDraftLegal(firstNameDisplay(profile) || "");
     } else if (field === "preferredFirstName") {
-      setDraftPreferred(profile.preferredFirstName?.trim() ?? "");
+      setDraftPreferred(lastNameDisplay(profile) || "");
     } else if (field === "phoneNumber") {
       const parsed = parsePhoneNumber(profile.phoneNumber?.trim() ?? "");
       setSelectedCountry(parsed.country);
@@ -408,9 +424,9 @@ const Profile: React.FC = () => {
     }
 
     if (editField === "legalName") {
-      setDraftLegal(legalDisplay(profile) || "");
+      setDraftLegal(firstNameDisplay(profile) || "");
     } else if (editField === "preferredFirstName") {
-      setDraftPreferred(profile.preferredFirstName?.trim() ?? "");
+      setDraftPreferred(lastNameDisplay(profile) || "");
     } else if (editField === "phoneNumber") {
       const parsed = parsePhoneNumber(profile.phoneNumber?.trim() ?? "");
       setSelectedCountry(parsed.country);
@@ -505,11 +521,11 @@ const Profile: React.FC = () => {
     if (editField === "legalName") {
       const v = draftLegal.trim();
       if (!v) {
-        setDraftLegalError("Enter a legal name");
+        setDraftLegalError("Enter a first name");
         return;
       }
       if (v.length < 2 || v.length > 100) {
-        setDraftLegalError("Legal name must be between 2 and 100 characters");
+        setDraftLegalError("First name must be between 2 and 100 characters");
         return;
       }
       if (!nameRegex.test(v)) {
@@ -517,18 +533,18 @@ const Profile: React.FC = () => {
         return;
       }
       setDraftLegalError(null);
-      void persist({ legalName: v });
+      void persist({ firstName: v });
       return;
     }
     if (editField === "preferredFirstName") {
       const pf = draftPreferred.trim();
       if (!pf) {
-        setDraftPreferredError("Enter a preferred first name");
+        setDraftPreferredError("Enter a last name");
         return;
       }
       if (pf.length < 2 || pf.length > 100) {
         setDraftPreferredError(
-          "Preferred first name must be between 2 and 100 characters",
+          "Last name must be between 2 and 100 characters",
         );
         return;
       }
@@ -537,7 +553,7 @@ const Profile: React.FC = () => {
         return;
       }
       setDraftPreferredError(null);
-      void persist({ preferredFirstName: pf });
+      void persist({ lastName: pf });
       return;
     }
     if (editField === "phoneNumber") {
@@ -723,8 +739,8 @@ const Profile: React.FC = () => {
 
   const personalRows = useMemo(() => {
     const p = profile;
-    const legal = legalDisplay(p);
-    const preferred = p?.preferredFirstName?.trim() ?? "";
+    const firstName = firstNameDisplay(p);
+    const lastName = lastNameDisplay(p);
     const phone = p?.phoneNumber?.trim() ?? "";
     const email = p?.email?.trim() ?? reduxUser?.email?.trim() ?? "";
     const residential = residentialFromProfile(p);
@@ -733,17 +749,17 @@ const Profile: React.FC = () => {
     return [
       {
         key: "legalName" as const,
-        label: "Legal name",
-        value: legal,
+        label: "First name",
+        value: firstName,
         placeholder: "Not provided",
-        hasData: isFilled(legal),
+        hasData: isFilled(firstName),
       },
       {
         key: "preferredFirstName" as const,
-        label: "Preferred First Name",
-        value: preferred,
+        label: "Last name",
+        value: lastName,
         placeholder: "Not provided",
-        hasData: isFilled(preferred),
+        hasData: isFilled(lastName),
       },
       {
         key: "phoneNumber" as const,
@@ -954,8 +970,8 @@ const Profile: React.FC = () => {
                                   setGeneralError(null);
                                 }}
                                 className={inputEditClass}
-                                placeholder="Legal name as on ID"
-                                autoComplete="name"
+                                placeholder="First name"
+                                autoComplete="given-name"
                               />
                               {draftLegalError && (
                                 <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">
@@ -975,7 +991,8 @@ const Profile: React.FC = () => {
                                   setGeneralError(null);
                                 }}
                                 className={inputEditClass}
-                                placeholder="Preferred first name"
+                                placeholder="Last name"
+                                autoComplete="family-name"
                               />
                               {draftPreferredError && (
                                 <p className="mt-2 text-[13px] font-medium text-[#E74C3C]">

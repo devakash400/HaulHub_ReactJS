@@ -98,7 +98,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [trailor, setTrailor] = useState("");
+  const [trailor, setTrailor] = useState("Renter");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(
     COUNTRY_OPTIONS[3],
@@ -131,7 +131,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setGender("");
     setEmail("");
     setPassword("");
-    setTrailor("");
+    setTrailor("Renter");
     setPhoneNumber("");
     setSelectedCountry(COUNTRY_OPTIONS[3]);
     setAgreed(false);
@@ -658,7 +658,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         fontSize: "12px",
                         lineHeight: "100%",
                         letterSpacing: "0%",
-                        color: trailor ? "#000000" : "#929191",
+                        color: "#000000",
                       }}
                     >
                       <option value="Renter" style={{ color: "#000000" }}>
