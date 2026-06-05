@@ -517,7 +517,7 @@ const Profile: React.FC = () => {
 
   const handleSaveField = () => {
     if (!profile || !editField) return;
-    const nameRegex = /^[A-Za-z\s]+$/;
+    const nameRegex = /^[A-Za-z]+$/;
     if (editField === "legalName") {
       const v = draftLegal.trim();
       if (!v) {
@@ -529,7 +529,9 @@ const Profile: React.FC = () => {
         return;
       }
       if (!nameRegex.test(v)) {
-        setDraftLegalError("Name must contain only letters and spaces");
+        setDraftLegalError(
+          "First name must contain only letters and no spaces",
+        );
         return;
       }
       setDraftLegalError(null);
@@ -549,7 +551,9 @@ const Profile: React.FC = () => {
         return;
       }
       if (!nameRegex.test(pf)) {
-        setDraftPreferredError("Name must contain only letters and spaces");
+        setDraftPreferredError(
+          "Last name must contain only letters and no spaces",
+        );
         return;
       }
       setDraftPreferredError(null);
