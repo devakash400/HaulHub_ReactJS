@@ -57,7 +57,7 @@ export const PolicySection: React.FC = () => {
               src={icon}
               alt={title}
               className="
-            w-[58px] h-[58px]
+            w-[38px] h-[38px]
             object-contain
             mb-3
           "
@@ -67,7 +67,7 @@ export const PolicySection: React.FC = () => {
               style={{
                 fontFamily: "Lexend",
                 fontWeight: 400,
-                fontSize: "27px",
+                fontSize: "22px",
                 lineHeight: "100%",
                 letterSpacing: "0%",
                 color: "#000000",
@@ -80,7 +80,7 @@ export const PolicySection: React.FC = () => {
               style={{
                 fontFamily: "Lexend",
                 fontWeight: 300,
-                fontSize: "18px",
+                fontSize: "14px",
                 lineHeight: "120%",
                 letterSpacing: "0%",
                 color: "#000000",

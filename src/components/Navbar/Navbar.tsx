@@ -381,14 +381,6 @@ const Navbar: React.FC = () => {
                         </li>
                         <li
                           className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={() =>
-                            handleProtectedDrawerNavigate("/booking")
-                          }
-                        >
-                          <span>Booked Trailor</span>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                           onClick={handleDrawerLinkRowClick}
                         >
                           <Link to="/profile">Profile</Link>
