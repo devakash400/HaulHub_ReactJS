@@ -209,6 +209,13 @@ const Notifications: React.FC = () => {
               const isBookingUpdated =
                 /your booking for .* was updated/i.test(notification.title) ||
                 /your booking for .* was updated/i.test(notification.message);
+              const isPickupPhotosUploaded =
+                /pickup condition photos?/i.test(notification.title) ||
+                /pickup condition photos?/i.test(notification.message) ||
+                /uploaded pickup/i.test(notification.title) ||
+                /uploaded pickup/i.test(notification.message) ||
+                /pickup photos/i.test(notification.title) ||
+                /pickup photos/i.test(notification.message);
 
               return (
                 <div
@@ -271,18 +278,16 @@ const Notifications: React.FC = () => {
                             View details
                           </Link>
                         )
-                      ) : (
+                      ) : isPickupPhotosUploaded ? null : isBookingAccepted ? null : (
                         <Link
                           to={
                             isBookingAcceptedByOwner
                               ? "/booking"
                               : isBookingReturned || isBookingUpdated
                                 ? "/booking"
-                                : isBookingAccepted
-                                  ? "/prescreening"
-                                  : isRequestSent
-                                    ? "/booking"
-                                    : `/booking/${notification.bookingId}`
+                                : isRequestSent
+                                  ? "/booking"
+                                  : `/booking/${notification.bookingId}`
                           }
                           className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
@@ -292,11 +297,9 @@ const Notifications: React.FC = () => {
                               ? isBookingReturned
                                 ? "View status"
                                 : "View bookings"
-                              : isBookingAccepted
-                                ? "Start pre screening"
-                                : isRequestSent
-                                  ? "View request status"
-                                  : "View details"}
+                              : isRequestSent
+                                ? "View request status"
+                                : "View details"}
                         </Link>
                       )}
                     </div>

@@ -74,6 +74,30 @@ const OwnerViewMoreTrucks: React.FC = () => {
           <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
             {allOwnerTrucks.map((item) => {
               const booked = isBookedTrailer(Number(item.id));
+              const rawStatus = item.availabilityStatus?.toLowerCase();
+              const statusText = rawStatus
+                ? rawStatus === "available"
+                  ? "Available"
+                  : rawStatus === "unavailable"
+                    ? "Unavailable"
+                    : rawStatus === "booked"
+                      ? "Booked"
+                      : item.availabilityStatus
+                : booked
+                  ? "Booked"
+                  : "Available";
+              const statusClass = rawStatus
+                ? rawStatus === "available"
+                  ? "bg-[#EBFFE9] text-[#389131]"
+                  : rawStatus === "unavailable"
+                    ? "bg-[#FEE2E2] text-[#B42318]"
+                    : rawStatus === "booked"
+                      ? "bg-[#E5E5E5] text-[#929191]"
+                      : "bg-[#E5E7E5] text-[#929191]"
+                : booked
+                  ? "bg-[#E5E5E5] text-[#929191]"
+                  : "bg-[#EBFFE9] text-[#389131]";
+              const isActuallyBooked = rawStatus === "booked" || booked;
 
               return (
                 <div
@@ -81,7 +105,7 @@ const OwnerViewMoreTrucks: React.FC = () => {
                   className="w-full cursor-pointer"
                   onClick={() =>
                     navigate(`/owner/truck/${item.id}`, {
-                      state: { isBooked: booked },
+                      state: { isBooked: isActuallyBooked },
                     })
                   }
                 >
@@ -182,14 +206,10 @@ const OwnerViewMoreTrucks: React.FC = () => {
                             text-[9px]
                             font-medium
                             leading-[100%]
-                            ${
-                              booked
-                                ? "bg-[#E5E5E5] text-[#929191]"
-                                : "bg-[#EBFFE9] text-[#389131]"
-                            }
+                            ${statusClass}
                           `}
                         >
-                          {booked ? "Booked" : "Available"}
+                          {statusText}
                         </span>
                       </div>
                     </div>
