@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import api from "../../api/api.ts";
@@ -23,6 +23,18 @@ const BookingDetails: React.FC = () => {
   );
   const [processing, setProcessing] = useState(false);
   const [verifiedDocs, setVerifiedDocs] = useState(false);
+  const [drivingLicenseVerified, setDrivingLicenseVerified] = useState(false);
+  const [passportVerified, setPassportVerified] = useState(false);
+  const [conditionFiles, setConditionFiles] = useState<
+    Record<string, File | null>
+  >({ front: null, left: null, right: null, back: null });
+  const fileInputsRef = useRef<Record<string, HTMLInputElement | null>>({});
+  const previewUrlsRef = useRef<Record<string, string | null>>({
+    front: null,
+    left: null,
+    right: null,
+    back: null,
+  });
 
   const isOwnerUser = useSelector(
     (state: RootState) =>
@@ -73,22 +85,91 @@ const BookingDetails: React.FC = () => {
     }
   }, [booking?.status]);
 
-  // Reset verification checkbox when booking changes
+  // Reset verification states when booking changes
   useEffect(() => {
     setVerifiedDocs(false);
+    setDrivingLicenseVerified(false);
+    setPassportVerified(false);
   }, [booking?._id]);
+
+  const uploadConditionPhotos = async () => {
+    const files = Object.entries(conditionFiles).filter(([, f]) => f);
+    if (files.length === 0) return;
+
+    const fd = new FormData();
+    fd.append("phase", "pickup");
+    const labels: string[] = [];
+
+    for (const [label, file] of files) {
+      if (file) {
+        fd.append("photos", file as File);
+        labels.push(label);
+      }
+    }
+
+    fd.append("labels", JSON.stringify(labels));
+
+    const conditionId =
+      booking?.trailerId?._id ||
+      booking?.trailerId ||
+      "6a10a06f18a8497a2a61d99e";
+    const endpoint = `https://api.renthaulhub.com/api/condition-photos/${conditionId}`;
+    await api.post(endpoint, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  };
 
   const handleAction = async (action: "accept" | "reject") => {
     if (!bookingId) return;
+    if (action === "accept") {
+      if (showUploadSection && !areAllPhotosUploaded) {
+        setError(
+          "Please upload all required condition photos before accepting.",
+        );
+        return;
+      }
+      if ((drivingLicenseUrl || passportUrl) && !verifiedDocs) {
+        setError("Please verify all renter documents before accepting.");
+        return;
+      }
+    }
+
     setProcessing(true);
     setError(null);
     try {
+      if (action === "accept") {
+        try {
+          await uploadConditionPhotos();
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error("Condition photos upload error:", err);
+          setError("Photo upload failed. Request cannot be accepted.");
+          return;
+        }
+      }
+
       await api.patch(`/api/bookings/${bookingId}/${action}`);
-      setProcessed(action === "accept" ? "Accepted" : "Rejected");
+      if (action === "accept") {
+        setProcessed("Accepted");
+        setBooking((prev: any) =>
+          prev ? { ...prev, status: "accepted" } : prev,
+        );
+      } else {
+        setProcessed("Rejected");
+        setBooking((prev: any) =>
+          prev ? { ...prev, status: "rejected" } : prev,
+        );
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Booking action error:", err);
-      setError("Unable to perform action. Please try again.");
+      if (action === "accept") {
+        setError(
+          "Unable to accept request after photo upload. Booking remains unchanged.",
+        );
+      } else {
+        setError("Unable to perform action. Please try again.");
+      }
     } finally {
       setProcessing(false);
     }
@@ -192,11 +273,7 @@ const BookingDetails: React.FC = () => {
       .toUpperCase();
   };
 
-  const formatName = (
-    first?: string,
-    last?: string,
-    full?: string,
-  ): string => {
+  const formatName = (first?: string, last?: string, full?: string): string => {
     const combined = [first?.trim(), last?.trim()].filter(Boolean).join(" ");
     return combined || (full?.trim() ?? "");
   };
@@ -239,104 +316,213 @@ const BookingDetails: React.FC = () => {
   const renterEmail =
     booking?.user?.email ?? booking?.userId?.email ?? state?.renterEmail ?? "";
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 flex-shrink-0 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold">
-              {getInitials(renterName)}
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">
-                {renterName}
-              </h2>
-              {renterEmail && (
-                <p className="text-sm text-gray-500">{renterEmail}</p>
-              )}
-              <p className="mt-1 text-sm text-gray-600">
-                Booking ID:{" "}
-                <span className="font-mono text-xs text-gray-700">
-                  {booking?._id ?? bookingId}
-                </span>
-              </p>
-            </div>
-          </div>
+  const isAccepted = String(booking?.status ?? "").toLowerCase() === "accepted";
+  const isRejected = String(booking?.status ?? "").toLowerCase() === "rejected";
+  const showUploadSection = !isAccepted;
+  const areAllPhotosUploaded = Object.values(conditionFiles).every(Boolean);
+  const canAccept =
+    !processing &&
+    (!showUploadSection || areAllPhotosUploaded) &&
+    (!(drivingLicenseUrl || passportUrl) || verifiedDocs);
 
-          <div className="flex items-center gap-3">
-            {processed ? (
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700">
-                {processed}
+  const getDuration = () => {
+    if (!booking?.startDate || !booking?.endDate) return "-";
+    const start = new Date(booking.startDate);
+    const end = new Date(booking.endDate);
+    const days = Math.max(
+      Math.ceil((end.valueOf() - start.valueOf()) / (1000 * 60 * 60 * 24)),
+      1,
+    );
+    return `${days} Day${days === 1 ? "" : "s"}`;
+  };
+
+  const getTrailerType = () =>
+    booking?.trailerType ||
+    booking?.trailer?.type ||
+    booking?.vehicleType ||
+    "Flatbed Trailer";
+
+  const getSummaryValue = (value: any, fallback: string) =>
+    value === undefined || value === null ? fallback : value;
+
+  const onConditionFileChange = (label: string, file?: File | null) => {
+    setConditionFiles((prev) => ({ ...prev, [label]: file ?? null }));
+    try {
+      const prev = previewUrlsRef.current[label];
+      if (prev) URL.revokeObjectURL(prev);
+    } catch (e) {
+      // ignore
+    }
+    if (file) {
+      previewUrlsRef.current[label] = URL.createObjectURL(file);
+    } else {
+      previewUrlsRef.current[label] = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      try {
+        Object.values(previewUrlsRef.current).forEach((u) => {
+          if (u) URL.revokeObjectURL(u);
+        });
+      } catch (e) {
+        // ignore
+      }
+    };
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-slate-100 py-8">
+      <div className="mx-auto w-full max-w-[1260px] px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-14 rounded-full bg-indigo-500 text-white grid place-items-center text-xl font-semibold">
+                {getInitials(renterName)}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">
+                  {booking?.user?.fullName
+                    ? "Booking details"
+                    : "Booking details"}
+                </p>
+                <h1 className="text-2xl font-semibold text-slate-900">
+                  {renterName}
+                </h1>
+                <p className="mt-1 text-sm text-slate-500">
+                  Booking ID:{" "}
+                  <span className="font-mono text-slate-600">
+                    {booking?._id ?? bookingId}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                {processed ?? "Pending"}
               </span>
-            ) : (
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-50 text-yellow-700">
-                Pending
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-sm text-slate-600">
+                {booking?.status ? booking.status : "Awaiting action"}
               </span>
-            )}
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="text-sm text-gray-600"
-            >
-              Close
-            </button>
+              {isAccepted && (
+                <button className="rounded-full bg-emerald-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
+                  Accepted
+                </button>
+              )}
+              {isRejected && (
+                <button className="rounded-full bg-rose-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
+                  Rejected
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {error && (
-          <div className="mt-4 rounded-2xl border border-red-200 bg-[#FEF3F2] p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+        <div className="mt-6 grid grid-cols-1 gap-6">
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Trip details
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Review the trailer booking information.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
+                  {getTrailerType()}
+                </div>
+              </div>
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-2 space-y-4">
-            <div className="rounded-lg border border-gray-100 bg-white p-4">
-              <h3 className="text-sm font-medium text-gray-700">Trip dates</h3>
-              <div className="mt-3 grid grid-cols-2 gap-4">
-                <div className="p-3 rounded-md bg-gray-50">
-                  <p className="text-xs text-gray-500">Start</p>
-                  <p className="text-sm font-medium text-gray-900">
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="rounded-3xl bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Start date</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
                     {booking?.startDate
                       ? new Date(booking.startDate).toLocaleString()
                       : "-"}
                   </p>
                 </div>
-                <div className="p-3 rounded-md bg-gray-50">
-                  <p className="text-xs text-gray-500">End</p>
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="rounded-3xl bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">End date</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
                     {booking?.endDate
                       ? new Date(booking.endDate).toLocaleString()
                       : "-"}
+                  </p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Duration</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {getDuration()}
+                  </p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-4">
+                  <p className="text-xs text-slate-500">Trailer type</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {getTrailerType()}
                   </p>
                 </div>
               </div>
             </div>
 
             {isOwnerUser && (drivingLicenseUrl || passportUrl) && (
-              <div className="rounded-lg border border-gray-100 bg-white p-4">
-                <h3 className="text-sm font-medium text-gray-700">
-                  Renter documents
-                </h3>
-                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-900">
+                      Renter documents
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Verify renter identity documents before accepting.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {drivingLicenseUrl && (
-                    <div className="p-3 rounded-md bg-gray-50 flex flex-col justify-between h-56">
-                      <p className="text-xs text-gray-500">Driving license</p>
-                      <div className="mt-2 flex-1 flex items-center justify-center w-full">
+                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-slate-500">
+                            Driving license
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-slate-900">
+                            {drivingLicenseVerified
+                              ? "Verified"
+                              : "Awaiting verification"}
+                          </p>
+                        </div>
+                        {drivingLicenseVerified ? (
+                          <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                            Verified
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setDrivingLicenseVerified(true)}
+                            className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-800"
+                          >
+                            Verify
+                          </button>
+                        )}
+                      </div>
+                      <div className="mt-4 flex h-44 items-center justify-center overflow-hidden rounded-3xl bg-white">
                         <img
                           src={drivingLicenseUrl}
-                          alt="dl"
-                          className="max-h-36 w-full object-contain rounded"
+                          alt="driving license"
+                          className="max-h-full object-contain"
                         />
                       </div>
-                      <div className="mt-3 flex gap-3 justify-center">
+                      <div className="mt-4 flex items-center justify-between gap-3 text-sm text-indigo-600">
                         <a
                           href={drivingLicenseUrl}
                           target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-indigo-600 hover:underline"
+                          rel="noreferrer"
+                          className="hover:underline"
                         >
-                          Open
+                          View
                         </a>
                         <button
                           onClick={() =>
@@ -345,38 +531,59 @@ const BookingDetails: React.FC = () => {
                               drivingLicenseFileName,
                             )
                           }
-                          className="text-sm text-indigo-600 hover:underline"
+                          className="hover:underline"
                         >
                           Download
                         </button>
                       </div>
                     </div>
                   )}
-
                   {passportUrl && (
-                    <div className="p-3 rounded-md bg-gray-50 flex flex-col justify-between h-56">
-                      <p className="text-xs text-gray-500">Passport</p>
-                      <div className="mt-2 flex-1 flex items-center justify-center w-full">
+                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-slate-500">Passport</p>
+                          <p className="mt-1 text-sm font-semibold text-slate-900">
+                            {passportVerified
+                              ? "Verified"
+                              : "Awaiting verification"}
+                          </p>
+                        </div>
+                        {passportVerified ? (
+                          <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                            Verified
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setPassportVerified(true)}
+                            className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-800"
+                          >
+                            Verify
+                          </button>
+                        )}
+                      </div>
+                      <div className="mt-4 flex h-44 items-center justify-center overflow-hidden rounded-3xl bg-white">
                         <img
                           src={passportUrl}
                           alt="passport"
-                          className="max-h-36 w-full object-contain rounded"
+                          className="max-h-full object-contain"
                         />
                       </div>
-                      <div className="mt-3 flex gap-3 justify-center">
+                      <div className="mt-4 flex items-center justify-between gap-3 text-sm text-indigo-600">
                         <a
                           href={passportUrl}
                           target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-indigo-600 hover:underline"
+                          rel="noreferrer"
+                          className="hover:underline"
                         >
-                          Open
+                          View
                         </a>
                         <button
                           onClick={() =>
                             void downloadFile(passportUrl, passportFileName)
                           }
-                          className="text-sm text-indigo-600 hover:underline"
+                          className="hover:underline"
                         >
                           Download
                         </button>
@@ -386,68 +593,160 @@ const BookingDetails: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {showUploadSection && (
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-900">
+                      Trailer condition before trip
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Upload condition photos before pickup.
+                    </p>
+                  </div>
+                  <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                    Front / Left / Right / Back
+                  </span>
+                </div>
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                  <div className="col-span-full rounded-3xl bg-amber-50 p-4 text-sm text-amber-900">
+                    All four condition photos are required before accepting this
+                    booking.
+                  </div>
+                  {[
+                    { key: "front", label: "Front View" },
+                    { key: "left", label: "Left View" },
+                    { key: "right", label: "Right View" },
+                    { key: "back", label: "Back View" },
+                  ].map((it) => {
+                    const file = conditionFiles[it.key];
+                    const previewSrc = previewUrlsRef.current[it.key] ?? null;
+                    return (
+                      <div
+                        key={it.key}
+                        className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-center"
+                      >
+                        <div className="text-sm font-semibold text-slate-900">
+                          {it.label}
+                        </div>
+                        <div className="mt-4 flex h-40 items-center justify-center rounded-3xl bg-white border border-dashed border-slate-200 overflow-hidden">
+                          {previewSrc ? (
+                            <img
+                              src={previewSrc}
+                              alt={`${it.label} preview`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="px-3 text-sm text-slate-400">
+                              Upload Photo
+                              <br />
+                              <span className="text-xs text-slate-400">
+                                PNG, JPG up to 5MB
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-4 flex flex-col gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              fileInputsRef.current[it.key]?.click()
+                            }
+                            className="inline-flex h-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                          >
+                            {file ? "Change" : "Upload"}
+                          </button>
+                          {file && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                onConditionFileChange(it.key, null)
+                              }
+                              className="text-sm text-rose-600 hover:underline"
+                            >
+                              Remove
+                            </button>
+                          )}
+                          <input
+                            ref={(el) => {
+                              fileInputsRef.current[it.key] = el;
+                            }}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) =>
+                              onConditionFileChange(
+                                it.key,
+                                e.target.files?.[0] ?? null,
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
-          <aside className="space-y-4">
-            <div className="rounded-lg border border-gray-100 bg-white p-4">
-              <h4 className="text-sm font-medium text-gray-700">Actions</h4>
-
-              {processed ? (
-                <div className="mt-3 text-sm text-gray-700">
-                  You {processed === "Accepted" ? "accepted" : "rejected"} this
-                  request.
-                </div>
-              ) : (
-                <div className="mt-3 space-y-3">
-                  {(drivingLicenseUrl || passportUrl) && (
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={verifiedDocs}
-                        onChange={(e) => setVerifiedDocs(e.target.checked)}
-                        className="h-4 w-4"
-                      />
-                      <span className="text-sm text-gray-700">
-                        I have verified the renter's documents
-                      </span>
-                    </label>
+          <aside className="space-y-6">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-col gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Booking actions
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Review renter details and take action.
+                  </p>
+                  {error && (
+                    <div className="mt-3 rounded-2xl bg-rose-50 p-3 text-sm text-rose-700">
+                      {error}
+                    </div>
                   )}
+                </div>
 
-                  <div className="flex flex-col gap-2">
+                {isAccepted ? (
+                  <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700">
+                    Accepted
+                  </div>
+                ) : isRejected ? (
+                  <div className="rounded-2xl bg-rose-50 px-4 py-3 text-center text-sm font-semibold text-rose-700">
+                    Rejected
+                  </div>
+                ) : (
+                  <>
                     <button
-                      disabled={
-                        processing ||
-                        (Boolean(drivingLicenseUrl || passportUrl) &&
-                          !verifiedDocs)
-                      }
+                      disabled={!canAccept}
                       onClick={() => void handleAction("accept")}
-                      className={`flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white ${processing ? "bg-green-300 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
+                      className={`w-full max-w-[280px] mx-auto rounded-2xl px-4 py-3 text-sm font-semibold text-white transition ${!canAccept ? "bg-emerald-300 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700"}`}
                     >
                       {processing ? "Processing..." : "Accept request"}
                     </button>
-
                     <button
                       disabled={processing}
                       onClick={() => void handleAction("reject")}
-                      className={`flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold ${processing ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "border border-red-300 text-red-600 hover:bg-red-50"}`}
+                      className={`w-full max-w-[280px] mx-auto rounded-2xl border border-rose-300 px-4 py-3 text-sm font-semibold transition ${processing ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "text-rose-600 hover:bg-rose-50"}`}
                     >
                       {processing ? "Processing..." : "Reject request"}
                     </button>
-                  </div>
-                </div>
-              )}
-            </div>
 
-            <div className="rounded-lg border border-gray-100 bg-white p-4 text-sm text-gray-600">
-              <p>
-                <span className="font-medium text-gray-800">Requested on:</span>{" "}
-                {booking?.createdAt
-                  ? new Date(booking.createdAt).toLocaleString()
-                  : "-"}
-              </p>
-              <p className="mt-2">
-                Contact the renter via email to discuss details.
-              </p>
+                    {(drivingLicenseUrl || passportUrl) && (
+                      <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={verifiedDocs}
+                          onChange={(e) => setVerifiedDocs(e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        />
+                        <span>I have verified all renter documents</span>
+                      </label>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </aside>
         </div>

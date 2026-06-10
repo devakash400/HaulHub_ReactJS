@@ -362,6 +362,25 @@ const Home: React.FC = () => {
 
                 {visibleOwnerTrailers.map((item) => {
                   const booked = isBookedTrailer(Number(item.id));
+                  const rawStatus = item.availabilityStatus?.toLowerCase();
+                  const statusText = rawStatus
+                    ? rawStatus === "available"
+                      ? "Available"
+                      : rawStatus === "unavailable"
+                        ? "Unavailable"
+                        : item.availabilityStatus
+                    : booked
+                      ? "Booked"
+                      : "Available";
+                  const statusClass = rawStatus
+                    ? rawStatus === "available"
+                      ? "bg-[#EBFFE9] text-[#389131]"
+                      : rawStatus === "unavailable"
+                        ? "bg-[#FEE2E2] text-[#B42318]"
+                        : "bg-[#E5E7E5] text-[#929191]"
+                    : booked
+                      ? "bg-[#E5E5E5] text-[#929191]"
+                      : "bg-[#EBFFE9] text-[#389131]";
 
                   return (
                     <div
@@ -461,7 +480,6 @@ const Home: React.FC = () => {
                             {item.priceLabel}
                           </p>
 
-                          {/* Status */}
                           <div className="mt-2">
                             <span
                               className={`
@@ -475,14 +493,10 @@ const Home: React.FC = () => {
                 text-[9px]
                 font-medium
                 leading-[100%]
-                ${
-                  booked
-                    ? "bg-[#E5E5E5] text-[#929191]"
-                    : "bg-[#EBFFE9] text-[#389131]"
-                }
+                ${statusClass}
               `}
                             >
-                              {booked ? "Booked" : "Available"}
+                              {statusText}
                             </span>
                           </div>
                         </div>

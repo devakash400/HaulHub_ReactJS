@@ -23,6 +23,7 @@ export type ApiTrailer = {
   profilePicture?: string;
   takePhoto?: string;
   isFeatured?: boolean;
+  availabilityStatus?: string;
 };
 
 type TrailersListResponse = {
@@ -96,6 +97,7 @@ export function apiTrailerToListItem(t: ApiTrailer): TrailerListItem {
     modelLabel: `Model: ${modelName}`,
     priceLabel: formatPricePerDay(t.pricePerDay),
     badgeLabel: t.isFeatured ? "Featured" : undefined,
+    availabilityStatus: t.availabilityStatus?.toLowerCase(),
   };
 }
 
@@ -159,6 +161,7 @@ export type ApiTrailerDetail = ApiTrailer & {
   securityDepositAmount?: number;
   usageRestrictions?: string;
   availability?: { startDate?: string; endDate?: string }[];
+  isUnavailable?: boolean;
 };
 
 type TrailerDetailResponse = {
@@ -383,6 +386,42 @@ export async function updateTrailer(
   }
 }
 
+export async function setTrailerUnavailability(
+  id: string,
+  isUnavailable: boolean,
+): Promise<boolean> {
+  if (!id?.trim()) {
+    console.error("setTrailerUnavailability: id is required");
+    return false;
+  }
+
+  try {
+    const res = await api.patch(
+      `/api/trailers/${encodeURIComponent(id)}/unavailability`,
+      { isUnavailable },
+    );
+    const body = res.data;
+    if (body?.success === true) {
+      return true;
+    }
+    if (body?.success === false) {
+      console.error(
+        "Server returned success: false",
+        body.message || body.error,
+      );
+      return false;
+    }
+    return res.status === 200 || res.status === 204;
+  } catch (error: any) {
+    console.error("Error setting trailer unavailability:", {
+      message: error?.message,
+      status: error?.response?.status,
+      data: error?.response?.data,
+    });
+    return false;
+  }
+}
+
 export function mapApiTrailerDetailToTrailerDetail(
   data: ApiTrailerDetail,
 ): TrailerDetail {
@@ -418,6 +457,12 @@ export function mapApiTrailerDetailToTrailerDetail(
     images: galleryImageUrls(data),
     location,
     specs,
+    isAvailable:
+      data.availabilityStatus?.toLowerCase() === "available"
+        ? true
+        : data.availabilityStatus?.toLowerCase() === "unavailable"
+          ? false
+          : true,
     rating,
     reviewCount: totalReviews,
     ratingDescription,

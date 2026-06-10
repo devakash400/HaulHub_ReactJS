@@ -44,6 +44,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import { RootState } from "./store/index.ts";
 import { updateUser } from "./store/authSlice.ts";
 import { getUserProfile } from "./api/userApi.ts";
+import SearchResults from "./pages/SearchResults/SearchResults.tsx";
 
 type LocationState = {
   backgroundLocation?: Location;
@@ -131,6 +132,7 @@ const App: React.FC = () => {
           <Route path="/request-to-book" element={<RequestToBookPage />} />
           <Route path="/liability-agreement" element={<LiabilityAgreement />} />
           <Route path="/prescreening" element={<PreScreening />} />
+          <Route path="/search" element={<SearchResults />} />
           <Route path="/verify-identity" element={<VerifyIdentity />} />
           <Route path="/booking-sent" element={<BookingSent />} />
           <Route path="/payment-receipt" element={<PaymentReceipt />} />
