@@ -16,7 +16,10 @@ export type BookingStatus =
   | "in_use"
   | "overdue"
   | "return"
-  | "returned";
+  | "returned"
+  | "pre_screening"
+  | "pre-screening"
+  | "owner_photos_uploaded";
 export type FilterStatus =
   | "all"
   | "pending"
@@ -451,6 +454,19 @@ const BookingScreen: React.FC = () => {
               const trailerUrl = trailerId
                 ? `/trailer/${trailerId}`
                 : undefined;
+              const bookingStatusKey = String(statusKey).toLowerCase();
+              const showPreScreeningAction = [
+                "accepted",
+                "owner_photos_uploaded",
+                "pre_screening",
+                "pre-screening",
+              ].includes(bookingStatusKey);
+              const preScreeningButtonLabel = [
+                "pre_screening",
+                "pre-screening",
+              ].includes(bookingStatusKey)
+                ? "Pay Now"
+                : "Start Pre Screening";
               const isReturnable =
                 statusKey === "active" || statusKey === "in_use";
               const isReturnLoading = Boolean(returnSubmitting[booking._id]);
@@ -493,7 +509,7 @@ const BookingScreen: React.FC = () => {
                       >
                         {status.label}
                       </span>
-                      {String(booking.status).toLowerCase() === "accepted" && (
+                      {showPreScreeningAction && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -512,7 +528,7 @@ const BookingScreen: React.FC = () => {
                           }}
                           className="px-3 py-1.5 rounded-lg bg-[#389131] text-white text-sm font-medium hover:bg-[#2e6f26]"
                         >
-                          Start Pre Screening
+                          {preScreeningButtonLabel}
                         </button>
                       )}
                       {isReturnable && (

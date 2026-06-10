@@ -9,6 +9,7 @@ import {
 import {
   fetchTrailerById,
   mapApiTrailerDetailToTrailerDetail,
+  setTrailerUnavailability,
   updateTrailer,
 } from "../../api/trailersApi.ts";
 import { toast } from "react-toastify";
@@ -112,6 +113,9 @@ const OwnerTruckDescription: React.FC = () => {
 
         if (resolvedTrailer) {
           setTrailer(resolvedTrailer);
+          setIsAvailable(
+            isTruckBooked ? false : (resolvedTrailer.isAvailable ?? true),
+          );
           const initialDetails = {
             title: resolvedTrailer.title,
             location: resolvedTrailer.location,
@@ -323,10 +327,18 @@ const OwnerTruckDescription: React.FC = () => {
                   <p className="text-xs text-gray-500">Status</p>
                   <p
                     className={`text-base font-semibold ${
-                      isAvailable ? "text-[#2F7A29]" : "text-[#B42318]"
+                      isTruckBooked
+                        ? "text-[#6B7280]"
+                        : isAvailable
+                          ? "text-[#2F7A29]"
+                          : "text-[#B42318]"
                     }`}
                   >
-                    {isAvailable ? "Available" : "Unavailable"}
+                    {isTruckBooked
+                      ? "Booked"
+                      : isAvailable
+                        ? "Available"
+                        : "Unavailable"}
                   </p>
                 </div>
               </div>
@@ -334,14 +346,41 @@ const OwnerTruckDescription: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     if (isTruckBooked) {
                       toast.info(
                         "Availability cannot be changed while truck is booked.",
                       );
                       return;
                     }
-                    setIsAvailable((prev) => !prev);
+                    if (!id?.trim()) {
+                      toast.error("Invalid trailer ID.");
+                      return;
+                    }
+
+                    const nextIsAvailable = !isAvailable;
+                    const newIsUnavailable = !nextIsAvailable;
+                    const success = await setTrailerUnavailability(
+                      id,
+                      newIsUnavailable,
+                    );
+
+                    if (!success) {
+                      toast.error(
+                        "Unable to update trailer availability. Please try again.",
+                      );
+                      return;
+                    }
+
+                    setIsAvailable(nextIsAvailable);
+                    setTrailer((prev) =>
+                      prev ? { ...prev, isAvailable: nextIsAvailable } : prev,
+                    );
+                    toast.success(
+                      newIsUnavailable
+                        ? "Trailer marked unavailable."
+                        : "Trailer marked available.",
+                    );
                   }}
                   className={`rounded-lg px-4 py-2 text-sm font-semibold text-white ${
                     isTruckBooked

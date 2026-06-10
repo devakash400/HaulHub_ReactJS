@@ -5,8 +5,11 @@ import Navbar from "../../../src/components/Navbar/Navbar.tsx";
 import BottomBar from "../../components/BottomBar/BottomBar.tsx";
 import {
   completePreScreening,
+  getConditionPhotos,
   getPreScreeningStatus,
+  ConditionPhotoImage,
 } from "../../../src/api/preScreeningApi.ts";
+import { uploadSignature } from "../../../src/api/uploadApi.ts";
 
 const stepDefinitions = [
   { label: "Pre-Screening" },
@@ -99,78 +102,37 @@ const PreScreening: React.FC = () => {
   );
   const [liabilityAccepted, setLiabilityAccepted] = useState(false);
   const [photosConfirmed, setPhotosConfirmed] = useState(false);
-  const [canvasReady, setCanvasReady] = useState(false);
-  const [signatureImage, setSignatureImage] = useState<string | null>(null);
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
   const [hasSignature, setHasSignature] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const lastPoint = useRef<{ x: number; y: number } | null>(null);
-  const drawingRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = "#0f172a";
-    ctx.lineWidth = 2;
-    setCanvasReady(true);
-  }, []);
-
-  const getPointerPoint = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  };
-
-  const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    drawingRef.current = true;
-    lastPoint.current = getPointerPoint(e);
-    canvas.setPointerCapture(e.pointerId);
-  };
-
-  const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!drawingRef.current) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const point = getPointerPoint(e);
-    const last = lastPoint.current;
-    if (!last) {
-      lastPoint.current = point;
-      return;
+  const handleSignatureFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setSignatureFile(file);
+      setHasSignature(true);
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setSignaturePreview(previewUrl);
+      console.log("✅ Signature file selected:", file.name);
+    } else {
+      setApiError("Please select a valid image file for your signature.");
     }
-    ctx.beginPath();
-    ctx.moveTo(last.x, last.y);
-    ctx.lineTo(point.x, point.y);
-    ctx.stroke();
-    lastPoint.current = point;
-    setHasSignature(true);
-  };
-
-  const endDrawing = () => {
-    drawingRef.current = false;
-    lastPoint.current = null;
   };
 
   const clearSignature = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setSignatureFile(null);
     setHasSignature(false);
-    setSignatureImage(null);
+    if (signaturePreview) {
+      URL.revokeObjectURL(signaturePreview);
+    }
+    setSignaturePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleCheckboxChange = (index: number) => {
@@ -184,6 +146,14 @@ const PreScreening: React.FC = () => {
   const [preScreeningSubmitting, setPreScreeningSubmitting] = useState(false);
   const [step0Error, setStep0Error] = useState<string>("");
   const [apiError, setApiError] = useState<string>("");
+  const [pickupPhotos, setPickupPhotos] = useState<Record<string, string>>({
+    front: "",
+    left: "",
+    right: "",
+    back: "",
+  });
+  const [photoError, setPhotoError] = useState<string>("");
+  const [photoLoading, setPhotoLoading] = useState(false);
 
   useEffect(() => {
     const fetchPreScreeningStatus = async () => {
@@ -193,13 +163,27 @@ const PreScreening: React.FC = () => {
       try {
         const response = await getPreScreeningStatus(id);
         if (response?.success && response.data) {
-          const { identityVerified, licenseVerified, agreementConfirmed } =
-            response.data;
+          const {
+            identityVerified,
+            licenseVerified,
+            agreementConfirmed,
+            agreementSignature,
+          } = response.data;
 
           if (identityVerified && licenseVerified && agreementConfirmed) {
             setCheckedItems(checklistItems.map(() => true));
             setLiabilityAccepted(true);
             setStep0Error("");
+
+            // Load signature if it exists
+            if (agreementSignature) {
+              setSignaturePreview(agreementSignature);
+              setHasSignature(true);
+              console.log(
+                "✅ Signature loaded from pre-screening:",
+                agreementSignature,
+              );
+            }
           } else {
             setCheckedItems((prev) => [
               identityVerified,
@@ -220,29 +204,132 @@ const PreScreening: React.FC = () => {
     void fetchPreScreeningStatus();
   }, [bookingId, state.bookingId]);
 
+  useEffect(() => {
+    if (stepIndex !== 2) return;
+    const fetchPickupPhotos = async () => {
+      const id = state.bookingId ?? bookingId;
+      if (!id) return;
+
+      setPhotoError("");
+      setPhotoLoading(true);
+      try {
+        const response = await getConditionPhotos(id);
+        const pickupRecords = response.data.filter(
+          (record) => record.phase === "pickup",
+        );
+
+        if (!pickupRecords.length) {
+          setPhotoError(
+            "No pickup condition photos were found for this booking.",
+          );
+          setPickupPhotos({ front: "", left: "", right: "", back: "" });
+          return;
+        }
+
+        const latestRecord = pickupRecords.reduce((latest, record) =>
+          new Date(record.updatedAt).valueOf() >
+          new Date(latest.updatedAt).valueOf()
+            ? record
+            : latest,
+        );
+
+        const grouped = latestRecord.images.reduce(
+          (acc: Record<string, ConditionPhotoImage>, image) => {
+            const existing = acc[image.label];
+            if (
+              !existing ||
+              new Date(image.uploadedAt).valueOf() >
+                new Date(existing.uploadedAt).valueOf()
+            ) {
+              acc[image.label] = image;
+            }
+            return acc;
+          },
+          {},
+        );
+
+        setPickupPhotos({
+          front: grouped.front?.url ?? "",
+          left: grouped.left?.url ?? "",
+          right: grouped.right?.url ?? "",
+          back: grouped.back?.url ?? "",
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to load pickup photos:", err);
+        setPhotoError(
+          "Unable to load pickup photos. Please refresh the page and try again.",
+        );
+      } finally {
+        setPhotoLoading(false);
+      }
+    };
+
+    void fetchPickupPhotos();
+  }, [bookingId, state.bookingId, stepIndex]);
+
   const submitPreScreening = async () => {
     const id = state.bookingId ?? bookingId;
-    const payload = {
+    let signatureUrl = "";
+
+    // Upload signature if agreement is confirmed and we have a file to upload
+    // (If signature was loaded from API, we already have the URL)
+    if (liabilityAccepted && signatureFile) {
+      try {
+        console.log("📸 Uploading signature file...", signatureFile.name);
+        const uploadResponse = await uploadSignature(signatureFile);
+
+        if (uploadResponse.success && uploadResponse.data?.url) {
+          signatureUrl = uploadResponse.data.url;
+          console.log("✅ Signature uploaded successfully:", signatureUrl);
+        } else {
+          throw new Error("Signature upload failed");
+        }
+      } catch (uploadErr) {
+        // eslint-disable-next-line no-console
+        console.error("❌ Signature upload error:", uploadErr);
+        setApiError("Failed to upload signature. Please try again.");
+        setPreScreeningSubmitting(false);
+        return false;
+      }
+    } else if (liabilityAccepted && signaturePreview && !signatureFile) {
+      // Signature was already uploaded in a previous session
+      signatureUrl = signaturePreview;
+      console.log("✅ Using previously uploaded signature:", signatureUrl);
+    }
+
+    const payload: {
+      identityVerified: boolean;
+      licenseVerified: boolean;
+      agreementConfirmed: boolean;
+      agreementSignature?: string;
+    } = {
       identityVerified: Boolean(checkedItems[0]),
       licenseVerified: Boolean(checkedItems[1]),
       agreementConfirmed: Boolean(liabilityAccepted),
     };
 
+    if (signatureUrl) {
+      payload.agreementSignature = signatureUrl;
+    }
+
     try {
       setPreScreeningSubmitting(true);
       setApiError("");
-      console.log("📤 Calling API with:", {
+      console.log("📤 Calling pre-screening complete API with:", {
         endpoint: `/api/pre-screening/${id}/complete`,
         payload,
       });
       const response = await completePreScreening(id, payload);
-      console.log("✅ API Response:", response);
+      console.log("✅ Pre-screening API Response:", response);
+      return true;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("❌ PreScreening submission error:", err);
       setApiError(
         "Error submitting pre-screening. Please check your internet connection and try again.",
       );
+      return false;
     } finally {
       setPreScreeningSubmitting(false);
     }
@@ -262,17 +349,7 @@ const PreScreening: React.FC = () => {
       return;
     }
     if (stepIndex === 1 && liabilityAccepted && hasSignature) {
-      // submit pre-screening to backend before moving to photos
-      console.log("Submitting pre-screening with payload:", {
-        identityVerified: Boolean(checkedItems[0]),
-        licenseVerified: Boolean(checkedItems[1]),
-        agreementConfirmed: Boolean(liabilityAccepted),
-        bookingId: state.bookingId ?? bookingId,
-      });
-      await submitPreScreening();
-      if (!apiError) {
-        setStepIndex(2);
-      }
+      setStepIndex(2);
       return;
     }
     if (stepIndex === 1) {
@@ -283,7 +360,21 @@ const PreScreening: React.FC = () => {
       return;
     }
     if (stepIndex === 2 && photosConfirmed) {
-      setStepIndex(3);
+      console.log("📋 Step 2: Submitting pre-screening...", {
+        identityVerified: Boolean(checkedItems[0]),
+        licenseVerified: Boolean(checkedItems[1]),
+        agreementConfirmed: Boolean(liabilityAccepted),
+        bookingId: state.bookingId ?? bookingId,
+      });
+      const success = await submitPreScreening();
+      if (success) {
+        console.log(
+          "✅ Pre-screening submitted successfully, advancing to step 3",
+        );
+        setStepIndex(3);
+      } else {
+        console.error("❌ Pre-screening submission failed, staying on step 2");
+      }
       return;
     }
     if (stepIndex === 3) {
@@ -495,28 +586,57 @@ const PreScreening: React.FC = () => {
                               Signature
                             </p>
                             <p className="text-sm text-slate-500">
-                              Draw your signature below.
+                              Upload your signature image.
                             </p>
                           </div>
                           <button
                             type="button"
                             onClick={clearSignature}
                             className="rounded-full border border-[#D9D9D9] px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                            disabled={!hasSignature}
                           >
                             Clear
                           </button>
                         </div>
 
-                        <div className="h-[200px] rounded-[24px] border border-[#D9D9D9] bg-[#F8F8F8] overflow-hidden">
-                          <canvas
-                            ref={canvasRef}
-                            className="w-full h-full"
-                            onPointerDown={startDrawing}
-                            onPointerMove={draw}
-                            onPointerUp={endDrawing}
-                            onPointerCancel={endDrawing}
-                            onPointerLeave={endDrawing}
+                        <div className="rounded-[24px] border-2 border-dashed border-[#D9D9D9] bg-[#F8F8F8] p-6">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleSignatureFileChange}
+                            className="hidden"
                           />
+                          {!hasSignature ? (
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="w-full text-center py-8 hover:bg-slate-100 rounded-[20px] transition"
+                            >
+                              <p className="text-sm font-semibold text-slate-900">
+                                📁 Click to upload signature
+                              </p>
+                              <p className="text-xs text-slate-600 mt-2">
+                                or drag and drop (PNG, JPG, etc.)
+                              </p>
+                            </button>
+                          ) : (
+                            <div className="flex flex-col items-center gap-3">
+                              <img
+                                src={signaturePreview || ""}
+                                alt="Signature preview"
+                                className="max-h-[150px] max-w-[300px] object-contain rounded-[12px] border border-slate-300"
+                              />
+                              <div className="text-center">
+                                <p className="text-sm font-semibold text-[#1F8A3D]">
+                                  ✓ Signature uploaded
+                                </p>
+                                <p className="text-xs text-slate-600 mt-1">
+                                  {signatureFile?.name}
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <label className="inline-flex items-center gap-3 rounded-2xl border border-[#D9D9D9] bg-white px-4 py-3">
@@ -542,25 +662,43 @@ const PreScreening: React.FC = () => {
                     <p className="text-sm text-slate-600">
                       Please review the trailer condition photos before payment.
                     </p>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {photoItems.map((photo) => (
-                        <div
-                          key={photo.title}
-                          className="rounded-3xl overflow-hidden border border-[#D9D9D9] bg-white"
-                        >
-                          <img
-                            src={photo.src}
-                            alt={photo.title}
-                            className="h-48 w-full object-cover"
-                          />
-                          <div className="p-4">
-                            <p className="text-sm font-semibold text-slate-900">
-                              {photo.title}
-                            </p>
+                    {photoLoading ? (
+                      <div className="rounded-3xl border border-[#D9D9D9] bg-white p-8 text-center text-sm text-slate-600">
+                        Loading pickup photos...
+                      </div>
+                    ) : photoError ? (
+                      <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+                        {photoError}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {[
+                          { key: "front", title: "Front View" },
+                          { key: "left", title: "Left Side" },
+                          { key: "right", title: "Right Side" },
+                          { key: "back", title: "Back View" },
+                        ].map((item) => (
+                          <div
+                            key={item.key}
+                            className="rounded-3xl overflow-hidden border border-[#D9D9D9] bg-white"
+                          >
+                            <img
+                              src={
+                                pickupPhotos[item.key] ||
+                                "https://via.placeholder.com/600x360?text=Missing+Photo"
+                              }
+                              alt={item.title}
+                              className="h-48 w-full object-cover"
+                            />
+                            <div className="p-4">
+                              <p className="text-sm font-semibold text-slate-900">
+                                {item.title}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
 
                     <label className="inline-flex items-start gap-3 rounded-2xl border border-[#D9D9D9] bg-white px-4 py-4">
                       <input

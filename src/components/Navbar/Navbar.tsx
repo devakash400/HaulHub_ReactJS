@@ -74,6 +74,15 @@ const Navbar: React.FC = () => {
     location;
   const isTrailerScreen = backgroundLocation.pathname.startsWith("/trailer/");
 
+  const [navSearch, setNavSearch] = useState("");
+
+  const submitSearch = (value?: string) => {
+    const q = (value ?? navSearch).trim();
+    if (!q) return;
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+    setIsDrawerOpen(false);
+  };
+
   useEffect(() => setIsDrawerOpen(false), [backgroundLocation.pathname]);
 
   useEffect(() => {
@@ -193,14 +202,24 @@ const Navbar: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Search here..."
+                  value={navSearch}
+                  onChange={(e) => setNavSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") submitSearch();
+                  }}
                   className={`min-w-0 flex-1 border-none bg-transparent font-[Lexend] font-normal text-[23px] leading-[100%] tracking-normal text-[#929191] placeholder:text-[#929191] outline-none transition-[font-size] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "text-[18px]" : "text-[23px]"}`}
                 />
-                <div className="flex shrink-0 items-center justify-center rounded-full bg-[#389131] h-[51px] w-[51px]">
+                <button
+                  type="button"
+                  onClick={() => submitSearch()}
+                  className="flex shrink-0 items-center justify-center rounded-full bg-[#389131] h-[51px] w-[51px]"
+                  aria-label="Search"
+                >
                   <Search
                     className="text-white h-[23.3px] w-[23.3px]"
                     aria-hidden
                   />
-                </div>
+                </button>
               </div>
             </div>
           )}
@@ -268,213 +287,439 @@ const Navbar: React.FC = () => {
             )}
 
             {isDrawerOpen && (
-              <div
-                className="absolute right-0 
-                top-full z-[60] 
-                mt-2 rounded-lg 
-                bg-white py-2 
-                
-                max-h-[calc(100vh-140px)] overflow-y-auto"
-                style={{
-                  width: "161px",
-                  opacity: 1,
-                  border: "1px solid #00000033",
-                }}
-              >
-                <div className="p-0">
-                  <ul className="m-0 list-none p-0 flex flex-col gap-[12px] text-[14px] text-black font-medium leading-none font-[Inter] navbar-menu-bar">
-                    {isTrailerScreen ? (
-                      <>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/"
-                            className="text-inherit no-underline cursor-pointer block w-full"
+              <>
+                <div
+                  className="fixed inset-0 z-[55] bg-black/20 sm:hidden"
+                  onClick={closeDrawer}
+                />
+                <div className="fixed inset-y-0 right-0 z-[60] flex h-full w-[88vw] max-w-[360px] flex-col overflow-y-auto bg-[#F6F3E9] text-[#111827] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.12)] sm:hidden">
+                  <div className="flex items-center justify-between border-b border-[#d9d3c3] pb-3 mb-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.32em] text-[#7b6a4d]">
+                        Menu
+                      </p>
+                      <h2 className="mt-1 text-lg font-semibold text-[#111827]">
+                        Navigation
+                      </h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={closeDrawer}
+                      aria-label="Close menu"
+                      className="text-[#111827] text-[1.5rem] font-semibold transition-colors hover:text-[#6a5f45]"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="mb-5 rounded-[20px] border border-[#d9d3c3] bg-white/80 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e7dcc2] text-[1rem] font-semibold text-[#111827]">
+                        {profileInitial(user)}
+                      </div>
+                      <div>
+                        <p className="text-base font-semibold text-[#111827]">
+                          {user?.firstName || user?.email || "Guest"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-0">
+                    <ul className="m-0 list-none p-0 space-y-4 text-xl font-semibold leading-none font-[Inter] navbar-menu-bar">
+                      {isTrailerScreen ? (
+                        <>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
                           >
-                            Home
-                          </Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/booking"
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                          >
-                            Booking Screen
-                          </Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/contact"
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                          >
-                            Contact
-                          </Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link
-                            to="/profile"
-                            className="text-inherit no-underline cursor-pointer block w-full"
-                          >
-                            Profile
-                          </Link>
-                        </li>
-                        {isAuthenticated ? (
-                          <>
-                            <li
-                              className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                              onClick={handleDrawerLinkRowClick}
+                            <Link
+                              to="/"
+                              className="text-inherit no-underline block w-full"
                             >
-                              <Link
-                                to="/notifications"
-                                className="text-inherit no-underline cursor-pointer block w-full"
+                              Home
+                            </Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link
+                              to="/booking"
+                              className="text-inherit no-underline block w-full"
+                            >
+                              Booking Screen
+                            </Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link
+                              to="/contact"
+                              className="text-inherit no-underline block w-full"
+                            >
+                              Contact
+                            </Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link
+                              to="/profile"
+                              className="text-inherit no-underline block w-full"
+                            >
+                              Profile
+                            </Link>
+                          </li>
+                          {isAuthenticated ? (
+                            <>
+                              <li
+                                className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                                onClick={handleDrawerLinkRowClick}
                               >
-                                Notifications
-                              </Link>
-                            </li>
+                                <Link
+                                  to="/notifications"
+                                  className="text-inherit no-underline block w-full"
+                                >
+                                  Notifications
+                                </Link>
+                              </li>
+                              <li
+                                className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                                onClick={() => setIsLogoutConfirmOpen(true)}
+                              >
+                                <span className="text-inherit no-underline block w-full">
+                                  Logout
+                                </span>
+                              </li>
+                            </>
+                          ) : (
                             <li
-                              className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                              onClick={() => setIsLogoutConfirmOpen(true)}
+                              className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                              onClick={() => {
+                                closeDrawer();
+                                modalNavigate("/login");
+                              }}
                             >
-                              <span className="text-inherit no-underline cursor-pointer block w-full">
-                                Logout
+                              <span className="text-inherit no-underline block w-full">
+                                Login / Sign Up
                               </span>
                             </li>
-                          </>
-                        ) : (
+                          )}
+                        </>
+                      ) : isOwner ? (
+                        <>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/">Home</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/notifications">Notification</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/profile">Profile</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={() => setIsLogoutConfirmOpen(true)}
+                          >
+                            <span>Log Out</span>
+                          </li>
+                        </>
+                      ) : !isAuthenticated ? (
+                        <>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/">Home</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={() =>
+                              handleProtectedDrawerNavigate("/booking")
+                            }
+                          >
+                            <span>Booked Trailor</span>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/contact">Contact</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={() =>
+                              handleProtectedDrawerNavigate("/profile")
+                            }
+                          >
+                            <span>Profile</span>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
                             onClick={() => {
                               closeDrawer();
                               modalNavigate("/login");
                             }}
                           >
-                            <span className="text-inherit no-underline cursor-pointer block w-full">
-                              Login / Sign Up
-                            </span>
+                            <span>Login / Sign Up</span>
                           </li>
-                        )}
-                      </>
-                    ) : isOwner ? (
-                      <>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/">Home</Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/notifications">Notification</Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/profile">Profile</Link>
-                        </li>
-                        <li
-                          className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
-                          onClick={() => setIsLogoutConfirmOpen(true)}
-                        >
-                          <span>Log Out</span>
-                        </li>
-                      </>
-                    ) : !isAuthenticated ? (
-                      <>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/">Home</Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={() =>
-                            handleProtectedDrawerNavigate("/booking")
-                          }
-                        >
-                          <span>Booked Trailor</span>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/contact">Contact</Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={() =>
-                            handleProtectedDrawerNavigate("/profile")
-                          }
-                        >
-                          <span>Profile</span>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={() => {
-                            closeDrawer();
-                            modalNavigate("/login");
-                          }}
-                        >
-                          <span>Login / Sign Up</span>
-                        </li>
-                      </>
-                    ) : (
-                      <>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/">Home</Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/booking">Booking Screen</Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/notifications">Notifications</Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/contact">Contact</Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={handleDrawerLinkRowClick}
-                        >
-                          <Link to="/profile">Profile</Link>
-                        </li>
-                        <li
-                          className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
-                          onClick={() => setIsLogoutConfirmOpen(true)}
-                        >
-                          <span>Logout</span>
-                        </li>
-                      </>
-                    )}
-                  </ul>
+                        </>
+                      ) : (
+                        <>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/">Home</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/booking">Booking Screen</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/notifications">Notifications</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/contact">Contact</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/profile">Profile</Link>
+                          </li>
+                          <li
+                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            onClick={() => setIsLogoutConfirmOpen(true)}
+                          >
+                            <span>Logout</span>
+                          </li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
                 </div>
-              </div>
+                <div
+                  className="hidden sm:block absolute right-0 top-full z-[60] mt-2 rounded-lg bg-white py-2 max-h-[calc(100vh-140px)] overflow-y-auto"
+                  style={{
+                    width: "161px",
+                    opacity: 1,
+                    border: "1px solid #00000033",
+                  }}
+                >
+                  <div className="p-0">
+                    <ul className="m-0 list-none p-0 flex flex-col gap-[12px] text-[14px] text-black font-medium leading-none font-[Inter] navbar-menu-bar">
+                      {isTrailerScreen ? (
+                        <>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link
+                              to="/"
+                              className="text-inherit no-underline cursor-pointer block w-full"
+                            >
+                              Home
+                            </Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link
+                              to="/booking"
+                              className="text-inherit no-underline cursor-pointer block w-full"
+                            >
+                              Booking Screen
+                            </Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link
+                              to="/contact"
+                              className="text-inherit no-underline cursor-pointer block w-full"
+                            >
+                              Contact
+                            </Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link
+                              to="/profile"
+                              className="text-inherit no-underline cursor-pointer block w-full"
+                            >
+                              Profile
+                            </Link>
+                          </li>
+                          {isAuthenticated ? (
+                            <>
+                              <li
+                                className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                                onClick={handleDrawerLinkRowClick}
+                              >
+                                <Link
+                                  to="/notifications"
+                                  className="text-inherit no-underline cursor-pointer block w-full"
+                                >
+                                  Notifications
+                                </Link>
+                              </li>
+                              <li
+                                className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                                onClick={() => setIsLogoutConfirmOpen(true)}
+                              >
+                                <span className="text-inherit no-underline cursor-pointer block w-full">
+                                  Logout
+                                </span>
+                              </li>
+                            </>
+                          ) : (
+                            <li
+                              className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                              onClick={() => {
+                                closeDrawer();
+                                modalNavigate("/login");
+                              }}
+                            >
+                              <span className="text-inherit no-underline cursor-pointer block w-full">
+                                Login / Sign Up
+                              </span>
+                            </li>
+                          )}
+                        </>
+                      ) : isOwner ? (
+                        <>
+                          <li
+                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/">Home</Link>
+                          </li>
+                          <li
+                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/notifications">Notification</Link>
+                          </li>
+                          <li
+                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/profile">Profile</Link>
+                          </li>
+                          <li
+                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            onClick={() => setIsLogoutConfirmOpen(true)}
+                          >
+                            <span>Log Out</span>
+                          </li>
+                        </>
+                      ) : !isAuthenticated ? (
+                        <>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/">Home</Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={() =>
+                              handleProtectedDrawerNavigate("/booking")
+                            }
+                          >
+                            <span>Booked Trailor</span>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/contact">Contact</Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={() =>
+                              handleProtectedDrawerNavigate("/profile")
+                            }
+                          >
+                            <span>Profile</span>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={() => {
+                              closeDrawer();
+                              modalNavigate("/login");
+                            }}
+                          >
+                            <span>Login / Sign Up</span>
+                          </li>
+                        </>
+                      ) : (
+                        <>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/">Home</Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/booking">Booking Screen</Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/notifications">Notifications</Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/contact">Contact</Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={handleDrawerLinkRowClick}
+                          >
+                            <Link to="/profile">Profile</Link>
+                          </li>
+                          <li
+                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            onClick={() => setIsLogoutConfirmOpen(true)}
+                          >
+                            <span>Logout</span>
+                          </li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>

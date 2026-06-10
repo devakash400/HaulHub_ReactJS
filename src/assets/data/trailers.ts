@@ -32,6 +32,7 @@ export type TrailerDetail = {
     label: string;
   }[];
   price: string;
+  isAvailable?: boolean;
   ratingBreakdown: Record<number, number>;
   metrics: TrailerMetric[];
   guestFavouriteRating: number;
@@ -361,6 +362,7 @@ export type TrailerListItem = {
   modelLabel: string;
   priceLabel: string;
   badgeLabel?: string;
+  availabilityStatus?: string;
 };
 
 const GOOSENECK_MODELS = ["FMAX208", "FMAX208", "FMAX208", "FMAX208", "FMAX210", "FMAX210", "FMAX220", "FMAX220"];

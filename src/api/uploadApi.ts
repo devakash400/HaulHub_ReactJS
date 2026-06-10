@@ -25,4 +25,20 @@ export async function uploadProfilePhoto(file: File): Promise<UploadResponse> {
   return res.data as UploadResponse;
 }
 
+/**
+ * Uploads a signature file (from canvas PNG) to the server.
+ * Returns the URL of the uploaded signature.
+ */
+export async function uploadSignature(file: File): Promise<UploadResponse> {
+  const form = new FormData();
+  form.append("fileName", "liability-agreement-signature");
+  form.append("photo", file);
+
+  const res = await api.post("/api/uploads/photo", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return res.data as UploadResponse;
+}
+
 export default uploadProfilePhoto;
