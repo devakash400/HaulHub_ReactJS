@@ -682,10 +682,15 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                     });
 
                     if (file && file instanceof File) {
-                      setProfilePhotoFile(file);
                       const objectUrl = URL.createObjectURL(file);
+                      setProfilePhotoFile(file);
                       setProfilePhotoUrl(objectUrl);
                       setTouched((prev) => ({ ...prev, profilePhoto: true }));
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.profilePhoto;
+                        return next;
+                      });
                       console.log(
                         "Profile photo state updated with:",
                         file.name,
@@ -767,7 +772,6 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                       return;
                     }
 
-                    // Validate each file
                     const validFiles = files.filter((file) => {
                       if (!(file instanceof File)) {
                         console.error("Invalid file object:", file);
@@ -782,7 +786,6 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                       );
                     }
 
-                    // Create object URLs and ensure files array is properly captured
                     const photoUrls = validFiles.map((file) => {
                       const url = URL.createObjectURL(file);
                       console.log(
@@ -794,10 +797,9 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                       return url;
                     });
 
-                    // Store the actual File objects with explicit array creation
-                    // This prevents reference issues
                     const filesSnapshot = [...validFiles];
                     const urlsSnapshot = [...photoUrls];
+                    const nextPhotos = [...photos, ...urlsSnapshot];
 
                     console.log(
                       "Before setState - filesSnapshot length:",
@@ -807,17 +809,22 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                       "Before setState - urlsSnapshot length:",
                       urlsSnapshot.length,
                     );
+                    console.log(
+                      "Current photoFiles length:",
+                      photoFiles.length,
+                    );
 
-                    setPhotoFiles(filesSnapshot);
-                    setPhotos(urlsSnapshot);
+                    setPhotoFiles((prev) => [...prev, ...filesSnapshot]);
+                    setPhotos(nextPhotos);
                     setTouched((prev) => ({ ...prev, photos: true }));
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.photos;
+                      return next;
+                    });
 
-                    // Validation after state update
-                    setTimeout(() => {
-                      validate(urlsSnapshot);
-                    }, 0);
+                    validate(nextPhotos);
 
-                    // Reset input to allow re-selecting same files
                     e.target.value = "";
 
                     console.log("Gallery photos state updated successfully");

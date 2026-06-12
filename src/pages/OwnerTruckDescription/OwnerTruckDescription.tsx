@@ -154,15 +154,7 @@ const OwnerTruckDescription: React.FC = () => {
   const galleryImages = useMemo(() => {
     if (!trailer) return [];
 
-    const primaryImages = trailer.images.filter(Boolean);
-    const fallbackImages = trailersData
-      .flatMap((item) => item.images)
-      .filter((img) => Boolean(img));
-    const combined = [...primaryImages, ...fallbackImages];
-    const unique = Array.from(new Set(combined));
-
-    // Keep gallery rich even if current truck has limited photos.
-    return unique.slice(0, 9);
+    return trailer.images.filter(Boolean);
   }, [trailer]);
 
   if (loading) {
@@ -614,22 +606,23 @@ const OwnerTruckDescription: React.FC = () => {
 
       {/* Animated photo gallery modal */}
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 transition-all duration-300 ${
           isPhotosOpen
-            ? "pointer-events-auto bg-black/55 opacity-100"
-            : "pointer-events-none bg-black/0 opacity-0"
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none opacity-0"
         }`}
       >
         <div
-          className={`w-full max-w-5xl rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 transition-all duration-300 ${
+          className={`w-full max-w-6xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${
             isPhotosOpen
               ? "translate-y-0 scale-100 opacity-100"
               : "translate-y-6 scale-95 opacity-0"
           }`}
+          style={{ maxHeight: "calc(100vh - 80px)" }}
         >
-          <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
             <h3 className="text-lg font-semibold text-gray-900">
-              All Truck Photos
+              All Trailer Photos
             </h3>
             <button
               type="button"
@@ -641,66 +634,74 @@ const OwnerTruckDescription: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1.65fr_1fr]">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-[#F8FAFC] shadow-sm">
-              <img
-                src={galleryImages[selectedPhotoIndex] || trailer.images[0]}
-                alt={`${trailer.title} featured`}
-                className="h-[420px] w-full object-cover"
-              />
-            </div>
+          <div
+            className="overflow-y-auto p-6"
+            style={{ maxHeight: "calc(100vh - 120px)" }}
+          >
+            <div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
+              <div className="mx-auto h-[400px] w-full max-w-[420px] overflow-hidden rounded-[32px] border border-gray-200 bg-[#F8FAFC]">
+                <img
+                  src={galleryImages[selectedPhotoIndex] || trailer.images[0]}
+                  alt={`${trailer.title} featured`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {galleryImages.slice(0, 5).map((imageUrl, imageIndex) => (
-                <button
-                  key={`${imageUrl}-${imageIndex}`}
-                  type="button"
-                  onClick={() => setSelectedPhotoIndex(imageIndex)}
-                  className={`overflow-hidden rounded-lg bg-white transition-all ${
-                    selectedPhotoIndex === imageIndex
-                      ? "ring-2 ring-[#389131]/20"
-                      : ""
-                  } ${
-                    imageIndex === 0
-                      ? "col-span-2"
-                      : imageIndex === 3
-                        ? "row-span-2"
-                        : ""
-                  }`}
-                >
-                  <img
-                    src={imageUrl}
-                    alt={`${trailer.title} thumb ${imageIndex + 1}`}
-                    className={`w-full object-cover ${
-                      imageIndex === 0
-                        ? "h-40"
-                        : imageIndex === 3
-                          ? "h-[196px]"
-                          : "h-[94px]"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="mb-2 text-sm font-semibold text-gray-800">
-              More Photos ({galleryImages.length})
-            </p>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-              {galleryImages.map((imageUrl, imageIndex) => (
-                <div
-                  key={`extra-${imageUrl}-${imageIndex}`}
-                  className="overflow-hidden rounded-lg border border-gray-200 bg-white"
-                >
-                  <img
-                    src={imageUrl}
-                    alt={`${trailer.title} extra ${imageIndex + 1}`}
-                    className="h-24 w-full object-cover transition-transform duration-500 hover:scale-[1.04]"
-                  />
+              <div className="flex flex-col gap-5">
+                <div className="rounded-[32px] border border-gray-200 bg-white p-4 shadow-sm">
+                  <p className="mb-3 text-sm font-semibold text-gray-800">
+                    Select photo
+                  </p>
+                  <div className="flex gap-3 overflow-x-auto pb-2">
+                    {galleryImages.map((imageUrl, imageIndex) => (
+                      <button
+                        key={`${imageUrl}-${imageIndex}`}
+                        type="button"
+                        onClick={() => setSelectedPhotoIndex(imageIndex)}
+                        className={`relative min-w-[100px] overflow-hidden rounded-3xl border border-gray-200 transition-all duration-150 ${
+                          selectedPhotoIndex === imageIndex
+                            ? "ring-2 ring-[#389131]/40"
+                            : "hover:border-[#389131]"
+                        }`}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`${trailer.title} thumb ${imageIndex + 1}`}
+                          className="h-[100px] w-[100px] object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              ))}
+
+                <div className="rounded-[32px] border border-gray-200 bg-white p-4 shadow-sm">
+                  <div className="mb-4">
+                    <p className="text-sm font-semibold text-gray-800">
+                      More Photos ({galleryImages.length})
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Tap any image to preview it on the left.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {galleryImages.map((imageUrl, imageIndex) => (
+                      <button
+                        key={`extra-${imageUrl}-${imageIndex}`}
+                        type="button"
+                        onClick={() => setSelectedPhotoIndex(imageIndex)}
+                        className="group overflow-hidden rounded-3xl border border-gray-200 bg-gray-50 transition-shadow duration-200 hover:shadow-lg"
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`${trailer.title} extra ${imageIndex + 1}`}
+                          className="h-[220px] w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
