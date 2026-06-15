@@ -500,35 +500,37 @@ const BookingScreen: React.FC = () => {
                     onClick={() => {
                       if (trailerUrl) navigate(trailerUrl);
                     }}
-                    className="cursor-pointer flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow"
+                    className="cursor-pointer flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow"
                   >
-                    {/* Thumbnail */}
-                    <img
-                      src={image}
-                      alt={title}
-                      className="w-32 h-32 sm:w-40 sm:h-40 shrink-0 rounded-lg object-cover"
-                    />
-                    {/* Details */}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base sm:text-lg font-bold text-black m-0 mb-1 truncate">
-                        {title}
-                      </h3>
-                      <p className="text-sm text-gray-700 font-medium m-0 mt-0.5">
-                        {price}
-                      </p>
-                      <div className="mt-2 space-y-0.5 text-sm text-gray-600">
-                        {pickup && (
-                          <p className="m-0">Pickup Date : {pickup}</p>
-                        )}
-                        {returnDate && (
-                          <p className="m-0">Return Date : {returnDate}</p>
-                        )}
+                    <div className="flex gap-3 sm:gap-4 w-full sm:w-auto sm:flex-1 min-w-0">
+                      {/* Thumbnail */}
+                      <img
+                        src={image}
+                        alt={title}
+                        className="w-24 h-24 sm:w-40 sm:h-40 shrink-0 rounded-lg object-cover"
+                      />
+                      {/* Details */}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base sm:text-lg font-bold text-black m-0 mb-1 truncate">
+                          {title}
+                        </h3>
+                        <p className="text-sm text-gray-700 font-medium m-0 mt-0.5">
+                          {price}
+                        </p>
+                        <div className="mt-2 space-y-0.5 text-sm text-gray-600">
+                          {pickup && (
+                            <p className="m-0 truncate">Pickup Date : {pickup}</p>
+                          )}
+                          {returnDate && (
+                            <p className="m-0 truncate">Return Date : {returnDate}</p>
+                          )}
+                        </div>
                       </div>
                     </div>
                     {/* Status / action button */}
-                    <div className="flex flex-col items-end shrink-0 gap-2">
+                    <div className="flex flex-row flex-wrap sm:flex-col items-center sm:items-end shrink-0 gap-2 w-full sm:w-auto justify-between sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
                       <span
-                        className={`inline-flex items-center justify-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm font-medium whitespace-nowrap ${status.className}`}
+                        className={`inline-flex items-center justify-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-normal sm:whitespace-nowrap text-center ${status.className}`}
                       >
                         {status.label}
                       </span>
@@ -540,7 +542,7 @@ const BookingScreen: React.FC = () => {
                             handleReturnBooking(booking._id);
                           }}
                           disabled={isReturnLoading}
-                          className="px-3 py-1.5 rounded-lg bg-[#F97316] text-white text-sm font-medium hover:bg-[#dd6b14] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="px-3 py-1.5 rounded-lg bg-[#F97316] text-white text-xs sm:text-sm font-medium hover:bg-[#dd6b14] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {isReturnLoading ? "Returning..." : "Return Trailer"}
                         </button>
@@ -560,15 +562,15 @@ const BookingScreen: React.FC = () => {
                               },
                             );
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-[#389131] text-white text-sm font-medium hover:bg-[#2f7a29]"
+                          className="px-3 py-1.5 rounded-lg bg-[#389131] text-white text-xs sm:text-sm font-medium hover:bg-[#2f7a29]"
                         >
                           Start Pre-Screening
                         </button>
                       )}
                       {isReturnedBooking &&
                         (alreadyReviewed ? (
-                          <span className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700">
-                            <CheckCircle className="w-4 h-4" />
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs sm:text-sm font-medium text-green-700">
+                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                             Review Added
                           </span>
                         ) : (
@@ -584,7 +586,7 @@ const BookingScreen: React.FC = () => {
                                 );
                               }
                             }}
-                            className="px-3 py-1.5 rounded-lg border border-[#389131] bg-white text-[#389131] text-sm font-medium hover:bg-[#F5FBF5]"
+                            className="px-3 py-1.5 rounded-lg border border-[#389131] bg-white text-[#389131] text-xs sm:text-sm font-medium hover:bg-[#F5FBF5]"
                           >
                             Review
                           </button>
