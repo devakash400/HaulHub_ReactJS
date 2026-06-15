@@ -50,6 +50,11 @@ export async function returnBooking(bookingId: string) {
   return res.data;
 }
 
+export async function markReadyForPickup(bookingId: string) {
+  const res = await api.post(`/api/bookings/${bookingId}/ready-for-pickup`);
+  return res.data;
+}
+
 export function getBookingErrorMessage(err: unknown): string {
   if (err instanceof AxiosError) {
     const data = err.response?.data as
