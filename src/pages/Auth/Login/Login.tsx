@@ -170,6 +170,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [loginError, setLoginError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [isCheckingReset, setIsCheckingReset] = useState(false);
 
   // Reset flow
   const [resetPhone, setResetPhone] = useState("");
@@ -623,8 +624,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
   //   setOtpError(null);
   //   setStep("otp");
   // };
-  const handleResetContinue = () => {
-    if (!resetCanContinue) return;
+  const handleResetContinue = async () => {
+    if (!resetCanContinue || isCheckingReset) return;
 
     const phoneDigits = resetPhone.replace(/\D/g, "");
     const isPhone = phoneDigits.length >= 10;
@@ -635,17 +636,74 @@ const LoginModal: React.FC<LoginModalProps> = ({
       return;
     }
 
-    setOtp("");
-    setOtpError(null);
+    setIsCheckingReset(true);
     setResetError(null);
-    const currentState = location.state as Record<string, unknown> | null;
-    modalNavigate("/otp", {
-      state: {
-        ...currentState,
-        resetEmail,
-        resetPhone,
-      },
-    });
+
+    try {
+      if (isEmail) {
+        const res = await checkEmailApi({
+          email: resetEmail.trim(),
+          trailor: loginTrailor,
+        });
+        const exists =
+          res &&
+          typeof res === "object" &&
+          "data" in res &&
+          (res as any).data &&
+          typeof (res as any).data === "object" &&
+          "exists" in (res as any).data
+            ? Boolean((res as any).data.exists)
+            : false;
+
+        if (!exists) {
+          setResetError("This email is not registered. Please check or sign up.");
+          return;
+        }
+      } else if (isPhone) {
+        const phoneWithCode = `${selectedCountry.dialCode}${phoneDigits}`;
+        const res = await checkPhoneApi({
+          phoneNumber: phoneWithCode,
+          trailor: loginTrailor,
+        });
+        const exists =
+          res &&
+          typeof res === "object" &&
+          "data" in res &&
+          (res as any).data &&
+          typeof (res as any).data === "object" &&
+          "exists" in (res as any).data
+            ? Boolean((res as any).data.exists)
+            : false;
+
+        if (!exists) {
+          setResetError("This phone number is not registered. Please check or sign up.");
+          return;
+        }
+      }
+
+      setOtp("");
+      setOtpError(null);
+      setResetError(null);
+      const currentState = location.state as Record<string, unknown> | null;
+      modalNavigate("/otp", {
+        state: {
+          ...currentState,
+          resetEmail,
+          resetPhone,
+        },
+      });
+    } catch (err) {
+      let msg = getApiErrorMessage(err) || "Unable to verify. Please try again.";
+      if (
+        msg.toLowerCase().includes("e.164") ||
+        msg.toLowerCase().includes("valid international")
+      ) {
+        msg = "This phone number is not registered. Please check or sign up.";
+      }
+      setResetError(msg);
+    } finally {
+      setIsCheckingReset(false);
+    }
   };
   const handleResendOtp = () => {
     setOtpSeconds(59);
@@ -1438,14 +1496,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="button"
                 onClick={handleResetContinue}
-                disabled={!resetCanContinue}
+                disabled={!resetCanContinue || isCheckingReset}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white`}
                 style={{
-                  backgroundColor: resetCanContinue ? "#389131" : "#929191",
-                  cursor: resetCanContinue ? "pointer" : "not-allowed",
+                  backgroundColor: resetCanContinue && !isCheckingReset ? "#389131" : "#929191",
+                  cursor: resetCanContinue && !isCheckingReset ? "pointer" : "not-allowed",
                 }}
               >
-                Continue
+                {isCheckingReset ? "Checking..." : "Continue"}
               </button>
               <div
                 className="mt-auto pt-24 text-center text-black"
