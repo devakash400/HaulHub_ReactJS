@@ -14,6 +14,7 @@ import { register, roleToTrailor } from "../../api/authApi.ts";
 import {
   createBooking,
   getBookingErrorMessage,
+  getMyBookings,
 } from "../../api/bookingsApi.ts";
 import { signUpSuccess } from "../../store/authSlice.ts";
 import type { RootState } from "../../store";
@@ -104,6 +105,34 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     checkOut: string;
   } | null>(null);
   const bookingInFlight = useRef(false);
+  const [isCheckingBookings, setIsCheckingBookings] = useState(false);
+
+  const checkPendingBookings = async () => {
+    try {
+      const res = await getMyBookings();
+      let userBookings: any[] = [];
+      if (Array.isArray(res)) userBookings = res;
+      else if (res && Array.isArray((res as any).bookings)) userBookings = (res as any).bookings;
+      else if (res && Array.isArray((res as any).data)) userBookings = (res as any).data;
+      else if (res && Array.isArray((res as any).results)) userBookings = (res as any).results;
+
+      const activeStatuses = [
+        "pending", "accepted", "active", "in_use", "pre_screening", "pre-screening", 
+        "owner_photos_uploaded", "waiting_for_pickup_approval", "pre_screening_completed"
+      ];
+      
+      const currentTrailerId = String(trailerId).trim();
+      const hasActiveBooking = userBookings.some((b) => {
+         const bTrailerId = b.trailerId?._id || b.trailerId;
+         return String(bTrailerId) === currentTrailerId && activeStatuses.includes(String(b.status).toLowerCase());
+      });
+
+      return hasActiveBooking;
+    } catch (err) {
+       console.error("Error checking bookings", err);
+       return false;
+    }
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -111,9 +140,19 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     }
   }, [isAuthenticated]);
 
-  const handleReserve = () => {
+  const handleReserve = async () => {
     if (!validateBookingDates(checkIn, checkOut)) {
       return;
+    }
+
+    if (isAuthenticated) {
+      setIsCheckingBookings(true);
+      const alreadyBooked = await checkPendingBookings();
+      setIsCheckingBookings(false);
+      if (alreadyBooked) {
+        toast.error("You already have an active or pending booking for this trailer.");
+        return;
+      }
     }
 
     const dates = `${checkIn} – ${checkOut}`;
@@ -145,9 +184,19 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     });
   };
 
-  const handleRentalDatesNext = (pickupDate: string, returnDate: string) => {
+  const handleRentalDatesNext = async (pickupDate: string, returnDate: string) => {
     if (!validateBookingDates(pickupDate, returnDate)) {
       return;
+    }
+
+    if (isAuthenticated) {
+      setIsCheckingBookings(true);
+      const alreadyBooked = await checkPendingBookings();
+      setIsCheckingBookings(false);
+      if (alreadyBooked) {
+        toast.error("You already have an active or pending booking for this trailer.");
+        return;
+      }
     }
 
     const dates = `${pickupDate} – ${returnDate}`;
@@ -480,9 +529,10 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
           <button
             type="button"
             onClick={handleReserve}
+            disabled={isCheckingBookings}
             className="w-full mt-4 h-[53px] 
             flex items-center justify-center text-white 
-            over:opacity-90 transition"
+            over:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
               background: "#389131",
               paddingTop: "12px",
@@ -507,8 +557,13 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       <LoginModal
         isOpen={isLoginOpen && !isAuthenticated}
         onClose={() => setIsLoginOpen(false)}
-        onSuccess={() => {
+        onSuccess={async () => {
           setIsLoginOpen(false);
+          const alreadyBooked = await checkPendingBookings();
+          if (alreadyBooked) {
+            toast.error("You already have an active or pending booking for this trailer.");
+            return;
+          }
           // After login, continue booking flow: go to verify-identity page
           navigate("/verify-identity", {
             state: {

@@ -117,8 +117,21 @@ const authSlice = createSlice({
       state.accessToken = token ?? null;
       state.refreshToken = readStoredToken("refreshToken");
       state.userType = trailor;
-      state.user = trailor || email
-        ? { email: email || undefined, trailor: trailor || undefined, profilePicture }
+      let cachedFirst: string | undefined;
+      let cachedLast: string | undefined;
+      if (typeof window !== "undefined") {
+        cachedFirst = window.localStorage.getItem("cachedFirstName") || undefined;
+        cachedLast = window.localStorage.getItem("cachedLastName") || undefined;
+      }
+
+      state.user = trailor || email || cachedFirst || cachedLast
+        ? { 
+            email: email || undefined, 
+            trailor: trailor || undefined, 
+            profilePicture,
+            firstName: cachedFirst,
+            lastName: cachedLast
+          }
         : null;
       state.ownerTrailersCount = trailor === "Owner" ? state.ownerTrailersCount : 0;
     },
@@ -136,6 +149,10 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.userType = action.payload.userType ?? action.payload.user?.trailor ?? null;
+      if (typeof window !== "undefined" && state.user) {
+        if (state.user.firstName) window.localStorage.setItem("cachedFirstName", state.user.firstName);
+        if (state.user.lastName) window.localStorage.setItem("cachedLastName", state.user.lastName);
+      }
     },
     signUpSuccess(
       state,
@@ -152,6 +169,10 @@ const authSlice = createSlice({
       state.refreshToken = action.payload.refreshToken;
       state.userType = action.payload.userType ?? action.payload.user.trailor ?? null;
       state.ownerTrailersCount = state.userType === "Owner" ? 0 : state.ownerTrailersCount;
+      if (typeof window !== "undefined" && state.user) {
+        if (state.user.firstName) window.localStorage.setItem("cachedFirstName", state.user.firstName);
+        if (state.user.lastName) window.localStorage.setItem("cachedLastName", state.user.lastName);
+      }
     },
     updateUser(state, action: PayloadAction<Partial<AuthUser>>) {
       if (!state.user) {
@@ -161,6 +182,10 @@ const authSlice = createSlice({
           ...state.user,
           ...action.payload,
         };
+      }
+      if (typeof window !== "undefined") {
+        if (state.user.firstName) window.localStorage.setItem("cachedFirstName", state.user.firstName);
+        if (state.user.lastName) window.localStorage.setItem("cachedLastName", state.user.lastName);
       }
     },
     addOwnerTrailer(state) {
@@ -173,6 +198,10 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.userType = null;
       state.ownerTrailersCount = 0;
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("cachedFirstName");
+        window.localStorage.removeItem("cachedLastName");
+      }
     },
   },
 });

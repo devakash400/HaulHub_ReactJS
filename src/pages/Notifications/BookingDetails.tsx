@@ -28,6 +28,7 @@ const BookingDetails: React.FC = () => {
   const [conditionFiles, setConditionFiles] = useState<
     Record<string, File | null>
   >({ front: null, left: null, right: null, back: null });
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const fileInputsRef = useRef<Record<string, HTMLInputElement | null>>({});
   const previewUrlsRef = useRef<Record<string, string | null>>({
     front: null,
@@ -401,21 +402,24 @@ const BookingDetails: React.FC = () => {
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-                {processed ?? "Pending"}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-sm text-slate-600">
-                {booking?.status ? booking.status : "Awaiting action"}
-              </span>
+              {!isAccepted && !isRejected && (
+                <span className={`inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-sm capitalize ${
+                  String(booking?.status).toLowerCase() === "pending" 
+                    ? "bg-emerald-50 text-emerald-700 font-semibold" 
+                    : "bg-slate-100 text-slate-600"
+                }`}>
+                  {booking?.status ? booking.status : "Awaiting action"}
+                </span>
+              )}
               {isAccepted && (
-                <button className="rounded-full bg-emerald-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
+                <span className="inline-flex items-center rounded-full bg-emerald-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
                   Accepted
-                </button>
+                </span>
               )}
               {isRejected && (
-                <button className="rounded-full bg-rose-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
+                <span className="inline-flex items-center rounded-full bg-rose-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
                   Rejected
-                </button>
+                </span>
               )}
             </div>
           </div>
@@ -637,7 +641,8 @@ const BookingDetails: React.FC = () => {
                             <img
                               src={previewSrc}
                               alt={`${it.label} preview`}
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => setFullScreenImage(previewSrc)}
                             />
                           ) : (
                             <div className="px-3 text-sm text-slate-400">
@@ -753,6 +758,28 @@ const BookingDetails: React.FC = () => {
           </aside>
         </div>
       </div>
+
+      {fullScreenImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 p-4 sm:p-8"
+          onClick={() => setFullScreenImage(null)}
+        >
+          <div className="relative flex h-full w-full max-w-5xl items-center justify-center">
+            <button
+              className="absolute top-0 right-0 z-[101] flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors sm:top-4 sm:right-4"
+              onClick={() => setFullScreenImage(null)}
+            >
+              <span className="text-2xl leading-none">&times;</span>
+            </button>
+            <img
+              src={fullScreenImage}
+              alt="Full screen preview"
+              className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
