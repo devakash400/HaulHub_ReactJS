@@ -114,6 +114,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [genderTouched, setGenderTouched] = useState(false);
   const [dateOfBirthTouched, setDateOfBirthTouched] = useState(false);
+  const [ageSubmitError, setAgeSubmitError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const dateInputRef = useRef<HTMLInputElement | null>(null);
   const todayIso = new Date().toISOString().split("T")[0];
@@ -142,7 +143,12 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setPhoneTouched(false);
     setGenderTouched(false);
     setDateOfBirthTouched(false);
+    setAgeSubmitError(false);
   }, [isOpen]);
+
+  useEffect(() => {
+    setAgeSubmitError(false);
+  }, [trailor, dateOfBirth]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -197,6 +203,21 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (trailor === "Owner" && dateOfBirth) {
+      const today = new Date();
+      const birthDate = new Date(dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      if (age < 24) {
+        setAgeSubmitError(true);
+        return;
+      }
+    }
+
     if (!isFormValid) return;
     const fullPhone =
       normalizedDigits.length > 0
@@ -895,16 +916,19 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                 <p className="mt-3 text-xs text-red-600">{submitError}</p>
               )}
 
+              {ageSubmitError && (
+                <p className="my-3 text-xs text-red-600">Age must be greater than 24</p>
+              )}
+
               {/* <div className="px-6 pb-6 sm:px-10 sm:pb-8 border-t border-gray-200"> */}
               <button
                 type="submit"
                 disabled={!isFormValid}
                 aria-disabled={!isFormValid}
-                className={`w-full py-3.5 text-sm sm:text-base font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${
-                  isFormValid
+                className={`w-full py-3.5 text-sm sm:text-base font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 ${isFormValid
                     ? "bg-[#389131] text-white hover:opacity-90"
                     : "text-white cursor-not-allowed"
-                }`}
+                  }`}
                 style={{
                   backgroundColor: isFormValid ? "#389131" : "#929191",
                 }}
