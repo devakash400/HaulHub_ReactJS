@@ -394,17 +394,27 @@ const Navbar: React.FC = () => {
                               </li>
                             </>
                           ) : (
-                            <li
-                              className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
-                              onClick={() => {
-                                closeDrawer();
-                                modalNavigate("/login");
-                              }}
-                            >
-                              <span className="text-inherit no-underline block w-full">
-                                Login / Sign Up
-                              </span>
-                            </li>
+                            <>
+                              <li
+                                className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
+                                onClick={() => handleProtectedDrawerNavigate("/notifications")}
+                              >
+                                <span className="text-inherit no-underline block w-full">
+                                  Notifications
+                                </span>
+                              </li>
+                              <li
+                                className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
+                                onClick={() => {
+                                  closeDrawer();
+                                  modalNavigate("/login");
+                                }}
+                              >
+                                <span className="text-inherit no-underline block w-full">
+                                  Login / Sign Up
+                                </span>
+                              </li>
+                            </>
                           )}
                         </>
                       ) : isOwner ? (
@@ -449,6 +459,14 @@ const Navbar: React.FC = () => {
                             }
                           >
                             <span>Booked Trailor</span>
+                          </li>
+                          <li
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                            onClick={() =>
+                              handleProtectedDrawerNavigate("/notifications")
+                            }
+                          >
+                            <span>Notifications</span>
                           </li>
                           <li
                             className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
