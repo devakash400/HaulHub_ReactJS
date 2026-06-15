@@ -399,21 +399,24 @@ const BookingDetails: React.FC = () => {
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-                {processed ?? "Pending"}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-sm text-slate-600">
-                {booking?.status ? booking.status : "Awaiting action"}
-              </span>
+              {!isAccepted && !isRejected && (
+                <span className={`inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-sm capitalize ${
+                  String(booking?.status).toLowerCase() === "pending" 
+                    ? "bg-emerald-50 text-emerald-700 font-semibold" 
+                    : "bg-slate-100 text-slate-600"
+                }`}>
+                  {booking?.status ? booking.status : "Awaiting action"}
+                </span>
+              )}
               {isAccepted && (
-                <button className="rounded-full bg-emerald-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
+                <span className="inline-flex items-center rounded-full bg-emerald-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
                   Accepted
-                </button>
+                </span>
               )}
               {isRejected && (
-                <button className="rounded-full bg-rose-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
+                <span className="inline-flex items-center rounded-full bg-rose-600 px-4 py-1 text-sm font-semibold text-white shadow-sm">
                   Rejected
-                </button>
+                </span>
               )}
             </div>
           </div>
