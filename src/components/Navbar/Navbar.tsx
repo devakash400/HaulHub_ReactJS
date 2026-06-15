@@ -733,6 +733,7 @@ const Navbar: React.FC = () => {
             >
               <div
                 className={`mx-auto flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_22px_rgba(56,145,49,0.2)] motion-reduce:transition-none ${isSearchCompact ? "h-[32px] w-[min(100%,400px)] px-3" : "h-[38px] w-[min(100%,560px)] px-3.5"}`}
+                
               >
                 <input
                   type="text"
