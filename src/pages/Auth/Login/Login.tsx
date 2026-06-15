@@ -310,9 +310,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
       setStep(initialStep ?? "email");
     }
 
-    if (pathname === "/login" && locationState) {
+    if (locationState) {
       if (locationState.loginIdentifier !== undefined) {
         setEmail(locationState.loginIdentifier);
+        if (pathname === "/reset-password") {
+          if (locationState.usePhoneOnly) {
+            setResetPhone((prev) => prev || locationState.loginIdentifier!);
+          } else {
+            setResetEmail((prev) => prev || locationState.loginIdentifier!);
+          }
+        }
       }
       if (locationState.usePhoneOnly !== undefined) {
         setUsePhoneOnly(locationState.usePhoneOnly);
