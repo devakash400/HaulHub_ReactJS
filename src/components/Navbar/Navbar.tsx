@@ -181,7 +181,7 @@ const Navbar: React.FC = () => {
     <>
       <style>{navbarMenuBarStyles}</style>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F6F3E9] border-b border-gray-200 font-sans min-w-0 w-full">
-        <div className="flex items-center justify-between gap-3 px-10 py-3 min-w-0 w-full">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-10 py-3 min-w-0 w-full">
           <Link
             to="/"
             onClick={closeDrawer}
