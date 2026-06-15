@@ -435,6 +435,10 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       absolute
                       top-3
                       right-3
+
+
+
+                      
                       w-9
                       h-9
                       rounded-full

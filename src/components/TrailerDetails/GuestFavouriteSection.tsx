@@ -102,7 +102,7 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
     return (score * progress).toFixed(decimals);
   };
 
-  // Only hide if rating is null/undefined (show even if 0)
+ 
   if (rating == null) {
     return null;
   }
