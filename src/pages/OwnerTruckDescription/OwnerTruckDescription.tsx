@@ -282,7 +282,7 @@ const OwnerTruckDescription: React.FC = () => {
               <img
                 src={trailer.images[0]}
                 alt={trailer.title}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             </div>
 
@@ -643,7 +643,7 @@ const OwnerTruckDescription: React.FC = () => {
                 <img
                   src={galleryImages[selectedPhotoIndex] || trailer.images[0]}
                   alt={`${trailer.title} featured`}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                 />
               </div>
 
@@ -667,7 +667,7 @@ const OwnerTruckDescription: React.FC = () => {
                         <img
                           src={imageUrl}
                           alt={`${trailer.title} thumb ${imageIndex + 1}`}
-                          className="h-[100px] w-[100px] object-cover"
+                          className="h-[100px] w-[100px] object-contain"
                         />
                       </button>
                     ))}
@@ -695,7 +695,7 @@ const OwnerTruckDescription: React.FC = () => {
                         <img
                           src={imageUrl}
                           alt={`${trailer.title} extra ${imageIndex + 1}`}
-                          className="h-[220px] w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="h-[220px] w-full object-contain transition-transform duration-300 group-hover:scale-105"
                         />
                       </button>
                     ))}
