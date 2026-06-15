@@ -23,7 +23,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
-import { logout } from "../../store/authSlice.ts";
+import { logout, updateUser } from "../../store/authSlice.ts";
 import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
@@ -506,6 +506,7 @@ const Profile: React.FC = () => {
     try {
       const next = await updateUserProfile(patch);
       setProfile(next);
+      dispatch(updateUser(patch));
       toast.success("Profile updated");
       closeEditor();
     } catch (err) {
