@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Star, CheckCircle } from "lucide-react";
 import { images } from "../../assets/images/index.ts";
 import { getMyBookings, returnBooking } from "../../api/bookingsApi.ts";
@@ -120,6 +120,22 @@ const BookingScreen: React.FC = () => {
   const location = useLocation();
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const filterDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target as Node)
+      ) {
+        setFilterOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const filteredBookings = (() => {
     if (filterStatus === "all") return bookings;
@@ -291,7 +307,7 @@ const BookingScreen: React.FC = () => {
 
         {/* Filter button */}
         <div className="flex justify-end mb-4">
-          <div className="relative">
+          <div className="relative" ref={filterDropdownRef}>
             <button
               type="button"
               onClick={() => setFilterOpen((o) => !o)}

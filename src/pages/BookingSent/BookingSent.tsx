@@ -1,6 +1,18 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+const formatDateString = (dateStr: string) => {
+  if (!dateStr) return "";
+  const dateRegex = /(\d{4})[-/](\d{1,2})[-/](\d{1,2})/g;
+  return String(dateStr).replace(dateRegex, (match, year, month, day) => {
+    const d = new Date(Number(year), Number(month) - 1, Number(day));
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    return match;
+  });
+};
+
 const BookingSent: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,7 +72,7 @@ const BookingSent: React.FC = () => {
               <span className="text-gray-500 text-lg">Dates</span>
 
               <span className="font-semibold text-lg">
-                {String(state.dates || "2026-05-14 - 2026-05-26")}
+                {formatDateString(String(state.dates || "2026-05-14 - 2026-05-26"))}
               </span>
             </div>
 

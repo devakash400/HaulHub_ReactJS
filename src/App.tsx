@@ -56,9 +56,6 @@ const App: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
-  const profilePicture = useSelector(
-    (state: RootState) => state.auth.user?.profilePicture,
-  );
 
   const currentLocation = useLocation();
   const state = currentLocation.state as LocationState | null;
@@ -74,23 +71,33 @@ const App: React.FC = () => {
       ? "pt-[124px] sm:pt-[76px]"
       : "pt-[76px]";
 
-  // Sync profile picture from backend on app init if authenticated but missing picture
+  // Sync user profile from backend on app init if authenticated
   useEffect(() => {
-    if (!isAuthenticated || profilePicture) return;
+    if (!isAuthenticated) return;
 
-    const syncProfilePicture = async () => {
+    const syncProfile = async () => {
       try {
         const profile = await getUserProfile();
-        if (profile?.profilePicture) {
-          dispatch(updateUser({ profilePicture: profile.profilePicture }));
+        if (profile) {
+          const first = profile.firstName?.trim() || profile.legalName?.trim() || (profile.fullName ? profile.fullName.trim().split(" ")[0] : undefined);
+          const parts = profile.fullName ? profile.fullName.trim().split(" ") : [];
+          const last = profile.lastName?.trim() || profile.preferredFirstName?.trim() || (parts.length > 1 ? parts.slice(1).join(" ") : undefined);
+
+          dispatch(updateUser({
+            firstName: first,
+            lastName: last,
+            email: profile.email,
+            profilePicture: profile.profilePicture,
+            phoneNumber: profile.phoneNumber
+          }));
         }
       } catch {
         // silently ignore if fetch fails
       }
     };
 
-    void syncProfilePicture();
-  }, [isAuthenticated, profilePicture, dispatch]);
+    void syncProfile();
+  }, [isAuthenticated, dispatch]);
 
   return (
     <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden min-w-0">

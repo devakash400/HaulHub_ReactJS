@@ -222,8 +222,10 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       newErrors.zipCode = "Zip code is required";
     }
 
-    if (photoList.length < 4) {
+    if (photoList.length === 0) {
       newErrors.photos = "Please upload at least 4 photos";
+    } else if (photoList.length < 4) {
+      newErrors.photos = `${photoList.length} of 4 images uploaded`;
     } else if (photoList.length > 20) {
       newErrors.photos = "You can upload up to 20 photos";
     }
