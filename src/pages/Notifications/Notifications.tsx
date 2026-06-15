@@ -216,6 +216,11 @@ const Notifications: React.FC = () => {
                 /uploaded pickup/i.test(notification.message) ||
                 /pickup photos/i.test(notification.title) ||
                 /pickup photos/i.test(notification.message);
+              const isPreScreeningCompleted =
+                /pre[\s-]?screening completed/i.test(notification.title) ||
+                /pre[\s-]?screening completed/i.test(notification.message) ||
+                /pre[\s-]?screening.*complete/i.test(notification.title) ||
+                /pre[\s-]?screening.*complete/i.test(notification.message);
 
               return (
                 <div
@@ -278,6 +283,23 @@ const Notifications: React.FC = () => {
                             View details
                           </Link>
                         )
+                      ) : isPreScreeningCompleted && isOwner ? (
+                        <Link
+                          to={`/pre-screening-complete/${notification.bookingId}`}
+                          className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          View & Approve
+                        </Link>
+                      ) : isBookingAcceptedByOwner && !isOwner ? (
+                        <Link
+                          to={`/prescreening?bookingId=${encodeURIComponent(notification.bookingId)}`}
+                          state={{
+                            bookingId: notification.bookingId,
+                          }}
+                          className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          Start Pre-Screening
+                        </Link>
                       ) : isPickupPhotosUploaded ? null : isBookingAccepted ? null : (
                         <Link
                           to={

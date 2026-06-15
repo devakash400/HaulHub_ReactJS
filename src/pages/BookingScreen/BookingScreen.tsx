@@ -476,6 +476,7 @@ const BookingScreen: React.FC = () => {
               const isReturnable =
                 statusKey === "active" || statusKey === "in_use";
               const isReturnLoading = Boolean(returnSubmitting[booking._id]);
+              const isAccepted = statusKey === "accepted";
 
               return (
                 <li key={booking._id}>
@@ -526,6 +527,26 @@ const BookingScreen: React.FC = () => {
                           className="px-3 py-1.5 rounded-lg bg-[#F97316] text-white text-sm font-medium hover:bg-[#dd6b14] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {isReturnLoading ? "Returning..." : "Return Trailer"}
+                        </button>
+                      )}
+                      {isAccepted && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(
+                              `/prescreening?bookingId=${encodeURIComponent(booking._id)}`,
+                              {
+                                state: {
+                                  bookingId: booking._id,
+                                  backgroundLocation: location,
+                                },
+                              },
+                            );
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-[#389131] text-white text-sm font-medium hover:bg-[#2f7a29]"
+                        >
+                          Start Pre-Screening
                         </button>
                       )}
                       {isReturnedBooking &&
