@@ -82,13 +82,16 @@ function formatPricePerDay(n: number | undefined): string {
   })}`;
 }
 
-export function apiTrailerToListItem(t: ApiTrailer): TrailerListItem {
+export function apiTrailerToListItem(t: ApiTrailer | ApiTrailerDetail): TrailerListItem {
   const modelName = (
     t.model ||
     t.title ||
     t.name ||
     "Trailer"
   ).trim();
+
+  const averageRating = (t as ApiTrailerDetail).averageRating;
+  const totalRatings = (t as ApiTrailerDetail).totalRatings;
 
   return {
     id: t._id,
@@ -98,6 +101,8 @@ export function apiTrailerToListItem(t: ApiTrailer): TrailerListItem {
     priceLabel: formatPricePerDay(t.pricePerDay),
     badgeLabel: t.isFeatured ? "Featured" : undefined,
     availabilityStatus: t.availabilityStatus?.toLowerCase(),
+    averageRating,
+    totalRatings,
   };
 }
 
@@ -162,6 +167,8 @@ export type ApiTrailerDetail = ApiTrailer & {
   usageRestrictions?: string;
   availability?: { startDate?: string; endDate?: string }[];
   isUnavailable?: boolean;
+  averageRating?: number;
+  totalRatings?: number;
 };
 
 type TrailerDetailResponse = {
@@ -425,7 +432,10 @@ export async function setTrailerUnavailability(
 export function mapApiTrailerDetailToTrailerDetail(
   data: ApiTrailerDetail,
 ): TrailerDetail {
-  const { rating, totalReviews } = ownerStats(data.ownerId);
+  // Use averageRating from API if available, otherwise fall back to ownerStats
+  const rating = data.averageRating ?? ownerStats(data.ownerId).rating;
+  const totalReviews = data.totalRatings ?? ownerStats(data.ownerId).totalReviews;
+  
   const type = apiTrailerTypeToUIType(data.trailerType);
   const title = (data.title || data.name || "Trailer").trim();
   const loc = data.location;
@@ -470,9 +480,11 @@ export function mapApiTrailerDetailToTrailerDetail(
     price: formatPricePerDay(data.pricePerDay),
     ratingBreakdown: {},
     metrics: defaultApiMetrics,
-    guestFavouriteRating: rating > 0 ? rating : 4.5,
+    guestFavouriteRating: rating,
     guestFavouriteDescription:
-      "Ratings and guest favourite status will grow as renters complete trips.",
+      totalReviews > 0 
+        ? "This trailer is in the top listings based on renter ratings, performance, and reliability."
+        : "Ratings and guest favourite status will grow as renters complete trips.",
     reviews,
   };
 }
@@ -482,11 +494,22 @@ export async function resolveTrailerForRoute(
 ): Promise<TrailerDetail | null> {
   if (!id?.trim()) return null;
   const trimmed = id.trim();
+  console.log("[DEBUG] Resolving trailer for route with ID:", trimmed);
+  
   const fromApi = await fetchTrailerById(trimmed);
-  if (fromApi) return mapApiTrailerDetailToTrailerDetail(fromApi);
+  console.log("[DEBUG] API response:", fromApi);
+  
+  if (fromApi) {
+    console.log("[DEBUG] Using API data, mapped rating:", fromApi.averageRating ?? "undefined");
+    return mapApiTrailerDetailToTrailerDetail(fromApi);
+  }
+  
   const n = Number(trimmed);
   if (Number.isInteger(n) && !Number.isNaN(n)) {
+    console.log("[DEBUG] API failed, falling back to static data");
     return getTrailerById(n) ?? null;
   }
+  
+  console.log("[DEBUG] Could not resolve trailer");
   return null;
 }

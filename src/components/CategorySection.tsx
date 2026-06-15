@@ -21,6 +21,8 @@ type CategoryItem = {
   modelLabel: string;
   priceLabel: string;
   badgeLabel?: string;
+  averageRating?: number;
+  totalRatings?: number;
 };
 
 type CategorySectionProps = {
@@ -358,7 +360,27 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   />
 
                   {/* BADGE */}
-                  {!isAuthenticated && (
+                  {item.averageRating !== undefined && item.averageRating > 0 && (
+                    <span
+                      className="
+      absolute
+      top-3
+      left-3
+      px-3
+      py-1
+      rounded-[9px]
+      bg-white
+      text-[11px]
+      font-medium
+      text-black
+      shadow
+    "
+                    >
+                      {item.averageRating.toFixed(1)} {!isAuthenticated ? "Guest favourite" : "Favourite"}
+                    </span>
+                  )}
+
+                  {!isAuthenticated && (!item.averageRating || item.averageRating === 0) && (
                     <span
                       className="
       absolute
@@ -378,7 +400,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     </span>
                   )}
 
-                  {isAuthenticated && (
+                  {isAuthenticated && (!item.averageRating || item.averageRating === 0) && (
                     <span
                       className="
       absolute

@@ -43,7 +43,10 @@ const BookingDetails: React.FC = () => {
   );
 
   useEffect(() => {
-    if (!bookingId) return;
+    if (!bookingId) {
+      setError("Booking ID not found in URL");
+      return;
+    }
     const fetchBooking = async () => {
       setLoading(true);
       setError(null);
@@ -93,35 +96,15 @@ const BookingDetails: React.FC = () => {
     setPassportVerified(false);
   }, [booking?._id]);
 
-  const uploadConditionPhotos = async () => {
-    const files = Object.entries(conditionFiles).filter(([, f]) => f);
-    if (files.length === 0) return;
-
-    const fd = new FormData();
-    fd.append("phase", "pickup");
-    const labels: string[] = [];
-
-    for (const [label, file] of files) {
-      if (file) {
-        fd.append("photos", file as File);
-        labels.push(label);
-      }
-    }
-
-    fd.append("labels", JSON.stringify(labels));
-
-    const conditionId =
-      booking?.trailerId?._id ||
-      booking?.trailerId ||
-      "6a10a06f18a8497a2a61d99e";
-    const endpoint = `https://api.renthaulhub.com/api/condition-photos/${conditionId}`;
-    await api.post(endpoint, fd, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-  };
-
   const handleAction = async (action: "accept" | "reject") => {
-    if (!bookingId) return;
+    if (!bookingId) {
+      setError("Booking ID not found. Cannot perform action.");
+      return;
+    }
+    
+    // eslint-disable-next-line no-console
+    console.log("handleAction called:", { action, bookingId, booking: booking?._id });
+    
     if (action === "accept") {
       if (showUploadSection && !areAllPhotosUploaded) {
         setError(
@@ -139,23 +122,44 @@ const BookingDetails: React.FC = () => {
     setError(null);
     try {
       if (action === "accept") {
-        try {
-          await uploadConditionPhotos();
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error("Condition photos upload error:", err);
-          setError("Photo upload failed. Request cannot be accepted.");
-          return;
-        }
-      }
+        // Use unified accept-with-photos endpoint
+        const fd = new FormData();
+        fd.append("phase", "pickup");
+        const labels: string[] = [];
 
-      await api.patch(`/api/bookings/${bookingId}/${action}`);
-      if (action === "accept") {
+        const files = Object.entries(conditionFiles).filter(([, f]) => f);
+        for (const [label, file] of files) {
+          if (file) {
+            fd.append("photos", file as File);
+            labels.push(label);
+          }
+        }
+
+        if (labels.length > 0) {
+          fd.append("labels", JSON.stringify(labels));
+        }
+
+        // eslint-disable-next-line no-console
+        console.log(`Sending accept-with-photos request to /api/bookings/${bookingId}/accept-with-photos`);
+        
+        await api.patch(
+          `/api/bookings/${bookingId}/accept-with-photos`,
+          fd,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        
         setProcessed("Accepted");
         setBooking((prev: any) =>
           prev ? { ...prev, status: "accepted" } : prev,
         );
       } else {
+        // Reject endpoint remains unchanged
+        // eslint-disable-next-line no-console
+        console.log(`Sending reject request to /api/bookings/${bookingId}/reject`);
+        
+        await api.patch(`/api/bookings/${bookingId}/${action}`);
         setProcessed("Rejected");
         setBooking((prev: any) =>
           prev ? { ...prev, status: "rejected" } : prev,
@@ -165,9 +169,7 @@ const BookingDetails: React.FC = () => {
       // eslint-disable-next-line no-console
       console.error("Booking action error:", err);
       if (action === "accept") {
-        setError(
-          "Unable to accept request after photo upload. Booking remains unchanged.",
-        );
+        setError("Unable to accept request. Please try again.");
       } else {
         setError("Unable to perform action. Please try again.");
       }

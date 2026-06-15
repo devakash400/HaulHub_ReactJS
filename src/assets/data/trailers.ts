@@ -363,6 +363,8 @@ export type TrailerListItem = {
   priceLabel: string;
   badgeLabel?: string;
   availabilityStatus?: string;
+  averageRating?: number;
+  totalRatings?: number;
 };
 
 const GOOSENECK_MODELS = ["FMAX208", "FMAX208", "FMAX208", "FMAX208", "FMAX210", "FMAX210", "FMAX220", "FMAX220"];

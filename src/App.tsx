@@ -23,6 +23,7 @@ import PaymentReceipt from "./pages/PaymentReceipt/PaymentReceipt.tsx";
 import BookingSent from "./pages/BookingSent/BookingSent.tsx";
 import VerifyIdentity from "./pages/VerifyIdentity/VerifyIdentity.tsx";
 import PreScreening from "./pages/PreScreening/PreScreening.tsx";
+import PreScreeningComplete from "./pages/PreScreeningComplete/PreScreeningComplete.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
 import AccountSettings from "./pages/AccountSettings/AccountSettings.tsx";
 import Wishlist from "./pages/Wishlist/Wishlist.tsx";
@@ -139,6 +140,10 @@ const App: React.FC = () => {
           <Route path="/request-to-book" element={<RequestToBookPage />} />
           <Route path="/liability-agreement" element={<LiabilityAgreement />} />
           <Route path="/prescreening" element={<PreScreening />} />
+          <Route
+            path="/pre-screening-complete/:bookingId"
+            element={<PreScreeningComplete />}
+          />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/verify-identity" element={<VerifyIdentity />} />
           <Route path="/booking-sent" element={<BookingSent />} />
