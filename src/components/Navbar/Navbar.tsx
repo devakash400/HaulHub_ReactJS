@@ -289,10 +289,10 @@ const Navbar: React.FC = () => {
             {isDrawerOpen && (
               <>
                 <div
-                  className="fixed inset-0 z-[55] bg-black/20 sm:hidden"
+                  className="fixed inset-0 z-[55] bg-black/20 backdrop-blur-[2px] sm:hidden transition-all duration-300"
                   onClick={closeDrawer}
                 />
-                <div className="fixed inset-y-0 right-0 z-[60] flex h-full w-[88vw] max-w-[360px] flex-col overflow-y-auto bg-[#F6F3E9] text-[#111827] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.12)] sm:hidden">
+                <div className="fixed inset-y-0 right-0 z-[60] flex h-full w-[88vw] max-w-[360px] flex-col overflow-y-auto bg-[#F6F3E9] text-[#111827] p-5 shadow-[-10px_0_30px_rgba(0,0,0,0.1)] sm:hidden rounded-l-[24px]">
                   <div className="flex items-center justify-between border-b border-[#d9d3c3] pb-3 mb-4">
                     <div>
                       <p className="text-xs uppercase tracking-[0.32em] text-[#7b6a4d]">
@@ -306,12 +306,12 @@ const Navbar: React.FC = () => {
                       type="button"
                       onClick={closeDrawer}
                       aria-label="Close menu"
-                      className="text-[#111827] text-[1.5rem] font-semibold transition-colors hover:text-[#6a5f45]"
+                      className="text-[#111827] text-[1.75rem] font-semibold transition-all duration-300 hover:text-[#389131] hover:scale-110 active:scale-95"
                     >
                       ×
                     </button>
                   </div>
-                  <div className="mb-5 rounded-[20px] border border-[#d9d3c3] bg-white/80 p-4">
+                  <div className="mb-5 rounded-[20px] border border-[#d9d3c3]/60 bg-white/90 p-4 shadow-sm backdrop-blur-md transition-transform duration-300 hover:scale-[1.02]">
                     <div className="flex items-center gap-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e7dcc2] text-[1rem] font-semibold text-[#111827]">
                         {profileInitial(user)}
@@ -328,7 +328,7 @@ const Navbar: React.FC = () => {
                       {isTrailerScreen ? (
                         <>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link
@@ -339,7 +339,7 @@ const Navbar: React.FC = () => {
                             </Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link
@@ -350,7 +350,7 @@ const Navbar: React.FC = () => {
                             </Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link
@@ -361,7 +361,7 @@ const Navbar: React.FC = () => {
                             </Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link
@@ -374,7 +374,7 @@ const Navbar: React.FC = () => {
                           {isAuthenticated ? (
                             <>
                               <li
-                                className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                                className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
                                 onClick={handleDrawerLinkRowClick}
                               >
                                 <Link
@@ -385,7 +385,7 @@ const Navbar: React.FC = () => {
                                 </Link>
                               </li>
                               <li
-                                className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                                className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
                                 onClick={() => setIsLogoutConfirmOpen(true)}
                               >
                                 <span className="text-inherit no-underline block w-full">
@@ -395,7 +395,7 @@ const Navbar: React.FC = () => {
                             </>
                           ) : (
                             <li
-                              className="w-full rounded-none bg-transparent px-5 py-4 transition-colors hover:bg-white hover:text-[#111827]"
+                              className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
                               onClick={() => {
                                 closeDrawer();
                                 modalNavigate("/login");
@@ -410,25 +410,25 @@ const Navbar: React.FC = () => {
                       ) : isOwner ? (
                         <>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/">Home</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/notifications">Notification</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/profile">Profile</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={() => setIsLogoutConfirmOpen(true)}
                           >
                             <span>Log Out</span>
@@ -437,13 +437,13 @@ const Navbar: React.FC = () => {
                       ) : !isAuthenticated ? (
                         <>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/">Home</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={() =>
                               handleProtectedDrawerNavigate("/booking")
                             }
@@ -451,13 +451,13 @@ const Navbar: React.FC = () => {
                             <span>Booked Trailor</span>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/contact">Contact</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={() =>
                               handleProtectedDrawerNavigate("/profile")
                             }
@@ -465,7 +465,7 @@ const Navbar: React.FC = () => {
                             <span>Profile</span>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={() => {
                               closeDrawer();
                               modalNavigate("/login");
@@ -477,37 +477,37 @@ const Navbar: React.FC = () => {
                       ) : (
                         <>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/">Home</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/booking">Booking Screen</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/notifications">Notifications</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/contact">Contact</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/profile">Profile</Link>
                           </li>
                           <li
-                            className="w-full rounded-none bg-transparent px-5 py-4 text-[#111827] transition-colors hover:bg-white hover:text-[#111827]"
+                            className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={() => setIsLogoutConfirmOpen(true)}
                           >
                             <span>Logout</span>
