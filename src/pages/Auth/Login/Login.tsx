@@ -294,6 +294,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
       usePhoneOnly?: boolean;
       selectedCountryCode?: string;
       loginTrailor?: "Renter" | "Owner";
+      resetEmail?: string;
+      resetPhone?: string;
     } | null;
 
     // Map pathname to step state
@@ -313,10 +315,20 @@ const LoginModal: React.FC<LoginModalProps> = ({
     if (locationState) {
       if (locationState.loginIdentifier !== undefined) {
         setEmail(locationState.loginIdentifier);
-        if (pathname === "/reset-password") {
-          if (locationState.usePhoneOnly) {
+        if (
+          pathname === "/reset-password" ||
+          pathname === "/otp" ||
+          pathname === "/Newpassword"
+        ) {
+          if (locationState.resetPhone !== undefined) {
+            setResetPhone(locationState.resetPhone);
+          } else if (locationState.usePhoneOnly) {
             setResetPhone((prev) => prev || locationState.loginIdentifier!);
-          } else {
+          }
+
+          if (locationState.resetEmail !== undefined) {
+            setResetEmail(locationState.resetEmail);
+          } else if (!locationState.usePhoneOnly) {
             setResetEmail((prev) => prev || locationState.loginIdentifier!);
           }
         }
@@ -628,7 +640,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setResetError(null);
     const currentState = location.state as Record<string, unknown> | null;
     modalNavigate("/otp", {
-      state: currentState,
+      state: {
+        ...currentState,
+        resetEmail,
+        resetPhone,
+      },
     });
   };
   const handleResendOtp = () => {
@@ -646,7 +662,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setOtpError(null);
     const currentState = location.state as Record<string, unknown> | null;
     modalNavigate("/Newpassword", {
-      state: currentState,
+      state: {
+        ...currentState,
+        resetEmail,
+        resetPhone,
+      },
     });
   };
 
@@ -1341,6 +1361,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       setResetPhone(e.target.value);
                       setResetError(null);
                     }}
+                    onBlur={() => {
+                      navigate(location.pathname, {
+                        replace: true,
+                        state: {
+                          ...(location.state as Record<string, unknown>),
+                          resetPhone,
+                        },
+                      });
+                    }}
                     placeholder="Phone Number"
                     maxLength={10}
                     className="flex-1 min-w-0 bg-transparent
@@ -1381,6 +1410,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   onChange={(e) => {
                     setResetEmail(e.target.value);
                     setResetError(null);
+                  }}
+                  onBlur={() => {
+                    navigate(location.pathname, {
+                      replace: true,
+                      state: {
+                        ...(location.state as Record<string, unknown>),
+                        resetEmail,
+                      },
+                    });
                   }}
                   placeholder="Enter Your Email"
                   className="w-full rounded-[5px] border border-black px-4 outline-none focus:outline-none focus:ring-0 custom-placeholder placeholder:text-[#9B989E]"
