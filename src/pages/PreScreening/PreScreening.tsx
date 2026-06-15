@@ -302,11 +302,13 @@ const PreScreening: React.FC = () => {
       identityVerified: boolean;
       licenseVerified: boolean;
       agreementConfirmed: boolean;
+      currentPhotosVerified: boolean;
       agreementSignature?: string;
     } = {
       identityVerified: Boolean(checkedItems[0]),
       licenseVerified: Boolean(checkedItems[1]),
       agreementConfirmed: Boolean(liabilityAccepted),
+      currentPhotosVerified: Boolean(photosConfirmed),
     };
 
     if (signatureUrl) {

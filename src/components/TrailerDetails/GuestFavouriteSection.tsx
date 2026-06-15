@@ -102,6 +102,11 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
     return (score * progress).toFixed(decimals);
   };
 
+  // Only hide if rating is null/undefined (show even if 0)
+  if (rating == null) {
+    return null;
+  }
+
   const allMetrics = [
     { label: "Overall rating", score: rating, icon: "communication" as const },
     ...metrics,
@@ -174,7 +179,7 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
           textAlign: "center",
         }}
       >
-        {title}
+       {title}
       </h2>
       <p
         className={`max-w-2xl mx-auto text-center text-black transition-all duration-700 delay-300 ${
