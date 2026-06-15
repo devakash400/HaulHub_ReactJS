@@ -102,8 +102,7 @@ const AllTrailerPhotos: React.FC = () => {
       : `/trailer/${id}`;
 
   return (
-    <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden shadow-[0px_-4px_4px_0px_#00000040]">
-      <header className="top-0     z-40 bg-transparent border-0 shadow-none">
+<div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden shadow-[0px_4px_4px_0px_#00000040]">      <header className="top-0     z-40 bg-transparent border-0 shadow-none">
         <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-row flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">

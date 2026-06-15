@@ -81,7 +81,8 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute z-10 flex items-center justify-center rounded-full bg-white text-[#389131] shadow-[0_1px_3px_rgba(0,0,0,0.12)] hover:bg-[#f5f5f5] active:bg-[#ebebeb] 
+          className="absolute z-10 flex items-center justify-center 
+          rounded-full bg-white text-[#389131] shadow-[0_1px_3px_rgba(0,0,0,0.12)] hover:bg-[#f5f5f5] active:bg-[#ebebeb] 
           transition-colors right-3 top-3 sm:right-5 sm:top-4"
           style={{ width: closeDim, height: closeDim }}
         >
