@@ -627,11 +627,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
   //   setStep("otp");
   // };
   const handleResetContinue = async () => {
-    if (!resetCanContinue || isCheckingReset) return;
+    if (isCheckingReset) return;
 
     const phoneDigits = resetPhone.replace(/\D/g, "");
     const isPhone = phoneDigits.length >= 10;
     const isEmail = emailRegex.test(resetEmail.trim());
+
+    if (phoneDigits.length === 0 && resetEmail.trim().length === 0) {
+      setResetError("Email or Mobile number is required");
+      return;
+    }
 
     if (!isPhone && !isEmail) {
       setResetError("Please enter a valid phone number or email.");
@@ -1502,7 +1507,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="button"
                 onClick={handleResetContinue}
-                disabled={!resetCanContinue || isCheckingReset}
+                disabled={isCheckingReset}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white`}
                 style={{
                   backgroundColor: resetCanContinue && !isCheckingReset ? "#389131" : "#929191",
