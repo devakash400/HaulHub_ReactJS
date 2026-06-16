@@ -216,8 +216,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const otpTargetLabel = useMemo(() => {
     const e = resetEmail.trim();
     if (emailRegex.test(e)) return e;
+    const p = resetPhone.replace(/\D/g, "");
+    if (p.length > 0) return `${selectedCountry.dialCode} ${p}`;
     return "demo@gmail.com";
-  }, [resetEmail]);
+  }, [resetEmail, resetPhone, selectedCountry.dialCode]);
 
   useEffect(() => {
     if (step !== "otp") return;
