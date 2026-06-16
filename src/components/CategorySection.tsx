@@ -271,43 +271,41 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
           </h2>
 
           {/* ARROWS */}
-          {!isMobileCompact && (
-            <div className="flex items-center">
-              <button
-                type="button"
-                onClick={() => handleScroll("left")}
-                disabled={!canScrollLeft}
-                className="transition-all duration-200"
-                style={{
-                  opacity: !canScrollLeft ? 0.4 : 1,
-                  cursor: !canScrollLeft ? "not-allowed" : "pointer",
-                }}
-              >
-                <img
-                  src={images.ArrowRight}
-                  alt="Previous"
-                  className="w-[40px] h-[40px] rotate-180"
-                />
-              </button>
+          <div className="flex items-center gap-1 sm:gap-0">
+            <button
+              type="button"
+              onClick={() => handleScroll("left")}
+              disabled={!canScrollLeft}
+              className="transition-all duration-200"
+              style={{
+                opacity: !canScrollLeft ? 0.4 : 1,
+                cursor: !canScrollLeft ? "not-allowed" : "pointer",
+              }}
+            >
+              <img
+                src={images.ArrowRight}
+                alt="Previous"
+                className="w-[30px] h-[30px] sm:w-[40px] sm:h-[40px] rotate-180"
+              />
+            </button>
 
-              <button
-                type="button"
-                onClick={() => handleScroll("right")}
-                disabled={!canScrollRight}
-                className="transition-all duration-200"
-                style={{
-                  opacity: !canScrollRight ? 0.4 : 1,
-                  cursor: !canScrollRight ? "not-allowed" : "pointer",
-                }}
-              >
-                <img
-                  src={images.ArrowRight}
-                  alt="Next"
-                  className="w-[40px] h-[40px]"
-                />
-              </button>
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={() => handleScroll("right")}
+              disabled={!canScrollRight}
+              className="transition-all duration-200"
+              style={{
+                opacity: !canScrollRight ? 0.4 : 1,
+                cursor: !canScrollRight ? "not-allowed" : "pointer",
+              }}
+            >
+              <img
+                src={images.ArrowRight}
+                alt="Next"
+                className="w-[30px] h-[30px] sm:w-[40px] sm:h-[40px]"
+              />
+            </button>
+          </div>
         </header>
 
         {/* CARDS */}
@@ -364,16 +362,18 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     <span
                       className="
       absolute
-      top-3
-      left-3
-      px-3
+      top-2 sm:top-3
+      left-2 sm:left-3
+      px-1.5 sm:px-3
       py-1
       rounded-[9px]
       bg-white
-      text-[11px]
+      text-[9px] sm:text-[11px]
       font-medium
       text-black
       shadow
+      max-w-[calc(100%-40px)] sm:max-w-none
+      truncate
     "
                     >
                       {item.averageRating.toFixed(1)} {!isAuthenticated ? "Guest favourite" : "Favourite"}
@@ -384,16 +384,18 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     <span
                       className="
       absolute
-      top-3
-      left-3
-      px-3
+      top-2 sm:top-3
+      left-2 sm:left-3
+      px-1.5 sm:px-3
       py-1
       rounded-[9px]
       bg-white
-      text-[11px]
+      text-[9px] sm:text-[11px]
       font-medium
       text-black
       shadow
+      max-w-[calc(100%-40px)] sm:max-w-none
+      truncate
     "
                     >
                       Guest favourite
@@ -404,16 +406,18 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     <span
                       className="
       absolute
-      top-3
-      left-3
-      px-3
+      top-2 sm:top-3
+      left-2 sm:left-3
+      px-1.5 sm:px-3
       py-1
       rounded-[9px]
       bg-white
-      text-[11px]
+      text-[9px] sm:text-[11px]
       font-medium
       text-black
       shadow
+      max-w-[calc(100%-40px)] sm:max-w-none
+      truncate
     "
                     >
                       Favourite
@@ -433,10 +437,10 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     }
                     className="
                       absolute
-                      top-3
-                      right-3
-                      w-9
-                      h-9
+                      top-2 sm:top-3
+                      right-2 sm:right-3
+                      w-7 sm:w-9
+                      h-7 sm:h-9
                       rounded-full
                       bg-white
                       border
@@ -448,7 +452,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     "
                   >
                     <Heart
-                      size={18}
+                      className="w-4 h-4 sm:w-[18px] sm:h-[18px]"
                       strokeWidth={2.2}
                       color={isWishlisted ? "#E03A3A" : "#8B8B8B"}
                       fill={isWishlisted ? "#E03A3A" : "none"}
