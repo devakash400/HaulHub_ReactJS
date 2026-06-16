@@ -1417,6 +1417,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     value={resetPhone}
                     onChange={(e) => {
                       setResetPhone(e.target.value);
+                      setResetEmail("");
                       setResetError(null);
                     }}
                     onBlur={() => {
@@ -1425,6 +1426,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                         state: {
                           ...(location.state as Record<string, unknown>),
                           resetPhone,
+                          resetEmail,
                         },
                       });
                     }}
@@ -1467,6 +1469,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   value={resetEmail}
                   onChange={(e) => {
                     setResetEmail(e.target.value);
+                    setResetPhone("");
                     setResetError(null);
                   }}
                   onBlur={() => {
@@ -1475,6 +1478,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       state: {
                         ...(location.state as Record<string, unknown>),
                         resetEmail,
+                        resetPhone,
                       },
                     });
                   }}
