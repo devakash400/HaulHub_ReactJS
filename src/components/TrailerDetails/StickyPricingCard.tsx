@@ -486,7 +486,8 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                   <input
                     type="date"
                     value={checkOut}
-                    min={today}
+                    min={checkIn || today}
+                    disabled={!checkIn}
                     onChange={(e) => {
                       setCheckOut(e.target.value);
                       setValidationError(null);
@@ -500,6 +501,8 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
       focus:outline-none
       appearance-none
       pr-10
+      disabled:opacity-50
+      disabled:cursor-not-allowed
       [&::-webkit-calendar-picker-indicator]:opacity-0
       [&::-webkit-calendar-picker-indicator]:absolute
       [&::-webkit-calendar-picker-indicator]:right-0
