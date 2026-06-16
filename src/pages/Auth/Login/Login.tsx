@@ -789,7 +789,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const modal = (
     <div
       className="modal-overlay fixed inset-0 z-[80] flex items-center justify-center bg-black/45 px-4"
-      onClick={handleOverlayClick}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          handleOverlayClick();
+        }
+      }}
     >
       <style>{`
         .custom-placeholder::placeholder {
