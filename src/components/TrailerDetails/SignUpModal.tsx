@@ -105,6 +105,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   );
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const countryDropdownRef = useRef<HTMLDivElement | null>(null);
+  const [genderDropdownOpen, setGenderDropdownOpen] = useState(false);
+  const genderDropdownRef = useRef<HTMLDivElement | null>(null);
   const [agreed, setAgreed] = useState(false);
 
   const [firstNameTouched, setFirstNameTouched] = useState(false);
@@ -144,6 +146,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setGenderTouched(false);
     setDateOfBirthTouched(false);
     setAgeSubmitError(false);
+    setGenderDropdownOpen(false);
   }, [isOpen]);
 
   useEffect(() => {
@@ -157,6 +160,27 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
       unlock();
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        genderDropdownRef.current &&
+        !genderDropdownRef.current.contains(event.target as Node)
+      ) {
+        setGenderDropdownOpen(false);
+      }
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const isFirstNameValid =
     firstName.trim().length > 0 && onlyAlphabetsRegex.test(firstName.trim());
@@ -455,12 +479,12 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   >
                     Gender
                   </label>
-                  <div className="relative">
-                    <select
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
+                  <div className="relative" ref={genderDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setGenderDropdownOpen((prev) => !prev)}
                       onBlur={() => setGenderTouched(true)}
-                      className="w-full px-3 pr-9 text-[12px] bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
+                      className="w-full px-3 pr-9 text-left flex items-center justify-between bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
@@ -475,22 +499,34 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         color: gender ? "#000000" : "#929191",
                       }}
                     >
-                      <option value="" style={{ color: "#000000" }}>
-                        Select Gender
-                      </option>
-                      <option value="Male" style={{ color: "#000000" }}>
-                        Male
-                      </option>
-                      <option value="Female" style={{ color: "#000000" }}>
-                        Female
-                      </option>
-                      <option value="Other" style={{ color: "#000000" }}>
-                        Other
-                      </option>
-                    </select>
+                      {gender || "Select Gender"}
+                    </button>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
                       <ChevronDown className="w-4 h-4" aria-hidden />
                     </span>
+                    {genderDropdownOpen && (
+                      <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-[5px] border border-[#D1D5DB] bg-white shadow-lg">
+                        {["Male", "Female", "Other"].map((option, index) => (
+                          <button
+                            type="button"
+                            key={option}
+                            onClick={() => {
+                              setGender(option);
+                              setGenderDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-[14px] text-[#000000] hover:bg-[#F3F4F6] ${
+                              index !== 2 ? "border-b border-[#D1D5DB]" : ""
+                            }`}
+                            style={{
+                              fontFamily: "Lexend",
+                              fontWeight: 300,
+                            }}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   {genderTouched && gender.trim().length === 0 && (
                     <p className="mt-1 text-xs text-red-600">
