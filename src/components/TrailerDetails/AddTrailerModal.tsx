@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
-import { ChevronDown, Upload } from "lucide-react";
+import { ChevronDown, Upload, X } from "lucide-react";
 import { ModalHeader } from "../ModalHeader.tsx";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import { addOwnerTrailer } from "../../store/authSlice.ts";
@@ -74,6 +74,24 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
   const [dimensionPresetOpen, setDimensionPresetOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDimensionPreset, setSelectedDimensionPreset] = useState("");
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+
+  const removeGalleryPhoto = (indexToRemove: number) => {
+    const nextPhotos = photos.filter((_, idx) => idx !== indexToRemove);
+    const nextPhotoFiles = photoFiles.filter((_, idx) => idx !== indexToRemove);
+    setPhotos(nextPhotos);
+    setPhotoFiles(nextPhotoFiles);
+    setTouched(prev => ({ ...prev, photos: true }));
+    validate(nextPhotos, profilePhotoUrl);
+  };
+
+  const removeProfilePhoto = () => {
+    setProfilePhotoUrl(null);
+    setProfilePhotoFile(null);
+    if (profileInputRef.current) profileInputRef.current.value = "";
+    setTouched(prev => ({ ...prev, profilePhoto: true }));
+    validate(photos, null);
+  };
 
   const typeRef = useRef<HTMLDivElement>(null);
   const hitchRef = useRef<HTMLDivElement>(null);
@@ -107,6 +125,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     setPhotos([]);
     setPhotoFiles([]);
     setSelectedDimensionPreset("");
+    setPreviewImageUrl(null);
     setErrors({});
     setTouched({});
   }, [isOpen]);
@@ -159,7 +178,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     };
   }, []);
 
-  const validate = (photoList: string[] = photos) => {
+  const validate = (photoList: string[] = photos, profilePhoto: string | null = profilePhotoUrl) => {
     const newErrors: Errors = {};
 
     if (!title.trim()) {
@@ -202,7 +221,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       newErrors.availabilityEndDate = "End date is required";
     }
 
-    if (!profilePhotoUrl?.trim()) {
+    if (!profilePhoto?.trim()) {
       newErrors.profilePhoto = "Profile photo is required";
     }
 
@@ -743,6 +762,30 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                     {errors.profilePhoto}
                   </p>
                 )}
+
+                {profilePhotoUrl && (
+                  <div className="mt-3">
+                    <p className="mb-2 font-lexend text-[12px] font-normal text-[#7C7C7C]">
+                      Profile Picture Preview
+                    </p>
+                    <div className="relative group h-[60px] w-[60px] overflow-hidden rounded-[5px] border border-[#7C7C7C]/30">
+                      <img
+                        src={profilePhotoUrl}
+                        alt="Profile Preview"
+                        className="h-full w-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => setPreviewImageUrl(profilePhotoUrl)}
+                      />
+                      <button
+                        type="button"
+                        onClick={removeProfilePhoto}
+                        className="absolute top-1 right-1 bg-white/80 p-0.5 rounded-full hover:bg-white transition-colors shadow-sm"
+                        aria-label="Remove profile photo"
+                      >
+                        <X className="h-3 w-3 text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -873,6 +916,37 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
                 {touched.photos && errors.photos && (
                   <p className="mt-2 text-sm text-red-500">{errors.photos}</p>
+                )}
+
+                {photos.length > 0 && (
+                  <div className="mt-3">
+                    <p className="mb-2 font-lexend text-[12px] font-normal text-[#7C7C7C]">
+                      Preview of {photos.length} uploaded image{photos.length !== 1 ? 's' : ''}
+                    </p>
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#7C7C7C]/30 scrollbar-track-transparent">
+                      {photos.map((photo, idx) => (
+                        <div
+                          key={idx}
+                          className="relative group h-[60px] w-[60px] shrink-0 overflow-hidden rounded-[5px] border border-[#7C7C7C]/30"
+                        >
+                          <img
+                            src={photo}
+                            alt={`Upload ${idx + 1}`}
+                            className="h-full w-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setPreviewImageUrl(photo)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeGalleryPhoto(idx)}
+                            className="absolute top-1 right-1 bg-white/80 p-0.5 rounded-full hover:bg-white transition-colors shadow-sm"
+                            aria-label={`Remove photo ${idx + 1}`}
+                          >
+                            <X className="h-3 w-3 text-red-500" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -1106,5 +1180,34 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     </div>
   );
 
-  return createPortal(modal, document.body);
+  const imagePreviewModal = previewImageUrl ? (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+      onClick={() => setPreviewImageUrl(null)}
+    >
+      <div className="relative max-h-[90vh] max-w-[90vw]">
+        <button
+          className="absolute -top-10 right-0 text-white hover:text-gray-300"
+          onClick={() => setPreviewImageUrl(null)}
+          aria-label="Close preview"
+        >
+          <X className="h-8 w-8" />
+        </button>
+        <img
+          src={previewImageUrl}
+          alt="Full screen preview"
+          className="max-h-[85vh] max-w-full rounded-lg object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    </div>
+  ) : null;
+
+  return createPortal(
+    <>
+      {modal}
+      {imagePreviewModal}
+    </>,
+    document.body
+  );
 };

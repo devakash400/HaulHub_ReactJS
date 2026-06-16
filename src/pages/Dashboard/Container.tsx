@@ -56,7 +56,7 @@ const Container: React.FC = () => {
   return (
     <main className="w-full min-w-0 m-0 p-0 font-sans overflow-x-hidden">
       <section
-        className="relative w-full min-w-0 overflow-hidden rounded-none shadow-none mb-0 flex items-center justify-center bg-white h-[592px]"
+        className="relative w-full min-w-0 overflow-hidden rounded-none shadow-none mb-0 flex items-center justify-center bg-white h-[200px] sm:h-[300px] md:h-[400px] lg:h-[592px]"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
