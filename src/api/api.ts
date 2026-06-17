@@ -115,17 +115,36 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await axios.post(`${BASE_URL}/api/auth/refresh-token`, {
+        const refreshUrl = `${BASE_URL}/api/auth/refresh`;
+        console.log("[refresh] URL:", refreshUrl);
+        const res = await axios.post(refreshUrl, {
           refreshToken,
         });
 
-        const data = res.data as {
-          accessToken: string;
+        console.log("[refresh] response:", res.data);
+
+        const payload = (res.data ?? {}) as {
+          success?: boolean;
+          data?: {
+            accessToken?: string;
+            refreshToken?: string;
+          };
+          accessToken?: string;
           refreshToken?: string;
         };
 
-        const newAccessToken = data.accessToken;
-        const newRefreshToken = data.refreshToken ?? refreshToken;
+        const nestedData = payload.data ?? {};
+        const newAccessToken =
+          nestedData.accessToken ?? payload.accessToken ?? null;
+        const newRefreshToken =
+          nestedData.refreshToken ?? payload.refreshToken ?? refreshToken;
+
+        console.log("[refresh] parsed accessToken:", newAccessToken);
+        console.log("[refresh] parsed refreshToken:", newRefreshToken);
+
+        if (!newAccessToken) {
+          throw new Error("Refresh response missing accessToken");
+        }
 
         setTokens(newAccessToken, newRefreshToken || "");
         processQueue(null, newAccessToken);
