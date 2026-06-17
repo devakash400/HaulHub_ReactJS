@@ -817,7 +817,7 @@ const Profile: React.FC = () => {
     "flex min-h-[71px] w-full max-w-[593px] items-center justify-between rounded-[2px] border border-[#D9D9D9] bg-white px-5 py-4 lg:w-[593px]";
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-white">
+    <div className="w-full overflow-x-hidden bg-white">
       <div className="w-full px-[40px] py-6 sm:py-8">
         <div className="flex w-full flex-col gap-10 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-8">
           {/* LEFT SIDE */}
