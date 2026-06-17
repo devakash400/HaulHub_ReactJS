@@ -32,7 +32,9 @@ export const roleToTrailor = (
 };
 
 export type RegisterPayload = {
-  fullName: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   phoneNumber: string;
   password: string;
@@ -145,9 +147,22 @@ export const phoneLogin = async (
 export const register = async (
   payload: RegisterPayload
 ): Promise<LoginResponse> => {
-  const { trailor, ...rest } = payload;
+  const { trailor, fullName, firstName, lastName, ...rest } = payload;
+
+  const normalizedFirstName = firstName?.trim() ||
+    (fullName
+      ? fullName.trim().split(/\s+/).filter(Boolean)[0]
+      : "");
+  const normalizedLastName = lastName?.trim() ||
+    (fullName
+      ? fullName.trim().split(/\s+/).filter(Boolean).slice(1).join(" ")
+      : "");
+
   const res = await api.post<BackendLoginResponse>("/api/auth/register", {
     ...rest,
+    fullName: fullName?.trim() || `${normalizedFirstName} ${normalizedLastName}`.trim(),
+    firstName: normalizedFirstName,
+    lastName: normalizedLastName,
     role: stringToRole(trailor),
   });
 
