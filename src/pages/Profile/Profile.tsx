@@ -438,7 +438,7 @@ const Profile: React.FC = () => {
                   <button
                     type="button"
                     onClick={item.onClick}
-                    className="flex items-center justify-between w-full h-[71px] bg-white border border-[#00000042] px-5 shadow-[0px_4px_4px_0px_#00000040] hover:bg-[#fafafa] transition"
+                    className="flex items-center justify-between w-full min-h-[71px] py-3 sm:py-0 sm:h-[71px] bg-white border border-[#00000042] px-5 shadow-[0px_4px_4px_0px_#00000040] hover:bg-[#fafafa] transition text-left"
                   >
                     <div className="flex items-center gap-4">
                       {typeof Icon === "string" ? (
@@ -451,12 +451,12 @@ const Profile: React.FC = () => {
                         <Icon className="w-[25px] h-[25px] shrink-0 text-black" />
                       )}
 
-                      <span className="text-[24px] leading-[100%] font-normal text-black tracking-[0px] font-['Lexend']">
+                      <span className="text-[18px] sm:text-[24px] leading-[1.2] sm:leading-[100%] font-normal text-black tracking-[0px] font-['Lexend']">
                         {item.label}
                       </span>
                     </div>
 
-                    <ChevronRight className="w-5 h-5 text-[#666]" />
+                    <ChevronRight className="w-5 h-5 text-[#666] shrink-0" />
                   </button>
                 </li>
               );
