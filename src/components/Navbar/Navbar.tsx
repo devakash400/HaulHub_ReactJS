@@ -386,7 +386,7 @@ const Navbar: React.FC = () => {
                               </li>
                               <li
                                 className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
-                                onClick={() => setIsLogoutConfirmOpen(true)}
+                                onClick={() => { closeDrawer(); setIsLogoutConfirmOpen(true); }}
                               >
                                 <span className="text-inherit no-underline block w-full">
                                   Logout
@@ -439,7 +439,7 @@ const Navbar: React.FC = () => {
                           </li>
                           <li
                             className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                            onClick={() => setIsLogoutConfirmOpen(true)}
+                            onClick={() => { closeDrawer(); setIsLogoutConfirmOpen(true); }}
                           >
                             <span>Log Out</span>
                           </li>
@@ -526,7 +526,7 @@ const Navbar: React.FC = () => {
                           </li>
                           <li
                             className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                            onClick={() => setIsLogoutConfirmOpen(true)}
+                            onClick={() => { closeDrawer(); setIsLogoutConfirmOpen(true); }}
                           >
                             <span>Logout</span>
                           </li>
