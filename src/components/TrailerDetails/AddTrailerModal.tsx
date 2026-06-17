@@ -479,7 +479,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
           <div className="space-y-4 px-6 py-6 sm:px-8">
             {/* Trailer Title */}
             <div>
-              <label className={fieldLabelClass}>Trailer Title</label>
+              <label className={fieldLabelClass}>Trailer Title <span className="text-red-500">*</span></label>
 
               <input
                 type="text"
@@ -495,7 +495,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
             {/* Trailer Type */}
             <div ref={typeRef} className="relative">
-              <label className={fieldLabelClass}>Trailer Type</label>
+              <label className={fieldLabelClass}>Trailer Type <span className="text-red-500">*</span></label>
 
               <button
                 type="button"
@@ -543,7 +543,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
             {/* Weight */}
             <div>
-              <label className={fieldLabelClass}>Weight</label>
+              <label className={fieldLabelClass}>Weight <span className="text-red-500">*</span></label>
 
               <input
                 type="text"
@@ -558,7 +558,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
             {/* Hitch Type */}
             <div ref={hitchRef} className="relative">
-              <label className={fieldLabelClass}>Hitch Type</label>
+              <label className={fieldLabelClass}>Hitch Type <span className="text-red-500">*</span></label>
 
               <button
                 type="button"
@@ -606,7 +606,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
             {/* Dimensions */}
             <div ref={dimensionPresetRef} className="relative">
-              <label className={fieldLabelClass}>Dimensions</label>
+              <label className={fieldLabelClass}>Dimensions <span className="text-red-500">*</span></label>
 
               <button
                 type="button"
@@ -686,7 +686,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
             {/* Uploads */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={fieldLabelClass}>Profile Picture</label>
+                <label className={fieldLabelClass}>Profile Picture <span className="text-red-500">*</span></label>
 
                 <input
                   ref={profileInputRef}
@@ -789,7 +789,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
               </div>
 
               <div>
-                <label className={fieldLabelClass}>Upload Images</label>
+                <label className={fieldLabelClass}>Upload Images <span className="text-red-500">*</span></label>
 
                 <input
                   ref={takePhotoInputRef}
@@ -953,7 +953,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
             {/* Price */}
             <div>
-              <label className={fieldLabelClass}>Set Pricing</label>
+              <label className={fieldLabelClass}>Set Pricing <span className="text-red-500">*</span></label>
 
               <input
                 type="text"
@@ -967,7 +967,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
             {/* Availability */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={fieldLabelClass}>Availability Start</label>
+                <label className={fieldLabelClass}>Availability Start <span className="text-red-500">*</span></label>
 
                 <input
                   type="date"
@@ -1007,7 +1007,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
               </div>
 
               <div>
-                <label className={fieldLabelClass}>Availability End</label>
+                <label className={fieldLabelClass}>Availability End <span className="text-red-500">*</span></label>
 
                 <input
                   type="date"
@@ -1061,7 +1061,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
             {/* Location Fields */}
             <div>
-              <label className={fieldLabelClass}>Address</label>
+              <label className={fieldLabelClass}>Address <span className="text-red-500">*</span></label>
 
               <input
                 type="text"
@@ -1080,7 +1080,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={fieldLabelClass}>City</label>
+                <label className={fieldLabelClass}>City <span className="text-red-500">*</span></label>
 
                 <input
                   type="text"
@@ -1098,7 +1098,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
               </div>
 
               <div>
-                <label className={fieldLabelClass}>State</label>
+                <label className={fieldLabelClass}>State <span className="text-red-500">*</span></label>
 
                 <input
                   type="text"
@@ -1121,7 +1121,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
             </div>
 
             <div>
-              <label className={fieldLabelClass}>Zip Code</label>
+              <label className={fieldLabelClass}>Zip Code <span className="text-red-500">*</span></label>
 
               <input
                 type="text"
