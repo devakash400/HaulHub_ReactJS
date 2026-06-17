@@ -380,20 +380,20 @@ const BookingDetails: React.FC = () => {
       <div className="mx-auto w-full max-w-[1260px] px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-full bg-indigo-500 text-white grid place-items-center text-xl font-semibold">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="h-14 w-14 shrink-0 rounded-full bg-indigo-500 text-white grid place-items-center text-xl font-semibold">
                 {getInitials(renterName)}
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-slate-500">
                   {booking?.user?.fullName
                     ? "Booking details"
                     : "Booking details"}
                 </p>
-                <h1 className="text-2xl font-semibold text-slate-900">
+                <h1 className="text-2xl font-semibold text-slate-900 break-words break-all">
                   {renterName}
                 </h1>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-500 truncate">
                   Booking ID:{" "}
                   <span className="font-mono text-slate-600">
                     {booking?._id ?? bookingId}

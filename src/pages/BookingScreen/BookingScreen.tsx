@@ -498,7 +498,16 @@ const BookingScreen: React.FC = () => {
                 <li key={booking._id}>
                   <article
                     onClick={() => {
-                      if (trailerUrl) navigate(trailerUrl);
+                      if (trailerUrl) {
+                        navigate(trailerUrl, {
+                          state: {
+                            bookingId: booking._id,
+                            status: statusKey,
+                            startDate: booking.startDate ? new Date(booking.startDate).toISOString().split('T')[0] : undefined,
+                            endDate: booking.endDate ? new Date(booking.endDate).toISOString().split('T')[0] : undefined,
+                          }
+                        });
+                      }
                     }}
                     className="cursor-pointer flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow"
                   >

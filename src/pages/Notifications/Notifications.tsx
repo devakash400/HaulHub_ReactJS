@@ -228,35 +228,35 @@ const Notifications: React.FC = () => {
                   className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-5 shadow-sm"
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex gap-4">
+                    <div className="flex flex-1 min-w-0 gap-4">
                       {imageUrl ? (
                         <img
                           src={imageUrl}
                           alt={notification.trailerId?.title ?? ""}
-                          className="h-20 w-28 rounded-2xl object-cover"
+                          className="h-20 w-28 shrink-0 rounded-2xl object-cover"
                         />
                       ) : (
-                        <div className="flex h-20 w-28 items-center justify-center rounded-2xl bg-gray-200 text-sm text-gray-500">
+                        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-2xl bg-gray-200 text-sm text-gray-500">
                           No image
                         </div>
                       )}
 
-                      <div>
-                        <p className="text-base font-semibold text-gray-900">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-base font-semibold text-gray-900 break-words">
                           {notification.title}
                         </p>
-                        <p className="mt-1 text-sm text-gray-700">
+                        <p className="mt-1 text-sm text-gray-700 break-words">
                           {notification.message}
                         </p>
-                        <p className="mt-2 text-xs font-medium text-gray-500">
+                        <p className="mt-2 text-xs font-medium text-gray-500 break-words">
                           Booking ID: {notification.bookingId}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-start gap-3 text-right sm:items-end">
-                      <span className="inline-flex items-center rounded-full bg-[#E7F6E6] px-3 py-1 text-xs font-semibold text-[#2F7A29]">
-                        {notification.title}
+                    <div className="flex shrink-0 flex-col items-start gap-3 text-right sm:items-end">
+                      <span className="inline-flex max-w-full items-center rounded-full bg-[#E7F6E6] px-3 py-1 text-xs font-semibold text-[#2F7A29] break-words text-left">
+                        <span className="truncate">{notification.title}</span>
                       </span>
                       <p className="text-xs text-gray-500">{createdAt}</p>
                       {isOwner && isNewRentalRequest ? (
