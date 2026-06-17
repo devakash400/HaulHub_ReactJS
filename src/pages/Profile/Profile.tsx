@@ -287,7 +287,10 @@ const Profile: React.FC = () => {
     {
       label: "Transaction History",
       icon: transactionicon,
-      onClick: () => navigate("/booking"),
+      onClick: () =>
+        navigate("/account-settings", {
+          state: { panel: "transactionHistory" },
+        }),
     },
     {
       label: "Log Out",

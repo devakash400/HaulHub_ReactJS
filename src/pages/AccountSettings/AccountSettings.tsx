@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import settingsIcon from "../../assets/images/Personalinfo.png";
 import privacyicon from "../../assets/images/privacypolicy.png";
 import termsicon from "../../assets/images/termscondition.png";
@@ -141,25 +141,25 @@ const residentialFromProfile = (p: UserProfileApiData | null): string => {
     : isFilled(p.address)
       ? String(p.address).trim()
       : (() => {
-          const list = p.addresses;
-          if (Array.isArray(list) && list.length > 0) {
-            const first = list[0];
-            if (typeof first === "string") return first.trim();
-            if (first && typeof first === "object") {
-              const o = first as Record<string, unknown>;
-              const s =
-                o.formattedAddress ??
-                o.address ??
-                o.addressLine ??
-                o.addressLine1 ??
-                o.street ??
-                o.line1 ??
-                o.city;
-              if (typeof s === "string" && s.trim()) return s.trim();
-            }
+        const list = p.addresses;
+        if (Array.isArray(list) && list.length > 0) {
+          const first = list[0];
+          if (typeof first === "string") return first.trim();
+          if (first && typeof first === "object") {
+            const o = first as Record<string, unknown>;
+            const s =
+              o.formattedAddress ??
+              o.address ??
+              o.addressLine ??
+              o.addressLine1 ??
+              o.street ??
+              o.line1 ??
+              o.city;
+            if (typeof s === "string" && s.trim()) return s.trim();
           }
-          return "";
-        })();
+        }
+        return "";
+      })();
 
   const locationParts = [p.state?.trim(), p.country?.trim()].filter(isFilled);
   return [addressLine, ...locationParts].filter(isFilled).join(", ");
@@ -285,6 +285,7 @@ const transactionStatusClass: Record<TransactionStatus, string> = {
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
@@ -296,7 +297,15 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [editField, setEditField] = useState<EditField | null>(null);
   const [saving, setSaving] = useState(false);
-  const [rightPanel, setRightPanel] = useState<RightPanelView>("personalInfo");
+  const initialPanel = (location.state as any)?.panel === "transactionHistory" ? "transactionHistory" : "personalInfo";
+  const [rightPanel, setRightPanel] = useState<RightPanelView>(initialPanel);
+
+  useEffect(() => {
+    const p = (location.state as any)?.panel;
+    if (p === "transactionHistory" || p === "personalInfo") {
+      setRightPanel(p);
+    }
+  }, [location.state]);
 
   const [draftLegal, setDraftLegal] = useState("");
   const [draftPreferred, setDraftPreferred] = useState("");
@@ -839,9 +848,8 @@ const Profile: React.FC = () => {
                     key={item.label}
                     type="button"
                     onClick={item.onClick}
-                    className={`${profileCardClass} ${
-                      isActive ? " bg-[#f6fbf4]" : ""
-                    }`}
+                    className={`${profileCardClass} ${isActive ? " bg-[#f6fbf4]" : ""
+                      }`}
                   >
                     <span className="flex items-center gap-3">
                       {typeof Icon === "string" ? (
@@ -955,9 +963,8 @@ const Profile: React.FC = () => {
                   return (
                     <div
                       key={row.key}
-                      className={`${personalCardClass} ${
-                        dimOthers ? "opacity-40" : "opacity-100"
-                      }`}
+                      className={`${personalCardClass} ${dimOthers ? "opacity-40" : "opacity-100"
+                        }`}
                     >
                       {isActive ? (
                         <div className="flex min-h-[71px] flex-col justify-center">
@@ -1345,9 +1352,8 @@ const Profile: React.FC = () => {
                             </p>
 
                             <p
-                              className={`mt-[6px] truncate text-[11px] font-light leading-[100%] ${
-                                row.hasData ? "text-black" : "text-black/45"
-                              }`}
+                              className={`mt-[6px] truncate text-[11px] font-light leading-[100%] ${row.hasData ? "text-black" : "text-black/45"
+                                }`}
                             >
                               {row.hasData ? row.value : row.placeholder}
                             </p>
