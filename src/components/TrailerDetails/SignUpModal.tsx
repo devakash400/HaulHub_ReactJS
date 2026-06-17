@@ -33,7 +33,7 @@ type CountryOption = {
   flag: string;
   flagUrl: string;
 };
-
+//Data 
 const COUNTRY_OPTIONS: CountryOption[] = [
   {
     code: "US",
@@ -843,15 +843,12 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   />
 
                   {/* Changed label -> div so text click won't toggle checkbox */}
-                  <div className="text-[11px] sm:text-xs leading-relaxed text-gray-700 break-words">
+                  <div className="text-[13px] leading-[18px] sm:text-[17px] sm:leading-[21px] text-gray-700 break-words">
                     <span
-                      className="block sm:inline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
-                        fontSize: "17px",
-                        lineHeight: "21px",
                         letterSpacing: "4%",
                         color: "#000000",
                       }}
@@ -860,13 +857,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     </span>
                     <a
                       href="/terms"
-                      className="block sm:inline underline"
+                      className="underline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
-                        fontSize: "17px",
-                        lineHeight: "21px",
                         letterSpacing: "0.04em",
                         textDecorationStyle: "solid",
                         textDecorationSkipInk: "auto",
@@ -876,13 +871,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       Terms of service
                     </a>
                     <span
-                      className="block sm:inline underline"
+                      className="underline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
-                        fontSize: "17px",
-                        lineHeight: "21px",
                         letterSpacing: "0.04em",
                         textDecorationStyle: "solid",
                         textDecorationSkipInk: "auto",
@@ -893,13 +886,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     </span>
                     <a
                       href="/payments-terms"
-                      className="block sm:inline underline"
+                      className="underline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
-                        fontSize: "17px",
-                        lineHeight: "21px",
                         letterSpacing: "0.04em",
                         textDecorationStyle: "solid",
                         textDecorationSkipInk: "auto",
@@ -909,31 +900,23 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                       Payments Terms of Service and Anti-Discrimination Policy
                     </a>
                     <span
-                      className="block sm:inline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
-                        fontSize: "17px",
-                        lineHeight: "21px",
                         letterSpacing: "4%",
                         color: "#000000",
                       }}
                     >
                       , and acknowledge the{" "}
                     </span>
-                    <span className="block sm:hidden mt-0.5">
-                      , and acknowledge the
-                    </span>{" "}
                     <a
                       href="/privacy-policy"
-                      className="block sm:inline underline"
+                      className="underline"
                       style={{
                         fontFamily: "Lexend, sans-serif",
                         fontWeight: 400,
                         fontStyle: "normal",
-                        fontSize: "17px",
-                        lineHeight: "21px",
                         letterSpacing: "0.04em",
                         textDecorationStyle: "solid",
                         textDecorationSkipInk: "auto",
@@ -942,7 +925,16 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                     >
                       Privacy Policy
                     </a>
-                    <span>.</span>
+                    <span
+                      style={{
+                        fontFamily: "Lexend, sans-serif",
+                        fontWeight: 400,
+                        fontStyle: "normal",
+                        color: "#000000",
+                      }}
+                    >
+                      .
+                    </span>
                   </div>
                 </div>
               </div>

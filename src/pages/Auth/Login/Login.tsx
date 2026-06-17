@@ -216,8 +216,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const otpTargetLabel = useMemo(() => {
     const e = resetEmail.trim();
     if (emailRegex.test(e)) return e;
+    const p = resetPhone.replace(/\D/g, "");
+    if (p.length > 0) return `${selectedCountry.dialCode} ${p}`;
     return "demo@gmail.com";
-  }, [resetEmail]);
+  }, [resetEmail, resetPhone, selectedCountry.dialCode]);
 
   useEffect(() => {
     if (step !== "otp") return;
@@ -625,11 +627,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
   //   setStep("otp");
   // };
   const handleResetContinue = async () => {
-    if (!resetCanContinue || isCheckingReset) return;
+    if (isCheckingReset) return;
 
     const phoneDigits = resetPhone.replace(/\D/g, "");
     const isPhone = phoneDigits.length >= 10;
     const isEmail = emailRegex.test(resetEmail.trim());
+
+    if (phoneDigits.length === 0 && resetEmail.trim().length === 0) {
+      setResetError("Email or Mobile number is required");
+      return;
+    }
 
     if (!isPhone && !isEmail) {
       setResetError("Please enter a valid phone number or email.");
@@ -782,7 +789,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const modal = (
     <div
       className="modal-overlay fixed inset-0 z-[80] flex items-center justify-center bg-black/45 px-4"
-      onClick={handleOverlayClick}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          handleOverlayClick();
+        }
+      }}
     >
       <style>{`
         .custom-placeholder::placeholder {
@@ -1417,6 +1428,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     value={resetPhone}
                     onChange={(e) => {
                       setResetPhone(e.target.value);
+                      setResetEmail("");
                       setResetError(null);
                     }}
                     onBlur={() => {
@@ -1425,6 +1437,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                         state: {
                           ...(location.state as Record<string, unknown>),
                           resetPhone,
+                          resetEmail,
                         },
                       });
                     }}
@@ -1467,6 +1480,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   value={resetEmail}
                   onChange={(e) => {
                     setResetEmail(e.target.value);
+                    setResetPhone("");
                     setResetError(null);
                   }}
                   onBlur={() => {
@@ -1475,6 +1489,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       state: {
                         ...(location.state as Record<string, unknown>),
                         resetEmail,
+                        resetPhone,
                       },
                     });
                   }}
@@ -1496,7 +1511,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="button"
                 onClick={handleResetContinue}
-                disabled={!resetCanContinue || isCheckingReset}
+                disabled={isCheckingReset}
                 className={`w-full mt-6 py-3.5 rounded-md text-sm font-semibold text-white`}
                 style={{
                   backgroundColor: resetCanContinue && !isCheckingReset ? "#389131" : "#929191",
