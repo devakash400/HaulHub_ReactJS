@@ -314,7 +314,7 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white overflow-x-hidden">
+    <div className="w-full bg-white overflow-x-hidden pb-12">
       <div className="mb-5 w-full px-[32px]">
         <header className="pt-6 pb-2">
           <h1 className="text-[42px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
