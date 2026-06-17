@@ -310,20 +310,21 @@ const BottomBar: React.FC = () => {
   return (
     <footer className="bg-[#F9F7F0] pt-8 sm:pt-10 pb-6 sm:pb-0 px-5 sm:px-10 font-sans w-full overflow-x-hidden mb-[10px]">
       {/* TOP SECTION */}
-      <div className="w-full flex flex-wrap items-start justify-between gap-8 min-w-0">
+      <div className="w-full flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8 min-w-0">
         {/* LEFT SIDE */}
         <div
           className="
-            flex flex-col sm:flex-row sm:flex-wrap gap-8 sm:gap-12
-            flex-1 min-w-0 sm:min-w-[260px]
+            flex flex-col lg:flex-row lg:flex-wrap gap-8 lg:gap-12
+            w-full lg:flex-1 min-w-0 lg:min-w-[260px]
+            items-center lg:items-start justify-center lg:justify-start
           "
         >
-          <div>
+          <div className="text-center lg:text-left flex flex-col items-center lg:items-start w-full lg:w-auto">
             <h3 className="m-0 mb-4 sm:mb-8 text-[22px] sm:text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
               Explore
             </h3>
 
-            <ul className="list-none p-0 m-0 flex flex-col gap-4 sm:gap-[21px] text-[16px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
+            <ul className="list-none p-0 m-0 flex flex-col items-center lg:items-start gap-4 sm:gap-[21px] text-[16px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
               {isRenter && (
                 <li>
                   <Link
@@ -372,7 +373,7 @@ const BottomBar: React.FC = () => {
                           state: { returnTo: "/booking" },
                         })
                       }
-                      className="no-underline text-black transition-colors hover:text-[#389131] text-left"
+                      className="no-underline text-black transition-colors hover:text-[#389131] text-center lg:text-left"
                     >
                       Your Booked Trailers
                     </button>
@@ -401,12 +402,12 @@ const BottomBar: React.FC = () => {
           </div>
 
           {/* COMPANY */}
-          <div>
+          <div className="text-center lg:text-left flex flex-col items-center lg:items-start w-full lg:w-auto">
             <h3 className="m-0 mb-4 sm:mb-8 text-[22px] sm:text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
               Company
             </h3>
 
-            <ul className="list-none p-0 m-0 flex flex-col gap-4 sm:gap-[21px] text-[16px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
+            <ul className="list-none p-0 m-0 flex flex-col items-center lg:items-start gap-4 sm:gap-[21px] text-[16px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
               <li>
                 <Link
                   to="/how-it-works"
@@ -520,13 +521,13 @@ const BottomBar: React.FC = () => {
           className="
             flex flex-col items-center gap-4
             py-1
-            sm:grid
-            sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]
-            sm:items-center
-            sm:gap-x-6
+            lg:grid
+            lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]
+            lg:items-center
+            lg:gap-x-6
           "
         >
-          <div className="hidden sm:block min-w-[88px]" aria-hidden />
+          <div className="hidden lg:block min-w-[88px]" aria-hidden />
 
           {/* COPYRIGHT */}
           <p
@@ -567,7 +568,7 @@ const BottomBar: React.FC = () => {
           </p>
 
           {/* SOCIALS */}
-          <div className="flex w-full shrink-0 items-center justify-center gap-2.5 sm:w-auto sm:justify-self-end sm:justify-end mt-4 sm:mt-0">
+          <div className="flex w-full shrink-0 items-center justify-center gap-2.5 lg:w-auto lg:justify-self-end lg:justify-end mt-4 lg:mt-0">
             <span className="font-['Lexend'] text-[15px] sm:text-[18px] leading-[1.1] text-[#504E4E]">
               Join Us
             </span>
