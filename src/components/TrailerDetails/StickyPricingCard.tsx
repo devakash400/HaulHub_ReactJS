@@ -50,8 +50,11 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     return Number.isNaN(date.getTime()) ? null : date;
   };
   const today = new Date().toISOString().split("T")[0];
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const { status: passedStatus, startDate: passedStartDate, endDate: passedEndDate } = location.state || {};
+  const hasBookingStatus = !!passedStatus;
+
+  const [checkIn, setCheckIn] = useState(passedStartDate || "");
+  const [checkOut, setCheckOut] = useState(passedEndDate || "");
   const [validationError, setValidationError] = useState<string | null>(null);
   const validateBookingDates = (
     pickupDate: string,
@@ -437,6 +440,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                     type="date"
                     value={checkIn}
                     min={today}
+                    disabled={hasBookingStatus}
                     onChange={(e) => {
                       setCheckIn(e.target.value);
                       setValidationError(null);
@@ -487,7 +491,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                     type="date"
                     value={checkOut}
                     min={checkIn || today}
-                    disabled={!checkIn}
+                    disabled={hasBookingStatus || !checkIn}
                     onChange={(e) => {
                       setCheckOut(e.target.value);
                       setValidationError(null);
@@ -532,7 +536,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
           <button
             type="button"
             onClick={handleReserve}
-            disabled={isCheckingBookings}
+            disabled={isCheckingBookings || hasBookingStatus}
             className="w-full mt-4 h-[53px] 
             flex items-center justify-center text-white 
             over:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
@@ -552,7 +556,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
               verticalAlign: "middle",
             }}
           >
-            <span>Reserve</span>
+            <span>{hasBookingStatus ? String(passedStatus).replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()) : "Reserve"}</span>
           </button>
         </div>
       </div>
