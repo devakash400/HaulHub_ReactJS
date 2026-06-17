@@ -381,16 +381,14 @@ const Contact: React.FC = () => {
               <div className="pt-1.5">
                 <button
                   type="submit"
-                  className="w-full rounded-[2px] transition-colors hover:bg-[#2d7326] focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 flex items-center justify-center"
+                  className="w-full rounded-[2px] transition-colors hover:bg-[#2d7326] focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 flex items-center justify-center px-0 sm:px-[246px]"
                   style={{
                     height: "57px",
                     background: "#389131",
                     opacity: 1,
                     gap: "10px",
                     paddingTop: "13px",
-                    paddingRight: "246px",
                     paddingBottom: "13px",
-                    paddingLeft: "246px",
                     fontFamily: "Lexend",
                     fontWeight: 500,
                     fontStyle: "normal",

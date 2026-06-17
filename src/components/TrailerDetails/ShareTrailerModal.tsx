@@ -132,7 +132,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
       w-[99px]
       h-[67px]
       rounded-[4px]
-      object-cover
+      object-contain
       shrink-0
       opacity-100
     "
@@ -146,7 +146,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
     text-[21px]
     leading-[100%]
     tracking-[0%]
-    text-center
+    text-left sm:text-center
     align-middle
     text-black
     m-0
@@ -192,13 +192,13 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
           )}
 
           {/* Buttons */}
-          <div className="grid grid-cols-2 gap-6 mt-7">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-7">
             {/* Copy Link */}
             <button
               type="button"
               onClick={handleCopyLink}
               className="
-      w-[278px]
+      w-full sm:w-[278px]
       h-[50px]
       border
       border-[#00000066]
@@ -240,7 +240,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
               type="button"
               onClick={handleWhatsApp}
               className="
-      w-[278px]
+      w-full sm:w-[278px]
       h-[50px]
       border
       border-[#00000066]

@@ -324,8 +324,11 @@ const Home: React.FC = () => {
                   type="button"
                   onClick={() => setAddTrailerOpen(true)}
                   className="
-    w-[255px]
-    h-[257px]
+    w-full
+    xl:w-[255px]
+    aspect-[255/257]
+    xl:aspect-auto
+    xl:h-[257px]
     rounded-[6px]
     border
     border-[#00000036]
@@ -338,21 +341,28 @@ const Home: React.FC = () => {
                 >
                   <span
                     className="
-      w-[136px]
-      h-[44px]
+      w-max
+      max-w-[90%]
+      sm:w-[136px]
+      h-auto
+      py-2
+      sm:py-0
+      sm:h-[44px]
       rounded-[3px]
       bg-[#389131]
       text-white
       flex
       items-center
       justify-center
-      px-[16px]
-      pt-[10px]
-      pb-[9px]
+      px-3
+      sm:px-[16px]
+      sm:pt-[10px]
+      sm:pb-[9px]
       whitespace-nowrap
       font-[Lexend]
       font-medium
-      text-[20px]
+      text-[14px]
+      sm:text-[20px]
       leading-[100%]
     "
                   >
@@ -385,7 +395,7 @@ const Home: React.FC = () => {
                   return (
                     <div
                       key={item.id}
-                      className="w-[240px] cursor-pointer"
+                      className="w-full xl:w-[240px] cursor-pointer"
                       onClick={() =>
                         navigate(`/owner/truck/${item.id}`, {
                           state: { isBooked: booked },
@@ -397,7 +407,7 @@ const Home: React.FC = () => {
                        rounded-[4px] bg-white"
                       >
                         {/* Image */}
-                        <div className="h-[257px] w-[240px] overflow-hidden rounded-[4px]">
+                        <div className="aspect-[240/257] w-full xl:h-[257px] xl:w-[240px] overflow-hidden rounded-[4px]">
                           <img
                             src={item.image}
                             alt={item.modelLabel}
@@ -415,14 +425,15 @@ const Home: React.FC = () => {
               font-semibold
               leading-[100%]
               text-black
+              truncate
             "
                           >
                             {item.titleLabel ?? item.modelLabel}
                           </p>
 
                           {/* Rating + Model */}
-                          <div className="mt-1 flex items-center">
-                            <span className="text-[12px] text-[#F5A623]">
+                          <div className="mt-1 flex items-center whitespace-nowrap">
+                            <span className="text-[12px] text-[#F5A623] shrink-0">
                               ★
                             </span>
 
@@ -434,6 +445,7 @@ const Home: React.FC = () => {
                 font-normal
                 leading-[100%]
                 text-black
+                shrink-0
               "
                             >
                               4.9
@@ -447,6 +459,7 @@ const Home: React.FC = () => {
                 font-normal
                 leading-[100%]
                 text-black
+                shrink-0
               "
                             >
                               Model :
@@ -460,6 +473,7 @@ const Home: React.FC = () => {
                 font-light
                 leading-[100%]
                 text-black
+                truncate
               "
                             >
                               {item.modelLabel.replace(/^Model:\s*/i, "")}

@@ -116,6 +116,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [dateOfBirthTouched, setDateOfBirthTouched] = useState(false);
   const [ageSubmitError, setAgeSubmitError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [genderMenuOpen, setGenderMenuOpen] = useState(false);
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const dateInputRef = useRef<HTMLInputElement | null>(null);
   const todayIso = new Date().toISOString().split("T")[0];
 
@@ -478,12 +480,13 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   >
                     Gender
                   </label>
-                  <div className="relative">
+                  <div className="relative w-full max-w-full overflow-hidden rounded-[5px] overflow-visible">
+                    {/* Desktop Native Select */}
                     <select
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
                       onBlur={() => setGenderTouched(true)}
-                      className="w-full px-3 pr-9 text-[12px] bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
+                      className="hidden md:block w-full px-3 pr-9 text-[16px] md:text-[12px] bg-transparent focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
@@ -492,10 +495,12 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         fontFamily: "Lexend",
                         fontWeight: 300,
                         fontStyle: "normal",
-                        fontSize: "12px",
                         lineHeight: "100%",
                         letterSpacing: "0%",
                         color: gender ? "#000000" : "#929191",
+                        boxSizing: "border-box",
+                        maxWidth: "100%",
+                        width: "100%",
                       }}
                     >
                       <option value="" style={{ color: "#000000" }}>
@@ -511,9 +516,57 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         Other
                       </option>
                     </select>
-                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                    <span className="hidden md:flex pointer-events-none absolute inset-y-0 right-0 items-center pr-3 text-gray-500">
                       <ChevronDown className="w-4 h-4" aria-hidden />
                     </span>
+
+                    {/* Mobile Custom Dropdown */}
+                    <div 
+                      className="md:hidden relative w-full"
+                      tabIndex={0}
+                      onBlur={(e) => {
+                        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                          setGenderMenuOpen(false);
+                          setGenderTouched(true);
+                        }
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setGenderMenuOpen(p => !p)}
+                        className="flex items-center justify-between w-full px-3 bg-transparent outline-none text-[16px] text-left"
+                        style={{
+                          height: "40px",
+                          borderRadius: "5px",
+                          border: "1px solid #7C7C7C",
+                          fontFamily: "Lexend",
+                          fontWeight: 300,
+                          lineHeight: "100%",
+                          color: gender ? "#000000" : "#929191",
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {gender || "Select Gender"}
+                        <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden />
+                      </button>
+                      {genderMenuOpen && (
+                        <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#7C7C7C] rounded-[5px] shadow-lg z-50 overflow-hidden">
+                          {["Male", "Female", "Other"].map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-[16px]"
+                              onClick={() => {
+                                setGender(opt);
+                                setGenderMenuOpen(false);
+                              }}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   {genderTouched && gender.trim().length === 0 && (
                     <p className="mt-1 text-xs text-red-600">
@@ -686,11 +739,12 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   >
                     Choose Your Category
                   </label>
-                  <div className="relative">
+                  <div className="relative w-full max-w-full overflow-hidden rounded-[5px] overflow-visible">
+                    {/* Desktop Native Select */}
                     <select
                       value={trailor}
                       onChange={(e) => setTrailor(e.target.value)}
-                      className="w-full px-3 pr-9 text-[12px] bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
+                      className="hidden md:block w-full px-3 pr-9 text-[16px] md:text-[12px] bg-transparent focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
@@ -699,10 +753,12 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         fontFamily: "Lexend",
                         fontWeight: 300,
                         fontStyle: "normal",
-                        fontSize: "12px",
                         lineHeight: "100%",
                         letterSpacing: "0%",
                         color: "#000000",
+                        boxSizing: "border-box",
+                        maxWidth: "100%",
+                        width: "100%",
                       }}
                     >
                       <option value="Renter" style={{ color: "#000000" }}>
@@ -712,9 +768,56 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         Owner
                       </option>
                     </select>
-                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                    <span className="hidden md:flex pointer-events-none absolute inset-y-0 right-0 items-center pr-3 text-gray-500">
                       <ChevronDown className="w-4 h-4" aria-hidden />
                     </span>
+
+                    {/* Mobile Custom Dropdown */}
+                    <div 
+                      className="md:hidden relative w-full"
+                      tabIndex={0}
+                      onBlur={(e) => {
+                        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                          setCategoryMenuOpen(false);
+                        }
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setCategoryMenuOpen(p => !p)}
+                        className="flex items-center justify-between w-full px-3 bg-transparent outline-none text-[16px] text-left"
+                        style={{
+                          height: "40px",
+                          borderRadius: "5px",
+                          border: "1px solid #7C7C7C",
+                          fontFamily: "Lexend",
+                          fontWeight: 300,
+                          lineHeight: "100%",
+                          color: "#000000",
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {trailor}
+                        <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden />
+                      </button>
+                      {categoryMenuOpen && (
+                        <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#7C7C7C] rounded-[5px] shadow-lg z-50 overflow-hidden">
+                          {["Renter", "Owner"].map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-[16px]"
+                              onClick={() => {
+                                setTrailor(opt);
+                                setCategoryMenuOpen(false);
+                              }}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

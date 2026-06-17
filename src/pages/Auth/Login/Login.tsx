@@ -189,6 +189,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [newPasswordTouched, setNewPasswordTouched] = useState(false);
   const [confirmNewPasswordTouched, setConfirmNewPasswordTouched] =
     useState(false);
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
 
   const isEmailFilled = email.trim().length > 0;
   const isEmailValid = useMemo(() => emailRegex.test(email.trim()), [email]);
@@ -948,14 +949,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   Choose your Category <span className="text-red-500">*</span>
                 </label>
 
-                <div className="relative">
+                <div className="relative w-full max-w-full overflow-hidden rounded-[5px] overflow-visible">
+                  {/* Desktop Native Select */}
                   <select
                     value={loginTrailor}
                     onChange={(e) => {
                       setLoginTrailor(e.target.value as "Renter" | "Owner");
                       setLoginError(null);
                     }}
-                    className="w-full px-4 pr-10 appearance-none bg-white outline-none"
+                    className="hidden md:block w-full px-4 pr-10 appearance-none bg-transparent outline-none text-[16px] md:text-[12px]"
                     style={{
                       height: "40px",
                       minHeight: "40px",
@@ -963,20 +965,78 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       borderRadius: "5px",
                       fontFamily: "Lexend",
                       fontWeight: 300,
-                      fontSize: "12px",
                       lineHeight: "40px",
                       color: "#000",
                       WebkitAppearance: "none",
                       MozAppearance: "none",
+                      boxSizing: "border-box",
+                      maxWidth: "100%",
+                      width: "100%",
                     }}
                   >
                     <option value="Renter">Renter</option>
                     <option value="Owner">Owner</option>
                   </select>
 
-                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                  <span className="hidden md:flex pointer-events-none absolute inset-y-0 right-0 items-center pr-3 text-gray-500">
                     <ChevronDown className="w-4 h-4" aria-hidden />
                   </span>
+
+                  {/* Mobile Custom Dropdown */}
+                  <div 
+                    className="md:hidden relative w-full"
+                    tabIndex={0}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                        setCategoryMenuOpen(false);
+                      }
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setCategoryMenuOpen(p => !p)}
+                      className="flex items-center justify-between w-full px-4 bg-transparent outline-none text-[16px] text-left"
+                      style={{
+                        height: "40px",
+                        border: "1px solid #050303",
+                        borderRadius: "5px",
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        lineHeight: "40px",
+                        color: "#000",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      {loginTrailor}
+                      <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden />
+                    </button>
+                    {categoryMenuOpen && (
+                      <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#050303] rounded-[5px] shadow-lg z-50 overflow-hidden">
+                        <button
+                          type="button"
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[16px]"
+                          onClick={() => {
+                            setLoginTrailor("Renter");
+                            setLoginError(null);
+                            setCategoryMenuOpen(false);
+                          }}
+                        >
+                          Renter
+                        </button>
+                        <button
+                          type="button"
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[16px]"
+                          onClick={() => {
+                            setLoginTrailor("Owner");
+                            setLoginError(null);
+                            setCategoryMenuOpen(false);
+                          }}
+                        >
+                          Owner
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
