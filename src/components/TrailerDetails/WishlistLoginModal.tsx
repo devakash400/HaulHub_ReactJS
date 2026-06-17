@@ -47,7 +47,7 @@ export const WishlistLoginModal: React.FC<WishlistLoginModalProps> = ({
       aria-labelledby="wishlist-modal-title"
     >
       <div
-        className="relative w-full max-w-[500px] bg-white rounded-t-2xl sm:rounded-2xl shadow-lg overflow-hidden"
+        className="relative w-full max-w-[500px] bg-white rounded-2xl shadow-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
