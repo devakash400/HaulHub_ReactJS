@@ -819,7 +819,7 @@ const Profile: React.FC = () => {
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-white">
       <div className="w-full px-[40px] py-6 sm:py-8">
-        <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+        <div className="flex w-full flex-col gap-10 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-8">
           {/* LEFT SIDE */}
           <div className="flex w-full flex-col lg:max-w-[539px]">
             <header>
