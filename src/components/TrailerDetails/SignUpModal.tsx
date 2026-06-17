@@ -119,6 +119,24 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const dateInputRef = useRef<HTMLInputElement | null>(null);
   const todayIso = new Date().toISOString().split("T")[0];
 
+  const getAgeFromDob = (dob: string) => {
+    const birthDate = new Date(dob);
+    if (Number.isNaN(birthDate.getTime())) return 0;
+
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age;
+  };
+
+  const isAgeAtLeast24 =
+    dateOfBirth.trim().length > 0 && getAgeFromDob(dateOfBirth) >= 24;
   const hasEmailSubmitError =
     typeof submitError === "string" && /email|email address/i.test(submitError);
   const hasPhoneSubmitError =
@@ -187,11 +205,15 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const normalizedDigits = phoneNumber.replace(/\D/g, "");
   const isPhoneValid = normalizedDigits.length === 10;
 
+  const isDateOfBirthValid =
+    dateOfBirth.trim().length > 0 &&
+    dateOfBirth <= todayIso &&
+    isAgeAtLeast24;
+
   const isFormValid =
     isFirstNameValid &&
     isLastNameValid &&
-    dateOfBirth.trim().length > 0 &&
-    dateOfBirth <= todayIso &&
+    isDateOfBirthValid &&
     gender.trim().length > 0 &&
     isEmailValid &&
     isPasswordValid &&
@@ -199,23 +221,19 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     isPhoneValid &&
     agreed;
 
+  const showDobAgeError =
+    (dateOfBirthTouched || ageSubmitError) &&
+    dateOfBirth.trim().length > 0 &&
+    !isAgeAtLeast24;
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (trailor === "Owner" && dateOfBirth) {
-      const today = new Date();
-      const birthDate = new Date(dateOfBirth);
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      if (age < 24) {
-        setAgeSubmitError(true);
-        return;
-      }
+    if (!isAgeAtLeast24) {
+      setAgeSubmitError(true);
+      return;
     }
 
     if (!isFormValid) return;
@@ -437,6 +455,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   {dateOfBirthTouched && dateOfBirth.trim().length === 0 && (
                     <p className="mt-1 text-xs text-red-600">
                       Enter date of birth
+                    </p>
+                  )}
+                  {showDobAgeError && (
+                    <p className="mt-1 text-xs text-red-600">
+                      You must be at least 24 years old
                     </p>
                   )}
                 </div>
