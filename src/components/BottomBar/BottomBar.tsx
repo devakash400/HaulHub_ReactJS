@@ -308,22 +308,22 @@ const BottomBar: React.FC = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#F9F7F0] pt-10 pb-0 px-10 font-sans w-full overflow-x-hidden mb-[10px]">
+    <footer className="bg-[#F9F7F0] pt-8 sm:pt-10 pb-6 sm:pb-0 px-5 sm:px-10 font-sans w-full overflow-x-hidden mb-[10px]">
       {/* TOP SECTION */}
       <div className="w-full flex flex-wrap items-start justify-between gap-8 min-w-0">
         {/* LEFT SIDE */}
         <div
           className="
-            flex flex-wrap gap-8 sm:gap-12
+            flex flex-col sm:flex-row sm:flex-wrap gap-8 sm:gap-12
             flex-1 min-w-0 sm:min-w-[260px]
           "
         >
           <div>
-            <h3 className="m-0 mb-8 text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
+            <h3 className="m-0 mb-4 sm:mb-8 text-[22px] sm:text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
               Explore
             </h3>
 
-            <ul className="list-none p-0 m-0 flex flex-col gap-[21px] text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
+            <ul className="list-none p-0 m-0 flex flex-col gap-4 sm:gap-[21px] text-[16px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
               {isRenter && (
                 <li>
                   <Link
@@ -402,11 +402,11 @@ const BottomBar: React.FC = () => {
 
           {/* COMPANY */}
           <div>
-            <h3 className="m-0 mb-8 text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
+            <h3 className="m-0 mb-4 sm:mb-8 text-[22px] sm:text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
               Company
             </h3>
 
-            <ul className="list-none p-0 m-0 flex flex-col gap-[21px] text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
+            <ul className="list-none p-0 m-0 flex flex-col gap-4 sm:gap-[21px] text-[16px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
               <li>
                 <Link
                   to="/how-it-works"
@@ -449,35 +449,35 @@ const BottomBar: React.FC = () => {
             <img
               src={images.logo}
               alt="HaulHub app logo"
-              className="w-[208px] h-[84px] object-contain"
+              className="w-[150px] sm:w-[208px] h-auto sm:h-[84px] object-contain"
             />
           </div>
 
           {/* STORE BUTTONS */}
-          <div className="flex items-center justify-center gap-4 w-full">
+          <div className="flex flex-row items-center justify-center gap-2 sm:gap-4 w-full mt-2 sm:mt-0">
             {/* APP STORE */}
             <a
               href="https://www.apple.com/app-store/"
               target="_blank"
               rel="noopener noreferrer"
               className="
-                flex items-center justify-center gap-2
+                flex items-center justify-center gap-1.5 sm:gap-2
                 bg-black text-white no-underline
-                w-[207px] h-[68px] rounded-[3px]
+                w-[150px] sm:w-[207px] h-[50px] sm:h-[68px] rounded-[3px]
               "
             >
               <img
                 src={images.appStore}
                 alt="App Store"
-                className="w-[50px] h-[50px] object-contain"
+                className="w-[34px] sm:w-[50px] h-[34px] sm:h-[50px] object-contain"
               />
 
               <span className="flex flex-col leading-none">
-                <span className="font-['Lexend'] text-[9px] uppercase text-white">
+                <span className="font-['Lexend'] text-[7px] sm:text-[9px] uppercase text-white">
                   Download on the
                 </span>
 
-                <span className="font-['Lexend'] text-[21px] text-white">
+                <span className="font-['Lexend'] text-[15px] sm:text-[21px] text-white">
                   App Store
                 </span>
               </span>
@@ -489,23 +489,23 @@ const BottomBar: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="
-                flex items-center justify-center gap-2
+                flex items-center justify-center gap-1.5 sm:gap-2
                 bg-black text-white no-underline
-                w-[207px] h-[68px] rounded-[3px]
+                w-[150px] sm:w-[207px] h-[50px] sm:h-[68px] rounded-[3px]
               "
             >
               <img
                 src={images.googlePlay}
                 alt="Google Play"
-                className="w-[50px] h-[50px] object-contain"
+                className="w-[34px] sm:w-[50px] h-[34px] sm:h-[50px] object-contain"
               />
 
               <span className="flex flex-col leading-none">
-                <span className="font-['Lexend'] text-[9px] uppercase text-white">
+                <span className="font-['Lexend'] text-[7px] sm:text-[9px] uppercase text-white">
                   Get it on
                 </span>
 
-                <span className="font-['Lexend'] text-[21px] text-white">
+                <span className="font-['Lexend'] text-[15px] sm:text-[21px] text-white">
                   Google Play
                 </span>
               </span>
@@ -536,7 +536,8 @@ const BottomBar: React.FC = () => {
               text-center
               font-['Lexend']
               font-normal
-              text-[18px]
+              text-[14px]
+              sm:text-[18px]
               leading-[150%]
               tracking-[0.01em]
               text-[#504E4E]
@@ -566,8 +567,8 @@ const BottomBar: React.FC = () => {
           </p>
 
           {/* SOCIALS */}
-          <div className="flex w-full shrink-0 items-center justify-center gap-2.5 sm:w-auto sm:justify-self-end sm:justify-end">
-            <span className="font-['Lexend'] text-[18px] leading-[1.1] text-[#504E4E]">
+          <div className="flex w-full shrink-0 items-center justify-center gap-2.5 sm:w-auto sm:justify-self-end sm:justify-end mt-4 sm:mt-0">
+            <span className="font-['Lexend'] text-[15px] sm:text-[18px] leading-[1.1] text-[#504E4E]">
               Join Us
             </span>
 
