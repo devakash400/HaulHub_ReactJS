@@ -32,7 +32,7 @@ const METHOD_META: Record<
     icon: Car,
   },
   passport: {
-    label: "Passport",
+    label: "Proof Of Insurance",
     icon: CreditCard,
   },
 };
