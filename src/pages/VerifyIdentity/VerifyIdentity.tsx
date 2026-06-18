@@ -1,4 +1,4 @@
-﻿import React, { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
@@ -286,8 +286,8 @@ const VerifyIdentity: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <Icon
                       className="
-        w-[15.75px]
-        h-[20.5625px]
+        w-[21px]
+        h-[21px]
         text-black
       "
                     />
@@ -333,8 +333,8 @@ const VerifyIdentity: React.FC = () => {
               <div className="mb-2 flex items-center gap-2">
                 <CalendarDays
                   className="
-          w-[15.75px]
-          h-[20.5625px]
+          w-[21px]
+          h-[21px]
           text-black
         "
                 />
@@ -382,8 +382,8 @@ const VerifyIdentity: React.FC = () => {
               <div className="mb-2 flex items-center gap-2">
                 <CalendarDays
                   className="
-          w-[15.75px]
-          h-[20.5625px]
+          w-[21px]
+          h-[21px]
           text-black
         "
                 />
