@@ -52,13 +52,13 @@ const BookingSent: React.FC = () => {
             </h1>
 
             <p
-              className="mt-4 text-[22px] font-light leading-[20px] tracking-[0px] text-black align-middle"
+              className="mt-4 text-[22px] font-light leading-normal md:leading-[20px] tracking-[0px] text-black align-middle"
               style={{ fontFamily: "Lexend" }}
             >
               Your booking request has been submitted successfully.
             </p>
             <p
-              className="mt-4 text-[22px] font-light leading-[20px] tracking-[0px] text-black align-middle"
+              className="mt-4 text-[22px] font-light leading-normal md:leading-[20px] tracking-[0px] text-black align-middle"
               style={{ fontFamily: "Lexend" }}
             >
               The owner will review and respond shortly.
@@ -68,26 +68,26 @@ const BookingSent: React.FC = () => {
 
           {/* Details Card */}
           <div className="max-w-3xl mx-auto mt-12 border border-gray-200 rounded-2xl p-8 bg-[#fafafa]">
-            <div className="flex justify-between items-center py-4 border-b">
-              <span className="text-gray-500 text-lg">Dates</span>
+            <div className="flex justify-between items-center py-4 border-b gap-4 md:gap-0">
+              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">Dates</span>
 
-              <span className="font-semibold text-lg">
+              <span className="font-semibold text-lg text-right md:text-left">
                 {formatDateString(String(state.dates || "2026-05-14 - 2026-05-26"))}
               </span>
             </div>
 
-            <div className="flex justify-between items-center py-4 border-b">
-              <span className="text-gray-500 text-lg">Total Price</span>
+            <div className="flex justify-between items-center py-4 border-b gap-4 md:gap-0">
+              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">Total Price</span>
 
-              <span className="font-semibold text-lg">
+              <span className="font-semibold text-lg text-right md:text-left">
                 {String(state.totalPrice || "320")}
               </span>
             </div>
 
-            <div className="flex justify-between items-center pt-4">
-              <span className="text-gray-500 text-lg">Status</span>
+            <div className="flex justify-between items-center pt-4 gap-4 md:gap-0">
+              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">Status</span>
 
-              <span className="px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700">
+              <span className="px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700 whitespace-nowrap md:whitespace-normal text-right md:text-left">
                 Pending Confirmation
               </span>
             </div>
