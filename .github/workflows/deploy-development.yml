@@ -22,9 +22,7 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          ssh-keyscan -p ${{ secrets.VPS_PORT }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
-
-          ssh -o BatchMode=yes -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -Ee -o pipefail
             trap 'echo "Deployment failed on VPS line $LINENO while running: $BASH_COMMAND"' ERR
 
