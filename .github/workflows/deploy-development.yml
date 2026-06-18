@@ -14,6 +14,9 @@ jobs:
     steps:
       - name: Deploy frontend on VPS
         run: |
+          set -Ee -o pipefail
+          trap 'echo "Deployment failed in GitHub Actions line $LINENO while running: $BASH_COMMAND"' ERR
+
           mkdir -p ~/.ssh
 
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
@@ -21,9 +24,9 @@ jobs:
 
           ssh-keyscan -p ${{ secrets.VPS_PORT }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          ssh -o BatchMode=yes -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -Ee -o pipefail
-            trap 'echo "❌ Deployment failed on VPS line $LINENO while running: $BASH_COMMAND"' ERR
+            trap 'echo "Deployment failed on VPS line $LINENO while running: $BASH_COMMAND"' ERR
 
             echo "Loading Node via NVM..."
 
@@ -31,10 +34,11 @@ jobs:
             if [ -s "$NVM_DIR/nvm.sh" ]; then
               . "$NVM_DIR/nvm.sh"
             else
-              echo "❌ NVM not found at $NVM_DIR/nvm.sh"
+              echo "NVM not found at $NVM_DIR/nvm.sh"
               exit 1
             fi
 
+            nvm install 24.15.0
             nvm use 24.15.0
 
             echo "Node version:"
@@ -47,7 +51,6 @@ jobs:
 
             cd /var/www/HaulHub_ReactJS
 
-            git pull
             git fetch origin HAULHUB_DEV
             git checkout HAULHUB_DEV
             git reset --hard origin/HAULHUB_DEV
