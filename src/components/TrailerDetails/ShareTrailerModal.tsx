@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { X, Link2 } from "lucide-react";
+import { X, Link } from "lucide-react";
 import { lockScroll } from "../../utils/scrollLock.ts";
 import whatsappIcon from "../../assets/icons/whatsapp.png";
 export interface ShareTrailerModalProps {
@@ -220,7 +220,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
       hover:bg-gray-50
     "
             >
-              <Link2
+              <Link
                 className="
     w-[21.56px]
     h-[21.67px]
