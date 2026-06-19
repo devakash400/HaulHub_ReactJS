@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useModalNavigate from "../../hooks/useModalNavigate.ts";
 import { RootState } from "../../store";
 import api from "../../api/api.ts";
+import EmptyState from "../../components/common/EmptyState.tsx";
 
 type ApiNotification = {
   _id: string;
@@ -167,9 +168,10 @@ const Notifications: React.FC = () => {
           )}
 
           {!loading && !error && notifications.length === 0 && (
-            <div className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-6 text-center text-sm text-gray-600">
-              No notifications available.
-            </div>
+            // <div className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-6 text-center text-sm text-gray-600">
+            //   No notifications available.
+            // </div>
+            <EmptyState line="No notifications available."/>
           )}
 
           {!loading &&

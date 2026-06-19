@@ -503,7 +503,7 @@ const Trailer: React.FC = () => {
 
               <div
                 style={{ paddingBottom: "20px" }}
-                className="lg:col-span-1 mt-8 lg:mt-0"
+                className="lg:col-span-1 mt-8 lg:mt-0 flex justify-center lg:block"
               >
                 <RevealSection delayMs={140} variant="soft">
                   <StickyPricingCard

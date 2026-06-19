@@ -282,7 +282,7 @@ const Profile: React.FC = () => {
     {
       label: "Terms & Conditions",
       icon: termsicon,
-      onClick: () => navigate("/trust-safety"),
+      onClick: () => navigate("/terms"),
     },
     {
       label: "Transaction History",

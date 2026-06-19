@@ -325,7 +325,7 @@ const Home: React.FC = () => {
                   onClick={() => setAddTrailerOpen(true)}
                   className="
     w-full
-    xl:w-[255px]
+    xl:w-[240px]
     aspect-[255/257]
     xl:aspect-auto
     xl:h-[257px]

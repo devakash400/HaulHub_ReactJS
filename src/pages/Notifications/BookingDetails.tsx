@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import api from "../../api/api.ts";
 import { RootState } from "../../store";
 
@@ -349,6 +350,14 @@ const BookingDetails: React.FC = () => {
     value === undefined || value === null ? fallback : value;
 
   const onConditionFileChange = (label: string, file?: File | null) => {
+    if (file && file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5 MB");
+      if (fileInputsRef.current[label]) {
+        fileInputsRef.current[label]!.value = "";
+      }
+      return;
+    }
+
     setConditionFiles((prev) => ({ ...prev, [label]: file ?? null }));
     try {
       const prev = previewUrlsRef.current[label];

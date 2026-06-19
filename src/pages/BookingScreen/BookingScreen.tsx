@@ -8,6 +8,33 @@ import {
 } from "../../api/trailersApi.ts";
 import { useLocation, useNavigate } from "react-router-dom";
 
+function getBookingDateText(createdAtString?: string) {
+  if (!createdAtString) return null;
+  const createdAt = new Date(createdAtString);
+  const now = new Date();
+  
+  // Set times to midnight to calculate calendar days difference accurately
+  const createdDate = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  const diffTime = nowDate.getTime() - createdDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return "Booked today";
+  } else if (diffDays === 1) {
+    return "Booked 1 day ago";
+  } else if (diffDays <= 7) {
+    return `Booked ${diffDays} days ago`;
+  } else {
+    return `Booked on ${createdAt.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })}`;
+  }
+}
+
 export type BookingStatus =
   | "pending"
   | "accepted"
@@ -54,6 +81,7 @@ type ApiBooking = {
   } | null;
   startDate?: string;
   endDate?: string;
+  createdAt?: string;
   status?: string;
   totalPrice?: number;
 };
@@ -484,6 +512,8 @@ const BookingScreen: React.FC = () => {
                 ? new Date(booking.endDate).toLocaleDateString()
                 : undefined;
 
+              const bookingDateText = getBookingDateText(booking.createdAt);
+
               const trailerId = booking.trailerId?._id;
               const trailerUrl = trailerId
                 ? `/trailer/${trailerId}`
@@ -532,6 +562,9 @@ const BookingScreen: React.FC = () => {
                           )}
                           {returnDate && (
                             <p className="m-0 truncate">Return Date : {returnDate}</p>
+                          )}
+                          {bookingDateText && (
+                            <p className="m-0 font-medium text-black mt-2 text-[15px]">{bookingDateText}</p>
                           )}
                         </div>
                       </div>
