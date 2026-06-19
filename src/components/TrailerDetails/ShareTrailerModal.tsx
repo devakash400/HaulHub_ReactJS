@@ -115,6 +115,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
     tracking-[0%]
     align-middle
     font-['Lexend']
+    ml-10 sm:ml-0
   "
           >
             Share This Trailer
