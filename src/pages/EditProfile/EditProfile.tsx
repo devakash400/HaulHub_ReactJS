@@ -583,7 +583,7 @@ const EditProfile: React.FC = () => {
 
             {/* ══ TOP PANEL — Avatar + quick info ══ */}
             <aside className="w-full max-w-[480px] shrink-0">
-              <div className="bg-white rounded-2xl border border-[#E4E7EC] shadow-[0_1px_4px_rgba(16,24,40,0.06)] p-8 flex flex-col items-center gap-5">
+              <div className="flex flex-col items-center gap-5">
 
                 {/* Avatar */}
                 <div className="relative w-[140px] h-[140px]">
@@ -661,6 +661,9 @@ const EditProfile: React.FC = () => {
                 </p>
               </div>
             </aside>
+
+            {/* Divider between profile and other stuff */}
+            <div className="w-full h-px bg-[#E4E7EC]" />
 
             {/* ══ BOTTOM PANEL — Form ══ */}
             <main className="w-full">
