@@ -9,6 +9,7 @@ import {
   CircleDollarSign,
   Camera,
   FileText,
+  Pencil
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -374,7 +375,7 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Camera Button */}
-            <button
+            {/* <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto}
@@ -396,6 +397,30 @@ const Profile: React.FC = () => {
               /// The button is intentinally
             >
               <Camera className="w-5 h-5 text-white" />
+            </button> */}
+
+                        <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              aria-label="Change profile photo"
+              className="
+        absolute
+        bottom-2
+        right-0
+        w-[44px]
+        h-[44px]
+        rounded-full
+        bg-[#4A9B3D]
+        flex
+        items-center
+        justify-center
+        shadow-lg
+      
+      "
+              /// The button is intentinally
+            >
+              <Pencil className="w-5 h-5 text-white" />
             </button>
 
             <input
