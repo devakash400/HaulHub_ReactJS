@@ -579,10 +579,10 @@ const EditProfile: React.FC = () => {
         </div>
       ) : (
         <div className="w-full max-w-[1200px] mx-auto px-8 py-10">
-          <div className="flex flex-col lg:flex-row gap-10 items-start">
+          <div className="flex flex-col gap-10 items-center">
 
-            {/* ══ LEFT PANEL — Avatar + quick info ══ */}
-            <aside className="w-full lg:w-[320px] shrink-0">
+            {/* ══ TOP PANEL — Avatar + quick info ══ */}
+            <aside className="w-full max-w-[480px] shrink-0">
               <div className="bg-white rounded-2xl border border-[#E4E7EC] shadow-[0_1px_4px_rgba(16,24,40,0.06)] p-8 flex flex-col items-center gap-5">
 
                 {/* Avatar */}
@@ -646,7 +646,7 @@ const EditProfile: React.FC = () => {
 
                 {/* Display name */}
                 {displayName && (
-                  <p className="text-[20px] font-semibold text-[#101828] text-center leading-tight font-['Lexend']">
+                  <p className="text-[20px] font-semibold text-[#101828] text-center leading-tight font-['Lexend'] break-words px-4 w-full">
                     {displayName}
                   </p>
                 )}
@@ -662,19 +662,13 @@ const EditProfile: React.FC = () => {
               </div>
             </aside>
 
-            {/* ══ RIGHT PANEL — Form ══ */}
-            <main className="flex-1 min-w-0">
+            {/* ══ BOTTOM PANEL — Form ══ */}
+            <main className="w-full">
               <div className="bg-white rounded-2xl border border-[#E4E7EC] shadow-[0_1px_4px_rgba(16,24,40,0.06)] p-8">
 
-                {/* Section: Personal Information */}
-                <section>
-                  <h2 className="text-[20px] font-semibold text-[#101828] font-['Lexend'] mb-6 pb-4 border-b border-[#F2F4F7]">
-                    Personal Information
-                  </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* First Name */}
-                    <div>
+                    <div className="col-span-1 lg:col-span-1">
                       <FieldLabel htmlFor="ep-firstName" required>First Name</FieldLabel>
                       <TextInput
                         id="ep-firstName"
@@ -687,7 +681,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Last Name */}
-                    <div>
+                    <div className="col-span-1 lg:col-span-1">
                       <FieldLabel htmlFor="ep-lastName" required>Last Name</FieldLabel>
                       <TextInput
                         id="ep-lastName"
@@ -700,7 +694,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Email */}
-                    <div className="sm:col-span-2">
+                    <div className="col-span-2 lg:col-span-2">
                       <FieldLabel htmlFor="ep-email" required>Email</FieldLabel>
                       <TextInput
                         id="ep-email"
@@ -716,7 +710,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Phone Number */}
-                    <div className="sm:col-span-2">
+                    <div className="col-span-2 lg:col-span-2">
                       <FieldLabel htmlFor="ep-phone" required>Phone Number</FieldLabel>
                       <PhoneInput
                         id="ep-phone"
@@ -729,7 +723,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Date of Birth */}
-                    <div className="sm:col-span-2">
+                    <div className="col-span-2 lg:col-span-2">
                       <FieldLabel htmlFor="ep-dob" required>Date of birth</FieldLabel>
                       <div className="relative">
                         <TextInput
@@ -742,21 +736,9 @@ const EditProfile: React.FC = () => {
                         />
                       </div>
                     </div>
-                  </div>
-                </section>
 
-                {/* Divider */}
-                <div className="my-8 border-t border-[#F2F4F7]" />
-
-                {/* Section: Address */}
-                <section>
-                  <h2 className="text-[20px] font-semibold text-[#101828] font-['Lexend'] mb-6 pb-4 border-b border-[#F2F4F7]">
-                    Address
-                  </h2>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {/* Address */}
-                    <div className="sm:col-span-2">
+                    <div className="col-span-2 lg:col-span-4">
                       <FieldLabel htmlFor="ep-address" required>Address</FieldLabel>
                       <TextInput
                         id="ep-address"
@@ -769,7 +751,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Country dropdown */}
-                    <div className="sm:col-span-2" ref={countryDropRef}>
+                    <div ref={countryDropRef} className="col-span-2 lg:col-span-2">
                       <FieldLabel required>Country</FieldLabel>
                       <div className="relative">
                         <button
@@ -828,7 +810,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* City */}
-                    <div>
+                    <div className="col-span-2 lg:col-span-1">
                       <FieldLabel htmlFor="ep-city" required>City</FieldLabel>
                       <TextInput
                         id="ep-city"
@@ -841,7 +823,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Zip Code */}
-                    <div>
+                    <div className="col-span-2 lg:col-span-1">
                       <FieldLabel htmlFor="ep-zip" required>Zip Code</FieldLabel>
                       <TextInput
                         id="ep-zip"
@@ -852,30 +834,20 @@ const EditProfile: React.FC = () => {
                         autoComplete="postal-code"
                       />
                     </div>
-                  </div>
-                </section>
 
-                {/* Divider */}
-                <div className="my-8 border-t border-[#F2F4F7]" />
-
-                {/* Section: Emergency Contact */}
-                <section>
-                  <h2 className="text-[20px] font-semibold text-[#101828] font-['Lexend'] mb-6 pb-4 border-b border-[#F2F4F7]">
-                    Emergency Contact
-                  </h2>
-
-                  <div>
-                    <FieldLabel htmlFor="ep-ecPhone">Emergency Contact Number</FieldLabel>
-                    <PhoneInput
-                      id="ep-ecPhone"
-                      country={ecCountry}
-                      local={ecLocal}
-                      onCountryChange={setEcCountry}
-                      onLocalChange={setEcLocal}
-                      placeholder="Enter emergency contact"
-                    />
-                  </div>
-                </section>
+                    {/* Emergency Contact */}
+                    <div className="col-span-2 lg:col-span-2">
+                      <FieldLabel htmlFor="ep-ecPhone">Emergency Contact Number</FieldLabel>
+                      <PhoneInput
+                        id="ep-ecPhone"
+                        country={ecCountry}
+                        local={ecLocal}
+                        onCountryChange={setEcCountry}
+                        onLocalChange={setEcLocal}
+                        placeholder="Enter emergency contact"
+                      />
+                    </div>
+                </div>
 
                 {/* ── Save button ── */}
                 <div className="mt-10 flex items-center justify-end gap-4">
