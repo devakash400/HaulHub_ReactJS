@@ -23,8 +23,8 @@ export const FeatureIconsSection: React.FC<FeatureIconsSectionProps> = ({
 }) => {
   return (
     <section
-      className="flex items-start
-     justify-between w-[682px] ml-0 mr-auto px-0"
+      className="flex flex-wrap md:flex-nowrap items-start
+     justify-center md:justify-between w-full md:w-[682px] ml-0 mr-auto px-0 gap-6 md:gap-0"
     >
       {features.map(({ icon, label }, index) => {
         const iconSrc = iconMap[icon];
@@ -58,23 +58,22 @@ export const FeatureIconsSection: React.FC<FeatureIconsSectionProps> = ({
         return (
           <div
             key={label}
-            style={{ paddingBottom: "100px" }}
             className="flex flex-col items-center
-             text-center w-auto"
+             text-center w-[45%] md:w-auto pb-8 md:pb-[100px]"
           >
             <img
               src={iconSrc}
               alt={displayText}
-              className={`w-[62px] h-[74px] object-contain mb-3 mx-auto ${
+              className={`w-[50px] md:w-[62px] h-[60px] md:h-[74px] object-contain mb-3 mx-auto ${
                 isSecondIcon ? "scale-110" : ""
               }`}
             />
 
             <p
+              className="text-[16px] md:text-[24px]"
               style={{
                 fontFamily: "Lexend",
                 fontWeight: 400,
-                fontSize: "24px",
                 lineHeight: "100%",
                 letterSpacing: "0%",
                 color: "#000000",

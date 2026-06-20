@@ -25,7 +25,7 @@ export const TrailerImageGallery: React.FC<TrailerImageGalleryProps> = ({
 
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden border border-gray-300 rounded-xl">
         <img
           src={mainImage}
           alt="Main trailer"
@@ -34,11 +34,11 @@ export const TrailerImageGallery: React.FC<TrailerImageGalleryProps> = ({
       </div>
       <div className="grid grid-cols-2 gap-4">
         {gridImages.map((src, i) => (
-          <div key={i} className="relative overflow-hidden">
+          <div key={i} className="relative overflow-hidden border border-gray-300 rounded-xl">
             <img
               src={src}
               alt={`Trailer view ${i + 2}`}
-              className="w-full h-[200px] object-cover "
+              className="w-full h-[200px] object-cover"
             />
             {i === 3 && trailerId != null && (
               <button

@@ -30,6 +30,8 @@ const Contact: React.FC = () => {
   const [serviceError, setServiceError] = useState<string | null>(null);
   const [budgetError, setBudgetError] = useState<string | null>(null);
   const [messageError, setMessageError] = useState<string | null>(null);
+  const [serviceMenuOpen, setServiceMenuOpen] = useState(false);
+  const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,52 +215,117 @@ const Contact: React.FC = () => {
                   What service are you interested in
                 </label>
 
-                <div className="relative">
-                  <select
-                    id="contact-service"
-                    value={serviceType}
-                    onChange={(e) => {
-                      setServiceType(e.target.value);
-                      if (serviceError) setServiceError(null);
-                    }}
-                    onBlur={() => {
-                      if (!serviceType.trim()) {
-                        setServiceError("Select a service type");
+                <div className="relative w-full max-w-full overflow-visible">
+                  {/* Desktop Native Select */}
+                  <div className="hidden md:block relative w-full">
+                    <select
+                      id="contact-service"
+                      value={serviceType}
+                      onChange={(e) => {
+                        setServiceType(e.target.value);
+                        if (serviceError) setServiceError(null);
+                      }}
+                      onBlur={() => {
+                        if (!serviceType.trim()) {
+                          setServiceError("Select a service type");
+                        }
+                      }}
+                      className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                      style={{
+                        background: "#FFFFFF",
+                        boxShadow: "0px 4px 4px 0px #00000040",
+                        height: "46px",
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontSize: "15px",
+                        lineHeight: "100%",
+                        color: serviceType ? "#000000" : "#B2B2B2",
+                      }}
+                    >
+                      <option value="" disabled hidden>
+                        Select Service type
+                      </option>
+
+                      {SERVICE_OPTIONS.map((opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                          style={{
+                            color: "#000000",
+                            fontFamily: "Lexend",
+                          }}
+                        >
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-700">
+                      <ChevronDown className="h-5 w-5" aria-hidden />
+                    </span>
+                  </div>
+
+                  {/* Mobile Custom Dropdown */}
+                  <div 
+                    className="md:hidden relative w-full"
+                    tabIndex={0}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                        setServiceMenuOpen(false);
+                        if (!serviceType.trim()) {
+                          setServiceError("Select a service type");
+                        }
                       }
                     }}
-                    className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
-                    style={{
-                      background: "#FFFFFF",
-                      boxShadow: "0px 4px 4px 0px #00000040",
-                      height: "46px",
-                      fontFamily: "Lexend",
-                      fontWeight: 300,
-                      fontSize: "15px",
-                      lineHeight: "100%",
-                      color: serviceType ? "#000000" : "#B2B2B2",
-                    }}
                   >
-                    <option value="" disabled hidden>
-                      Select Service type
-                    </option>
-
-                    {SERVICE_OPTIONS.map((opt) => (
-                      <option
-                        key={opt}
-                        value={opt}
-                        style={{
-                          color: "#000000",
-                          fontFamily: "Lexend",
-                        }}
-                      >
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-700">
-                    <ChevronDown className="h-5 w-5" aria-hidden />
-                  </span>
+                    <button
+                      type="button"
+                      onClick={() => setServiceMenuOpen((p) => !p)}
+                      className="flex items-center justify-between w-full px-3.5 bg-transparent outline-none text-left appearance-none rounded-[2px] border border-[#dbdbdb] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                      style={{
+                        background: "#FFFFFF",
+                        boxShadow: "0px 4px 4px 0px #00000040",
+                        height: "46px",
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontSize: "15px",
+                        lineHeight: "100%",
+                        color: serviceType ? "#000000" : "#B2B2B2",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      {serviceType || "Select Service type"}
+                      <ChevronDown className="h-5 w-5 text-neutral-700" aria-hidden />
+                    </button>
+                    {serviceMenuOpen && (
+                      <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#dbdbdb] rounded-[2px] shadow-lg z-50 overflow-hidden">
+                        {SERVICE_OPTIONS.map((opt, idx) => (
+                          <React.Fragment key={opt}>
+                            <button
+                              type="button"
+                              className="w-full text-left px-3.5 py-2.5 hover:bg-gray-100"
+                              style={{
+                                color: "#000000",
+                                fontFamily: "Lexend",
+                                fontWeight: 300,
+                                fontSize: "15px",
+                              }}
+                              onClick={() => {
+                                setServiceType(opt);
+                                if (serviceError) setServiceError(null);
+                                setServiceMenuOpen(false);
+                              }}
+                            >
+                              {opt}
+                            </button>
+                            {idx < SERVICE_OPTIONS.length - 1 && (
+                              <hr className="border-t border-[#dbdbdb] mx-3" />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {serviceError && (
@@ -282,52 +349,117 @@ const Contact: React.FC = () => {
                   Budget
                 </label>
 
-                <div className="relative">
-                  <select
-                    id="contact-budget"
-                    value={budget}
-                    onChange={(e) => {
-                      setBudget(e.target.value);
-                      if (budgetError) setBudgetError(null);
-                    }}
-                    onBlur={() => {
-                      if (!budget.trim()) {
-                        setBudgetError("Select a budget range");
+                <div className="relative w-full max-w-full overflow-visible">
+                  {/* Desktop Native Select */}
+                  <div className="hidden md:block relative w-full">
+                    <select
+                      id="contact-budget"
+                      value={budget}
+                      onChange={(e) => {
+                        setBudget(e.target.value);
+                        if (budgetError) setBudgetError(null);
+                      }}
+                      onBlur={() => {
+                        if (!budget.trim()) {
+                          setBudgetError("Select a budget range");
+                        }
+                      }}
+                      className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                      style={{
+                        background: "#FFFFFF",
+                        boxShadow: "0px 4px 4px 0px #00000040",
+                        height: "46px",
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontSize: "15px",
+                        lineHeight: "100%",
+                        color: budget ? "#000000" : "#B2B2B2",
+                      }}
+                    >
+                      <option value="" disabled hidden>
+                        Select project budget
+                      </option>
+
+                      {BUDGET_OPTIONS.map((opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                          style={{
+                            color: "#000000",
+                            fontFamily: "Lexend",
+                          }}
+                        >
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-700">
+                      <ChevronDown className="h-5 w-5" aria-hidden />
+                    </span>
+                  </div>
+
+                  {/* Mobile Custom Dropdown */}
+                  <div 
+                    className="md:hidden relative w-full"
+                    tabIndex={0}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                        setBudgetMenuOpen(false);
+                        if (!budget.trim()) {
+                          setBudgetError("Select a budget range");
+                        }
                       }
                     }}
-                    className="w-full appearance-none rounded-[2px] border border-[#dbdbdb] px-3.5 pr-10 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
-                    style={{
-                      background: "#FFFFFF",
-                      boxShadow: "0px 4px 4px 0px #00000040",
-                      height: "46px",
-                      fontFamily: "Lexend",
-                      fontWeight: 300,
-                      fontSize: "15px",
-                      lineHeight: "100%",
-                      color: budget ? "#000000" : "#B2B2B2",
-                    }}
                   >
-                    <option value="" disabled hidden>
-                      Select project budget
-                    </option>
-
-                    {BUDGET_OPTIONS.map((opt) => (
-                      <option
-                        key={opt}
-                        value={opt}
-                        style={{
-                          color: "#000000",
-                          fontFamily: "Lexend",
-                        }}
-                      >
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-700">
-                    <ChevronDown className="h-5 w-5" aria-hidden />
-                  </span>
+                    <button
+                      type="button"
+                      onClick={() => setBudgetMenuOpen((p) => !p)}
+                      className="flex items-center justify-between w-full px-3.5 bg-transparent outline-none text-left appearance-none rounded-[2px] border border-[#dbdbdb] focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
+                      style={{
+                        background: "#FFFFFF",
+                        boxShadow: "0px 4px 4px 0px #00000040",
+                        height: "46px",
+                        fontFamily: "Lexend",
+                        fontWeight: 300,
+                        fontSize: "15px",
+                        lineHeight: "100%",
+                        color: budget ? "#000000" : "#B2B2B2",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      {budget || "Select project budget"}
+                      <ChevronDown className="h-5 w-5 text-neutral-700" aria-hidden />
+                    </button>
+                    {budgetMenuOpen && (
+                      <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#dbdbdb] rounded-[2px] shadow-lg z-50 overflow-hidden">
+                        {BUDGET_OPTIONS.map((opt, idx) => (
+                          <React.Fragment key={opt}>
+                            <button
+                              type="button"
+                              className="w-full text-left px-3.5 py-2.5 hover:bg-gray-100"
+                              style={{
+                                color: "#000000",
+                                fontFamily: "Lexend",
+                                fontWeight: 300,
+                                fontSize: "15px",
+                              }}
+                              onClick={() => {
+                                setBudget(opt);
+                                if (budgetError) setBudgetError(null);
+                                setBudgetMenuOpen(false);
+                              }}
+                            >
+                              {opt}
+                            </button>
+                            {idx < BUDGET_OPTIONS.length - 1 && (
+                              <hr className="border-t border-[#dbdbdb] mx-3" />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {budgetError && (

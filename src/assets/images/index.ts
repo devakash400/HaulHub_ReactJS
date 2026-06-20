@@ -15,6 +15,7 @@ import ModalLogo from './modallogo.png';
 import Instagram from "./instagram.png";
 import Facebook from "./facebook.png";
 import Contact from "./contact.png";
+import logowithouttext from "./appLogo_without_text.png";
 // import trailer2 from "../../../src/assets/images/trailer2."
 
 // Export them al
@@ -34,4 +35,5 @@ export const images = {
   Instagram,
   Facebook,
   Contact,
+  logowithouttext
 };
