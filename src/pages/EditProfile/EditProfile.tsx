@@ -5,11 +5,12 @@ import React, {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, ChevronLeft, ChevronDown } from "lucide-react";
+import { Camera, ChevronLeft, ChevronDown, AlertTriangle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 
+import ActionConfirmModal from "../../components/common/ActionConfirmModal.tsx";
 import { updateUser } from "../../store/authSlice.ts";
 import { RootState } from "../../store/index.ts";
 import {
@@ -318,6 +319,7 @@ const EditProfile: React.FC = () => {
   const [profile, setProfile] = useState<UserProfileApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   /* avatar */
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -545,7 +547,7 @@ const EditProfile: React.FC = () => {
           phoneNumber: updated.phoneNumber,
         })
       );
-      toast.success("Profile saved successfully");
+      navigate("/profile")
     } catch (err) {
       toast.error(formatSaveError(err));
     } finally {
@@ -856,7 +858,7 @@ const EditProfile: React.FC = () => {
                 <div className="mt-10 flex items-center justify-end gap-4">
                   <button
                     type="button"
-                    onClick={() => navigate(-1)}
+                    onClick={() => setShowCancelModal(true)}
                     className="h-[48px] px-8 rounded-xl border border-[#D0D5DD] text-[15px] font-semibold text-[#344054] bg-white hover:bg-[#F9FAFB] transition-colors"
                   >
                     Cancel
@@ -886,6 +888,20 @@ const EditProfile: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ActionConfirmModal
+        visible={showCancelModal}
+        title="Discard Changes?"
+        description="Are you sure you want to discard your changes? Any unsaved edits will be lost."
+        confirmLabel="Keep Editing"
+        cancelLabel="Discard"
+        onConfirm={() => setShowCancelModal(false)}
+        onCancel={() => {
+          setShowCancelModal(false);
+          navigate(-1);
+        }}
+        icon={<AlertTriangle className="w-8 h-8 text-amber-500" strokeWidth={2} />}
+      />
     </div>
   );
 };
