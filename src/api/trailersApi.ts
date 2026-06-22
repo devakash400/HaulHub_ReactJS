@@ -100,7 +100,9 @@ export function apiTrailerToListItem(t: ApiTrailer | ApiTrailerDetail): TrailerL
     modelLabel: `Model: ${modelName}`,
     priceLabel: formatPricePerDay(t.pricePerDay),
     badgeLabel: t.isFeatured ? "Featured" : undefined,
-    availabilityStatus: t.availabilityStatus?.toLowerCase(),
+    availabilityStatus: (t as any).isUnavailable !== undefined 
+      ? ((t as any).isUnavailable ? "unavailable" : "available") 
+      : t.availabilityStatus?.toLowerCase(),
     averageRating,
     totalRatings,
   };
@@ -129,7 +131,9 @@ export async function fetchTrailersList(params?: {
   page?: number;
   limit?: number;
 }): Promise<GroupedHomeTrailers> {
-  const res = await api.get<TrailersListResponse>("/api/trailers", { params });
+  const res = await api.get<TrailersListResponse>("/api/trailers", { 
+    params: { ...params, _t: Date.now() } 
+  });
   const body = res.data;
   if (!body?.success || !body.data?.trailers) {
     return groupTrailersForHome([]);
@@ -300,6 +304,7 @@ export async function fetchTrailerById(
   try {
     const res = await api.get<TrailerDetailResponse>(
       `/api/trailers/${encodeURIComponent(id)}`,
+      { params: { _t: Date.now() } }
     );
     const body = res.data;
     if (!body?.success || !body.data?._id) return null;
@@ -468,11 +473,13 @@ export function mapApiTrailerDetailToTrailerDetail(
     location,
     specs,
     isAvailable:
-      data.availabilityStatus?.toLowerCase() === "available"
-        ? true
-        : data.availabilityStatus?.toLowerCase() === "unavailable"
-          ? false
-          : true,
+      data.isUnavailable !== undefined
+        ? !data.isUnavailable
+        : data.availabilityStatus?.toLowerCase() === "available"
+          ? true
+          : data.availabilityStatus?.toLowerCase() === "unavailable"
+            ? false
+            : true,
     rating,
     reviewCount: totalReviews,
     ratingDescription,
