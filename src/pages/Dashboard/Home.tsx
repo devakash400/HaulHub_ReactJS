@@ -408,7 +408,7 @@ const Home: React.FC = () => {
                        rounded-[4px] bg-white"
                       >
                         {/* Image */}
-                        <div className="aspect-[240/257] w-full xl:h-[257px] xl:w-[240px] overflow-hidden rounded-[4px]">
+                        <div className="aspect-[240/257] w-full xl:h-[257px] xl:w-[240px] overflow-hidden rounded-[4px] border border-black">
                           <img
                             src={item.image}
                             alt={item.modelLabel}
