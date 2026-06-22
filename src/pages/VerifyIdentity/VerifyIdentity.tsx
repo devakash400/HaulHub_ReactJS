@@ -118,7 +118,7 @@ const VerifyIdentity: React.FC = () => {
         startDate: pickupDate,
         endDate: returnDate,
         drivingLicenseDocuments: [drivingLicense],
-        passportDocuments: [passport],
+        proofOfInsuranceDocuments: [passport],
       } as any);
 
       toast.success("Booking request sent.");
