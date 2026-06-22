@@ -401,7 +401,7 @@ const Profile: React.FC = () => {
 
                         <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => navigate("/edit-profile")}
               disabled={uploadingPhoto}
               aria-label="Change profile photo"
               className="
