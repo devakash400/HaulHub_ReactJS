@@ -7,18 +7,18 @@ export type CreateBookingPayload = {
   endDate: string;
   // optional files (browser File objects)
   drivingLicenseDocuments?: File[] | null;
-  passportDocuments?: File[] | null;
+  proofOfInsuranceDocuments?: File[] | null;
 };
 
 export async function createBooking(
   payload: CreateBookingPayload,
 ): Promise<unknown> {
-  const { drivingLicenseDocuments, passportDocuments, ...rest } = payload;
+  const { drivingLicenseDocuments, proofOfInsuranceDocuments, ...rest } = payload;
 
   // If files are present, use multipart/form-data
   if (
     (Array.isArray(drivingLicenseDocuments) && drivingLicenseDocuments.length > 0) ||
-    (Array.isArray(passportDocuments) && passportDocuments.length > 0)
+    (Array.isArray(proofOfInsuranceDocuments) && proofOfInsuranceDocuments.length > 0)
   ) {
     const form = new FormData();
     Object.entries(rest).forEach(([k, v]) => {
@@ -27,8 +27,8 @@ export async function createBooking(
     if (Array.isArray(drivingLicenseDocuments)) {
       drivingLicenseDocuments.forEach((f) => form.append("drivingLicenseDocuments", f));
     }
-    if (Array.isArray(passportDocuments)) {
-      passportDocuments.forEach((f) => form.append("passportDocuments", f));
+    if (Array.isArray(proofOfInsuranceDocuments)) {
+      proofOfInsuranceDocuments.forEach((f) => form.append("proofOfInsuranceDocuments", f));
     }
     const res = await api.post("/api/bookings", form, {
       headers: { "Content-Type": "multipart/form-data" },
