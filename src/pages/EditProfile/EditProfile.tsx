@@ -395,24 +395,41 @@ const EditProfile: React.FC = () => {
       setFirstName(fn);
       setLastName(ln);
       setEmail(data.email?.trim() ?? "");
-      setAddress(data.residentialAddress?.trim() || data.address?.trim() || "");
-      setCity(data.state?.trim() ?? "");
+
+      if (data.dateOfBirth) {
+        setDob(data.dateOfBirth.split("T")[0]);
+      }
+
+      if (data.addresses && data.addresses.length > 0) {
+        const addr = data.addresses[0];
+        setAddress(addr.addressLine || "");
+        setCity(addr.state || addr.city || "");
+        if (addr.country) {
+          const match = COUNTRY_OPTIONS.find(
+            (c) =>
+              c.code.toLowerCase() === addr.country?.toLowerCase() ||
+              c.name.toLowerCase() === addr.country?.toLowerCase()
+          );
+          if (match) setSelectedCountry(match);
+        }
+      } else {
+        setAddress(data.residentialAddress?.trim() || data.address?.trim() || "");
+        setCity(data.state?.trim() ?? "");
+        if (data.country) {
+          const match = COUNTRY_OPTIONS.find(
+            (c) =>
+              c.code.toLowerCase() === data.country?.toLowerCase() ||
+              c.name.toLowerCase() === data.country?.toLowerCase()
+          );
+          if (match) setSelectedCountry(match);
+        }
+      }
       setZipCode("");
 
       /* phone */
       const parsedPhone = parsePhoneNumber(data.phoneNumber ?? "");
       setPhoneCountry(parsedPhone.country);
       setPhoneLocal(parsedPhone.local);
-
-      /* country */
-      if (data.country) {
-        const match = COUNTRY_OPTIONS.find(
-          (c) =>
-            c.code.toLowerCase() === data.country?.toLowerCase() ||
-            c.name.toLowerCase() === data.country?.toLowerCase()
-        );
-        if (match) setSelectedCountry(match);
-      }
 
       /* emergency contact */
       const ec = data.emergencyContact;
@@ -522,6 +539,14 @@ const EditProfile: React.FC = () => {
       residentialAddress: address.trim() || undefined,
       state: city.trim() || undefined,
       country: selectedCountry.code,
+      dateOfBirth: dob || undefined,
+      addresses: [
+        {
+          addressLine: address.trim() || undefined,
+          state: city.trim() || undefined,
+          country: selectedCountry.code,
+        }
+      ],
       ...(phoneNumber ? { phoneNumber } : {}),
       ...(ecPhoneNumber
         ? {
