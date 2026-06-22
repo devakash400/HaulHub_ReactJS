@@ -100,9 +100,9 @@ const App: React.FC = () => {
   }, [isAuthenticated, dispatch]);
 
   return (
-    <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden min-w-0">
+    <div className="flex flex-col min-h-screen bg-background w-full max-w-full overflow-x-hidden min-w-0">
       <ScrollToTop /> {!hideNavFooter && <Navbar />}
-      <main className={contentTopPadding}>
+      <main className={`flex-grow grid ${contentTopPadding}`}>
         <Routes location={backgroundLocation}>
           <Route path="/" element={<Home />} />
           {/* Auth routes (login/signup/forgot/otp/new-password) */}

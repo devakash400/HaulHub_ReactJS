@@ -57,6 +57,35 @@ const Notifications: React.FC = () => {
   const [processingRequests, setProcessingRequests] = useState<
     Record<string, boolean>
   >({});
+  const [expandedMessages, setExpandedMessages] = useState<
+    Record<string, boolean>
+  >({});
+
+  const toggleMessageExpand = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    setExpandedMessages((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const [truncateLength, setTruncateLength] = useState(80);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setTruncateLength(35); // Mobile
+      } else if (window.innerWidth < 1024) {
+        setTruncateLength(45); // Tablet/iPad
+      } else {
+        setTruncateLength(80); // Desktop
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleAcceptRequest = async (bookingId: string) => {
     setProcessingRequests((prev) => ({ ...prev, [bookingId]: true }));
@@ -248,7 +277,19 @@ const Notifications: React.FC = () => {
                           {notification.title}
                         </p>
                         <p className="mt-1 text-sm text-gray-700 break-words">
-                          {notification.message}
+                          {notification.message.length > truncateLength && !expandedMessages[notification._id]
+                            ? `${notification.message.substring(0, truncateLength)}... `
+                            : `${notification.message} `}
+                          {notification.message.length > truncateLength && (
+                            <button
+                              onClick={(e) =>
+                                toggleMessageExpand(e, notification._id)
+                              }
+                              className="text-[#389131] hover:underline font-medium focus:outline-none"
+                            >
+                              {expandedMessages[notification._id] ? "Show less" : "Show more"}
+                            </button>
+                          )}
                         </p>
                         <p className="mt-2 text-xs font-medium text-gray-500 break-words">
                           Booking ID: {notification.bookingId}
