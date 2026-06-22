@@ -103,8 +103,9 @@ const Home: React.FC = () => {
 
   // ownerTrailers is null while loading; once fetched it's an array (possibly empty).
   const ownerHasTrailers =
-    ownerTrailersCount > 0 ||
-    (ownerTrailers !== null && ownerTrailers.length > 0);
+    isOwner &&
+    (ownerTrailersCount > 0 ||
+      (ownerTrailers !== null && ownerTrailers.length > 0));
   const ownerHasNoTrailers =
     isOwner &&
     ownerTrailers !== null &&

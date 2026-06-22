@@ -38,6 +38,25 @@ const BookingDetails: React.FC = () => {
     back: null,
   });
 
+  const [isNameExpanded, setIsNameExpanded] = useState(false);
+  const [nameTruncateLength, setNameTruncateLength] = useState(80);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setNameTruncateLength(35); // Mobile
+      } else if (window.innerWidth < 1024) {
+        setNameTruncateLength(45); // Tablet/iPad
+      } else {
+        setNameTruncateLength(80); // Desktop
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const isOwnerUser = useSelector(
     (state: RootState) =>
       state.auth.userType === "Owner" || state.auth.user?.trailor === "Owner",
@@ -400,7 +419,20 @@ const BookingDetails: React.FC = () => {
                     : "Booking details"}
                 </p>
                 <h1 className="text-2xl font-semibold text-slate-900 break-words break-all">
-                  {renterName}
+                  {renterName.length > nameTruncateLength && !isNameExpanded
+                    ? `${renterName.substring(0, nameTruncateLength)}... `
+                    : `${renterName} `}
+                  {renterName.length > nameTruncateLength && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIsNameExpanded(!isNameExpanded);
+                      }}
+                      className="text-[#389131] hover:underline font-medium focus:outline-none text-base align-middle ml-2"
+                    >
+                      {isNameExpanded ? "Show less" : "Show more"}
+                    </button>
+                  )}
                 </h1>
                 <p className="mt-1 text-sm text-slate-500 truncate">
                   Booking ID:{" "}

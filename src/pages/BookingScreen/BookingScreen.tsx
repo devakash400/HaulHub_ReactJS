@@ -7,6 +7,7 @@ import {
   fetchTrailerReviews,
 } from "../../api/trailersApi.ts";
 import { useLocation, useNavigate } from "react-router-dom";
+import EmptyState from "../../components/common/EmptyState.tsx";
 
 function getBookingDateText(createdAtString?: string) {
   if (!createdAtString) return null;
@@ -472,13 +473,11 @@ const BookingScreen: React.FC = () => {
           ) : error ? (
             <li className="text-center py-8 text-red-500">{error}</li>
           ) : filteredBookings.length === 0 ? (
-            <li className="py-12 text-center">
-              <p className="text-[20px] font-semibold text-gray-700">
-                No bookings found
-              </p>
-              <p className="mt-2 text-[14px] text-gray-500">
-                Your upcoming bookings will appear here.
-              </p>
+            <li>
+              <EmptyState
+                line="No bookings found"
+                subLine="Your upcoming bookings will appear here."
+              />
             </li>
           ) : (
             filteredBookings.map((booking) => {
