@@ -562,7 +562,7 @@ const EditProfile: React.FC = () => {
       <div className="w-full bg-white border-b border-[#E4E7EC] px-8 py-5 flex items-center gap-4">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => setShowCancelModal(true)}
           className="flex items-center gap-1.5 text-[#667085] hover:text-[#344054] transition-colors"
           aria-label="Go back"
         >
