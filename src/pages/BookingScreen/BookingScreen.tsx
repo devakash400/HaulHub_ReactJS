@@ -327,7 +327,7 @@ const BookingScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white w-full min-w-0 overflow-x-hidden">
+    <div className="h-full flex flex-col bg-white w-full min-w-0 overflow-x-hidden">
       <main className="flex-1 min-h-0 min-w-0 overflow-y-auto max-w-3xl mx-auto w-full px-4 sm:px-6 py-4">
         {/* Page title */}
         <h1 className="text-xl sm:text-2xl font-bold text-black text-center mb-4 mt-2">

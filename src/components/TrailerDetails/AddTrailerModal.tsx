@@ -923,7 +923,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                     <p className="mb-2 font-lexend text-[12px] font-normal text-[#7C7C7C]">
                       Preview of {photos.length} uploaded image{photos.length !== 1 ? 's' : ''}
                     </p>
-                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#7C7C7C]/30 scrollbar-track-transparent">
+                    <div className="flex flex-wrap gap-2">
                       {photos.map((photo, idx) => (
                         <div
                           key={idx}

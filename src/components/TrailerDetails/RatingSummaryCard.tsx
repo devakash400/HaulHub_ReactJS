@@ -18,17 +18,16 @@ export const RatingSummaryCard: React.FC<RatingSummaryCardProps> = ({
         w-full max-w-[682px] min-h-[82px]
         bg-white border border-[#8D8D8D] rounded-[10px]
         flex items-center justify-between
-        px-[22px] py-[14px] gap-7
+        px-3 md:px-[22px] py-[14px] gap-2 md:gap-7
         box-border
       "
     >
       {/* Left */}
       <div className="flex flex-col items-center shrink-0">
         <p
-          className="m-0 text-center font-normal leading-[100%] text-black"
+          className="m-0 text-center font-normal leading-[100%] text-black text-[20px] md:text-[24px]"
           style={{
             fontFamily: "Lexend",
-            fontSize: "24px",
             fontStyle: "normal",
             letterSpacing: "0%",
             verticalAlign: "middle",
@@ -40,7 +39,11 @@ export const RatingSummaryCard: React.FC<RatingSummaryCardProps> = ({
           {[1, 2, 3, 4, 5].map((i) => (
             <Star
               key={i}
-              className="w-[15px] h-[15px] text-[#FFC107] fill-[#FFC107]"
+              className={`w-[15px] h-[15px] ${
+                i <= Math.round(rating)
+                  ? "text-[#FFC107] fill-[#FFC107]"
+                  : "text-[#FFC107] fill-transparent"
+              }`}
             />
           ))}
         </div>
@@ -52,7 +55,7 @@ export const RatingSummaryCard: React.FC<RatingSummaryCardProps> = ({
     flex-1 max-w-[360px]
     m-0
     text-center
-    text-[14px] font-normal leading-[100%]
+    text-[11px] md:text-[14px] font-normal leading-[100%]
     text-[#1D1D1D]
   "
         style={{
@@ -68,17 +71,16 @@ export const RatingSummaryCard: React.FC<RatingSummaryCardProps> = ({
       {/* Right */}
       <div className="flex flex-col items-center shrink-0">
         <p
-          className="m-0 text-center align-middle font-normal leading-[100%] tracking-[0%] text-[#111111]"
+          className="m-0 text-center align-middle font-normal leading-[100%] tracking-[0%] text-[#111111] text-[20px] md:text-[24px]"
           style={{
             fontFamily: "Lexend",
-            fontSize: "24px",
             fontStyle: "normal",
           }}
         >
           {reviewCount}
         </p>
 
-        <p className="mt-1 text-[16px] font-semibold leading-none text-[#444444]">
+        <p className="mt-1 text-[12px] md:text-[16px] font-semibold leading-none text-[#444444]">
           Reviews
         </p>
       </div>

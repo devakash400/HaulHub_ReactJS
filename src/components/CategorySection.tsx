@@ -342,7 +342,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 {/* IMAGE */}
                 <div
                   className="relative w-full
-                 aspect-square rounded-[18px] overflow-hidden"
+                 aspect-square rounded-[18px] overflow-hidden border border-black"
                 >
                   <img
                     src={item.image}

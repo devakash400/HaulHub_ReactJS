@@ -21,9 +21,8 @@ export const TrailerTitleSection: React.FC<TrailerTitleSectionProps> = ({
     <section className="flex flex-row flex-wrap items-center sm:items-start justify-between gap-4 mb-3 min-w-0">
       <div className="min-w-0 flex-1">
         <h1
-          className="text-[26px] sm:text-[40px] font-semibold tracking-tight text-[#389131] mb-0 sm:mb-2 break-words"
+          className="font-['Lexend'] text-[26px] sm:text-[40px] font-semibold tracking-tight text-[#389131] mb-0 sm:mb-2 break-words"
           style={{
-            fontFamily: "Lexend",
             fontWeight: 600,
             fontStyle: "normal",
             lineHeight: "100%",

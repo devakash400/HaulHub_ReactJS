@@ -867,6 +867,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
                     <input
                       type="tel"
+                      name="phone"
+                      autoComplete="tel"
                       placeholder="Phone Number"
                       value={email}
                       onChange={(e) => {
@@ -909,6 +911,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
               ) : (
                 <input
                   type="email"
+                  name="email"
+                  autoComplete="email"
                   placeholder="Enter your Email"
                   value={email}
                   onChange={(e) => {
@@ -1276,6 +1280,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
               <div className="relative">
                 <input
                   type={showLoginPwd ? "text" : "password"}
+                  name="password"
+                  autoComplete="current-password"
                   value={password}
                   placeholder="Enter your Password"
                   onChange={(e) => {
