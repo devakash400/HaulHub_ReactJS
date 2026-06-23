@@ -454,13 +454,13 @@ const Trailer: React.FC = () => {
         <RevealSection delayMs={80} variant="soft">
           <div className="mb-4 space-y-[10px]">
             <p
-              className="font-medium text-black text-[30px] leading-[100%] tracking-[0%]"
+              className="font-medium text-black text-[20px] sm:text-[24px] md:text-[30px] leading-[100%] tracking-[0%]"
               style={{ fontFamily: "Lexend", verticalAlign: "middle" }}
             >
               {locationText}
             </p>
             <p
-              className="text-[19px] font-normal leading-[100%] tracking-[0%] text-black"
+              className="font-normal text-black text-[15px] sm:text-[17px] md:text-[19px] leading-[100%] tracking-[0%]"
               style={{ fontFamily: "Lexend", verticalAlign: "middle" }}
             >
               {trailer.specs}

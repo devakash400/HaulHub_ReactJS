@@ -90,7 +90,17 @@ const Wishlist: React.FC = () => {
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 py-8">
         {/* Header */}
         <div className="mb-14">
-          <h1 className="font-['Lexend'] font-semibold text-[30px] leading-[100%] text-[#389131]">
+          <h1
+            className="font-['Lexend'] text-[26px] sm:text-[30px] font-semibold tracking-tight text-[#389131] mb-0 sm:mb-2 break-words"
+            style={{
+              fontWeight: 600,
+              fontStyle: "normal",
+              lineHeight: "100%",
+              letterSpacing: "0%",
+              verticalAlign: "middle",
+              color: "#389131",
+            }}
+          >
             Wishlist
           </h1>
           <p
@@ -98,7 +108,7 @@ const Wishlist: React.FC = () => {
     mt-3
     font-lexend
     font-light
-    text-[20px]
+    text-[19px] sm:text-[20px]
     leading-[100%]
     tracking-[0%]
     text-black
@@ -167,11 +177,10 @@ const Wishlist: React.FC = () => {
                           style={{
                             fontFamily: "Lexend",
                             fontWeight: 700,
-                            fontSize: "15px",
                             lineHeight: "100%",
                             color: "#000000",
                           }}
-                          className="truncate"
+                          className="truncate text-[15px]"
                         >
                           {item.title}
                         </p>
@@ -181,12 +190,11 @@ const Wishlist: React.FC = () => {
                             style={{
                               fontFamily: "Lexend",
                               fontWeight: 400,
-                              fontSize: "16px",
                               lineHeight: "100%",
                               color: "#9B989E",
                               marginTop: "8px",
                             }}
-                            className="truncate"
+                            className="truncate text-[16px]"
                           >
                             {item.description}
                           </p>
@@ -238,7 +246,7 @@ const Wishlist: React.FC = () => {
               className="
     font-lexend
     font-normal
-    text-[27px]
+    text-[26px] sm:text-[27px]
     leading-[100%]
     tracking-[0%]
     text-black
@@ -254,7 +262,7 @@ const Wishlist: React.FC = () => {
   
     font-lexend
     font-light
-    text-[20px]
+    text-[19px] sm:text-[20px]
     leading-[100%]
     tracking-[0%]
     text-black
