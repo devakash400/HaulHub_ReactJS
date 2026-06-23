@@ -256,21 +256,24 @@ const OwnerTruckDescription: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F9F8F3] px-4 py-6 sm:py-8">
-      <div className="mx-auto max-w-6xl space-y-5">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-[#F9F8F3] w-full min-w-0 overflow-x-hidden scroll-smooth">
+      <div
+        className="max-w-container mx-auto px-4 sm:px-6 lg:px-10 py-5 lg:py-5 w-full min-w-0 space-y-5"
+        style={{ paddingBottom: "5px" }}
+      >
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
               Truck Owner Description
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 mt-1">
               View truck details, manage bookings, track earnings, and update
               availability.
             </p>
           </div>
           <Link
             to="/"
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+            className="w-full sm:w-auto text-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
           >
             Back to Dashboard
           </Link>
@@ -278,7 +281,7 @@ const OwnerTruckDescription: React.FC = () => {
 
         <section className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
           <div className="grid gap-5 md:grid-cols-[360px_1fr]">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white h-[260px] md:h-auto min-h-[260px]">
               <img
                 src={trailer.images[0]}
                 alt={trailer.title}
@@ -335,7 +338,7 @@ const OwnerTruckDescription: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
                 <button
                   type="button"
                   onClick={async () => {
@@ -374,7 +377,7 @@ const OwnerTruckDescription: React.FC = () => {
                         : "Trailer marked available.",
                     );
                   }}
-                  className={`rounded-lg px-4 py-2 text-sm font-semibold text-white ${
+                  className={`w-full sm:w-auto text-center rounded-lg px-4 py-2 text-sm font-semibold text-white ${
                     isTruckBooked
                       ? "cursor-not-allowed"
                       : isAvailable
@@ -392,7 +395,7 @@ const OwnerTruckDescription: React.FC = () => {
                 <button
                   type="button"
                   onClick={openEditModal}
-                  className={`rounded-lg border px-4 py-2 text-sm font-semibold ${
+                  className={`w-full sm:w-auto text-center rounded-lg border px-4 py-2 text-sm font-semibold ${
                     isTruckBooked
                       ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                       : "border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
@@ -408,7 +411,7 @@ const OwnerTruckDescription: React.FC = () => {
                     setSelectedPhotoIndex(0);
                     setIsPhotosOpen(true);
                   }}
-                  className="rounded-lg border border-[#8CCB85] bg-[#EAF7E8] px-4 py-2 text-sm font-semibold text-[#2F7A29] hover:bg-[#DDF2DA] transition-colors"
+                  className="w-full sm:w-auto text-center rounded-lg border border-[#8CCB85] bg-[#EAF7E8] px-4 py-2 text-sm font-semibold text-[#2F7A29] hover:bg-[#DDF2DA] transition-colors"
                 >
                   View All Photos
                 </button>
@@ -439,13 +442,13 @@ const OwnerTruckDescription: React.FC = () => {
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="text-xl font-semibold text-gray-900">
               Manage Bookings
             </h2>
             <button
               type="button"
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+              className="w-full sm:w-auto text-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
             >
               View All Bookings
             </button>
@@ -639,7 +642,7 @@ const OwnerTruckDescription: React.FC = () => {
             style={{ maxHeight: "calc(100vh - 120px)" }}
           >
             <div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
-              <div className="mx-auto h-[400px] w-full max-w-[420px] overflow-hidden rounded-[32px] border border-gray-200 bg-[#F8FAFC]">
+              <div className="mx-auto h-[260px] sm:h-[400px] w-full max-w-[420px] overflow-hidden rounded-[32px] border border-gray-200 bg-[#F8FAFC]">
                 <img
                   src={galleryImages[selectedPhotoIndex] || trailer.images[0]}
                   alt={`${trailer.title} featured`}
