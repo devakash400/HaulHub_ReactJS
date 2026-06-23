@@ -348,13 +348,12 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   return (
     <>
       <div
-        className="w-full min-w-0 self-start
-       flexjcenter justify-start"
+        className="w-full min-w-0 self-start flex justify-center lg:justify-start"
       >
         <div
           style={{ backgroundColor: "#FFFFFF" }}
           className="
-      w-full max-w-[463px]
+      w-full max-w-[463px] mx-auto lg:mx-0
     
       border border-[#D7D7D7]
       rounded-[14px]

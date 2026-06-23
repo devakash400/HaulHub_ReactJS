@@ -401,7 +401,7 @@ const Trailer: React.FC = () => {
      w-full min-w-0 overflow-x-hidden scroll-smooth"
     >
       <div
-        className="max-w-container mx-auto px-10 sm:px-6
+        className="max-w-container mx-auto px-4 sm:px-6
        lg:px-10 py-5 lg:py-5 w-full min-w-0"
         style={{ paddingBottom: "5px" }}
       >
@@ -474,9 +474,9 @@ const Trailer: React.FC = () => {
               style={{
                 boxShadow: "0px 4px 4px 0px #00000040",
               }}
-              className="px-10 lg:grid lg:grid-cols-3 lg:gap-6"
+              className="px-4 sm:px-6 lg:px-10 py-6 lg:py-8 lg:grid lg:grid-cols-3 lg:gap-6"
             >
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-6 md:space-y-8">
                 <RevealSection variant="soft">
                   <RatingSummaryCard
                     rating={trailer.rating}
@@ -503,7 +503,7 @@ const Trailer: React.FC = () => {
 
               <div
                 style={{ paddingBottom: "20px" }}
-                className="lg:col-span-1 mt-8 lg:mt-0 flex justify-center lg:block"
+                className="lg:col-span-1 mt-8 lg:mt-0 flex justify-center w-full"
               >
                 <RevealSection delayMs={140} variant="soft">
                   <StickyPricingCard

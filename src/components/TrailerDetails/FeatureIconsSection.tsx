@@ -24,7 +24,7 @@ export const FeatureIconsSection: React.FC<FeatureIconsSectionProps> = ({
   return (
     <section
       className="flex flex-wrap md:flex-nowrap items-start
-     justify-center md:justify-between w-full md:w-[682px] ml-0 mr-auto px-0 gap-6 md:gap-0"
+     justify-around md:justify-between w-full md:w-[682px] ml-0 mr-auto px-0 gap-y-6 gap-x-2 md:gap-0"
     >
       {features.map(({ icon, label }, index) => {
         const iconSrc = iconMap[icon];
@@ -59,7 +59,7 @@ export const FeatureIconsSection: React.FC<FeatureIconsSectionProps> = ({
           <div
             key={label}
             className="flex flex-col items-center
-             text-center w-[45%] md:w-auto pb-8 md:pb-[100px]"
+             text-center w-[45%] md:w-auto pb-2 md:pb-[100px] px-2 md:px-0"
           >
             <img
               src={iconSrc}
