@@ -116,8 +116,10 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const [dateOfBirthTouched, setDateOfBirthTouched] = useState(false);
   const [ageSubmitError, setAgeSubmitError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [genderMenuOpen, setGenderMenuOpen] = useState(false);
+  const [genderDropdownOpen, setGenderDropdownOpen] = useState(false);
+  const genderDropdownRef = useRef<HTMLDivElement | null>(null);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+  const categoryDropdownRef = useRef<HTMLDivElement | null>(null);
   const dateInputRef = useRef<HTMLInputElement | null>(null);
   const todayIso = new Date().toISOString().split("T")[0];
 
@@ -164,11 +166,39 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     setGenderTouched(false);
     setDateOfBirthTouched(false);
     setAgeSubmitError(false);
+    setGenderDropdownOpen(false);
   }, [isOpen]);
 
   useEffect(() => {
     setAgeSubmitError(false);
   }, [trailor, dateOfBirth]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        genderDropdownRef.current &&
+        !genderDropdownRef.current.contains(event.target as Node)
+      ) {
+        setGenderDropdownOpen(false);
+      }
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setCountryDropdownOpen(false);
+      }
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setCategoryMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -480,13 +510,12 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   >
                     Gender
                   </label>
-                  <div className="relative w-full max-w-full overflow-hidden rounded-[5px] overflow-visible">
-                    {/* Desktop Native Select */}
-                    <select
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
+                  <div className="relative" ref={genderDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setGenderDropdownOpen((prev) => !prev)}
                       onBlur={() => setGenderTouched(true)}
-                      className="hidden md:block w-full px-3 pr-9 text-[16px] md:text-[12px] bg-transparent focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
+                      className="w-full px-3 pr-9 text-left flex items-center justify-between bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
@@ -495,78 +524,40 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         fontFamily: "Lexend",
                         fontWeight: 300,
                         fontStyle: "normal",
+                        fontSize: "12px",
                         lineHeight: "100%",
                         letterSpacing: "0%",
                         color: gender ? "#000000" : "#929191",
-                        boxSizing: "border-box",
-                        maxWidth: "100%",
-                        width: "100%",
                       }}
                     >
-                      <option value="" style={{ color: "#000000" }}>
-                        Select Gender
-                      </option>
-                      <option value="Male" style={{ color: "#000000" }}>
-                        Male
-                      </option>
-                      <option value="Female" style={{ color: "#000000" }}>
-                        Female
-                      </option>
-                      <option value="Other" style={{ color: "#000000" }}>
-                        Other
-                      </option>
-                    </select>
-                    <span className="hidden md:flex pointer-events-none absolute inset-y-0 right-0 items-center pr-3 text-gray-500">
+                      {gender || "Select Gender"}
+                    </button>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
                       <ChevronDown className="w-4 h-4" aria-hidden />
                     </span>
-
-                    {/* Mobile Custom Dropdown */}
-                    <div 
-                      className="md:hidden relative w-full"
-                      tabIndex={0}
-                      onBlur={(e) => {
-                        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                          setGenderMenuOpen(false);
-                          setGenderTouched(true);
-                        }
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setGenderMenuOpen(p => !p)}
-                        className="flex items-center justify-between w-full px-3 bg-transparent outline-none text-[16px] text-left"
-                        style={{
-                          height: "40px",
-                          borderRadius: "5px",
-                          border: "1px solid #7C7C7C",
-                          fontFamily: "Lexend",
-                          fontWeight: 300,
-                          lineHeight: "100%",
-                          color: gender ? "#000000" : "#929191",
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        {gender || "Select Gender"}
-                        <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden />
-                      </button>
-                      {genderMenuOpen && (
-                        <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#7C7C7C] rounded-[5px] shadow-lg z-50 overflow-hidden">
-                          {["Male", "Female", "Other"].map((opt) => (
-                            <button
-                              key={opt}
-                              type="button"
-                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-[16px]"
-                              onClick={() => {
-                                setGender(opt);
-                                setGenderMenuOpen(false);
-                              }}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    {genderDropdownOpen && (
+                      <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-[5px] border border-[#D1D5DB] bg-white shadow-lg">
+                        {["Male", "Female", "Other"].map((option, index) => (
+                          <button
+                            type="button"
+                            key={option}
+                            onClick={() => {
+                              setGender(option);
+                              setGenderDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-[14px] text-[#000000] hover:bg-[#F3F4F6] ${
+                              index !== 2 ? "border-b border-[#D1D5DB]" : ""
+                            }`}
+                            style={{
+                              fontFamily: "Lexend",
+                              fontWeight: 300,
+                            }}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   {genderTouched && gender.trim().length === 0 && (
                     <p className="mt-1 text-xs text-red-600">
@@ -739,12 +730,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   >
                     Choose Your Category
                   </label>
-                  <div className="relative w-full max-w-full overflow-hidden rounded-[5px] overflow-visible">
-                    {/* Desktop Native Select */}
-                    <select
-                      value={trailor}
-                      onChange={(e) => setTrailor(e.target.value)}
-                      className="hidden md:block w-full px-3 pr-9 text-[16px] md:text-[12px] bg-transparent focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15 appearance-none"
+                  <div className="relative" ref={categoryDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setCategoryMenuOpen((prev) => !prev)}
+                      className="w-full px-3 pr-9 text-left flex items-center justify-between bg-white focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/15"
                       style={{
                         height: "40px",
                         borderRadius: "5px",
@@ -753,71 +743,41 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                         fontFamily: "Lexend",
                         fontWeight: 300,
                         fontStyle: "normal",
+                        fontSize: "12px",
                         lineHeight: "100%",
                         letterSpacing: "0%",
                         color: "#000000",
-                        boxSizing: "border-box",
-                        maxWidth: "100%",
-                        width: "100%",
                       }}
                     >
-                      <option value="Renter" style={{ color: "#000000" }}>
-                        Renter
-                      </option>
-                      <option value="Owner" style={{ color: "#000000" }}>
-                        Owner
-                      </option>
-                    </select>
-                    <span className="hidden md:flex pointer-events-none absolute inset-y-0 right-0 items-center pr-3 text-gray-500">
+                      {trailor}
+                    </button>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
                       <ChevronDown className="w-4 h-4" aria-hidden />
                     </span>
 
-                    {/* Mobile Custom Dropdown */}
-                    <div 
-                      className="md:hidden relative w-full"
-                      tabIndex={0}
-                      onBlur={(e) => {
-                        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                          setCategoryMenuOpen(false);
-                        }
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setCategoryMenuOpen(p => !p)}
-                        className="flex items-center justify-between w-full px-3 bg-transparent outline-none text-[16px] text-left"
-                        style={{
-                          height: "40px",
-                          borderRadius: "5px",
-                          border: "1px solid #7C7C7C",
-                          fontFamily: "Lexend",
-                          fontWeight: 300,
-                          lineHeight: "100%",
-                          color: "#000000",
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        {trailor}
-                        <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden />
-                      </button>
-                      {categoryMenuOpen && (
-                        <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#7C7C7C] rounded-[5px] shadow-lg z-50 overflow-hidden">
-                          {["Renter", "Owner"].map((opt) => (
-                            <button
-                              key={opt}
-                              type="button"
-                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-[16px]"
-                              onClick={() => {
-                                setTrailor(opt);
-                                setCategoryMenuOpen(false);
-                              }}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    {categoryMenuOpen && (
+                      <div className="absolute left-0 top-full mt-1 w-full bg-white border border-[#D1D5DB] rounded-[5px] shadow-lg z-50 overflow-hidden">
+                        {["Renter", "Owner"].map((opt, index) => (
+                          <button
+                            type="button"
+                            key={opt}
+                            onClick={() => {
+                              setTrailor(opt);
+                              setCategoryMenuOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-[14px] text-[#000000] hover:bg-[#F3F4F6] ${
+                              index !== 1 ? "border-b border-[#D1D5DB]" : ""
+                            }`}
+                            style={{
+                              fontFamily: "Lexend",
+                              fontWeight: 300,
+                            }}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -887,7 +847,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
 
                     {countryDropdownOpen && (
                       <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-[10px] border border-[#D1D5DB] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
-                        {COUNTRY_OPTIONS.map((country) => (
+                        {COUNTRY_OPTIONS.map((country, index) => (
                           <button
                             type="button"
                             key={country.code}
@@ -895,7 +855,9 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                               setSelectedCountry(country);
                               setCountryDropdownOpen(false);
                             }}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#111827] hover:bg-[#F3F4F6]"
+                            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#111827] hover:bg-[#F3F4F6] ${
+                              index !== COUNTRY_OPTIONS.length - 1 ? "border-b border-[#D1D5DB]" : ""
+                            }`}
                           >
                             <img
                               src={country.flagUrl}
