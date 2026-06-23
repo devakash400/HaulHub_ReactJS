@@ -346,9 +346,9 @@ const Navbar: React.FC = () => {
                       <p className="text-xs uppercase tracking-[0.32em] text-[#7b6a4d]">
                         Menu
                       </p>
-                      <h2 className="mt-1 text-lg font-semibold text-[#111827]">
+                      {/* <h2 className="mt-1 text-lg font-semibold text-[#111827]">
                         Navigation
-                      </h2>
+                      </h2> */}
                     </div>
                     <button
                       type="button"

@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback } from "react";
 import { lockScroll } from "../../utils/scrollLock.ts";
-import { ModalHeader } from "../ModalHeader.tsx";
 
 export interface LogoutConfirmModalProps {
   isOpen: boolean;
@@ -51,39 +50,67 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
       aria-labelledby="logout-confirm-title"
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden"
+        className="w-full max-w-[340px] rounded-[28px] bg-white p-6 shadow-xl text-center"
         onClick={handleInnerClick}
       >
-        <ModalHeader
-          title="Sign out of your account?"
-          onClose={onCancel}
-          variant="close"
-          closeOnRight
-          titleId="logout-confirm-title"
-        />
-        <div className="px-6 py-6 sm:px-8 sm:py-7">
-          <p className="mb-4 text-sm text-gray-600">
-            You&apos;ll be logged out of HaulHub on this device. You can keep
-            browsing trailers, but you&apos;ll need to log in again to manage
-            bookings, your wishlist, or account settings.
-          </p>
+        <div className="mx-auto mb-5 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[#f8f9fa]">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M10 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V4C3 3.46957 3.21071 2.96086 3.58579 2.58579C3.96086 2.21071 4.46957 2 5 2H10"
+              stroke="#389131"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M16 17L21 12L16 7"
+              stroke="#389131"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M21 12H9"
+              stroke="#389131"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
 
-          <div className="mt-5 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 text-sm font-semibold">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-full border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-full bg-[#389131] text-white hover:bg-[#2f7a29] transition-colors"
-            >
-              Log out
-            </button>
-          </div>
+        <h3
+          id="logout-confirm-title"
+          className="mb-3 text-[22px] font-bold text-[#1f2937]"
+        >
+          Log Out
+        </h3>
+
+        <p className="mb-7 text-[15px] leading-relaxed text-[#6b7280]">
+          Are you sure you want to log out of<br />your account?
+        </p>
+
+        <div className="flex items-center gap-3 text-[15px] font-semibold">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 rounded-2xl bg-[#f3f4f6] px-4 py-3.5 text-[#374151] hover:bg-gray-200 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 rounded-2xl bg-[#389131] px-4 py-3.5 text-white hover:bg-[#2f7a29] transition-colors"
+          >
+            Log out
+          </button>
         </div>
       </div>
     </div>
