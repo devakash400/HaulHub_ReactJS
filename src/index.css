@@ -58,11 +58,13 @@ input[type="reset"]:disabled {
 ========================= */
 
 * {
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 *::-webkit-scrollbar {
-  width: 0; /* Chrome, Safari */
+  width: 0;
+  /* Chrome, Safari */
 }
 
 /* =========================
@@ -81,6 +83,7 @@ code {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -91,6 +94,7 @@ code {
     opacity: 0;
     transform: translateY(10px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -101,6 +105,6 @@ code {
   animation: modalOverlayFadeIn 220ms ease-out;
 }
 
-.modal-overlay > * {
+.modal-overlay>* {
   animation: modalContentIn 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
