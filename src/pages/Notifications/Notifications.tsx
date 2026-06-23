@@ -176,7 +176,7 @@ const Notifications: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="min-h-screen flex justify-center bg-[#F9F8F3] px-4 py-10">
+    <div className="h-full w-full flex justify-center bg-[#F9F8F3] px-4 py-10">
       {/* 80% width main container, near top instead of perfectly centered */}
       <div className="w-full max-w-5xl md:w-[80%] bg-white rounded-2xl shadow-md border border-gray-200 p-6 sm:p-8">
         <h1 className="text-2xl font-semibold text-gray-900 mb-6">

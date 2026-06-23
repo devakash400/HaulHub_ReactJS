@@ -110,7 +110,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
             className="
     text-white
     font-normal
-    text-[32px]
+    text-[24px] sm:text-[28px] md:text-[32px]
     leading-[100%]
     tracking-[0%]
     align-middle
@@ -144,7 +144,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
                 className="
     font-['Lexend']
     font-normal
-    text-[21px]
+    text-[18px] sm:text-[21px]
     leading-[100%]
     tracking-[0%]
     text-left sm:text-center
@@ -161,7 +161,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
     mt-[8px]
     font-['Lexend']
     font-normal
-    text-[14px]
+    text-[12px] sm:text-[14px]
     leading-[100%]
     tracking-[0%]
     align-middle
@@ -211,7 +211,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
 
       font-['Lexend']
       font-normal
-      text-[19px]
+      text-[16px] sm:text-[19px]
       leading-[100%]
       tracking-[0%]
       align-middle
@@ -253,7 +253,7 @@ export const ShareTrailerModal: React.FC<ShareTrailerModalProps> = ({
 
       font-['Lexend']
       font-normal
-      text-[19px]
+      text-[16px] sm:text-[19px]
       leading-[100%]
       tracking-[0%]
       align-middle

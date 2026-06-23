@@ -23,17 +23,15 @@ const SearchResults: React.FC = () => {
   const [results, setResults] = useState<ResultItem[] | null>(null);
 
   useEffect(() => {
-    if (!q.trim()) {
-      setResults([]);
-      return;
-    }
-
     let cancelled = false;
     const fetchResults = async () => {
       setLoading(true);
       setError(null);
       try {
-        const url = `https://api.renthaulhub.com/api/search?q=${encodeURIComponent(q)}`;
+        // If query is empty, fetch all trailers instead of returning empty results
+        const url = q.trim() 
+          ? `https://api.renthaulhub.com/api/search?q=${encodeURIComponent(q)}` 
+          : `https://api.renthaulhub.com/api/trailers`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Search failed: ${res.status}`);
         const data = await res.json();
@@ -47,10 +45,14 @@ const SearchResults: React.FC = () => {
         if (Array.isArray(data)) items = data as ResultItem[];
         else if (data && data.success && Array.isArray((data as any).data))
           items = (data as any).data as ResultItem[];
+        else if (data && data.success && Array.isArray((data as any).data?.trailers))
+          items = (data as any).data.trailers as ResultItem[];
         else if (data && Array.isArray((data as any).results))
           items = (data as any).results as ResultItem[];
         else if (data && Array.isArray((data as any).data))
           items = (data as any).data as ResultItem[];
+        else if (data && Array.isArray((data as any).trailers))
+          items = (data as any).trailers as ResultItem[];
 
         setResults(items);
       } catch (err: any) {
@@ -73,7 +75,13 @@ const SearchResults: React.FC = () => {
         <div>
           <p className="text-sm text-gray-500">Search</p>
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-            Results for “<span className="text-[#389131]">{q}</span>”
+            {q.trim() ? (
+              <>
+                Results for “<span className="text-[#389131]">{q}</span>”
+              </>
+            ) : (
+              "All Trailers"
+            )}
           </h1>
           <p className="mt-2 text-sm text-gray-600">
             {loading
@@ -140,8 +148,15 @@ const SearchResults: React.FC = () => {
                 : rawPrice
                   ? String(rawPrice)
                   : "--";
+            const loc = item.location;
             const locationText =
-              item.location ?? item.place ?? "Unknown location";
+              typeof loc === "object" && loc !== null
+                ? loc.city && loc.state
+                  ? `${loc.city}, ${loc.state}`
+                  : [loc.address, loc.city, loc.state].filter(Boolean).join(", ") || "Unknown location"
+                : typeof loc === "string"
+                  ? loc
+                  : item.place ?? "Unknown location";
 
             return (
               <li key={String(trailerId) + title}>

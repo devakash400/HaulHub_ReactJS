@@ -129,10 +129,10 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
     mt-4
     text-center
     bg-white
-    py-10
-    w-[calc(100%+32px)] sm:w-[calc(100%+48px)] lg:w-[calc(100%+64px)]
-    -mx-4 sm:-mx-6 lg:-mx-8
+    py-6 md:py-10
+    w-full
     shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]
+    px-4
   "
     >
       <div className="mx-auto relative flex items-center justify-center w-[242px] h-[242px]">
@@ -148,13 +148,12 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
         />
 
         <span
-          className={`absolute text-black transition-all duration-700 delay-150 ${
+          className={`absolute text-black transition-all duration-700 delay-150 text-[56px] md:text-[74px] ${
             isInView ? "opacity-100 scale-100" : "opacity-0 scale-75"
           }`}
           style={{
             fontFamily: "Lexend",
             fontWeight: 400,
-            fontSize: "74px",
             fontStyle: "normal",
             lineHeight: "100%",
             letterSpacing: "0%",
@@ -165,13 +164,12 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
         </span>
       </div>
       <h2
-        className={`text-center text-black transition-all duration-700 delay-200 ${
+        className={`text-center text-black transition-all duration-700 delay-200 text-[24px] md:text-[32px] px-2 ${
           isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         }`}
         style={{
           fontFamily: "Lexend",
           fontWeight: 500,
-          fontSize: "32px",
           fontStyle: "normal",
           lineHeight: "100%",
           letterSpacing: "0%",
@@ -182,13 +180,12 @@ export const GuestFavouriteSection: React.FC<GuestFavouriteSectionProps> = ({
        {title}
       </h2>
       <p
-        className={`max-w-2xl mx-auto text-center text-black transition-all duration-700 delay-300 ${
+        className={`max-w-2xl mx-auto text-center text-black transition-all duration-700 delay-300 text-[15px] md:text-[19px] mt-2 px-2 ${
           isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         }`}
         style={{
           fontFamily: "Lexend",
           fontWeight: 400,
-          fontSize: "19px",
           fontStyle: "normal",
           lineHeight: "100%",
           letterSpacing: "0%",

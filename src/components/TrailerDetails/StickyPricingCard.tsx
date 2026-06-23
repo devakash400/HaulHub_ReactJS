@@ -17,7 +17,7 @@ import {
   getMyBookings,
 } from "../../api/bookingsApi.ts";
 import { signUpSuccess } from "../../store/authSlice.ts";
-import type { RootState } from "../../store";
+import { store, type RootState } from "../../store/index.ts";
 
 export type TrailerBookingInfo = {
   title: string;
@@ -348,13 +348,12 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
   return (
     <>
       <div
-        className="w-full min-w-0 self-start
-       flexjcenter justify-start"
+        className="w-full min-w-0 self-start flex justify-center lg:justify-start"
       >
         <div
           style={{ backgroundColor: "#FFFFFF" }}
           className="
-      w-full max-w-[463px]
+      w-full max-w-[463px] mx-auto lg:mx-0
     
       border border-[#D7D7D7]
       rounded-[14px]
@@ -566,6 +565,12 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
         onClose={() => setIsLoginOpen(false)}
         onSuccess={async () => {
           setIsLoginOpen(false);
+          const userType = store.getState().auth.userType;
+          if (userType === "Owner") {
+            navigate("/");
+            return;
+          }
+
           const alreadyBooked = await checkPendingBookings();
           if (alreadyBooked) {
             toast.error("You already have an active or pending booking for this trailer.");
