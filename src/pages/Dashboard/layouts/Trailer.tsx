@@ -474,7 +474,7 @@ const Trailer: React.FC = () => {
               style={{
                 boxShadow: "0px 4px 4px 0px #00000040",
               }}
-              className="px-4 sm:px-6 lg:px-10 py-6 lg:py-8 lg:grid lg:grid-cols-3 lg:gap-6"
+              className="px-4 sm:px-6 lg:px-10 py-6 lg:py-8 lg:grid lg:grid-cols-3 lg:gap-10"
             >
               <div className="lg:col-span-2 space-y-6 md:space-y-8">
                 <RevealSection variant="soft">
