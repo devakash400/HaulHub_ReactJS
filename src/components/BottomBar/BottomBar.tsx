@@ -314,17 +314,17 @@ const BottomBar: React.FC = () => {
         {/* LEFT SIDE */}
         <div
           className="
-            flex flex-col lg:flex-row lg:flex-wrap gap-8 lg:gap-12
+            flex flex-row gap-4 sm:gap-8 lg:gap-12
             w-full lg:flex-1 min-w-0 lg:min-w-[260px]
-            items-center lg:items-start justify-center lg:justify-start
+            items-start justify-between lg:justify-start
           "
         >
-          <div className="text-center lg:text-left flex flex-col items-center lg:items-start w-full lg:w-auto">
-            <h3 className="m-0 mb-4 sm:mb-8 text-[22px] sm:text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
+          <div className="text-left flex flex-col items-start w-1/2 lg:w-auto">
+            <h3 className="m-0 mb-4 sm:mb-8 text-[18px] sm:text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
               Explore
             </h3>
 
-            <ul className="list-none p-0 m-0 flex flex-col items-center lg:items-start gap-4 sm:gap-[21px] text-[16px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
+            <ul className="list-none p-0 m-0 flex flex-col items-start gap-4 sm:gap-[21px] text-[14px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
               {isRenter && (
                 <li>
                   <Link
@@ -373,7 +373,7 @@ const BottomBar: React.FC = () => {
                           state: { returnTo: "/booking" },
                         })
                       }
-                      className="no-underline text-black transition-colors hover:text-[#389131] text-center lg:text-left"
+                      className="no-underline text-black transition-colors hover:text-[#389131] text-left"
                     >
                       Your Booked Trailers
                     </button>
@@ -402,12 +402,12 @@ const BottomBar: React.FC = () => {
           </div>
 
           {/* COMPANY */}
-          <div className="text-center lg:text-left flex flex-col items-center lg:items-start w-full lg:w-auto">
-            <h3 className="m-0 mb-4 sm:mb-8 text-[22px] sm:text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
+          <div className="text-left flex flex-col items-start w-1/2 lg:w-auto">
+            <h3 className="m-0 mb-4 sm:mb-8 text-[18px] sm:text-[25px] font-medium leading-[100%] tracking-[0%] text-black font-['Lexend']">
               Company
             </h3>
 
-            <ul className="list-none p-0 m-0 flex flex-col items-center lg:items-start gap-4 sm:gap-[21px] text-[16px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
+            <ul className="list-none p-0 m-0 flex flex-col items-start gap-4 sm:gap-[21px] text-[14px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
               <li>
                 <Link
                   to="/how-it-works"
