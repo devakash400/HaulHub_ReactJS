@@ -315,8 +315,8 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-white overflow-x-hidden pb-12">
-      <div className="mb-5 w-full px-[32px]">
+    <div className="w-full bg-white overflow-x-hidden flex flex-col min-h-[calc(100vh-160px)]">
+      <div className="w-full px-[32px]">
         <header className="pt-6 pb-2">
           <h1 className="text-[42px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
             Profile
@@ -326,7 +326,7 @@ const Profile: React.FC = () => {
         {/* Profile Section */}
         {/* Profile Section */}
         {/* Profile Section */}
-        <section className="mt-3 flex flex-col items-center border-b border-[#D9D9D9] pb-8">
+        <section className="mt-3 flex flex-col items-center pb-8">
           {/* Avatar Wrapper */}
           <div className="relative w-[156px] h-[156px]">
             {/* Profile Circle */}
@@ -451,9 +451,14 @@ const Profile: React.FC = () => {
             {displayName}
           </p>
         </section>
+      </div>
 
+      {/* Cream Divider */}
+      <div className="w-full h-[14px] bg-[#F4F0EC] shadow-[inset_0_3px_4px_rgba(0,0,0,0.04)] border-y border-[#EBE6E0]"></div>
+
+      <div className="mb-5 w-full px-[32px] pb-12 flex-grow">
         {/* Menu Items */}
-        <nav className="px-3 pt-5">
+        <nav className="px-3 pt-6">
           <ul className="space-y-3">
             {menuItems.map((item) => {
               const Icon = item.icon as any;
@@ -499,6 +504,9 @@ const Profile: React.FC = () => {
           }}
         />
       </div>
+
+      {/* Divider above footer */}
+      <div className="w-full h-[1px] mt-auto bg-[#E5E5E5]"></div>
     </div>
   );
 };
