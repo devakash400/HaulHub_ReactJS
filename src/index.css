@@ -7,9 +7,10 @@
 
 html {
   overflow-x: hidden;
+  overflow-y: scroll;
   width: 100%;
   -webkit-text-size-adjust: 100%;
-  scrollbar-gutter: auto;
+  scrollbar-gutter: stable;
 }
 
 body {
