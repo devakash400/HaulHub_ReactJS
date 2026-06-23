@@ -68,8 +68,8 @@ const App: React.FC = () => {
   const contentTopPadding = hideNavFooter
     ? ""
     : effectivePathname === "/"
-      ? "pt-[124px] sm:pt-[76px]"
-      : "pt-[166px] sm:pt-[92px]";
+      ? "pt-[110px] sm:pt-[97px]"
+      : "pt-[64px] sm:pt-[97px]";
 
   // Sync user profile from backend on app init if authenticated
   useEffect(() => {

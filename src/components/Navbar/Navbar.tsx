@@ -790,42 +790,44 @@ const Navbar: React.FC = () => {
           </div>
         </div>
 
-        <div
-          className={`overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none sm:hidden ${isSearchCompact ? "max-h-[48px]" : "max-h-[90px]"} ${(location.pathname === "/" || location.pathname === "/search") ? "" : "invisible pointer-events-none"}`}
-        >
+        {(location.pathname === "/" || location.pathname === "/search") && (
           <div
-            className={`transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "px-3 pb-1" : "px-4 pb-2"}`}
+            className={`overflow-hidden transition-[max-height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none sm:hidden ${isSearchCompact ? "max-h-[48px]" : "max-h-[90px]"}`}
           >
             <div
-              className={`mx-auto flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_22px_rgba(56,145,49,0.2)] motion-reduce:transition-none ${isSearchCompact ? "h-[32px] w-[min(100%,400px)] px-3" : "h-[38px] w-[min(100%,560px)] px-3.5"}`}
-              
+              className={`transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "px-3 pb-1" : "px-4 pb-2"}`}
             >
-              <input
-                type="search"
-                name="navSearchMobile"
-                autoComplete="off"
-                readOnly={location.pathname !== "/" && location.pathname !== "/search"}
-                tabIndex={location.pathname !== "/" && location.pathname !== "/search" ? -1 : 0}
-                placeholder="Search here..."
-                value={navSearch}
-                onChange={(e) => setNavSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") submitSearch();
-                }}
-                className={`min-w-0 flex-1 border-none bg-transparent text-gray-700 placeholder:text-gray-400 outline-none transition-[font-size] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "text-[0.74rem]" : "text-[0.8rem]"}`}
-              />
               <div
-                onClick={() => submitSearch()}
-                className={`flex cursor-pointer items-center justify-center rounded-full bg-[#389131] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "ml-2 h-6 w-6" : "ml-2 h-7 w-7"}`}
+                className={`mx-auto flex items-center rounded-full border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_22px_rgba(56,145,49,0.2)] motion-reduce:transition-none ${isSearchCompact ? "h-[32px] w-[min(100%,400px)] px-3" : "h-[38px] w-[min(100%,560px)] px-3.5"}`}
+                
               >
-                <Search
-                  className={`text-white transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "h-3.5 w-3.5" : "h-4 w-4"}`}
-                  aria-hidden
+                <input
+                  type="search"
+                  name="navSearchMobile"
+                  autoComplete="off"
+                  readOnly={location.pathname !== "/" && location.pathname !== "/search"}
+                  tabIndex={location.pathname !== "/" && location.pathname !== "/search" ? -1 : 0}
+                  placeholder="Search here..."
+                  value={navSearch}
+                  onChange={(e) => setNavSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") submitSearch();
+                  }}
+                  className={`min-w-0 flex-1 border-none bg-transparent text-gray-700 placeholder:text-gray-400 outline-none transition-[font-size] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "text-[0.74rem]" : "text-[0.8rem]"}`}
                 />
+                <div
+                  onClick={() => submitSearch()}
+                  className={`flex cursor-pointer items-center justify-center rounded-full bg-[#389131] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "ml-2 h-6 w-6" : "ml-2 h-7 w-7"}`}
+                >
+                  <Search
+                    className={`text-white transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "h-3.5 w-3.5" : "h-4 w-4"}`}
+                    aria-hidden
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <LogoutConfirmModal
           isOpen={isLogoutConfirmOpen}
