@@ -71,7 +71,7 @@ const OwnerViewMoreTrucks: React.FC = () => {
             No trailers found.
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {allOwnerTrucks.map((item) => {
               const booked = isBookedTrailer(Number(item.id));
               const rawStatus = item.availabilityStatus?.toLowerCase();
@@ -109,9 +109,9 @@ const OwnerViewMoreTrucks: React.FC = () => {
                     })
                   }
                 >
-                  <div className="overflow-hidden rounded-[4px] bg-white">
+                  <div className="overflow-hidden rounded-[8px] bg-white border border-[#E5E7EB] shadow-sm flex flex-col h-full">
                     {/* Image */}
-                    <div className="h-[257px] w-full overflow-hidden rounded-[4px]">
+                    <div className="aspect-[240/200] w-full overflow-hidden border-b border-[#E5E7EB]">
                       <img
                         src={item.image}
                         alt={item.modelLabel}
@@ -120,23 +120,25 @@ const OwnerViewMoreTrucks: React.FC = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="pt-2">
+                    <div className="flex flex-col flex-grow p-3 sm:p-4">
                       {/* Trailer Name */}
                       <p
                         className="
                           font-[Lexend]
-                          text-[14px]
+                          text-[15px]
                           font-semibold
-                          leading-[100%]
+                          leading-[1.2]
                           text-black
+                          truncate
+                          mb-1.5
                         "
                       >
                         {item.titleLabel ?? item.modelLabel}
                       </p>
 
                       {/* Rating + Model */}
-                      <div className="mt-1 flex items-center">
-                        <span className="text-[12px] text-[#F5A623]">★</span>
+                      <div className="flex items-center whitespace-nowrap mb-1.5">
+                        <span className="text-[13px] text-[#F5A623] shrink-0">★</span>
 
                         <span
                           className="
@@ -144,8 +146,8 @@ const OwnerViewMoreTrucks: React.FC = () => {
                             font-[Lexend]
                             text-[13px]
                             font-normal
-                            leading-[100%]
                             text-black
+                            shrink-0
                           "
                         >
                           4.9
@@ -153,15 +155,15 @@ const OwnerViewMoreTrucks: React.FC = () => {
 
                         <span
                           className="
-                            ml-1
+                            ml-1.5
                             font-[Lexend]
                             text-[13px]
                             font-normal
-                            leading-[100%]
-                            text-black
+                            text-gray-500
+                            shrink-0
                           "
                         >
-                          Model :
+                          Model:
                         </span>
 
                         <span
@@ -170,8 +172,8 @@ const OwnerViewMoreTrucks: React.FC = () => {
                             font-[Lexend]
                             text-[13px]
                             font-light
-                            leading-[100%]
                             text-black
+                            truncate
                           "
                         >
                           {item.modelLabel.replace(/^Model:\s*/i, "")}
@@ -181,31 +183,29 @@ const OwnerViewMoreTrucks: React.FC = () => {
                       {/* Price */}
                       <p
                         className="
-                          mt-1
                           font-[Lexend]
-                          text-[13px]
-                          font-semibold
-                          leading-[100%]
-                          text-black
+                          text-[15px]
+                          font-bold
+                          text-[#389131]
+                          mb-3
                         "
                       >
                         {item.priceLabel}
                       </p>
 
                       {/* Status */}
-                      <div className="mt-2">
+                      <div className="mt-auto">
                         <span
                           className={`
                             inline-flex
-                            h-[20px]
+                            h-[24px]
                             items-center
                             justify-center
-                            rounded-[2px]
+                            rounded-[4px]
                             px-3
                             font-[Lexend]
-                            text-[9px]
+                            text-[11px]
                             font-medium
-                            leading-[100%]
                             ${statusClass}
                           `}
                         >
