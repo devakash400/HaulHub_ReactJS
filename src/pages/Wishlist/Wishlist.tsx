@@ -90,7 +90,7 @@ const Wishlist: React.FC = () => {
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 py-8">
         {/* Header */}
         <div className="mb-14">
-          <h1 className="text-[32px] md:text-[40px] font-semibold text-[#111111]">
+          <h1 className="font-['Lexend'] font-semibold text-[30px] leading-[100%] text-[#389131]">
             Wishlist
           </h1>
           <p
