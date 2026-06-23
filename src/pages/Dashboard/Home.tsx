@@ -405,10 +405,10 @@ const Home: React.FC = () => {
                     >
                       <div
                         className="overflow-hidden
-                       rounded-[4px] bg-white"
+                       rounded-[8px] bg-white border border-[#E5E7EB] shadow-sm flex flex-col h-full"
                       >
                         {/* Image */}
-                        <div className="aspect-[240/257] w-full xl:h-[257px] xl:w-[240px] overflow-hidden rounded-[4px] border border-black">
+                        <div className="aspect-[240/200] w-full xl:h-[200px] xl:w-full overflow-hidden border-b border-[#E5E7EB]">
                           <img
                             src={item.image}
                             alt={item.modelLabel}
@@ -417,24 +417,25 @@ const Home: React.FC = () => {
                         </div>
 
                         {/* Content */}
-                        <div className="pt-2">
+                        <div className="flex flex-col flex-grow p-3 sm:p-4">
                           {/* Trailer Name */}
                           <p
                             className="
               font-[Lexend]
-              text-[14px]
+              text-[15px]
               font-semibold
-              leading-[100%]
+              leading-[1.2]
               text-black
               truncate
+              mb-1.5
             "
                           >
                             {item.titleLabel ?? item.modelLabel}
                           </p>
 
                           {/* Rating + Model */}
-                          <div className="mt-1 flex items-center whitespace-nowrap">
-                            <span className="text-[12px] text-[#F5A623] shrink-0">
+                          <div className="flex items-center whitespace-nowrap mb-1.5">
+                            <span className="text-[13px] text-[#F5A623] shrink-0">
                               ★
                             </span>
 
@@ -444,7 +445,6 @@ const Home: React.FC = () => {
                 font-[Lexend]
                 text-[13px]
                 font-normal
-                leading-[100%]
                 text-black
                 shrink-0
               "
@@ -454,16 +454,15 @@ const Home: React.FC = () => {
 
                             <span
                               className="
-                ml-1
+                ml-1.5
                 font-[Lexend]
                 text-[13px]
                 font-normal
-                leading-[100%]
-                text-black
+                text-gray-500
                 shrink-0
               "
                             >
-                              Model :
+                              Model:
                             </span>
 
                             <span
@@ -472,7 +471,6 @@ const Home: React.FC = () => {
                 font-[Lexend]
                 text-[13px]
                 font-light
-                leading-[100%]
                 text-black
                 truncate
               "
@@ -484,30 +482,29 @@ const Home: React.FC = () => {
                           {/* Price */}
                           <p
                             className="
-              mt-1
               font-[Lexend]
-              text-[13px]
-              font-semibold
-              leading-[100%]
-              text-black
+              text-[15px]
+              font-bold
+              text-[#389131]
+              mb-3
             "
                           >
                             {item.priceLabel}
                           </p>
 
-                          <div className="mt-2">
+                          {/* Status Badge */}
+                          <div className="mt-auto">
                             <span
                               className={`
                 inline-flex
-                h-[20px]
+                h-[24px]
                 items-center
                 justify-center
-                rounded-[2px]
+                rounded-[4px]
                 px-3
                 font-[Lexend]
-                text-[9px]
+                text-[11px]
                 font-medium
-                leading-[100%]
                 ${statusClass}
               `}
                             >
