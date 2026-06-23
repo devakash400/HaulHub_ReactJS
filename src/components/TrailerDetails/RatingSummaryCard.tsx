@@ -40,7 +40,11 @@ export const RatingSummaryCard: React.FC<RatingSummaryCardProps> = ({
           {[1, 2, 3, 4, 5].map((i) => (
             <Star
               key={i}
-              className="w-[15px] h-[15px] text-[#FFC107] fill-[#FFC107]"
+              className={`w-[15px] h-[15px] ${
+                i <= Math.round(rating)
+                  ? "text-[#FFC107] fill-[#FFC107]"
+                  : "text-[#FFC107] fill-transparent"
+              }`}
             />
           ))}
         </div>

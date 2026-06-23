@@ -323,7 +323,11 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className="w-[12px] h-[12px] fill-black text-black"
+                    className={`w-[12px] h-[12px] ${
+                      star <= review.stars
+                        ? "fill-black text-black"
+                        : "fill-transparent text-black"
+                    }`}
                   />
                 ))}
               </div>
