@@ -504,13 +504,13 @@ const OwnerTruckDescription: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900">
                 Edit Truck Details
               </h3>
-              <button
+              {/* <button
                 type="button"
                 onClick={closeEditModal}
                 className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700"
               >
                 Close
-              </button>
+              </button> */}
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
