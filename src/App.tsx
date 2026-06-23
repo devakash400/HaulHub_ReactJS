@@ -69,7 +69,7 @@ const App: React.FC = () => {
     ? ""
     : effectivePathname === "/"
       ? "pt-[124px] sm:pt-[76px]"
-      : "pt-[76px]";
+      : "pt-[166px] sm:pt-[92px]";
 
   // Sync user profile from backend on app init if authenticated
   useEffect(() => {
