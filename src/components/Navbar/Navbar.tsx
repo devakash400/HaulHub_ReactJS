@@ -106,6 +106,10 @@ const Navbar: React.FC = () => {
     const q = navSearch.trim();
     
     const timeoutId = setTimeout(() => {
+      if (location.pathname !== "/" && location.pathname !== "/search") {
+        return;
+      }
+      
       const currentParams = new URLSearchParams(window.location.search);
       const currentQ = currentParams.get("q") || "";
       
@@ -123,7 +127,7 @@ const Navbar: React.FC = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [navSearch, navigate]);
+  }, [navSearch, navigate, location.pathname]);
 
   useEffect(() => setIsDrawerOpen(false), [backgroundLocation.pathname]);
 
@@ -242,7 +246,11 @@ const Navbar: React.FC = () => {
                 className={`flex items-center border border-gray-200 bg-[#FEFEFE] shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_26px_rgba(56,145,49,0.22)] motion-reduce:transition-none w-[549px] h-[73px] rounded-[21px] px-5`}
               >
                 <input
-                  type="text"
+                  type="search"
+                  name="navSearchDesktop"
+                  autoComplete="off"
+                  readOnly={location.pathname !== "/" && location.pathname !== "/search"}
+                  tabIndex={location.pathname !== "/" && location.pathname !== "/search" ? -1 : 0}
                   placeholder="Search here..."
                   value={navSearch}
                   onChange={(e) => setNavSearch(e.target.value)}
@@ -796,7 +804,11 @@ const Navbar: React.FC = () => {
                 
               >
                 <input
-                  type="text"
+                  type="search"
+                  name="navSearchMobile"
+                  autoComplete="off"
+                  readOnly={location.pathname !== "/" && location.pathname !== "/search"}
+                  tabIndex={location.pathname !== "/" && location.pathname !== "/search" ? -1 : 0}
                   placeholder="Search here..."
                   value={navSearch}
                   onChange={(e) => setNavSearch(e.target.value)}
