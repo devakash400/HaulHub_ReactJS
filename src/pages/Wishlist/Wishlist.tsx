@@ -112,19 +112,19 @@ const Wishlist: React.FC = () => {
         {/* Wishlist Items */}
         {hasItems ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-8 pb-5">
               {validItems.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => navigate(`/trailer/${item.id}`)}
-                  className="cursor-pointer"
+                  className="cursor-pointer group"
                 >
                   {/* Image */}
-                  <div className="relative rounded-[18px] overflow-hidden">
+                  <div className="relative w-full aspect-square rounded-[18px] overflow-hidden border border-black">
                     <img
                       src={item.imageUrl}
                       alt={item.title}
-                      className="w-full h-[360px] object-cover"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                     />
 
                     {/* Heart Button */}
@@ -136,34 +136,57 @@ const Wishlist: React.FC = () => {
                       }}
                       className="
                         absolute
-                        top-4
-                        right-4
-                        w-10
-                        h-10
+                        top-2 sm:top-3
+                        right-2 sm:right-3
+                        w-7 sm:w-9
+                        h-7 sm:h-9
                         rounded-full
                         bg-white
+                        border
+                        border-[#E6E6E6]
+                        shadow-md
                         flex
                         items-center
                         justify-center
-                        shadow-md
                       "
                     >
-                      <Heart size={18} fill="#E53935" color="#E53935" />
+                      <Heart 
+                        className="w-4 h-4 sm:w-[18px] sm:h-[18px]"
+                        strokeWidth={2.2}
+                        color="#E03A3A" 
+                        fill="#E03A3A" 
+                      />
                     </button>
                   </div>
 
                   {/* Content */}
-                  <div className="pt-5">
+                  <div className="pt-3 px-1">
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 text-center">
-                        <h2 className="text-[18px] font-medium text-black">
+                      <div className="flex-1 overflow-hidden">
+                        <p
+                          style={{
+                            fontFamily: "Lexend",
+                            fontWeight: 700,
+                            fontSize: "15px",
+                            lineHeight: "100%",
+                            color: "#000000",
+                          }}
+                          className="truncate"
+                        >
                           {item.title}
-                        </h2>
+                        </p>
 
                         {item.description && (
                           <p
-                            className="mt-2 
-                          text-[14px] text-[#5E5E5E]"
+                            style={{
+                              fontFamily: "Lexend",
+                              fontWeight: 400,
+                              fontSize: "16px",
+                              lineHeight: "100%",
+                              color: "#9B989E",
+                              marginTop: "8px",
+                            }}
+                            className="truncate"
                           >
                             {item.description}
                           </p>
@@ -177,7 +200,7 @@ const Wishlist: React.FC = () => {
                           handleToggleItem(item);
                         }}
                         className="
-                          text-[14px]
+                          text-[13px]
                           text-[#389131]
                           underline
                           whitespace-nowrap
