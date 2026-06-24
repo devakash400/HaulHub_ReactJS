@@ -1,20 +1,11 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ChevronRight,
-  Settings,
-  CircleHelp,
-  ShieldCheck,
-  LogOut,
-  FileText,
-  History,
-} from "lucide-react";
+import { Camera, ChevronLeft, ChevronDown, AlertTriangle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
@@ -23,16 +14,108 @@ import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
 import Loader from "../../components/common/Loader.tsx";
-import { RootState } from "../../store";
+
+import ActionConfirmModal from "../../components/common/ActionConfirmModal.tsx";
+import { updateUser } from "../../store/authSlice.ts";
+import { RootState } from "../../store/index.ts";
 import {
   getUserProfile,
   updateUserProfile,
-  type EmergencyContactPayload,
   type UpdateUserProfilePayload,
   type UserProfileApiData,
 } from "../../api/userApi.ts";
-import chevronDown from "../../assets/images/Dorpdown.png";
+import uploadProfilePhoto from "../../api/uploadApi.ts";
 import { type CountryOption, COUNTRY_OPTIONS } from "../../data/countries.ts";
+
+/* ─── helpers ─────────────────────────────────────────────────────────────── */
+
+const DEFAULT_COUNTRY = COUNTRY_OPTIONS[0];
+
+const parsePhoneNumber = (
+  phone?: string
+): { country: CountryOption; local: string } => {
+  const raw = (phone ?? "").trim();
+  if (!raw) return { country: DEFAULT_COUNTRY, local: "" };
+  const digits = raw.replace(/[^0-9+]/g, "");
+  const sorted = COUNTRY_OPTIONS.slice().sort(
+    (a, b) => b.dialCode.length - a.dialCode.length
+  );
+  const match = sorted.find(
+    (c) =>
+      digits.startsWith(c.dialCode.replace(/^\+/, "")) ||
+      digits.startsWith(c.dialCode)
+  );
+  if (match) {
+    const d = digits.startsWith("+") ? digits : `+${digits}`;
+    const local = d.slice(match.dialCode.length).replace(/^0+/, "");
+    return { country: match, local };
+  }
+  return { country: DEFAULT_COUNTRY, local: digits.replace(/^\+/, "") };
+};
+
+type ProfileSaveErrorBody = {
+  message?: string;
+  errors?: Array<{ msg?: string; message?: string }>;
+};
+
+const formatSaveError = (err: unknown): string => {
+  const ax = err as AxiosError<ProfileSaveErrorBody>;
+  const list = ax.response?.data?.errors;
+  if (Array.isArray(list) && list.length > 0) {
+    const parts = list
+      .map((e) => e.msg || e.message)
+      .filter((s): s is string => Boolean(s && String(s).trim()));
+    if (parts.length > 0) return parts.join(" ");
+  }
+  return (
+    ax.response?.data?.message || ax.message || "Could not save changes."
+  );
+};
+
+const sanitizePublicId = (p?: string | null): string | null => {
+  if (!p) return null;
+  let s = String(p).trim();
+  s = s.replace(/^\s*["']+|["']+\s*$/g, "");
+  s = s.replace(/%22/g, "");
+  s = s.replace(/^\/+|\/+$/g, "");
+  return s || null;
+};
+
+const cloudinaryBase = "https://res.cloudinary.com/dpsy0wq7d/image/upload";
+
+const LAST_UPLOAD_KEY = "haulhub_profile_image_last";
+
+const getLastUpload = (): {
+  publicId?: string;
+  url?: string;
+  ts?: number;
+} | null => {
+  try {
+    const raw = localStorage.getItem(LAST_UPLOAD_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as { publicId?: string; url?: string; ts?: number };
+  } catch {
+    return null;
+  }
+};
+
+const setLastUpload = (publicId?: string | null, url?: string | null) => {
+  try {
+    if (!publicId || !url) {
+      localStorage.removeItem(LAST_UPLOAD_KEY);
+      return;
+    }
+    const cleanId = sanitizePublicId(publicId) ?? String(publicId);
+    localStorage.setItem(
+      LAST_UPLOAD_KEY,
+      JSON.stringify({ publicId: cleanId, url, ts: Date.now() })
+    );
+  } catch {
+    // ignore
+  }
+};
+
+/* ─── CountryFlag sub-component ───────────────────────────────────────────── */
 
 const countryCodeToEmoji = (code: string) => {
   if (!code) return "";
@@ -64,7 +147,6 @@ const CountryFlag: React.FC<{
     );
   }
   return (
-    // eslint-disable-next-line jsx-a11y/img-redundant-alt
     <img
       src={url}
       alt={alt ?? code}
@@ -74,137 +156,307 @@ const CountryFlag: React.FC<{
   );
 };
 
-const isFilled = (v?: string | null) => Boolean(v && String(v).trim());
+/* ─── PhoneInput sub-component ────────────────────────────────────────────── */
 
-const emergencyHasData = (ec?: EmergencyContactPayload | null) =>
-  Boolean(
-    ec && (isFilled(ec.name) || isFilled(ec.email) || isFilled(ec.phoneNumber)),
-  );
+interface PhoneInputProps {
+  country: CountryOption;
+  local: string;
+  onCountryChange: (c: CountryOption) => void;
+  onLocalChange: (v: string) => void;
+  placeholder?: string;
+  id?: string;
+}
 
-const residentialFromProfile = (p: UserProfileApiData | null): string => {
-  if (!p) return "";
-  if (isFilled(p.residentialAddress))
-    return String(p.residentialAddress).trim();
-  if (isFilled(p.address)) return String(p.address).trim();
-  const list = p.addresses;
-  if (Array.isArray(list) && list.length > 0) {
-    const first = list[0];
-    if (typeof first === "string") return first.trim();
-    if (first && typeof first === "object") {
-      const o = first as Record<string, unknown>;
-      const s =
-        o.formattedAddress ?? o.address ?? o.street ?? o.line1 ?? o.city;
-      if (typeof s === "string" && s.trim()) return s.trim();
-    }
-  }
-  return "";
-};
+const PhoneInput: React.FC<PhoneInputProps> = ({
+  country,
+  local,
+  onCountryChange,
+  onLocalChange,
+  placeholder = "Enter your phone number",
+  id,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
 
-const legalDisplay = (p: UserProfileApiData | null) => {
-  if (!p) return "";
-  if (isFilled(p.legalName)) return String(p.legalName).trim();
-  if (isFilled(p.fullName)) return String(p.fullName).trim();
-  return "";
-};
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
-const DEFAULT_COUNTRY = COUNTRY_OPTIONS[0];
-
-const parsePhoneNumber = (phone?: string) => {
-  const raw = (phone ?? "").trim();
-  if (!raw) return { country: DEFAULT_COUNTRY, local: "" };
-  const digits = raw.replace(/[^0-9+]/g, "");
-  // try to match by dialCode (longest first)
-  const sorted = COUNTRY_OPTIONS.slice().sort(
-    (a, b) => b.dialCode.length - a.dialCode.length,
-  );
-  const match = sorted.find(
+  const filtered = COUNTRY_OPTIONS.filter(
     (c) =>
-      digits.startsWith(c.dialCode.replace(/^\+/, "")) ||
-      digits.startsWith(c.dialCode),
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.dialCode.includes(search)
   );
-  if (match) {
-    const d = digits.startsWith("+") ? digits : `+${digits}`;
-    const local = d.slice(match.dialCode.length).replace(/^0+/, "");
-    return { country: match, local };
-  }
-  return { country: DEFAULT_COUNTRY, local: digits.replace(/^\+/, "") };
+
+  return (
+    <div
+      ref={ref}
+      className="relative flex items-center h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 gap-2 focus-within:border-[#4A9B3D] focus-within:ring-2 focus-within:ring-[#4A9B3D]/20 transition-all"
+    >
+      {/* Flag + dial code button */}
+      <button
+        type="button"
+        onClick={() => {
+          setSearch("");
+          setOpen((p) => !p);
+        }}
+        className="flex items-center gap-1.5 shrink-0 py-1 outline-none"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <CountryFlag
+          code={country.code}
+          url={country.flagUrl}
+          alt={country.name}
+          className="w-[24px] h-[16px] object-cover rounded-[2px] shrink-0"
+        />
+        <span className="text-[14px] text-[#344054] font-medium whitespace-nowrap">
+          {country.dialCode}
+        </span>
+        <ChevronDown className="w-3.5 h-3.5 text-[#667085]" />
+      </button>
+
+      <div className="w-px h-6 bg-[#D0D5DD] shrink-0" />
+
+      <input
+        id={id}
+        type="tel"
+        value={local}
+        onChange={(e) => onLocalChange(e.target.value)}
+        placeholder={placeholder}
+        className="flex-1 bg-transparent outline-none text-[15px] text-[#101828] placeholder:text-[#98A2B3] font-normal"
+      />
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-full max-h-[260px] overflow-hidden rounded-xl border border-[#D0D5DD] bg-white shadow-[0_12px_32px_rgba(16,24,40,0.12)]">
+          <div className="p-2 border-b border-[#F2F4F7]">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search country..."
+              className="w-full px-3 py-2 rounded-lg border border-[#D0D5DD] text-[13px] outline-none focus:border-[#4A9B3D]"
+              autoFocus
+            />
+          </div>
+          <ul className="overflow-y-auto max-h-[196px]" role="listbox">
+            {filtered.map((c) => (
+              <li key={c.code} role="option" aria-selected={c.code === country.code}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onCountryChange(c);
+                    setOpen(false);
+                    setSearch("");
+                  }}
+                  className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[14px] hover:bg-[#F9FAFB] transition-colors ${
+                    c.code === country.code ? "bg-[#F0FAF0]" : ""
+                  }`}
+                >
+                  <CountryFlag
+                    code={c.code}
+                    url={c.flagUrl}
+                    alt={c.name}
+                    className="w-[24px] h-[16px] object-cover rounded-[2px] shrink-0"
+                  />
+                  <span className="flex-1 truncate text-[#344054]">
+                    {c.name}
+                  </span>
+                  <span className="text-[13px] text-[#667085]">
+                    {c.dialCode}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 };
 
-type ProfileUpdateErrorBody = {
-  message?: string;
-  errors?: Array<{ msg?: string; message?: string }>;
-};
+/* ─── Field label ──────────────────────────────────────────────────────────── */
 
-const formatProfileSaveError = (err: unknown): string => {
-  const ax = err as AxiosError<ProfileUpdateErrorBody>;
-  const list = ax.response?.data?.errors;
-  if (Array.isArray(list) && list.length > 0) {
-    const parts = list
-      .map((e) => e.msg || e.message)
-      .filter((s): s is string => Boolean(s && String(s).trim()));
-    if (parts.length > 0) return parts.join(" ");
-  }
-  return ax.response?.data?.message || ax.message || "Could not save changes.";
-};
+const FieldLabel: React.FC<{
+  htmlFor?: string;
+  required?: boolean;
+  children: React.ReactNode;
+}> = ({ htmlFor, required, children }) => (
+  <label
+    htmlFor={htmlFor}
+    className="block text-[14px] font-semibold text-[#101828] mb-1.5"
+  >
+    {children}
+    {required && <span className="text-red-500 ml-0.5">*</span>}
+  </label>
+);
 
-type EditField =
-  | "legalName"
-  | "preferredFirstName"
-  | "phoneNumber"
-  | "email"
-  | "residentialAddress"
-  | "emergencyContact";
+/* ─── Text input ───────────────────────────────────────────────────────────── */
 
-const Profile: React.FC = () => {
+const TextInput: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement>
+> = (props) => (
+  <input
+    {...props}
+    className={`w-full h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#101828] placeholder:text-[#98A2B3] outline-none transition-all focus:border-[#4A9B3D] focus:ring-2 focus:ring-[#4A9B3D]/20 ${props.className ?? ""}`}
+  />
+);
+
+/* ─── Main component ───────────────────────────────────────────────────────── */
+
+const EditProfile: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated,
+    (state: RootState) => state.auth.isAuthenticated
   );
-  const reduxUser = useSelector((state: RootState) => state.auth.user);
-  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+
+  /* profile state */
   const [profile, setProfile] = useState<UserProfileApiData | null>(null);
-  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [editField, setEditField] = useState<EditField | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const [draftLegal, setDraftLegal] = useState("");
-  const [draftPreferred, setDraftPreferred] = useState("");
-  const [draftPhone, setDraftPhone] = useState("");
-  const [draftEmail, setDraftEmail] = useState("");
-  const [draftResidential, setDraftResidential] = useState("");
-  const [draftEcName, setDraftEcName] = useState("");
-  const [draftEcEmail, setDraftEcEmail] = useState("");
-  const [draftEcPhone, setDraftEcPhone] = useState("");
-  const [draftEcNameError, setDraftEcNameError] = useState<string | null>(null);
-  const [draftEcPhoneError, setDraftEcPhoneError] = useState<string | null>(null);
-  const [selectedCountry, setSelectedCountry] =
-    useState<CountryOption>(DEFAULT_COUNTRY);
-  const [countryMenuOpen, setCountryMenuOpen] = useState(false);
-  const countryDropdownRef = useRef<HTMLDivElement | null>(null);
+  /* avatar */
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /* form fields */
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [dob, setDob] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [zipCode, setZipCode] = useState("");
+
+  /* phone */
+  const [phoneCountry, setPhoneCountry] = useState<CountryOption>(DEFAULT_COUNTRY);
+  const [phoneLocal, setPhoneLocal] = useState("");
+
+  /* emergency phone */
+  const [ecCountry, setEcCountry] = useState<CountryOption>(DEFAULT_COUNTRY);
+  const [ecLocal, setEcLocal] = useState("");
+
+  /* country dropdown */
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(DEFAULT_COUNTRY);
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+  const countryDropRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!countryOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (countryDropRef.current && !countryDropRef.current.contains(e.target as Node))
+        setCountryOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [countryOpen]);
+
+  const filteredCountries = COUNTRY_OPTIONS.filter((c) =>
+    c.name.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  /* ── load profile ── */
   const loadProfile = useCallback(async () => {
     if (!isAuthenticated) {
-      setProfile(null);
-      setProfileLoadFailed(false);
       setLoading(false);
       return;
     }
     setLoading(true);
-    setProfileLoadFailed(false);
     try {
       const data = await getUserProfile();
       setProfile(data);
-    } catch (err) {
-      const ax = err as AxiosError<{ message?: string }>;
-      const msg =
-        ax.response?.data?.message ||
-        ax.message ||
-        "Could not load your profile.";
-      toast.error(msg);
-      setProfile(null);
-      setProfileLoadFailed(true);
+
+      /* populate fields */
+      const fn =
+        data.firstName?.trim() ||
+        data.legalName?.trim()?.split(" ").filter(Boolean)[0] ||
+        data.fullName?.trim()?.split(" ").filter(Boolean)[0] ||
+        "";
+      const ln =
+        data.lastName?.trim() ||
+        data.preferredFirstName?.trim() ||
+        (() => {
+          const full = data.fullName?.trim();
+          if (!full) return "";
+          const parts = full.split(/\s+/).filter(Boolean);
+          return parts.length > 1 ? parts.slice(1).join(" ") : "";
+        })();
+
+      setFirstName(fn);
+      setLastName(ln);
+      setEmail(data.email?.trim() ?? "");
+
+      if (data.dateOfBirth) {
+        setDob(data.dateOfBirth.split("T")[0]);
+      }
+
+      if (data.addresses && data.addresses.length > 0) {
+        const addr = data.addresses[0];
+        setAddress(addr.addressLine || "");
+        setCity(addr.state || addr.city || "");
+        if (addr.country) {
+          const match = COUNTRY_OPTIONS.find(
+            (c) =>
+              c.code.toLowerCase() === addr.country?.toLowerCase() ||
+              c.name.toLowerCase() === addr.country?.toLowerCase()
+          );
+          if (match) setSelectedCountry(match);
+        }
+      } else {
+        setAddress(data.residentialAddress?.trim() || data.address?.trim() || "");
+        setCity(data.state?.trim() ?? "");
+        if (data.country) {
+          const match = COUNTRY_OPTIONS.find(
+            (c) =>
+              c.code.toLowerCase() === data.country?.toLowerCase() ||
+              c.name.toLowerCase() === data.country?.toLowerCase()
+          );
+          if (match) setSelectedCountry(match);
+        }
+      }
+      setZipCode("");
+
+      /* phone */
+      const parsedPhone = parsePhoneNumber(data.phoneNumber ?? "");
+      setPhoneCountry(parsedPhone.country);
+      setPhoneLocal(parsedPhone.local);
+
+      /* emergency contact */
+      const ec = data.emergencyContact;
+      if (ec?.phoneNumber) {
+        const parsedEc = parsePhoneNumber(ec.phoneNumber);
+        setEcCountry(parsedEc.country);
+        setEcLocal(parsedEc.local);
+      }
+
+      /* avatar */
+      try {
+        const last = getLastUpload();
+        const lastId = sanitizePublicId(last?.publicId ?? null);
+        const dataId = sanitizePublicId(data.profilePicture ?? null);
+        if (lastId && dataId && lastId === dataId) {
+          setUploadedPreviewUrl(last?.url ?? null);
+        }
+      } catch {
+        // ignore
+      }
+    } catch {
+      toast.error("Could not load your profile.");
     } finally {
       setLoading(false);
     }
@@ -214,548 +466,476 @@ const Profile: React.FC = () => {
     void loadProfile();
   }, [loadProfile]);
 
-  const openEditor = (field: EditField) => {
-    if (!profile) return;
-    if (field === "legalName") {
-      setDraftLegal(legalDisplay(profile) || "");
-    } else if (field === "preferredFirstName") {
-      setDraftPreferred(profile.preferredFirstName?.trim() ?? "");
-    } else if (field === "phoneNumber") {
-      setDraftPhone(profile.phoneNumber?.trim() ?? "");
-    } else if (field === "email") {
-      setDraftEmail(profile.email?.trim() ?? "");
-    } else if (field === "residentialAddress") {
-      setDraftResidential(residentialFromProfile(profile));
-    } else if (field === "emergencyContact") {
-      setDraftEcName(profile.emergencyContact?.name?.trim() ?? "");
-      setDraftEcEmail(profile.emergencyContact?.email?.trim() ?? "");
-      const parsed = parsePhoneNumber(
-        profile.emergencyContact?.phoneNumber ?? "",
-      );
-      setSelectedCountry(parsed.country);
-      setDraftEcPhone(parsed.local);
-      setDraftEcNameError(null);
-      setDraftEcPhoneError(null);
+  /* ── avatar url ── */
+  const sanitizedPicture = sanitizePublicId(profile?.profilePicture ?? null);
+  let profilePictureUrl: string | null = null;
+  if (uploadedPreviewUrl) {
+    profilePictureUrl = uploadedPreviewUrl;
+  } else if (sanitizedPicture) {
+    if (/^https?:\/\//i.test(sanitizedPicture) || /^data:/i.test(sanitizedPicture)) {
+      profilePictureUrl = sanitizedPicture;
+    } else {
+      profilePictureUrl = `${cloudinaryBase}/${sanitizedPicture}.jpg`;
     }
-    setEditField(field);
+  }
+  const hasProfilePicture = Boolean(profilePictureUrl);
+
+  const displayName = [firstName, lastName].filter(Boolean).join(" ").trim();
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p.charAt(0).toUpperCase())
+    .join("");
+
+  /* ── photo upload ── */
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file?.type.startsWith("image/")) return;
+    setUploadingPhoto(true);
+    try {
+      const uploadResp = await uploadProfilePhoto(file);
+      if (!uploadResp?.success) throw new Error("Image upload failed");
+      const publicId = uploadResp.data.publicId;
+      const uploadedUrl = uploadResp.data.url;
+      setUploadedPreviewUrl(uploadedUrl);
+      setLastUpload(publicId, uploadedUrl);
+      setImgError(false);
+      setImgLoaded(false);
+      const updated = await updateUserProfile({ profilePicture: uploadedUrl });
+      setProfile(updated);
+      dispatch(updateUser({ profilePicture: updated.profilePicture ?? undefined }));
+      toast.success("Profile photo updated");
+    } catch (err) {
+      toast.error(formatSaveError(err));
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
-  const closeEditor = () => setEditField(null);
+  /* ── save ── */
+  const handleSave = async () => {
+    const fn = firstName.trim();
+    const ln = lastName.trim();
+    const em = email.trim();
 
-  useEffect(() => {
-    if (!editField) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setEditField(null);
+    if (!fn) { toast.error("First name is required"); return; }
+    if (!ln) { toast.error("Last name is required"); return; }
+    if (!em) { toast.error("Email is required"); return; }
+
+    const phoneNumber = phoneLocal.trim()
+      ? phoneLocal.startsWith("+")
+        ? phoneLocal
+        : `${phoneCountry.dialCode}${phoneLocal}`
+      : undefined;
+
+    const ecPhoneNumber = ecLocal.trim()
+      ? ecLocal.startsWith("+")
+        ? ecLocal
+        : `${ecCountry.dialCode}${ecLocal}`
+      : undefined;
+
+    const payload: UpdateUserProfilePayload = {
+      firstName: fn,
+      lastName: ln,
+      legalName: `${fn} ${ln}`,
+      email: em,
+      residentialAddress: address.trim() || undefined,
+      state: city.trim() || undefined,
+      country: selectedCountry.code,
+      dateOfBirth: dob || undefined,
+      addresses: [
+        {
+          addressLine: address.trim() || undefined,
+          state: city.trim() || undefined,
+          country: selectedCountry.code,
+        }
+      ],
+      ...(phoneNumber ? { phoneNumber } : {}),
+      ...(ecPhoneNumber
+        ? {
+            emergencyContact: {
+              name: "",
+              email: "",
+              phoneNumber: ecPhoneNumber,
+            },
+          }
+        : {}),
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [editField]);
 
-  useEffect(() => {
-    if (!countryMenuOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        countryDropdownRef.current &&
-        !countryDropdownRef.current.contains(e.target as Node)
-      ) {
-        setCountryMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [countryMenuOpen]);
-
-  /** PATCH only the keys sent here — do not merge empty strings for other fields (server validates the body). */
-  const persist = async (patch: UpdateUserProfilePayload) => {
-    if (!profile) return;
     setSaving(true);
     try {
-      const next = await updateUserProfile(patch);
-      setProfile(next);
-      toast.success("Profile updated");
-      closeEditor();
+      const updated = await updateUserProfile(payload);
+      setProfile(updated);
+      dispatch(
+        updateUser({
+          firstName: updated.firstName ?? fn,
+          lastName: updated.lastName ?? ln,
+          email: updated.email,
+          profilePicture: updated.profilePicture ?? undefined,
+          phoneNumber: updated.phoneNumber,
+        })
+      );
+      navigate("/profile")
     } catch (err) {
-      toast.error(formatProfileSaveError(err));
+      toast.error(formatSaveError(err));
     } finally {
       setSaving(false);
     }
   };
 
-  const handleSaveField = () => {
-    if (!profile || !editField) return;
-    if (editField === "legalName") {
-      const v = draftLegal.trim();
-      if (!v) {
-        toast.error("Enter a legal name");
-        return;
-      }
-      void persist({ legalName: v });
-      return;
-    }
-    if (editField === "preferredFirstName") {
-      const pf = draftPreferred.trim();
-      if (!pf) {
-        toast.error("Enter a preferred first name (1–50 characters)");
-        return;
-      }
-      void persist({ preferredFirstName: pf });
-      return;
-    }
-    if (editField === "phoneNumber") {
-      const v = draftPhone.trim();
-      if (!v) {
-        toast.error("Enter a phone number");
-        return;
-      }
-      void persist({ phoneNumber: v });
-      return;
-    }
-    if (editField === "email") {
-      const v = draftEmail.trim();
-      if (!v) {
-        toast.error("Enter an email");
-        return;
-      }
-      void persist({ email: v });
-      return;
-    }
-    if (editField === "residentialAddress") {
-      const v = draftResidential.trim();
-      if (!v) {
-        toast.error("Enter an address");
-        return;
-      }
-      void persist({ residentialAddress: v });
-      return;
-    }
-    if (editField === "emergencyContact") {
-      const name = draftEcName.trim();
-      const email = draftEcEmail.trim();
-      const phoneNumber = draftEcPhone.trim();
-      if (!name && !email && !phoneNumber) {
-        toast.error("Add at least one emergency contact detail");
-        return;
-      }
-      const normalized = phoneNumber
-        ? phoneNumber.startsWith("+")
-          ? phoneNumber
-          : `${selectedCountry.dialCode}${phoneNumber}`
-        : "";
-
-      void persist({
-        emergencyContact: { name, email, phoneNumber: normalized },
-      });
-    }
-  };
-
-  const menuItems = [
-    {
-      label: "Account Settings",
-      icon: Settings,
-      onClick: () => navigate("/account-settings"),
-    },
-    {
-      label: "About US",
-      icon: CircleHelp,
-      onClick: () => navigate("/about"),
-    },
-    {
-      label: "Privacy",
-      icon: ShieldCheck,
-      onClick: () => navigate("/trust-safety"),
-    },
-    {
-      label: "Terms & Conditions",
-      icon: FileText,
-      onClick: () => navigate("/trust-safety"),
-    },
-    {
-      label: "Transaction History",
-      icon: History,
-      onClick: () => navigate("/booking"),
-    },
-    {
-      label: "Log Out",
-      icon: LogOut,
-      onClick: () => setIsLogoutConfirmOpen(true),
-    },
-  ] as const;
-
-  const handleLogout = async () => {
-    try {
-      await logoutApi();
-    } finally {
-      dispatch(logout());
-      dispatch(clearWishlist());
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem("openLoginAfterLogout", "1");
-      }
-      navigate("/", { replace: true });
-      toast.success("Logged out successfully");
-    }
-  };
-
-  const personalRows = useMemo(() => {
-    const p = profile;
-    const legal = legalDisplay(p);
-    const preferred = p?.preferredFirstName?.trim() ?? "";
-    const phone = p?.phoneNumber?.trim() ?? "";
-    const email = p?.email?.trim() ?? reduxUser?.email?.trim() ?? "";
-    const residential = residentialFromProfile(p);
-    const ec = p?.emergencyContact;
-
-    return [
-      {
-        key: "legalName" as const,
-        label: "Legal name",
-        value: legal,
-        placeholder: "Not provided",
-        hasData: isFilled(legal),
-      },
-      {
-        key: "preferredFirstName" as const,
-        label: "Preferred First Name",
-        value: preferred,
-        placeholder: "Not provided",
-        hasData: isFilled(preferred),
-      },
-      {
-        key: "phoneNumber" as const,
-        label: "Phone number",
-        value: phone,
-        placeholder: "Provide phone number",
-        hasData: isFilled(phone),
-      },
-      {
-        key: "email" as const,
-        label: "Email",
-        value: email,
-        placeholder: "Not provided",
-        hasData: isFilled(email),
-      },
-      {
-        key: "residentialAddress" as const,
-        label: "Residential Address",
-        value: residential,
-        placeholder: "Not provided",
-        hasData: isFilled(residential),
-      },
-      {
-        key: "emergencyContact" as const,
-        label: "Emergency contact",
-        value: emergencyHasData(ec)
-          ? [ec?.name, ec?.phoneNumber, ec?.email].filter(isFilled).join(" · ")
-          : "",
-        placeholder: "Not provided",
-        hasData: emergencyHasData(ec),
-      },
-    ];
-  }, [profile, reduxUser?.email]);
-
-  const cardBtn =
-    "shrink-0 text-[22px] font-medium leading-[100%] tracking-normal text-[#389131] underline decoration-solid hover:text-[#2f7a2a]";
-
-  const inputEditClass =
-    "h-[44px] w-full rounded-[2px] border border-black bg-white px-4 text-[14px] text-black outline-none";
-  const inputEmergencyFieldClass =
-    "w-full rounded-sm border border-black bg-white px-3 py-2.5 text-[14px] text-gray-900 outline-none focus:ring-1 focus:ring-black/20";
-
-  const profileCardClass =
-    "flex h-[71px] w-full max-w-[539px] shrink-0 items-center justify-between rounded-[3px] border border-[#00000042] bg-white px-4 text-left transition-colors hover:bg-[#fafafa] lg:w-[539px]";
-
-  const personalCardClass =
-    "min-h-[71px] w-full max-w-[593px] rounded-[2px] border border-[#D9D9D9] bg-white px-5 py-4 lg:w-[593px]";
+  /* ── render ── */
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-white">
-      <div className="w-full px-[40px] py-6 sm:py-8">
-        <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-          {/* LEFT SIDE */}
-          <div className="flex w-full flex-col lg:max-w-[539px]">
-            <header>
-              <h1 className="text-[36px] font-medium leading-[100%] text-black">
-                Profile
-              </h1>
-            </header>
+    <div className="min-h-screen w-full overflow-x-hidden bg-[#F9FAFB]">
+      {/* ── Page header ── */}
+      <div className="w-full bg-white border-b border-[#E4E7EC] px-8 py-5 flex items-center gap-4">
+        <button
+          type="button"
+          onClick={() => setShowCancelModal(true)}
+          className="flex items-center gap-1.5 text-[#667085] hover:text-[#344054] transition-colors"
+          aria-label="Go back"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-[14px] font-medium">Back</span>
+        </button>
+        <div className="w-px h-5 bg-[#E4E7EC]" />
+        <h1 className="text-[28px] leading-[100%] font-semibold text-[#101828] font-['Lexend']">
+          Edit Profile
+        </h1>
+      </div>
 
-            <nav className="mt-6 flex flex-col gap-5">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-10 h-10 border-4 border-[#4A9B3D] border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : (
+        <div className="w-full max-w-[1200px] mx-auto px-8 py-10">
+          <div className="flex flex-col gap-10 items-center">
 
-                return (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={item.onClick}
-                    className={profileCardClass}
-                  >
-                    <span className="flex items-center gap-3">
-                      <Icon
-                        className="size-[21px] shrink-0 text-black"
-                        strokeWidth={1.75}
-                      />
+            {/* ══ TOP PANEL — Avatar + quick info ══ */}
+            <aside className="w-full max-w-[480px] shrink-0">
+              <div className="flex flex-col items-center gap-5">
 
-                      <span className="text-2xl font-medium leading-[100%] text-black">
-                        {item.label}
+                {/* Avatar */}
+                <div className="relative w-[140px] h-[140px]">
+                  <div className="w-full h-full rounded-full bg-[#E6EEF5] shadow-md overflow-hidden flex items-center justify-center relative">
+                    {hasProfilePicture && !imgLoaded && !imgError && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100/60">
+                        <svg
+                          className="animate-spin h-7 w-7 text-[#4A9B3D]"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                        </svg>
+                      </div>
+                    )}
+                    {imgError || !hasProfilePicture ? (
+                      <span className="text-[52px] font-semibold text-[#4A9B3D] leading-none select-none">
+                        {initials || "?"}
                       </span>
-                    </span>
-
-                    <ChevronRight
-                      className="size-[21px] shrink-0 text-black"
-                      strokeWidth={1.75}
-                    />
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* RIGHT SIDE */}
-          <div className="flex w-full flex-col lg:max-w-[593px]">
-            <header>
-              <h2 className="text-[36px] font-medium leading-[100%] text-black">
-                Personal info
-              </h2>
-            </header>
-
-            <div className="mt-6 flex flex-col gap-5">
-              {loading ? (
-                <div className={personalCardClass}>
-                  <div className="flex items-center justify-center py-6">
-                    <Loader />
+                    ) : (
+                      <img
+                        src={profilePictureUrl!}
+                        alt={displayName}
+                        onLoad={() => setImgLoaded(true)}
+                        onError={() => setImgError(true)}
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${
+                          imgLoaded ? "opacity-100" : "opacity-0"
+                        }`}
+                      />
+                    )}
                   </div>
-                </div>
-              ) : !isAuthenticated ? (
-                <div className={personalCardClass}>
-                  <p className="text-sm text-black/70">
-                    Sign in to view and edit your personal information.
-                  </p>
-                </div>
-              ) : profileLoadFailed ? (
-                <div className="w-full max-w-[593px] rounded-[3px] border border-[#00000042] bg-white p-4 lg:w-[593px]">
-                  <p className="text-sm text-black">
-                    We could not load your profile from the server.
-                  </p>
 
+                  {/* Camera button */}
                   <button
                     type="button"
-                    onClick={() => void loadProfile()}
-                    className="mt-3 rounded-md bg-[#389131] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f7a2a]"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingPhoto}
+                    aria-label="Change profile photo"
+                    className="absolute bottom-1 right-1 w-[40px] h-[40px] rounded-full bg-[#4A9B3D] flex items-center justify-center shadow-lg hover:bg-[#3d8432] transition-colors disabled:opacity-60"
                   >
-                    Try again
+                    {uploadingPhoto ? (
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                    ) : (
+                      <Camera className="w-4 h-4 text-white" />
+                    )}
                   </button>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(ev) => void handlePhotoChange(ev)}
+                    disabled={uploadingPhoto}
+                  />
                 </div>
-              ) : (
-                personalRows.map((row) => {
-                  const isActive = editField === row.key;
-                  const dimOthers = editField !== null && !isActive;
 
-                  return (
-                    <div
-                      key={row.key}
-                      className={`${personalCardClass} ${
-                        dimOthers ? "opacity-40" : "opacity-100"
-                      }`}
-                    >
-                      {isActive ? (
-                        <div className="flex min-h-[71px] flex-col justify-center">
-                          <p className="text-[14px] font-semibold text-black mb-2">
-                            {row.label}
-                          </p>
+                {/* Display name */}
+                {displayName && (
+                  <p className="text-[20px] font-semibold text-[#101828] text-center leading-tight font-['Lexend'] break-words px-4 w-full">
+                    {displayName}
+                  </p>
+                )}
+                {email && (
+                  <p className="text-[13px] text-[#667085] text-center -mt-2 truncate max-w-full">
+                    {email}
+                  </p>
+                )}
 
-                          {row.key === "legalName" && (
-                            <input
-                              value={draftLegal}
-                              onChange={(e) => setDraftLegal(e.target.value)}
-                              className={inputEditClass}
-                              placeholder="Legal name as on ID"
-                              autoComplete="name"
-                            />
-                          )}
+                <p className="text-[12px] text-[#98A2B3] text-center leading-relaxed">
+                  Click the camera icon to update your profile photo
+                </p>
+              </div>
+            </aside>
 
-                          {row.key === "preferredFirstName" && (
-                            <input
-                              value={draftPreferred}
-                              onChange={(e) =>
-                                setDraftPreferred(e.target.value)
-                              }
-                              className={inputEditClass}
-                              placeholder="Preferred first name"
-                            />
-                          )}
+            {/* Divider between profile and other stuff */}
+            <div className="w-full h-px bg-[#E4E7EC]" />
 
-                          {row.key === "phoneNumber" && (
-                            <input
-                              value={draftPhone}
-                              onChange={(e) => setDraftPhone(e.target.value)}
-                              className={inputEditClass}
-                              placeholder="Phone number"
-                            />
-                          )}
+            {/* ══ BOTTOM PANEL — Form ══ */}
+            <main className="w-full">
+              <div className="bg-white rounded-2xl border border-[#E4E7EC] shadow-[0_1px_4px_rgba(16,24,40,0.06)] p-8">
 
-                          {row.key === "email" && (
-                            <input
-                              type="email"
-                              value={draftEmail}
-                              onChange={(e) => setDraftEmail(e.target.value)}
-                              className={inputEditClass}
-                              placeholder="Email"
-                            />
-                          )}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* First Name */}
+                    <div className="col-span-1 lg:col-span-1">
+                      <FieldLabel htmlFor="ep-firstName" required>First Name</FieldLabel>
+                      <TextInput
+                        id="ep-firstName"
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Rohit"
+                        autoComplete="given-name"
+                      />
+                    </div>
 
-                          {row.key === "residentialAddress" && (
-                            <textarea
-                              value={draftResidential}
-                              onChange={(e) =>
-                                setDraftResidential(e.target.value)
-                              }
-                              rows={3}
-                              className={`${inputEditClass} resize-none`}
-                              placeholder="Street, city, state, ZIP"
-                            />
-                          )}
+                    {/* Last Name */}
+                    <div className="col-span-1 lg:col-span-1">
+                      <FieldLabel htmlFor="ep-lastName" required>Last Name</FieldLabel>
+                      <TextInput
+                        id="ep-lastName"
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Talreja"
+                        autoComplete="family-name"
+                      />
+                    </div>
 
-                          {row.key === "emergencyContact" && (
-                            <div className="mt-2 space-y-2">
+                    {/* Email */}
+                    <div className="col-span-2 lg:col-span-2">
+                      <FieldLabel htmlFor="ep-email" required>Email</FieldLabel>
+                      <TextInput
+                        id="ep-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="rohittalreja104@gmail.com"
+                        autoComplete="email"
+                      />
+                      <p className="mt-1.5 text-[12px] text-[#667085]">
+                        We'll email you a reservation confirmation.
+                      </p>
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="col-span-2 lg:col-span-2">
+                      <FieldLabel htmlFor="ep-phone" required>Phone Number</FieldLabel>
+                      <PhoneInput
+                        id="ep-phone"
+                        country={phoneCountry}
+                        local={phoneLocal}
+                        onCountryChange={setPhoneCountry}
+                        onLocalChange={setPhoneLocal}
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+
+                    {/* Date of Birth */}
+                    <div className="col-span-2 lg:col-span-2">
+                      <FieldLabel htmlFor="ep-dob" required>Date of birth</FieldLabel>
+                      <div className="relative">
+                        <TextInput
+                          id="ep-dob"
+                          type="date"
+                          value={dob}
+                          onChange={(e) => setDob(e.target.value)}
+                          placeholder="DD/MM/YY"
+                          className="pr-12"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Address */}
+                    <div className="col-span-2 lg:col-span-4">
+                      <FieldLabel htmlFor="ep-address" required>Address</FieldLabel>
+                      <TextInput
+                        id="ep-address"
+                        type="text"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder="Enter address"
+                        autoComplete="street-address"
+                      />
+                    </div>
+
+                    {/* Country dropdown */}
+                    <div ref={countryDropRef} className="col-span-2 lg:col-span-2">
+                      <FieldLabel required>Country</FieldLabel>
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => { setCountrySearch(""); setCountryOpen((p) => !p); }}
+                          className="w-full h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 flex items-center gap-3 text-left outline-none transition-all focus:border-[#4A9B3D] focus:ring-2 focus:ring-[#4A9B3D]/20 hover:border-[#98A2B3]"
+                          aria-haspopup="listbox"
+                          aria-expanded={countryOpen}
+                        >
+                          <CountryFlag
+                            code={selectedCountry.code}
+                            url={selectedCountry.flagUrl}
+                            alt={selectedCountry.name}
+                            className="w-[24px] h-[16px] object-cover rounded-[2px] shrink-0"
+                          />
+                          <span className="flex-1 text-[15px] text-[#101828] truncate">
+                            {selectedCountry.name}
+                          </span>
+                          <ChevronDown className={`w-4 h-4 text-[#667085] transition-transform ${countryOpen ? "rotate-180" : ""}`} />
+                        </button>
+
+                        {countryOpen && (
+                          <div className="absolute left-0 top-full z-50 mt-1 w-full max-h-[260px] overflow-hidden rounded-xl border border-[#D0D5DD] bg-white shadow-[0_12px_32px_rgba(16,24,40,0.12)]">
+                            <div className="p-2 border-b border-[#F2F4F7]">
                               <input
-                                value={draftEcName}
-                                onChange={(e) => setDraftEcName(e.target.value)}
-                                className={inputEmergencyFieldClass}
-                                placeholder="Contact name"
+                                type="text"
+                                value={countrySearch}
+                                onChange={(e) => setCountrySearch(e.target.value)}
+                                placeholder="Search country..."
+                                className="w-full px-3 py-2 rounded-lg border border-[#D0D5DD] text-[13px] outline-none focus:border-[#4A9B3D]"
+                                autoFocus
                               />
-
-                              <input
-                                type="email"
-                                value={draftEcEmail}
-                                onChange={(e) =>
-                                  setDraftEcEmail(e.target.value)
-                                }
-                                className={inputEmergencyFieldClass}
-                                placeholder="Contact email"
-                              />
-
-                              <div
-                                className="relative w-full"
-                                ref={countryDropdownRef}
-                              >
-                                <div className="h-[40px] bg-white border border-black rounded-[5px] flex items-center px-3 gap-2">
+                            </div>
+                            <ul className="overflow-y-auto max-h-[196px]" role="listbox">
+                              {filteredCountries.map((c) => (
+                                <li key={c.code} role="option" aria-selected={c.code === selectedCountry.code}>
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      setCountryMenuOpen((p) => !p)
-                                    }
-                                    className="flex items-center gap-2 rounded-[5px] bg-transparent px-1 py-1 text-left outline-none"
+                                    onClick={() => { setSelectedCountry(c); setCountryOpen(false); setCountrySearch(""); }}
+                                    className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-[14px] hover:bg-[#F9FAFB] transition-colors ${c.code === selectedCountry.code ? "bg-[#F0FAF0]" : ""}`}
                                   >
                                     <CountryFlag
-                                      code={selectedCountry.code}
-                                      url={selectedCountry.flagUrl}
-                                      alt={selectedCountry.name}
-                                      className="w-[20px] h-[12px] object-cover rounded-[1px]"
+                                      code={c.code}
+                                      url={c.flagUrl}
+                                      alt={c.name}
+                                      className="w-[24px] h-[16px] object-cover rounded-[2px] shrink-0"
                                     />
-                                    <span className="text-[14px] font-normal text-[#929191] leading-[15px]">
-                                      {selectedCountry.dialCode}
-                                    </span>
-                                    <img
-                                      src={chevronDown}
-                                      alt="dropdown"
-                                      className="w-[8.5px] h-[6px] mt-1 pointer-events-none"
-                                    />
+                                    <span className="flex-1 truncate text-[#344054]">{c.name}</span>
                                   </button>
-                                  <input
-                                    type="tel"
-                                    value={draftEcPhone}
-                                    onChange={(e) =>
-                                      setDraftEcPhone(e.target.value)
-                                    }
-                                    className="flex-1 bg-transparent outline-none text-[15px] text-black custom-placeholder placeholder:text-[#9B989E] font-normal"
-                                    placeholder="Contact phone"
-                                  />
-                                </div>
-
-                                {countryMenuOpen && (
-                                  <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-[10px] border border-[#D1D5DB] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.1)]">
-                                    {COUNTRY_OPTIONS.map((country) => (
-                                      <button
-                                        type="button"
-                                        key={country.code}
-                                        onClick={() => {
-                                          setSelectedCountry(country);
-                                          setCountryMenuOpen(false);
-                                        }}
-                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#111827] hover:bg-[#F3F4F6]"
-                                      >
-                                        <CountryFlag
-                                          code={country.code}
-                                          url={country.flagUrl}
-                                          alt={country.name}
-                                          className="w-[20px] h-[12px] object-cover rounded-[1px]"
-                                        />
-                                        <span className="flex-1 truncate">
-                                          {country.name}
-                                        </span>
-                                        <span className="text-[13px] text-[#6B7280]">
-                                          {country.dialCode}
-                                        </span>
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={handleSaveField}
-                            disabled={saving}
-                            className="mt-3 h-[36px] w-[90px] rounded-[4px] bg-[#389131] text-[14px] font-semibold text-white hover:bg-[#2f7a2a] disabled:opacity-50"
-                          >
-                            {saving ? "Saving..." : "Save"}
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-between gap-3">
-                          <div className="flex min-w-0 flex-1 flex-col justify-center">
-                            <p className="text-[14px] font-medium leading-[100%] text-black">
-                              {row.label}
-                            </p>
-
-                            <p
-                              className={`mt-[6px] truncate text-[11px] font-light leading-[100%] ${
-                                row.hasData ? "text-black" : "text-black/45"
-                              }`}
-                            >
-                              {row.hasData ? row.value : row.placeholder}
-                            </p>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-
-                          <button
-                            type="button"
-                            onClick={() => openEditor(row.key)}
-                            className={cardBtn}
-                          >
-                            {row.hasData ? "Edit" : "Add"}
-                          </button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  );
-                })
-              )}
-            </div>
+
+                    {/* City */}
+                    <div className="col-span-2 lg:col-span-1">
+                      <FieldLabel htmlFor="ep-city" required>City</FieldLabel>
+                      <TextInput
+                        id="ep-city"
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="Enter your city"
+                        autoComplete="address-level2"
+                      />
+                    </div>
+
+                    {/* Zip Code */}
+                    <div className="col-span-2 lg:col-span-1">
+                      <FieldLabel htmlFor="ep-zip" required>Zip Code</FieldLabel>
+                      <TextInput
+                        id="ep-zip"
+                        type="text"
+                        value={zipCode}
+                        onChange={(e) => setZipCode(e.target.value)}
+                        placeholder="Enter zip code"
+                        autoComplete="postal-code"
+                      />
+                    </div>
+
+                    {/* Emergency Contact */}
+                    <div className="col-span-2 lg:col-span-2">
+                      <FieldLabel htmlFor="ep-ecPhone">Emergency Contact Number</FieldLabel>
+                      <PhoneInput
+                        id="ep-ecPhone"
+                        country={ecCountry}
+                        local={ecLocal}
+                        onCountryChange={setEcCountry}
+                        onLocalChange={setEcLocal}
+                        placeholder="Enter emergency contact"
+                      />
+                    </div>
+                </div>
+
+                {/* ── Save button ── */}
+                <div className="mt-10 flex items-center justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCancelModal(true)}
+                    className="h-[48px] px-8 rounded-xl border border-[#D0D5DD] text-[15px] font-semibold text-[#344054] bg-white hover:bg-[#F9FAFB] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleSave()}
+                    disabled={saving}
+                    className="h-[48px] px-10 rounded-xl bg-[#4A9B3D] text-[15px] font-semibold text-white hover:bg-[#3d8432] active:bg-[#347029] transition-colors disabled:opacity-60 shadow-[0_1px_3px_rgba(74,155,61,0.4)]"
+                  >
+                    {saving ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                        </svg>
+                        Saving…
+                      </span>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </main>
+
           </div>
         </div>
+      )}
 
-        <LogoutConfirmModal
-          isOpen={isLogoutConfirmOpen}
-          onCancel={() => setIsLogoutConfirmOpen(false)}
-          onConfirm={() => {
-            setIsLogoutConfirmOpen(false);
-            void handleLogout();
-          }}
-        />
-      </div>
+      <ActionConfirmModal
+        visible={showCancelModal}
+        title="Discard Changes?"
+        description="Are you sure you want to discard your changes? Any unsaved edits will be lost."
+        confirmLabel="Keep Editing"
+        cancelLabel="Discard"
+        onConfirm={() => setShowCancelModal(false)}
+        onCancel={() => {
+          setShowCancelModal(false);
+          navigate(-1);
+        }}
+        icon={<AlertTriangle className="w-8 h-8 text-amber-500" strokeWidth={2} />}
+      />
     </div>
   );
 };
 
-export default Profile;
+export default EditProfile;
