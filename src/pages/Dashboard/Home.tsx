@@ -312,7 +312,9 @@ const Home: React.FC = () => {
                   className="
     w-full
     xl:w-[240px]
-    aspect-[255/257]
+    h-full
+    min-h-[220px]
+    xl:min-h-0
     xl:aspect-auto
     xl:h-[257px]
     rounded-[6px]
