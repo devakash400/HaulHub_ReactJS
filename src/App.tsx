@@ -25,6 +25,7 @@ import VerifyIdentity from "./pages/VerifyIdentity/VerifyIdentity.tsx";
 import PreScreening from "./pages/PreScreening/PreScreening.tsx";
 import PreScreeningComplete from "./pages/PreScreeningComplete/PreScreeningComplete.tsx";
 import Profile from "./pages/Profile/Profile.tsx";
+import EditProfile from "./pages/EditProfile/EditProfile.tsx";
 import AccountSettings from "./pages/AccountSettings/AccountSettings.tsx";
 import Wishlist from "./pages/Wishlist/Wishlist.tsx";
 import Notifications from "./pages/Notifications/Notifications.tsx";
@@ -118,6 +119,7 @@ const App: React.FC = () => {
             path="/notifications/booking/:bookingId"
             element={<BookingDetails />}
           />
+          <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/about" element={<About />} />

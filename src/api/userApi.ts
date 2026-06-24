@@ -29,7 +29,7 @@ export type UserProfileApiData = {
   country?: string;
   state?: string;
   emergencyContact?: EmergencyContactPayload | null;
-  addresses?: unknown[];
+  addresses?: any[];
   role?: string;
   rating?: number;
   totalReviews?: number;
@@ -37,6 +37,7 @@ export type UserProfileApiData = {
   emailVerified?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  dateOfBirth?: string;
 };
 
 export type UpdateUserProfilePayload = {
@@ -53,6 +54,8 @@ export type UpdateUserProfilePayload = {
   country?: string;
   state?: string;
   emergencyContact?: EmergencyContactPayload;
+  dateOfBirth?: string;
+  addresses?: any[];
 };
 
 type ProfileResponse = {
