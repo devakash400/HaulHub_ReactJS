@@ -250,7 +250,7 @@ const Navbar: React.FC = () => {
                 autoComplete="off"
                 readOnly={location.pathname !== "/" && location.pathname !== "/search"}
                 tabIndex={location.pathname !== "/" && location.pathname !== "/search" ? -1 : 0}
-                placeholder="Search here..."
+                placeholder="Search for trailers..."
                 value={navSearch}
                 onChange={(e) => setNavSearch(e.target.value)}
                 onKeyDown={(e) => {
@@ -807,7 +807,7 @@ const Navbar: React.FC = () => {
                   autoComplete="off"
                   readOnly={location.pathname !== "/" && location.pathname !== "/search"}
                   tabIndex={location.pathname !== "/" && location.pathname !== "/search" ? -1 : 0}
-                  placeholder="Search here..."
+                  placeholder="Search for trailers..."
                   value={navSearch}
                   onChange={(e) => setNavSearch(e.target.value)}
                   onKeyDown={(e) => {
