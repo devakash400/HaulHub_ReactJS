@@ -227,7 +227,7 @@ const Navbar: React.FC = () => {
     <>
       <style>{navbarMenuBarStyles}</style>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F6F3E9] border-b border-gray-200 font-sans min-w-0 w-full">
-        <div className="flex items-center justify-between gap-3 px-4 sm:px-10 py-3 min-w-0 w-full min-h-[64px] sm:min-h-[97px]">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-10 py-3 min-w-0 w-full min-h-[64px] sm:min-h-[81px]">
           <Link
             to="/"
             onClick={closeDrawer}
@@ -240,37 +240,39 @@ const Navbar: React.FC = () => {
             />
           </Link>
 
-          <div className={`hidden min-w-0 flex-1 items-center justify-center px-4 sm:flex ${(backgroundLocation.pathname === "/" || backgroundLocation.pathname === "/search") ? "" : "invisible pointer-events-none"}`}>
-            <div
-              className={`flex items-center border border-gray-200 bg-[#FEFEFE] shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_26px_rgba(56,145,49,0.22)] motion-reduce:transition-none w-[549px] h-[73px] rounded-[21px] px-5`}
-            >
-              <input
-                type="search"
-                name="navSearchDesktop"
-                autoComplete="off"
-                readOnly={location.pathname !== "/" && location.pathname !== "/search"}
-                tabIndex={location.pathname !== "/" && location.pathname !== "/search" ? -1 : 0}
-                placeholder="Search for trailers..."
-                value={navSearch}
-                onChange={(e) => setNavSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") submitSearch();
-                }}
-                className={`min-w-0 flex-1 border-none bg-transparent font-[Lexend] font-normal text-[23px] leading-[100%] tracking-normal text-[#929191] placeholder:text-[#929191] outline-none transition-[font-size] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "text-[18px]" : "text-[23px]"}`}
-              />
-              <button
-                type="button"
-                onClick={() => submitSearch()}
-                className="flex shrink-0 items-center justify-center rounded-full bg-[#389131] h-[51px] w-[51px]"
-                aria-label="Search"
+          {(backgroundLocation.pathname === "/" || backgroundLocation.pathname === "/search") && (
+            <div className="hidden min-w-0 flex-1 items-center justify-center px-4 sm:flex">
+              <div
+                className={`flex items-center border border-gray-200 bg-[#FEFEFE] shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-[#389131]/40 hover:shadow-[0_10px_26px_rgba(56,145,49,0.22)] motion-reduce:transition-none w-[549px] h-[57px] rounded-[21px] px-5`}
               >
-                <Search
-                  className="text-white h-[23.3px] w-[23.3px]"
-                  aria-hidden
+                <input
+                  type="search"
+                  name="navSearchDesktop"
+                  autoComplete="off"
+                  readOnly={location.pathname !== "/" && location.pathname !== "/search"}
+                  tabIndex={location.pathname !== "/" && location.pathname !== "/search" ? -1 : 0}
+                  placeholder="Search for trailers..."
+                  value={navSearch}
+                  onChange={(e) => setNavSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") submitSearch();
+                  }}
+                  className={`min-w-0 flex-1 border-none bg-transparent font-[Lexend] font-normal text-[18px] leading-[100%] tracking-normal text-[#929191] placeholder:text-[#929191] outline-none transition-[font-size] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isSearchCompact ? "text-[16px]" : "text-[18px]"}`}
                 />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => submitSearch()}
+                  className="flex shrink-0 items-center justify-center rounded-full bg-[#389131] h-[45px] w-[45px]"
+                  aria-label="Search"
+                >
+                  <Search
+                    className="text-white h-[20px] w-[20px]"
+                    aria-hidden
+                  />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div
             ref={dropdownRef}
