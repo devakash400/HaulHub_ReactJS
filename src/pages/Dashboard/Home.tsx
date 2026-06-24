@@ -8,6 +8,7 @@ import { fetchTrailersList } from "../../api/trailersApi.ts";
 import type { TrailerListItem } from "../../assets/data/trailers.ts";
 import { RootState } from "../../store";
 import { AddTrailerModal } from "../../components/TrailerDetails/AddTrailerModal.tsx";
+import Loader from "../../components/common/Loader.tsx";
 
 type RevealBlockProps = {
   children: React.ReactNode;
@@ -100,6 +101,7 @@ const Home: React.FC = () => {
   );
 
   const isOwner = user?.trailor === "Owner" || userType === "Owner";
+  const ownerStillLoading = isOwner && ownerTrailers === null;
 
   // ownerTrailers is null while loading; once fetched it's an array (possibly empty).
   const ownerHasTrailers =
@@ -208,7 +210,13 @@ const Home: React.FC = () => {
         <Container />
       </RevealBlock>
 
-      {ownerHasNoTrailers ? (
+      {ownerStillLoading ? (
+        <RevealBlock delayMs={120}>
+          <div className="flex items-center justify-center py-24">
+            <Loader />
+          </div>
+        </RevealBlock>
+      ) : ownerHasNoTrailers ? (
         /* Empty state below container - no trailer listings shown */
         <RevealBlock delayMs={120}>
           <div
