@@ -61,8 +61,8 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
   const [locationState, setLocationState] = useState("");
   const [zipCode, setZipCode] = useState("");
 
-  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
-  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
+  // const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
+  // const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
 
@@ -82,22 +82,22 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     setPhotos(nextPhotos);
     setPhotoFiles(nextPhotoFiles);
     setTouched(prev => ({ ...prev, photos: true }));
-    validate(nextPhotos, profilePhotoUrl);
+    validate(nextPhotos);
   };
 
-  const removeProfilePhoto = () => {
-    setProfilePhotoUrl(null);
-    setProfilePhotoFile(null);
-    if (profileInputRef.current) profileInputRef.current.value = "";
-    setTouched(prev => ({ ...prev, profilePhoto: true }));
-    validate(photos, null);
-  };
+  // const removeProfilePhoto = () => {
+  //   setProfilePhotoUrl(null);
+  //   setProfilePhotoFile(null);
+  //   if (profileInputRef.current) profileInputRef.current.value = "";
+  //   setTouched(prev => ({ ...prev, profilePhoto: true }));
+  //   validate(photos, null);
+  // };
 
   const typeRef = useRef<HTMLDivElement>(null);
   const hitchRef = useRef<HTMLDivElement>(null);
   const dimensionPresetRef = useRef<HTMLDivElement>(null);
 
-  const profileInputRef = useRef<HTMLInputElement>(null);
+  // const profileInputRef = useRef<HTMLInputElement>(null);
   const takePhotoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -118,9 +118,9 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     setCity("");
     setLocationState("");
     setZipCode("");
-    setProfilePhotoUrl(null);
-    setProfilePhotoFile(null);
-    if (profileInputRef.current) profileInputRef.current.value = "";
+    // setProfilePhotoUrl(null);
+    // setProfilePhotoFile(null);
+    // if (profileInputRef.current) profileInputRef.current.value = "";
     if (takePhotoInputRef.current) takePhotoInputRef.current.value = "";
     setPhotos([]);
     setPhotoFiles([]);
@@ -178,7 +178,8 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     };
   }, []);
 
-  const validate = (photoList: string[] = photos, profilePhoto: string | null = profilePhotoUrl) => {
+  // const validate = (photoList: string[] = photos, profilePhoto: string | null = profilePhotoUrl) => {
+  const validate = (photoList: string[] = photos) => {
     const newErrors: Errors = {};
 
     if (!title.trim()) {
@@ -221,9 +222,9 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       newErrors.availabilityEndDate = "End date is required";
     }
 
-    if (!profilePhoto?.trim()) {
-      newErrors.profilePhoto = "Profile photo is required";
-    }
+    // if (!profilePhoto?.trim()) {
+    //   newErrors.profilePhoto = "Profile photo is required";
+    // }
 
     if (!address.trim()) {
       newErrors.address = "Address is required";
@@ -276,7 +277,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
     try {
       // DEBUG: Log state at submission time
       console.log("=== FORM SUBMISSION DEBUG ===");
-      console.log("profilePhotoFile:", profilePhotoFile);
+      // console.log("profilePhotoFile:", profilePhotoFile);
       console.log("photoFiles array length:", photoFiles.length);
       console.log("photoFiles array:", photoFiles);
       console.log("photos array (URLs) length:", photos.length);
@@ -305,11 +306,11 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       };
 
       // Upload profile picture
-      console.log("--- Starting profile picture upload ---");
-      const profilePictureUrl = profilePhotoFile
-        ? await uploadImageFile(profilePhotoFile)
-        : profilePhotoUrl || "";
-      console.log("Final profilePictureUrl:", profilePictureUrl);
+      // console.log("--- Starting profile picture upload ---");
+      // const profilePictureUrl = profilePhotoFile
+      //   ? await uploadImageFile(profilePhotoFile)
+      //   : profilePhotoUrl || "";
+      // console.log("Final profilePictureUrl:", profilePictureUrl);
 
       // Upload gallery images - CRITICAL: Create a fresh snapshot of photoFiles
       console.log("--- Starting gallery images upload ---");
@@ -353,7 +354,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
         height: parseFloat(height) || 0,
         pricePerDay: parseFloat(price) || 0,
         usageRestrictions: usageRestrictions.trim() || "",
-        profilePicture: profilePictureUrl,
+        // profilePicture: profilePictureUrl,
         images: uploadedImages,
         securityDepositAmount: 0,
         isFeatured: false,
@@ -378,10 +379,10 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       };
 
       console.log("Final trailerData.images:", trailerData.images);
-      console.log(
-        "Final trailerData.profilePicture:",
-        trailerData.profilePicture,
-      );
+      // console.log(
+      //   "Final trailerData.profilePicture:",
+      //   trailerData.profilePicture,
+      // );
       console.log("=== DEBUG END ===");
 
       const success = await createTrailer(trailerData);
@@ -685,7 +686,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
             {/* Uploads */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              {/* <div>
                 <label className={fieldLabelClass}>Profile Picture <span className="text-red-500">*</span></label>
 
                 <input
@@ -786,10 +787,10 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                     </div>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               <div>
-                <label className={fieldLabelClass}>Upload Images <span className="text-red-500">*</span></label>
+                <label className={fieldLabelClass}>Trailer Picture <span className="text-red-500">*</span></label>
 
                 <input
                   ref={takePhotoInputRef}

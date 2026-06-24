@@ -9,6 +9,11 @@ import { Camera, ChevronLeft, ChevronDown, AlertTriangle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
+import { logout } from "../../store/authSlice.ts";
+import { clearWishlist } from "../../store/wishlistSlice.ts";
+import { logout as logoutApi } from "../../api/authApi.ts";
+import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
+import Loader from "../../components/common/Loader.tsx";
 
 import ActionConfirmModal from "../../components/common/ActionConfirmModal.tsx";
 import { updateUser } from "../../store/authSlice.ts";
@@ -634,11 +639,13 @@ const EditProfile: React.FC = () => {
                       </span>
                     ) : (
                       <img
-                        src={profilePictureUrl ?? undefined}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
+                        src={profilePictureUrl!}
+                        alt={displayName}
                         onLoad={() => setImgLoaded(true)}
-                        onError={() => { setImgError(true); setImgLoaded(false); }}
+                        onError={() => setImgError(true)}
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${
+                          imgLoaded ? "opacity-100" : "opacity-0"
+                        }`}
                       />
                     )}
                   </div>

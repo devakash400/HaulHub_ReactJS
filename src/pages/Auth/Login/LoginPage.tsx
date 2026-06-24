@@ -73,18 +73,7 @@ const LoginPage: React.FC = () => {
           initialCountryCode={loginState?.selectedCountryCode}
           initialTrailor={loginState?.loginTrailor}
           onClose={() => {
-            if (
-              backgroundLocation &&
-              typeof backgroundLocation.pathname === "string"
-            ) {
-              const target = `${backgroundLocation.pathname || "/"}${backgroundLocation.search ?? ""}`;
-              navigate(target, {
-                replace: true,
-                state: backgroundLocation.state ?? null,
-              });
-            } else {
-              navigate(-1);
-            }
+            navigate(-1);
           }}
           onSuccess={() => {
             if (returnTo) {
@@ -95,11 +84,7 @@ const LoginPage: React.FC = () => {
               backgroundLocation &&
               typeof backgroundLocation.pathname === "string"
             ) {
-              const target = `${backgroundLocation.pathname || "/"}${backgroundLocation.search ?? ""}`;
-              navigate(target, {
-                replace: true,
-                state: backgroundLocation.state ?? null,
-              });
+              navigate(-1);
             } else {
               navigate("/");
             }
