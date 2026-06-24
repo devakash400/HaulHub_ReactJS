@@ -22,6 +22,7 @@ import { logout } from "../../store/authSlice.ts";
 import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi } from "../../api/authApi.ts";
 import { LogoutConfirmModal } from "../../components/Auth/LogoutConfirmModal.tsx";
+import Loader from "../../components/common/Loader.tsx";
 import { RootState } from "../../store";
 import {
   getUserProfile,
@@ -520,10 +521,7 @@ const Profile: React.FC = () => {
               {loading ? (
                 <div className={personalCardClass}>
                   <div className="flex items-center justify-center py-6">
-                    <div
-                      className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
-                      aria-label="Loading"
-                    />
+                    <Loader />
                   </div>
                 </div>
               ) : !isAuthenticated ? (
