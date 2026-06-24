@@ -68,9 +68,9 @@ const App: React.FC = () => {
     effectivePathname === "/liability-agreement";
   const contentTopPadding = hideNavFooter
     ? ""
-    : effectivePathname === "/"
-      ? "pt-[110px] sm:pt-[97px]"
-      : "pt-[64px] sm:pt-[97px]";
+    : (effectivePathname === "/" || effectivePathname === "/search")
+      ? "pt-[110px] sm:pt-[81px]"
+      : "pt-[64px] sm:pt-[81px]";
 
   // Sync user profile from backend on app init if authenticated
   useEffect(() => {

@@ -28,6 +28,7 @@ import {
   WishlistModal,
   WishlistItem,
 } from "../../../components/TrailerDetails/index.ts";
+import Loader from "../../../components/common/Loader.tsx";
 import { RootState } from "../../../store";
 import {
   addWishlistItem,
@@ -248,10 +249,7 @@ const Trailer: React.FC = () => {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 px-4">
         <div className="flex items-center justify-center py-6">
-          <div
-            className="w-8 h-8 border-4 border-[#389131] border-t-transparent rounded-full animate-spin"
-            aria-label="Loading"
-          />
+          <Loader />
         </div>
       </div>
     );

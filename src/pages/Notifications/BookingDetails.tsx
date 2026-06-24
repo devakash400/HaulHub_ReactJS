@@ -231,10 +231,11 @@ const BookingDetails: React.FC = () => {
     undefined;
 
   const passportUrl =
-    resolveDocUrl(booking?.passportDocuments) ||
+    resolveDocUrl(booking?.proofOfInsuranceDocuments
+) ||
     resolveDocUrl(
-      booking?.passportDocuments?.length
-        ? booking.passportDocuments
+      booking?.proofOfInsuranceDocuments?.length
+        ? booking.proofOfInsuranceDocuments
         : undefined,
     ) ||
     resolveDocUrl(booking?.user?.passport) ||

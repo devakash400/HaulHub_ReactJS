@@ -609,21 +609,20 @@ const OwnerTruckDescription: React.FC = () => {
 
       {/* Animated photo gallery modal */}
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 transition-all duration-300 ${
+        className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-4 transition-all duration-300 ${
           isPhotosOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
         }`}
       >
         <div
-          className={`w-full max-w-6xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${
+          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] ${
             isPhotosOpen
-              ? "translate-y-0 scale-100 opacity-100"
-              : "translate-y-6 scale-95 opacity-0"
+              ? "translate-y-0 sm:scale-100 opacity-100"
+              : "translate-y-full sm:translate-y-6 scale-100 sm:scale-95 opacity-0"
           }`}
-          style={{ maxHeight: "calc(100vh - 80px)" }}
         >
-          <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+          <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
             <h3 className="text-lg font-semibold text-gray-900">
               All Trailer Photos
             </h3>
@@ -637,12 +636,9 @@ const OwnerTruckDescription: React.FC = () => {
             </button>
           </div>
 
-          <div
-            className="overflow-y-auto p-6"
-            style={{ maxHeight: "calc(100vh - 120px)" }}
-          >
-            <div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
-              <div className="mx-auto h-[260px] sm:h-[400px] w-full max-w-[420px] overflow-hidden rounded-[32px] border border-gray-200 bg-[#F8FAFC]">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
+              <div className="mx-auto h-[200px] sm:h-[400px] w-full max-w-[420px] shrink-0 overflow-hidden rounded-2xl sm:rounded-[32px] border border-gray-200 bg-[#F8FAFC]">
                 <img
                   src={galleryImages[selectedPhotoIndex] || trailer.images[0]}
                   alt={`${trailer.title} featured`}
@@ -650,18 +646,18 @@ const OwnerTruckDescription: React.FC = () => {
                 />
               </div>
 
-              <div className="flex flex-col gap-5">
-                <div className="rounded-[32px] border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="mb-3 text-sm font-semibold text-gray-800">
+              <div className="flex flex-col gap-4 sm:gap-5">
+                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
+                  <p className="mb-2 sm:mb-3 text-sm font-semibold text-gray-800">
                     Select photo
                   </p>
-                  <div className="flex gap-3 overflow-x-auto pb-2">
+                  <div className="flex gap-2 sm:gap-3 overflow-x-auto p-1 pb-2">
                     {galleryImages.map((imageUrl, imageIndex) => (
                       <button
                         key={`${imageUrl}-${imageIndex}`}
                         type="button"
                         onClick={() => setSelectedPhotoIndex(imageIndex)}
-                        className={`relative min-w-[100px] overflow-hidden rounded-3xl border border-gray-200 transition-all duration-150 ${
+                        className={`relative min-w-[70px] sm:min-w-[100px] overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 transition-all duration-150 ${
                           selectedPhotoIndex === imageIndex
                             ? "ring-2 ring-[#389131]/40"
                             : "hover:border-[#389131]"
@@ -670,15 +666,15 @@ const OwnerTruckDescription: React.FC = () => {
                         <img
                           src={imageUrl}
                           alt={`${trailer.title} thumb ${imageIndex + 1}`}
-                          className="h-[100px] w-[100px] object-contain"
+                          className="h-[70px] sm:h-[100px] w-[70px] sm:w-[100px] object-cover sm:object-contain"
                         />
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="rounded-[32px] border border-gray-200 bg-white p-4 shadow-sm">
-                  <div className="mb-4">
+                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
+                  <div className="mb-3 sm:mb-4">
                     <p className="text-sm font-semibold text-gray-800">
                       More Photos ({galleryImages.length})
                     </p>
@@ -687,18 +683,18 @@ const OwnerTruckDescription: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-2 sm:gap-3 grid-cols-2 lg:grid-cols-3">
                     {galleryImages.map((imageUrl, imageIndex) => (
                       <button
                         key={`extra-${imageUrl}-${imageIndex}`}
                         type="button"
                         onClick={() => setSelectedPhotoIndex(imageIndex)}
-                        className="group overflow-hidden rounded-3xl border border-gray-200 bg-gray-50 transition-shadow duration-200 hover:shadow-lg"
+                        className="group overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 bg-gray-50 transition-shadow duration-200 hover:shadow-lg"
                       >
                         <img
                           src={imageUrl}
                           alt={`${trailer.title} extra ${imageIndex + 1}`}
-                          className="h-[220px] w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                          className="h-[100px] sm:h-[220px] w-full object-cover sm:object-contain transition-transform duration-300 group-hover:scale-105"
                         />
                       </button>
                     ))}
