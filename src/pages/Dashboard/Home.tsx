@@ -195,7 +195,7 @@ const Home: React.FC = () => {
       numericId % 3 === 2
     );
   };
-  const visibleOwnerTrailers = ownerTrailerCards.slice(0, 4);
+  const visibleOwnerTrailers = ownerTrailerCards.slice(0, 5);
 
   return (
     <div
@@ -303,32 +303,9 @@ const Home: React.FC = () => {
         </RevealBlock>
       ) : ownerHasTrailers ? (
         <RevealBlock delayMs={120}>
-          <div className="w-full px-10 pb-6 pt-1">
+          <div className="w-full px-4 sm:px-10 pb-2 sm:pb-6 pt-1">
             <div className="w-full">
-              <div className="mb-3 flex justify-end px-3 py-2">
-                <button
-                  type="button"
-                  onClick={() => navigate("/owner/view-more-trucks")}
-                  className="
-    w-[80px]
-    h-[25px]
-    rounded-[2px]
-    bg-[#E5FDE3]
-    text-[#389131]
-    font-lexend
-    font-medium
-    text-[10px]
-    leading-[100%]
-    flex items-center justify-center
-    hover:bg-[#DDF2DA]
-    transition-colors
-  "
-                >
-                  View More
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pb-3 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="grid grid-cols-2 gap-3 mt-4 sm:mt-6 md:mt-8 pb-3 sm:grid-cols-3 lg:grid-cols-5">
                 <button
                   type="button"
                   onClick={() => setAddTrailerOpen(true)}
@@ -379,7 +356,7 @@ const Home: React.FC = () => {
                   </span>
                 </button>
 
-                {visibleOwnerTrailers.map((item) => {
+                {visibleOwnerTrailers.map((item, index) => {
                   const booked = isBookedTrailer(Number(item.id));
                   const rawStatus = item.availabilityStatus?.toLowerCase();
                   const statusText = rawStatus
@@ -404,7 +381,7 @@ const Home: React.FC = () => {
                   return (
                     <div
                       key={item.id}
-                      className="w-full xl:w-[240px] cursor-pointer"
+                      className={`w-full xl:w-[240px] cursor-pointer ${index === 4 ? "lg:hidden block" : ""}`}
                       onClick={() =>
                         navigate(`/owner/truck/${item.id}`, {
                           state: { isBooked: booked },
@@ -524,6 +501,29 @@ const Home: React.FC = () => {
                     </div>
                   );
                 })}
+              </div>
+
+              <div className="mt-2 sm:mt-6 md:mt-8 mb-0 sm:mb-4 flex justify-end px-2 sm:px-3 pt-1 sm:pt-2">
+                <button
+                  type="button"
+                  onClick={() => navigate("/owner/view-more-trucks")}
+                  className="
+    w-[80px]
+    h-[25px]
+    rounded-[2px]
+    bg-[#E5FDE3]
+    text-[#389131]
+    font-lexend
+    font-medium
+    text-[10px]
+    leading-[100%]
+    flex items-center justify-center
+    hover:bg-[#DDF2DA]
+    transition-colors
+  "
+                >
+                  View More
+                </button>
               </div>
             </div>
           </div>
