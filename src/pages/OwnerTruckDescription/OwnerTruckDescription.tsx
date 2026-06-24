@@ -655,7 +655,7 @@ const OwnerTruckDescription: React.FC = () => {
                   <p className="mb-3 text-sm font-semibold text-gray-800">
                     Select photo
                   </p>
-                  <div className="flex gap-3 overflow-x-auto pb-2">
+                  <div className="flex gap-3 overflow-x-auto p-1 pb-2">
                     {galleryImages.map((imageUrl, imageIndex) => (
                       <button
                         key={`${imageUrl}-${imageIndex}`}
