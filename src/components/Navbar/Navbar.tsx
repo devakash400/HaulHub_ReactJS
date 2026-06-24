@@ -221,7 +221,7 @@ const Navbar: React.FC = () => {
   };
 
   const navbarMenuBarStyles =
-    ".navbar-menu-bar a, .navbar-menu-bar span { font-family: Inter, sans-serif; font-weight: 500; font-style: normal; font-size: 14px; line-height: 100%; letter-spacing: 0; vertical-align: middle; color: #000000; }";
+    ".navbar-menu-bar a, .navbar-menu-bar span { font-family: Inter, sans-serif; font-style: normal; line-height: 100%; letter-spacing: 0; vertical-align: middle; color: inherit; font-size: inherit; font-weight: inherit; transition: color 0.15s ease-in-out; }";
 
   return (
     <>
@@ -372,7 +372,7 @@ const Navbar: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-0">
-                    <ul className="m-0 list-none p-0 space-y-4 text-xl font-semibold leading-none font-[Inter] navbar-menu-bar">
+                    <ul className="m-0 list-none p-0 divide-y divide-gray-200 text-xl font-semibold leading-none font-[Inter] navbar-menu-bar">
                       {isTrailerScreen ? (
                         <>
                           <li
@@ -592,11 +592,11 @@ const Navbar: React.FC = () => {
                   }}
                 >
                   <div className="p-0">
-                    <ul className="m-0 list-none p-0 flex flex-col gap-[12px] text-[14px] text-black font-medium leading-none font-[Inter] navbar-menu-bar">
+                    <ul className="m-0 list-none p-0 flex flex-col divide-y divide-gray-200 text-[14px] text-black font-medium leading-none font-[Inter] navbar-menu-bar">
                       {isTrailerScreen ? (
                         <>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link
@@ -607,7 +607,7 @@ const Navbar: React.FC = () => {
                             </Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link
@@ -618,7 +618,7 @@ const Navbar: React.FC = () => {
                             </Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link
@@ -629,7 +629,7 @@ const Navbar: React.FC = () => {
                             </Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link
@@ -642,7 +642,7 @@ const Navbar: React.FC = () => {
                           {isAuthenticated ? (
                             <>
                               <li
-                                className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                                className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                                 onClick={handleDrawerLinkRowClick}
                               >
                                 <Link
@@ -653,7 +653,7 @@ const Navbar: React.FC = () => {
                                 </Link>
                               </li>
                               <li
-                                className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                                className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                                 onClick={() => setIsLogoutConfirmOpen(true)}
                               >
                                 <span className="text-inherit no-underline cursor-pointer block w-full">
@@ -663,7 +663,7 @@ const Navbar: React.FC = () => {
                             </>
                           ) : (
                             <li
-                              className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                              className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                               onClick={() => {
                                 closeDrawer();
                                 modalNavigate("/login");
@@ -678,25 +678,25 @@ const Navbar: React.FC = () => {
                       ) : isOwner ? (
                         <>
                           <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="px-5 py-3 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/">Home</Link>
                           </li>
                           <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="px-5 py-3 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/notifications">Notification</Link>
                           </li>
                           <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="px-5 py-3 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/profile">Profile</Link>
                           </li>
                           <li
-                            className="px-5 py-1.5 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
+                            className="px-5 py-3 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={() => setIsLogoutConfirmOpen(true)}
                           >
                             <span>Log Out</span>
@@ -705,13 +705,13 @@ const Navbar: React.FC = () => {
                       ) : !isAuthenticated ? (
                         <>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/">Home</Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={() =>
                               handleProtectedDrawerNavigate("/booking")
                             }
@@ -719,13 +719,13 @@ const Navbar: React.FC = () => {
                             <span>Booked Trailor</span>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/contact">Contact</Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={() =>
                               handleProtectedDrawerNavigate("/profile")
                             }
@@ -733,7 +733,7 @@ const Navbar: React.FC = () => {
                             <span>Profile</span>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={() => {
                               closeDrawer();
                               modalNavigate("/login");
@@ -745,37 +745,37 @@ const Navbar: React.FC = () => {
                       ) : (
                         <>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/">Home</Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/booking">Booking Screen</Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/notifications">Notifications</Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/contact">Contact</Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
                             <Link to="/profile">Profile</Link>
                           </li>
                           <li
-                            className="px-7 py-1.5 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100"
+                            className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={() => setIsLogoutConfirmOpen(true)}
                           >
                             <span>Logout</span>
