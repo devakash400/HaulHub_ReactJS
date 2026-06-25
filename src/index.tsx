@@ -55,7 +55,7 @@ store.subscribe(() => {
 
 const root = ReactDOM.createRoot(rootElement);
 
-const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID";
+const GOOGLE_CLIENT_ID = "74651605435-rktt3smkbs4sl77ivsrluai4q9j449ve.apps.googleusercontent.com";
 
 root.render(
   <React.StrictMode>
