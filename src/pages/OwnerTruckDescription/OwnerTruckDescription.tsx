@@ -13,7 +13,7 @@ import {
   updateTrailer,
 } from "../../api/trailersApi.ts";
 import { toast } from "react-toastify";
-import { X } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 
 type BookingStatus = "Upcoming" | "Ongoing" | "Completed";
 
@@ -616,7 +616,7 @@ const OwnerTruckDescription: React.FC = () => {
         }`}
       >
         <div
-          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] ${
+          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] min-w-0 ${
             isPhotosOpen
               ? "translate-y-0 sm:scale-100 opacity-100"
               : "translate-y-full sm:translate-y-6 scale-100 sm:scale-95 opacity-0"
@@ -636,8 +636,8 @@ const OwnerTruckDescription: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-            <div className="grid gap-4 sm:gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-w-0">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-[420px_minmax(0,1fr)] min-w-0">
               <div className="mx-auto h-[200px] sm:h-[400px] w-full max-w-[420px] shrink-0 overflow-hidden rounded-2xl sm:rounded-[32px] border border-gray-200 bg-[#F8FAFC]">
                 <img
                   src={galleryImages[selectedPhotoIndex] || trailer.images[0]}
@@ -646,11 +646,17 @@ const OwnerTruckDescription: React.FC = () => {
                 />
               </div>
 
-              <div className="flex flex-col gap-4 sm:gap-5">
-                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
-                  <p className="mb-2 sm:mb-3 text-sm font-semibold text-gray-800">
-                    Select photo
-                  </p>
+              <div className="flex flex-col gap-4 sm:gap-5 min-w-0">
+                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm min-w-0">
+                  <div className="mb-2 sm:mb-3 flex items-center justify-between">
+                    <p className="text-sm font-semibold text-gray-800">
+                      Select photo
+                    </p>
+                    <div className="flex items-center gap-1 text-xs font-medium text-gray-500 sm:hidden animate-pulse">
+                      <span>Swipe</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </div>
+                  </div>
                   <div className="flex gap-2 sm:gap-3 overflow-x-auto p-1 pb-2">
                     {galleryImages.map((imageUrl, imageIndex) => (
                       <button
@@ -673,7 +679,7 @@ const OwnerTruckDescription: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
+                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm min-w-0">
                   <div className="mb-3 sm:mb-4">
                     <p className="text-sm font-semibold text-gray-800">
                       More Photos ({galleryImages.length})
