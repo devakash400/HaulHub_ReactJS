@@ -86,7 +86,13 @@ const Wishlist: React.FC = () => {
   const hasItems = validItems.length > 0;
 
   return (
-    <div className="min-h-screen bg-[#F8F7F3]">
+    <div 
+      className="min-h-screen bg-[#F8F7F3] w-full min-w-0 overflow-x-hidden"
+      style={{
+        boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)",
+        marginBottom: "10px",
+      }}
+    >
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 py-8">
         {/* Header */}
         <div className="mb-14">
