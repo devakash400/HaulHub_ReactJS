@@ -16,8 +16,11 @@ import {
   phoneLogin as phoneLoginApi,
   checkEmail as checkEmailApi,
   checkPhone as checkPhoneApi,
+  googleSso as googleSsoApi,
 } from "../../../api/authApi.ts";
 import { toast } from "react-toastify";
+import axios from "axios";
+import { useGoogleLogin } from "@react-oauth/google";
 import { DEFAULT_COUNTRY_CODE } from "../../../app/defaults.ts";
 
 type LoginModalProps = {
@@ -171,6 +174,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [emailError, setEmailError] = useState<string | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [isCheckingReset, setIsCheckingReset] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // Reset flow
   const [resetPhone, setResetPhone] = useState("");
@@ -609,6 +613,75 @@ const LoginModal: React.FC<LoginModalProps> = ({
       },
     });
   };
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setIsGoogleLoading(true);
+        const userInfo = await axios.get(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+          }
+        );
+
+        const googleUser = userInfo.data;
+        
+        const payload = {
+          subId: googleUser.sub,
+          type: "google" as const,
+          email: googleUser.email,
+          firstName: googleUser.given_name || "",
+          lastName: googleUser.family_name || "",
+          photo: googleUser.picture || "",
+          role: loginTrailor.toLowerCase() as "renter" | "owner",
+        };
+
+        const res = await googleSsoApi(payload);
+
+        console.log("the raw response from google", res)
+
+        if (res.success && res.data) {
+          const { user } = res.data;
+          dispatch(
+            loginSuccess({
+              user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                profilePicture: payload.photo,
+                trailor: loginTrailor,
+              },
+              accessToken: res.data.accessToken,
+              refreshToken: res.data.refreshToken,
+              userType: loginTrailor,
+            })
+          );
+
+          toast.success("Logged in successfully");
+          
+          if (res.data.isNewLoggedIn) {
+            navigate("/edit-profile");
+            onClose(); // Close the modal since we are redirecting
+          } else {
+            onSuccess();
+          }
+        } else {
+          toast.error("Failed to authenticate with Google. Please try again.");
+        }
+      } catch (err: any) {
+        const msg = getApiErrorMessage(err) || "Google authentication failed.";
+        toast.error(msg);
+      } finally {
+        setIsGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      setIsGoogleLoading(false);
+      toast.error("Google login failed. Please try again.");
+    },
+  });
 
   /** Static forgot-password flow â€” no API; Continue opens OTP step. */
   // const handleResetContinue = () => {
@@ -1105,20 +1178,28 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
               <button
                 type="button"
-                className="w-full mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
+                onClick={() => handleGoogleLogin()}
+                disabled={isGoogleLoading}
+                className={`w-full mb-3 flex items-center justify-center gap-3 transition-colors ${
+                  isGoogleLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer hover:border-[#389131]"
+                }`}
                 style={{
                   height: "40px",
                   background: "#FFFFFF",
                   border: "1px solid #000000",
                   borderRadius: "5px",
-                  opacity: 1,
+                  opacity: isGoogleLoading ? 0.7 : 1,
                 }}
               >
-                <img
-                  src={images.Google}
-                  alt="Google"
-                  className="w-[22px] h-[22px] object-contain"
-                />
+                {isGoogleLoading ? (
+                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <img
+                    src={images.Google}
+                    alt="Google"
+                    className="w-[22px] h-[22px] object-contain"
+                  />
+                )}
                 <span
                   style={{
                     fontFamily: "Lexend",
@@ -1131,7 +1212,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     color: "#000000",
                   }}
                 >
-                  Continue with Google
+                  {isGoogleLoading ? "Connecting..." : "Continue with Google"}
                 </span>
               </button>
               <button

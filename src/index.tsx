@@ -3,20 +3,25 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
-// @ts-expect-error CSS import
 import "react-toastify/dist/ReactToastify.css";
-// @ts-expect-error CSS import
 import "./index.css";
 import App from "./App.tsx";
 
 import reportWebVitals from "./reportWebVitals";
 import { store } from "./store/index.ts";
 import { loadTokensFromStorage, clearTokens } from "./api/api.ts";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { logout, initFromToken } from "./store/authSlice.ts";
 import {
   resetSessionExpiredGuard,
   setSessionExpiredHandler,
 } from "./api/sessionExpired.ts";
+
+declare const process: {
+  env: {
+    REACT_APP_GOOGLE_CLIENT_ID?: string;
+  };
+};
 
 const rootElement = document.getElementById("root");
 
@@ -50,25 +55,29 @@ store.subscribe(() => {
 
 const root = ReactDOM.createRoot(rootElement);
 
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID";
+
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <>
-          <App />
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            pauseOnHover
-            draggable
-            theme="colored"
-          />
-        </>
-      </BrowserRouter>
-    </Provider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <Provider store={store}>
+        <BrowserRouter>
+          <>
+            <App />
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              pauseOnHover
+              draggable
+              theme="colored"
+            />
+          </>
+        </BrowserRouter>
+      </Provider>
+    </GoogleOAuthProvider>
   </React.StrictMode>,
 );
 
