@@ -13,6 +13,16 @@ export type PhoneLoginPayload = {
   trailor: "Renter" | "Owner";
 };
 
+export type GoogleSsoPayload = {
+  subId: string;
+  type: "google";
+  email: string;
+  firstName: string;
+  lastName: string;
+  photo: string;
+  role: "renter" | "owner";
+};
+
 /** Maps UI category string to API role (`owner` | `renter`). */
 export const stringToRole = (value: string): "owner" | "renter" => {
   const v = value.trim().toLowerCase();
@@ -96,6 +106,26 @@ export type LoginResponse = {
   user: BackendLoginResponse["data"]["user"];
 };
 
+export type SsoResponse = {
+  success: boolean;
+  data: {
+    user: {
+      id: string;
+      email: string;
+      phoneNumber: string;
+      fullName: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      [key: string]: unknown;
+    };
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: string;
+    isNewLoggedIn: boolean;
+  };
+};
+
 export const login = async (payload: LoginPayload): Promise<LoginResponse> => {
   const res = await api.post<BackendLoginResponse>("/api/auth/login", {
     email: payload.email,
@@ -142,6 +172,21 @@ export const phoneLogin = async (
     expiresIn,
     user,
   };
+};
+
+export const googleSso = async (
+  payload: GoogleSsoPayload
+): Promise<SsoResponse> => {
+  const res = await api.post<SsoResponse>("/api/auth/sso", payload);
+
+  const { success, data } = res.data;
+
+  if (success && data?.accessToken && data?.refreshToken) {
+    setTokens(data.accessToken, data.refreshToken);
+    resetSessionExpiredGuard();
+  }
+
+  return res.data;
 };
 
 export const register = async (

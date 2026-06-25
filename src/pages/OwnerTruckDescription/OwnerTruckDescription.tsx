@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import {
   getTrailerById,
@@ -13,7 +13,7 @@ import {
   updateTrailer,
 } from "../../api/trailersApi.ts";
 import { toast } from "react-toastify";
-import { X } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 
 type BookingStatus = "Upcoming" | "Ongoing" | "Completed";
 
@@ -88,6 +88,10 @@ const OwnerTruckDescription: React.FC = () => {
     null,
   );
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollMax, setScrollMax] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
   useEffect(() => {
     let cancelled = false;
     if (!id) {
@@ -143,6 +147,36 @@ const OwnerTruckDescription: React.FC = () => {
       cancelled = true;
     };
   }, [id, isNumericId, parsedId]);
+
+  useEffect(() => {
+    const updateScrollMax = () => {
+      if (scrollContainerRef.current) {
+        const { scrollWidth, clientWidth } = scrollContainerRef.current;
+        setScrollMax(scrollWidth - clientWidth);
+      }
+    };
+    // Give table time to render layout
+    const timeout = setTimeout(updateScrollMax, 100);
+    window.addEventListener("resize", updateScrollMax);
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("resize", updateScrollMax);
+    };
+  }, [trailer]);
+
+  const handleTableScroll = () => {
+    if (scrollContainerRef.current) {
+      setScrollLeft(scrollContainerRef.current.scrollLeft);
+    }
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    setScrollLeft(val);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = val;
+    }
+  };
 
   const earnings = useMemo(() => {
     return {
@@ -454,33 +488,43 @@ const OwnerTruckDescription: React.FC = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div 
+            className="overflow-x-auto pb-2 w-full scrollbar-hide" 
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: "touch" }}
+            ref={scrollContainerRef}
+            onScroll={handleTableScroll}
+          >
+            <style>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                  display: none;
+              }
+            `}</style>
             <table className="min-w-full border-separate border-spacing-y-2">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
-                  <th className="px-3 py-2">Booking ID</th>
-                  <th className="px-3 py-2">Renter</th>
-                  <th className="px-3 py-2">Dates</th>
-                  <th className="px-3 py-2">Amount</th>
-                  <th className="px-3 py-2">Status</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Booking ID</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Renter</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Dates</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Amount</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {demoBookings.map((booking) => (
                   <tr key={booking.id} className="bg-[#F9FAFB]">
-                    <td className="rounded-l-lg px-3 py-3 text-sm font-medium text-gray-900">
+                    <td className="rounded-l-lg px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                       {booking.id}
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-700">
+                    <td className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
                       {booking.renterName}
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-700">
+                    <td className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
                       {booking.dates}
                     </td>
-                    <td className="px-3 py-3 text-sm font-medium text-gray-900">
+                    <td className="px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                       {booking.amount}
                     </td>
-                    <td className="rounded-r-lg px-3 py-3">
+                    <td className="rounded-r-lg px-3 py-3 whitespace-nowrap">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
                           statusClassMap[booking.status]
@@ -494,6 +538,19 @@ const OwnerTruckDescription: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {scrollMax > 0 && (
+            <div className="mt-1 sm:hidden w-full px-1 flex flex-col gap-1 relative z-20">
+              <input 
+                type="range" 
+                min="0" 
+                max={scrollMax} 
+                value={scrollLeft} 
+                onChange={handleSliderChange}
+                className="custom-scrollbar-range"
+              />
+            </div>
+          )}
         </section>
       </div>
 
@@ -616,7 +673,7 @@ const OwnerTruckDescription: React.FC = () => {
         }`}
       >
         <div
-          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] ${
+          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] min-w-0 ${
             isPhotosOpen
               ? "translate-y-0 sm:scale-100 opacity-100"
               : "translate-y-full sm:translate-y-6 scale-100 sm:scale-95 opacity-0"
@@ -636,8 +693,8 @@ const OwnerTruckDescription: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-            <div className="grid gap-4 sm:gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-w-0">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-[420px_minmax(0,1fr)] min-w-0">
               <div className="mx-auto h-[200px] sm:h-[400px] w-full max-w-[420px] shrink-0 overflow-hidden rounded-2xl sm:rounded-[32px] border border-gray-200 bg-[#F8FAFC]">
                 <img
                   src={galleryImages[selectedPhotoIndex] || trailer.images[0]}
@@ -646,11 +703,17 @@ const OwnerTruckDescription: React.FC = () => {
                 />
               </div>
 
-              <div className="flex flex-col gap-4 sm:gap-5">
-                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
-                  <p className="mb-2 sm:mb-3 text-sm font-semibold text-gray-800">
-                    Select photo
-                  </p>
+              <div className="flex flex-col gap-4 sm:gap-5 min-w-0">
+                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm min-w-0">
+                  <div className="mb-2 sm:mb-3 flex items-center justify-between">
+                    <p className="text-sm font-semibold text-gray-800">
+                      Select photo
+                    </p>
+                    <div className="flex items-center gap-1 text-xs font-medium text-gray-500 sm:hidden animate-pulse">
+                      <span>Swipe</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </div>
+                  </div>
                   <div className="flex gap-2 sm:gap-3 overflow-x-auto p-1 pb-2">
                     {galleryImages.map((imageUrl, imageIndex) => (
                       <button
@@ -673,7 +736,7 @@ const OwnerTruckDescription: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
+                <div className="rounded-2xl sm:rounded-[32px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm min-w-0">
                   <div className="mb-3 sm:mb-4">
                     <p className="text-sm font-semibold text-gray-800">
                       More Photos ({galleryImages.length})

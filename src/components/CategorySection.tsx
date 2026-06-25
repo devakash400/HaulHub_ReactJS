@@ -242,7 +242,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         w-full
         bg-white
         overflow-hidden
-        pt-8
+        pt-6
 
         transition-all
         duration-700
@@ -463,6 +463,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 {/* TEXT */}
                 <div className="pt-3 px-1">
                   <p
+                    className="truncate"
                     style={{
                       fontFamily: "Lexend",
                       fontWeight: 700,
@@ -475,6 +476,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   </p>
 
                   <p
+                    className="truncate"
                     style={{
                       fontFamily: "Lexend",
                       fontWeight: 400,

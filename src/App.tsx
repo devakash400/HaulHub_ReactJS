@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Routes, Route, useLocation, type Location } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate, type Location } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar.tsx";
 import BottomBar from "./components/BottomBar/BottomBar.tsx";
 import Home from "./pages/Dashboard/Home.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
+import EmptyState from "./components/common/EmptyState.tsx";
 // Auth flows are now handled via in-place modals; no dedicated auth routes
 import About from "./pages/About/About.tsx";
 import Contact from "./pages/Contact/Contact.tsx";
@@ -54,6 +55,7 @@ type LocationState = {
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,
   );
@@ -161,6 +163,23 @@ const App: React.FC = () => {
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route
+            path="*"
+            element={
+              <div className="h-full w-full flex justify-center bg-[#F9F8F3] px-4 py-10">
+                <div className="w-full max-w-5xl md:w-[80%] bg-white rounded-2xl shadow-md border border-gray-200 p-6 sm:p-8">
+                  <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+                    Page Not Found
+                  </h1>
+                  <EmptyState
+                    line="The page you are looking for does not exist or has been moved."
+                    actionLabel="Go to Homepage"
+                    onAction={() => navigate("/")}
+                  />
+                </div>
+              </div>
+            }
+          />
         </Routes>
         {state?.backgroundLocation && (
           <Routes>
