@@ -284,6 +284,7 @@ const Navbar: React.FC = () => {
                   to="/profile"
                   onClick={closeDrawer}
                   className="flex w-[41px] h-[41px] rounded-[20.5px] overflow-hidden bg-[#585858] text-white font-['Myriad_Pro'] font-normal text-[32px] leading-[100%] tracking-[0em] items-center justify-center no-underline hover:opacity-90 focus-visible:outline-none"
+                  title="Profile"
                   aria-label={
                     user?.firstName
                       ? `Profile: ${user.firstName}`
@@ -311,6 +312,7 @@ const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={toggleDrawer}
+                  title="Menu"
                   aria-label="Open menu"
                   aria-expanded={isDrawerOpen}
                   aria-haspopup="true"
@@ -326,6 +328,7 @@ const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={toggleDrawer}
+                title="Menu"
                 aria-label="Toggle navigation dropdown"
                 className="inline-flex cursor-pointer items-center justify-center rounded-full border-0 p-2"
               >
