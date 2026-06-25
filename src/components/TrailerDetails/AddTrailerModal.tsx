@@ -789,7 +789,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
                 )}
               </div> */}
 
-              <div>
+              <div className="col-span-2">
                 <label className={fieldLabelClass}>Trailer Picture <span className="text-red-500">*</span></label>
 
                 <input

@@ -56,14 +56,14 @@ const RevealBlock: React.FC<RevealBlockProps> = ({ children, delayMs = 0 }) => {
 };
 
 const LoadingCategorySection: React.FC<{ title: string }> = ({ title }) => (
-  <section aria-label={title} className="w-full bg-white pt-8">
+  <section aria-label={title} className="w-full bg-white pt-6">
     <div className="w-full px-[16px] sm:px-[24px] md:px-[40px]">
       <div className="mb-5 flex items-center justify-between">
         <div className="h-[32px] w-52 rounded-full bg-[#E5E7EB] animate-pulse" />
         <div className="hidden md:block h-9 w-28 rounded-full bg-[#E5E7EB] animate-pulse" />
       </div>
 
-      <div className="flex overflow-x-auto gap-4 pb-5 no-scrollbar">
+      <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`${title}-skeleton-${index}`}
