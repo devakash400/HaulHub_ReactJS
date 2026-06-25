@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import {
   getTrailerById,
@@ -88,6 +88,10 @@ const OwnerTruckDescription: React.FC = () => {
     null,
   );
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollMax, setScrollMax] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
   useEffect(() => {
     let cancelled = false;
     if (!id) {
@@ -143,6 +147,36 @@ const OwnerTruckDescription: React.FC = () => {
       cancelled = true;
     };
   }, [id, isNumericId, parsedId]);
+
+  useEffect(() => {
+    const updateScrollMax = () => {
+      if (scrollContainerRef.current) {
+        const { scrollWidth, clientWidth } = scrollContainerRef.current;
+        setScrollMax(scrollWidth - clientWidth);
+      }
+    };
+    // Give table time to render layout
+    const timeout = setTimeout(updateScrollMax, 100);
+    window.addEventListener("resize", updateScrollMax);
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("resize", updateScrollMax);
+    };
+  }, [trailer]);
+
+  const handleTableScroll = () => {
+    if (scrollContainerRef.current) {
+      setScrollLeft(scrollContainerRef.current.scrollLeft);
+    }
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    setScrollLeft(val);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = val;
+    }
+  };
 
   const earnings = useMemo(() => {
     return {
@@ -454,7 +488,17 @@ const OwnerTruckDescription: React.FC = () => {
             </button>
           </div>
 
-          <div className="overflow-x-scroll custom-horizontal-scrollbar pb-2 relative z-10 w-full" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div 
+            className="overflow-x-auto pb-2 w-full scrollbar-hide" 
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: "touch" }}
+            ref={scrollContainerRef}
+            onScroll={handleTableScroll}
+          >
+            <style>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                  display: none;
+              }
+            `}</style>
             <table className="min-w-full border-separate border-spacing-y-2">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
@@ -494,6 +538,19 @@ const OwnerTruckDescription: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {scrollMax > 0 && (
+            <div className="mt-1 sm:hidden w-full px-1 flex flex-col gap-1 relative z-20">
+              <input 
+                type="range" 
+                min="0" 
+                max={scrollMax} 
+                value={scrollLeft} 
+                onChange={handleSliderChange}
+                className="custom-scrollbar-range"
+              />
+            </div>
+          )}
         </section>
       </div>
 
