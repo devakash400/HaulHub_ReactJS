@@ -834,6 +834,38 @@ const LoginModal: React.FC<LoginModalProps> = ({
         >
           {step === "email" && (
             <div>
+              {/* Role Tabs */}
+              <div className="flex bg-[#EFEFEF] p-1.5 rounded-[10px] mb-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginTrailor("Owner");
+                    setLoginError(null);
+                  }}
+                  className={`flex-1 py-2 text-center text-[15px] font-['Lexend'] font-medium rounded-[8px] transition-all duration-200 ${
+                    loginTrailor === "Owner"
+                      ? "bg-[#389131] text-white shadow-sm"
+                      : "bg-transparent text-[#7C7C7C] hover:text-black"
+                  }`}
+                >
+                  Owner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginTrailor("Renter");
+                    setLoginError(null);
+                  }}
+                  className={`flex-1 py-2 text-center text-[15px] font-['Lexend'] font-medium rounded-[8px] transition-all duration-200 ${
+                    loginTrailor === "Renter"
+                      ? "bg-[#389131] text-white shadow-sm"
+                      : "bg-transparent text-[#7C7C7C] hover:text-black"
+                  }`}
+                >
+                  Renter
+                </button>
+              </div>
+
               <label
                 className="block mb-2 font-['Lexend']
               font-normal text-[14px] leading-[100%]
@@ -939,7 +971,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <p className="mt-2 text-xs text-red-600">{emailError}</p>
               )}
 
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <label
                   className="block mb-2 text-black"
                   style={{
@@ -954,7 +986,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 </label>
 
                 <div className="relative w-full max-w-full overflow-hidden rounded-[5px] overflow-visible">
-                  {/* Desktop Native Select */}
                   <select
                     value={loginTrailor}
                     onChange={(e) => {
@@ -986,7 +1017,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     <ChevronDown className="w-4 h-4" aria-hidden />
                   </span>
 
-                  {/* Mobile Custom Dropdown */}
                   <div 
                     className="md:hidden relative w-full"
                     tabIndex={0}
@@ -1042,7 +1072,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                     )}
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <button
                 type="button"
