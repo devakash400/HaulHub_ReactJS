@@ -454,33 +454,33 @@ const OwnerTruckDescription: React.FC = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-scroll custom-horizontal-scrollbar pb-2 relative z-10 w-full" style={{ WebkitOverflowScrolling: "touch" }}>
             <table className="min-w-full border-separate border-spacing-y-2">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
-                  <th className="px-3 py-2">Booking ID</th>
-                  <th className="px-3 py-2">Renter</th>
-                  <th className="px-3 py-2">Dates</th>
-                  <th className="px-3 py-2">Amount</th>
-                  <th className="px-3 py-2">Status</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Booking ID</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Renter</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Dates</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Amount</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {demoBookings.map((booking) => (
                   <tr key={booking.id} className="bg-[#F9FAFB]">
-                    <td className="rounded-l-lg px-3 py-3 text-sm font-medium text-gray-900">
+                    <td className="rounded-l-lg px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                       {booking.id}
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-700">
+                    <td className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
                       {booking.renterName}
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-700">
+                    <td className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
                       {booking.dates}
                     </td>
-                    <td className="px-3 py-3 text-sm font-medium text-gray-900">
+                    <td className="px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                       {booking.amount}
                     </td>
-                    <td className="rounded-r-lg px-3 py-3">
+                    <td className="rounded-r-lg px-3 py-3 whitespace-nowrap">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
                           statusClassMap[booking.status]
