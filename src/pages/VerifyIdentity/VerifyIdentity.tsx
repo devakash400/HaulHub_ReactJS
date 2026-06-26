@@ -247,6 +247,11 @@ const VerifyIdentity: React.FC = () => {
                   setDrivingLicense(null);
                   return;
                 }
+                if (passport && file.name === passport.name) {
+                  toast.error("Cannot upload the same file for both fields.");
+                  e.target.value = "";
+                  return;
+                }
               }
               setDrivingLicense(file ?? null);
             }}
@@ -257,7 +262,17 @@ const VerifyIdentity: React.FC = () => {
             type="file"
             accept="image/*,application/pdf"
             className="hidden"
-            onChange={(e) => setPassport(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                if (drivingLicense && file.name === drivingLicense.name) {
+                  toast.error("Cannot upload the same file for both fields.");
+                  e.target.value = "";
+                  return;
+                }
+              }
+              setPassport(file ?? null);
+            }}
           />
 
           {/* Methods */}
