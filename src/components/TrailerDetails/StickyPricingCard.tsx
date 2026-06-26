@@ -440,7 +440,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 </p>
                 <div className="relative w-full">
                   <div 
-                    className={`absolute z-10 inset-y-0 left-0 w-full flex items-center text-[14px] mt-1 ${hasBookingStatus ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    className={`absolute z-10 inset-y-0 left-0 w-full flex items-center justify-between gap-1 text-[14px] mt-1 pr-1 ${hasBookingStatus ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                     onClick={(e) => {
                       if (hasBookingStatus) return;
                       e.preventDefault();
@@ -451,13 +451,13 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                       }
                     }}
                   >
-                    <span className={hasBookingStatus ? "text-[#8C8C8C] opacity-50" : "text-[#8C8C8C]"}>
+                    <span className={hasBookingStatus ? "text-[#8C8C8C] opacity-50 truncate" : "text-[#8C8C8C] truncate"}>
                       {checkIn ? formatUserDate(checkIn) : <span className="opacity-80 lowercase">dd-mm-yyyy</span>}
                     </span>
                     <img
                       src={calendarIcon}
                       alt="Calendar"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                      className="w-5 h-5 shrink-0 pointer-events-none"
                     />
                   </div>
                   <input
@@ -501,7 +501,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 </p>
                 <div className="relative w-full">
                   <div 
-                    className={`absolute z-10 inset-y-0 left-0 w-full flex items-center text-[14px] mt-1 ${hasBookingStatus || !checkIn ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    className={`absolute z-10 inset-y-0 left-0 w-full flex items-center justify-between gap-1 text-[14px] mt-1 pr-1 ${hasBookingStatus || !checkIn ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                     onClick={(e) => {
                       if (hasBookingStatus || !checkIn) return;
                       e.preventDefault();
@@ -512,13 +512,13 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                       }
                     }}
                   >
-                    <span className={hasBookingStatus || !checkIn ? "text-[#8C8C8C] opacity-50" : "text-[#8C8C8C]"}>
+                    <span className={hasBookingStatus || !checkIn ? "text-[#8C8C8C] opacity-50 truncate" : "text-[#8C8C8C] truncate"}>
                       {checkOut ? formatUserDate(checkOut) : <span className="opacity-80 lowercase">dd-mm-yyyy</span>}
                     </span>
                     <img
                       src={calendarIcon}
                       alt="Calendar"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                      className="w-5 h-5 shrink-0 pointer-events-none"
                     />
                   </div>
                   <input
