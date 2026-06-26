@@ -198,7 +198,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   return (
     <div
       ref={ref}
-      className="relative flex items-center h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 gap-2 focus-within:border-[#4A9B3D] focus-within:ring-2 focus-within:ring-[#4A9B3D]/20 transition-all"
+      className={`relative flex items-center h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 gap-2 focus-within:border-[#4A9B3D] focus-within:ring-2 focus-within:ring-[#4A9B3D]/20 transition-all ${open ? 'z-50' : ''}`}
     >
       {/* Flag + dial code button */}
       <button
@@ -207,7 +207,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
           setSearch("");
           setOpen((p) => !p);
         }}
-        className="flex items-center gap-1.5 shrink-0 py-1 outline-none"
+        className="flex items-center gap-1 lg:gap-1.5 shrink-0 py-1 outline-none"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -215,15 +215,15 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
           code={country.code}
           url={country.flagUrl}
           alt={country.name}
-          className="w-[24px] h-[16px] object-cover rounded-[2px] shrink-0"
+          className="w-[20px] h-[14px] lg:w-[24px] lg:h-[16px] object-cover rounded-[2px] shrink-0"
         />
-        <span className="text-[14px] text-[#344054] font-medium whitespace-nowrap">
+        <span className="text-[13px] lg:text-[14px] text-[#344054] font-medium whitespace-nowrap">
           {country.dialCode}
         </span>
         <ChevronDown className="w-3.5 h-3.5 text-[#667085]" />
       </button>
 
-      <div className="w-px h-6 bg-[#D0D5DD] shrink-0" />
+      <div className="w-px h-5 lg:h-6 bg-[#D0D5DD] shrink-0" />
 
       <input
         id={id}
@@ -231,7 +231,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         value={local}
         onChange={(e) => onLocalChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-transparent outline-none text-[15px] text-[#101828] placeholder:text-[#98A2B3] font-normal"
+        className="flex-1 bg-transparent outline-none text-[14px] lg:text-[15px] text-[#101828] placeholder:text-[#98A2B3] font-normal min-w-0"
       />
 
       {/* Dropdown */}
@@ -292,7 +292,7 @@ const FieldLabel: React.FC<{
 }> = ({ htmlFor, required, children }) => (
   <label
     htmlFor={htmlFor}
-    className="block text-[14px] font-semibold text-[#101828] mb-1.5"
+    className="block text-[13px] lg:text-[14px] font-semibold text-[#101828] mb-1 lg:mb-1.5"
   >
     {children}
     {required && <span className="text-red-500 ml-0.5">*</span>}
@@ -306,7 +306,7 @@ const TextInput: React.FC<
 > = (props) => (
   <input
     {...props}
-    className={`w-full h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 text-[15px] text-[#101828] placeholder:text-[#98A2B3] outline-none transition-all focus:border-[#4A9B3D] focus:ring-2 focus:ring-[#4A9B3D]/20 ${props.className ?? ""}`}
+    className={`w-full h-[48px] lg:h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-3 lg:px-4 text-[14px] lg:text-[15px] text-[#101828] placeholder:text-[#98A2B3] outline-none transition-all focus:border-[#4A9B3D] focus:ring-2 focus:ring-[#4A9B3D]/20 ${props.className ?? ""}`}
   />
 );
 
@@ -587,20 +587,20 @@ const EditProfile: React.FC = () => {
 
   /* ── render ── */
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[#F9FAFB]">
+    <div className="min-h-screen w-full bg-[#F9FAFB] relative z-20 pb-20">
       {/* ── Page header ── */}
-      <div className="w-full bg-white border-b border-[#E4E7EC] px-8 py-5 flex items-center gap-4">
+      <div className="w-full bg-white border-b border-[#E4E7EC] px-4 sm:px-6 lg:px-8 py-4 lg:py-5 flex items-center gap-3 lg:gap-4">
         <button
           type="button"
           onClick={() => setShowCancelModal(true)}
-          className="flex items-center gap-1.5 text-[#667085] hover:text-[#344054] transition-colors"
+          className="flex items-center gap-1 lg:gap-1.5 text-[#667085] hover:text-[#344054] transition-colors"
           aria-label="Go back"
         >
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-[14px] font-medium">Back</span>
+          <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5" />
+          <span className="text-[13px] lg:text-[14px] font-medium">Back</span>
         </button>
-        <div className="w-px h-5 bg-[#E4E7EC]" />
-        <h1 className="text-[28px] leading-[100%] font-semibold text-[#101828] font-['Lexend']">
+        <div className="w-px h-4 lg:h-5 bg-[#E4E7EC]" />
+        <h1 className="text-[20px] sm:text-[24px] lg:text-[28px] leading-[100%] font-semibold text-[#101828] font-['Lexend']">
           Edit Profile
         </h1>
       </div>
@@ -610,15 +610,15 @@ const EditProfile: React.FC = () => {
           <div className="w-10 h-10 border-4 border-[#4A9B3D] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="w-full max-w-[1200px] mx-auto px-8 py-10">
-          <div className="flex flex-col gap-10 items-center">
+        <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+          <div className="flex flex-col gap-8 lg:gap-10 items-center">
 
             {/* ══ TOP PANEL — Avatar + quick info ══ */}
-            <aside className="w-full max-w-[480px] shrink-0">
-              <div className="flex flex-col items-center gap-5">
+            <aside className="w-full max-w-full lg:max-w-[480px] shrink-0">
+              <div className="flex flex-col items-center gap-4 lg:gap-5">
 
                 {/* Avatar */}
-                <div className="relative w-[140px] h-[140px]">
+                <div className="relative w-[110px] h-[110px] sm:w-[120px] sm:h-[120px] lg:w-[140px] lg:h-[140px]">
                   <div className="w-full h-full rounded-full bg-[#E6EEF5] shadow-md overflow-hidden flex items-center justify-center relative">
                     {hasProfilePicture && !imgLoaded && !imgError && (
                       <div className="absolute inset-0 flex items-center justify-center bg-gray-100/60">
@@ -680,17 +680,17 @@ const EditProfile: React.FC = () => {
 
                 {/* Display name */}
                 {displayName && (
-                  <p className="text-[20px] font-semibold text-[#101828] text-center leading-tight font-['Lexend'] break-words px-4 w-full">
+                  <p className="text-[18px] lg:text-[20px] font-semibold text-[#101828] text-center leading-tight font-['Lexend'] break-words px-4 w-full">
                     {displayName}
                   </p>
                 )}
                 {email && (
-                  <p className="text-[13px] text-[#667085] text-center -mt-2 truncate max-w-full">
+                  <p className="text-[12px] lg:text-[13px] text-[#667085] text-center -mt-1 lg:-mt-2 truncate max-w-full">
                     {email}
                   </p>
                 )}
 
-                <p className="text-[12px] text-[#98A2B3] text-center leading-relaxed">
+                <p className="text-[11px] lg:text-[12px] text-[#98A2B3] text-center leading-relaxed px-4">
                   Click the camera icon to update your profile photo
                 </p>
               </div>
@@ -701,9 +701,9 @@ const EditProfile: React.FC = () => {
 
             {/* ══ BOTTOM PANEL — Form ══ */}
             <main className="w-full">
-              <div className="bg-white rounded-2xl border border-[#E4E7EC] shadow-[0_1px_4px_rgba(16,24,40,0.06)] p-8">
+              <div className="bg-white rounded-2xl border border-[#E4E7EC] shadow-[0_1px_4px_rgba(16,24,40,0.06)] p-5 sm:p-6 lg:p-8">
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
                     {/* First Name */}
                     <div className="col-span-1 lg:col-span-1">
                       <FieldLabel htmlFor="ep-firstName" required>First Name</FieldLabel>
@@ -731,7 +731,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Email */}
-                    <div className="col-span-2 lg:col-span-2">
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-2">
                       <FieldLabel htmlFor="ep-email" required>Email</FieldLabel>
                       <TextInput
                         id="ep-email"
@@ -741,13 +741,13 @@ const EditProfile: React.FC = () => {
                         placeholder="rohittalreja104@gmail.com"
                         autoComplete="email"
                       />
-                      <p className="mt-1.5 text-[12px] text-[#667085]">
+                      <p className="mt-1 lg:mt-1.5 text-[11px] lg:text-[12px] text-[#667085]">
                         We'll email you a reservation confirmation.
                       </p>
                     </div>
 
                     {/* Phone Number */}
-                    <div className="col-span-2 lg:col-span-2">
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-2">
                       <FieldLabel htmlFor="ep-phone" required>Phone Number</FieldLabel>
                       <PhoneInput
                         id="ep-phone"
@@ -760,7 +760,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Date of Birth */}
-                    <div className="col-span-2 lg:col-span-2">
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-2">
                       <FieldLabel htmlFor="ep-dob" required>Date of birth</FieldLabel>
                       <div className="relative">
                         <TextInput
@@ -775,7 +775,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Address */}
-                    <div className="col-span-2 lg:col-span-4">
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-4">
                       <FieldLabel htmlFor="ep-address" required>Address</FieldLabel>
                       <TextInput
                         id="ep-address"
@@ -788,13 +788,13 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Country dropdown */}
-                    <div ref={countryDropRef} className="col-span-2 lg:col-span-2">
+                    <div ref={countryDropRef} className="col-span-1 sm:col-span-2 lg:col-span-2">
                       <FieldLabel required>Country</FieldLabel>
-                      <div className="relative">
+                      <div className={`relative ${countryOpen ? 'z-50' : ''}`}>
                         <button
                           type="button"
                           onClick={() => { setCountrySearch(""); setCountryOpen((p) => !p); }}
-                          className="w-full h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 flex items-center gap-3 text-left outline-none transition-all focus:border-[#4A9B3D] focus:ring-2 focus:ring-[#4A9B3D]/20 hover:border-[#98A2B3]"
+                          className="w-full h-[48px] lg:h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-3 lg:px-4 flex items-center gap-2 lg:gap-3 text-left outline-none transition-all focus:border-[#4A9B3D] focus:ring-2 focus:ring-[#4A9B3D]/20 hover:border-[#98A2B3]"
                           aria-haspopup="listbox"
                           aria-expanded={countryOpen}
                         >
@@ -802,9 +802,9 @@ const EditProfile: React.FC = () => {
                             code={selectedCountry.code}
                             url={selectedCountry.flagUrl}
                             alt={selectedCountry.name}
-                            className="w-[24px] h-[16px] object-cover rounded-[2px] shrink-0"
+                            className="w-[20px] h-[14px] lg:w-[24px] lg:h-[16px] object-cover rounded-[2px] shrink-0"
                           />
-                          <span className="flex-1 text-[15px] text-[#101828] truncate">
+                          <span className="flex-1 text-[14px] lg:text-[15px] text-[#101828] truncate">
                             {selectedCountry.name}
                           </span>
                           <ChevronDown className={`w-4 h-4 text-[#667085] transition-transform ${countryOpen ? "rotate-180" : ""}`} />
@@ -847,7 +847,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* City */}
-                    <div className="col-span-2 lg:col-span-1">
+                    <div className="col-span-1 lg:col-span-1">
                       <FieldLabel htmlFor="ep-city" required>City</FieldLabel>
                       <TextInput
                         id="ep-city"
@@ -860,7 +860,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Zip Code */}
-                    <div className="col-span-2 lg:col-span-1">
+                    <div className="col-span-1 lg:col-span-1">
                       <FieldLabel htmlFor="ep-zip" required>Zip Code</FieldLabel>
                       <TextInput
                         id="ep-zip"
@@ -873,7 +873,7 @@ const EditProfile: React.FC = () => {
                     </div>
 
                     {/* Emergency Contact */}
-                    <div className="col-span-2 lg:col-span-2">
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-2">
                       <FieldLabel htmlFor="ep-ecPhone">Emergency Contact Number</FieldLabel>
                       <PhoneInput
                         id="ep-ecPhone"
@@ -887,11 +887,11 @@ const EditProfile: React.FC = () => {
                 </div>
 
                 {/* ── Save button ── */}
-                <div className="mt-10 flex items-center justify-end gap-4">
+                <div className="mt-8 lg:mt-10 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4">
                   <button
                     type="button"
                     onClick={() => setShowCancelModal(true)}
-                    className="h-[48px] px-8 rounded-xl border border-[#D0D5DD] text-[15px] font-semibold text-[#344054] bg-white hover:bg-[#F9FAFB] transition-colors"
+                    className="w-full sm:w-auto h-[48px] px-8 rounded-xl border border-[#D0D5DD] text-[14px] lg:text-[15px] font-semibold text-[#344054] bg-white hover:bg-[#F9FAFB] transition-colors"
                   >
                     Cancel
                   </button>
@@ -899,7 +899,7 @@ const EditProfile: React.FC = () => {
                     type="button"
                     onClick={() => void handleSave()}
                     disabled={saving}
-                    className="h-[48px] px-10 rounded-xl bg-[#4A9B3D] text-[15px] font-semibold text-white hover:bg-[#3d8432] active:bg-[#347029] transition-colors disabled:opacity-60 shadow-[0_1px_3px_rgba(74,155,61,0.4)]"
+                    className="w-full sm:w-auto h-[48px] px-10 rounded-xl bg-[#4A9B3D] text-[14px] lg:text-[15px] font-semibold text-white hover:bg-[#3d8432] active:bg-[#347029] transition-colors disabled:opacity-60 shadow-[0_1px_3px_rgba(74,155,61,0.4)] flex items-center justify-center"
                   >
                     {saving ? (
                       <span className="flex items-center gap-2">

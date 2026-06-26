@@ -25,7 +25,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         {line}
       </p>
       {subLine && (
-        <p className="text-xs sm:text-sm text-gray-500 max-w-[280px] leading-relaxed mb-5">
+        <p className="text-xs sm:text-sm text-gray-500 max-w-[280px] leading-relaxed mb-5 whitespace-pre-line">
           {subLine}
         </p>
       )}

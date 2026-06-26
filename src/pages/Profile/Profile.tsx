@@ -266,9 +266,9 @@ const Profile: React.FC = () => {
 
   const menuItems = [
     {
-      label: "Account Setting",
+      label: "Personal Profile",
       icon: Settings,
-      onClick: () => navigate("/account-settings"),
+      onClick: () => navigate("/personal-profile"),
     },
     {
       label: "About US",
@@ -405,7 +405,7 @@ const Profile: React.FC = () => {
               <Camera className="w-5 h-5 text-white" />
             </button> */}
 
-                        <button
+                        {/* <button
               type="button"
               onClick={() => navigate("/edit-profile")}
               disabled={uploadingPhoto}
@@ -427,7 +427,7 @@ const Profile: React.FC = () => {
               /// The button is intentinally
             >
               <Pencil className="w-5 h-5 text-white" />
-            </button>
+            </button> */}
 
             <input
               ref={fileInputRef}

@@ -48,6 +48,7 @@ import { RootState } from "./store/index.ts";
 import { updateUser } from "./store/authSlice.ts";
 import { getUserProfile } from "./api/userApi.ts";
 import SearchResults from "./pages/SearchResults/SearchResults.tsx";
+import PersonalProfile from "./pages/PersonalProfile/PersonalProfile.tsx";
 
 type LocationState = {
   backgroundLocation?: Location;
@@ -122,6 +123,7 @@ const App: React.FC = () => {
             element={<BookingDetails />}
           />
           <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/personal-profile" element={<PersonalProfile />} />
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/about" element={<About />} />
