@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { images } from "../../assets/images/index.ts";
+import EmptyState from "../../components/common/EmptyState.tsx";
 
 type ResultItem = {
   _id?: string;
@@ -69,6 +70,28 @@ const SearchResults: React.FC = () => {
     };
   }, [q]);
 
+  if (!loading && results && results.length === 0) {
+    return (
+      <div className="h-full w-full flex justify-center bg-[#F9F8F3] px-4 py-10 min-h-[calc(100vh-100px)]">
+        <div className="w-full max-w-5xl md:w-[80%] bg-white rounded-2xl shadow-md border border-gray-200 p-6 sm:p-8 h-fit">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+            {q.trim() ? (
+              <>
+                Results for “<span className="text-[#389131]">{q}</span>”
+              </>
+            ) : (
+              "Search Results"
+            )}
+          </h1>
+          <EmptyState
+            line="No trailers found"
+            subLine={"Search tip\n\nUse keywords like flatbed, car hauler, or a location to quickly find matching trailers."}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6">
@@ -123,16 +146,7 @@ const SearchResults: React.FC = () => {
         </div>
       )}
 
-      {!loading && results && results.length === 0 && (
-        <div className="rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-lg font-semibold text-slate-900">
-            No trailers found
-          </p>
-          <p className="mt-2 text-sm text-gray-600">
-            Try another keyword or use a different location.
-          </p>
-        </div>
-      )}
+
 
       {!loading && results && results.length > 0 && (
         <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 list-none p-0">
