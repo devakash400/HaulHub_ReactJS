@@ -457,7 +457,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                     <img
                       src={calendarIcon}
                       alt="Calendar"
-                      className="absolute left-[95px] top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
                     />
                   </div>
                   <input
@@ -518,7 +518,7 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                     <img
                       src={calendarIcon}
                       alt="Calendar"
-                      className="absolute left-[95px] top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
                     />
                   </div>
                   <input
