@@ -101,12 +101,12 @@ const AllTrailerPhotos: React.FC = () => {
 
   return (
 <div className="min-h-screen bg-white w-full min-w-0 overflow-x-hidden shadow-[0px_4px_4px_0px_#00000040] relative z-10">      <header className="top-0     z-40 bg-transparent border-0 shadow-none">
-        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="px-4 sm:px-10 py-4 w-full">
           <div className="flex flex-row flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <Link
                 to={`/trailer/${id}`}
-                className="flex-shrink-0 p-1 -ml-1 rounded-full text-gray-700 hover:bg-gray-100 transition-colors"
+                className="flex-shrink-0 p-1 -ml-2 sm:-ml-3 rounded-full text-gray-700 hover:bg-gray-100 transition-colors"
                 aria-label="Back to trailer"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -156,7 +156,7 @@ const AllTrailerPhotos: React.FC = () => {
       </header>
 
       {/* Photo grid */}
-      <main className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+      <main className="px-4 sm:px-10 py-6 lg:py-8 w-full">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {photos.map((photo) => (
             <button
