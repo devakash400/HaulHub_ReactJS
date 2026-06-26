@@ -248,6 +248,8 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
     if (!zipCode.trim()) {
       newErrors.zipCode = "Zip code is required";
+    } else if (!/^[a-zA-Z0-9\s\-]+$/.test(zipCode.trim())) {
+      newErrors.zipCode = "Invalid zip code format";
     }
 
     if (photoList.length === 0) {
@@ -260,7 +262,10 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0;
+    return {
+      isValid: Object.keys(newErrors).length === 0,
+      errors: newErrors
+    };
   };
 
   const handleBlur = (field: string) => {
@@ -275,8 +280,10 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
-      toast.error("Please fill all required fields");
+    const validation = validate();
+    if (!validation.isValid) {
+      const firstError = Object.values(validation.errors)[0];
+      toast.error(firstError || "Please fill all required fields");
       return;
     }
 
