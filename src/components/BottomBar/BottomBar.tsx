@@ -336,24 +336,36 @@ const BottomBar: React.FC = () => {
                 </li>
               )}
 
-              <li>
-                <Link
-                  to="/why-choose"
-                  className="no-underline text-black transition-colors hover:text-[#389131]"
-                >
-                  Why Choose HaulHub
-                </Link>
-              </li>
-
-              {isOwner && (
+              {!isOwner && (
                 <li>
                   <Link
-                    to="/list-trailer"
+                    to="/why-choose"
                     className="no-underline text-black transition-colors hover:text-[#389131]"
                   >
-                    List Trailer
+                    Why Choose HaulHub
                   </Link>
                 </li>
+              )}
+
+              {isOwner && (
+                <>
+                  <li>
+                    <Link
+                      to="/list-trailer"
+                      className="no-underline text-black transition-colors hover:text-[#389131]"
+                    >
+                      Add Trailer
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/notifications"
+                      className="no-underline text-black transition-colors hover:text-[#389131]"
+                    >
+                      Notification
+                    </Link>
+                  </li>
+                </>
               )}
 
               {isRenter && (
@@ -408,6 +420,17 @@ const BottomBar: React.FC = () => {
             </h3>
 
             <ul className="list-none p-0 m-0 flex flex-col items-start gap-4 sm:gap-[21px] text-[14px] sm:text-[18px] font-normal leading-[100%] tracking-[0%] text-black font-['Lexend']">
+              {isOwner && (
+                <li>
+                  <Link
+                    to="/list-trailer"
+                    className="no-underline text-black transition-colors hover:text-[#389131]"
+                  >
+                    List Trailer
+                  </Link>
+                </li>
+              )}
+
               <li>
                 <Link
                   to="/how-it-works"
