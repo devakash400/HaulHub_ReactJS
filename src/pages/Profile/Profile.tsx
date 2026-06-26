@@ -315,7 +315,13 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-white overflow-x-hidden flex flex-col min-h-[calc(100vh-160px)]">
+    <div 
+      className="w-full bg-white overflow-x-hidden flex flex-col min-h-[calc(100vh-160px)]"
+      style={{
+        boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)",
+        marginBottom: "10px",
+      }}
+    >
       <div className="w-full px-[32px]">
         <header className="pt-6 pb-2">
           <h1 className="text-[42px] leading-[100%] font-medium text-black tracking-[0px] font-['Lexend']">
@@ -505,10 +511,9 @@ const Profile: React.FC = () => {
         />
       </div>
 
-      {/* Divider above footer */}
-      <div className="w-full h-[1px] mt-auto bg-[#E5E5E5]"></div>
     </div>
   );
 };
 
 export default Profile;
+
