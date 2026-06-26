@@ -590,7 +590,7 @@ const BookingDetails: React.FC = () => {
                     <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-xs text-slate-500">Passport</p>
+                          <p className="text-xs text-slate-500">Proof of Insurance</p>
                           <p className="mt-1 text-sm font-semibold text-slate-900">
                             {passportVerified
                               ? "Verified"
