@@ -214,12 +214,20 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
       newErrors.price = "Price is required";
     }
 
+    const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
     if (!availabilityStartDate.trim()) {
       newErrors.availabilityStartDate = "Start date is required";
+    } else if (availabilityStartDate < today) {
+      newErrors.availabilityStartDate = "Start date cannot be in the past";
     }
 
     if (!availabilityEndDate.trim()) {
       newErrors.availabilityEndDate = "End date is required";
+    } else if (availabilityStartDate && availabilityEndDate <= availabilityStartDate) {
+      newErrors.availabilityEndDate = "End date must be after start date";
+    } else if (availabilityEndDate <= today) {
+      newErrors.availabilityEndDate = "End date must be after today";
     }
 
     // if (!profilePhoto?.trim()) {
@@ -240,6 +248,8 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
     if (!zipCode.trim()) {
       newErrors.zipCode = "Zip code is required";
+    } else if (!/^[a-zA-Z0-9\s\-]+$/.test(zipCode.trim())) {
+      newErrors.zipCode = "Invalid zip code format";
     }
 
     if (photoList.length === 0) {
@@ -252,7 +262,10 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0;
+    return {
+      isValid: Object.keys(newErrors).length === 0,
+      errors: newErrors
+    };
   };
 
   const handleBlur = (field: string) => {
@@ -267,8 +280,10 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
-      toast.error("Please fill all required fields");
+    const validation = validate();
+    if (!validation.isValid) {
+      const firstError = Object.values(validation.errors)[0];
+      toast.error(firstError || "Please fill all required fields");
       return;
     }
 
@@ -972,6 +987,7 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
                 <input
                   type="date"
+                  min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}
                   value={availabilityStartDate}
                   onChange={(e) => setAvailabilityStartDate(e.target.value)}
                   onBlur={() => handleBlur("availabilityStartDate")}
@@ -1012,6 +1028,11 @@ export const AddTrailerModal: React.FC<AddTrailerModalProps> = ({
 
                 <input
                   type="date"
+                  min={
+                    availabilityStartDate
+                      ? new Date(new Date(availabilityStartDate).getTime() + 86400000).toISOString().split('T')[0]
+                      : new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000 + 86400000).toISOString().split('T')[0]
+                  }
                   value={availabilityEndDate}
                   onChange={(e) => setAvailabilityEndDate(e.target.value)}
                   onBlur={() => handleBlur("availabilityEndDate")}
