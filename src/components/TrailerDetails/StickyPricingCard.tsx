@@ -49,6 +49,11 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? null : date;
   };
+  const formatUserDate = (value: string): string => {
+    if (!value) return "";
+    const [y, m, d] = value.split("-");
+    return `${d}-${m}-${y}`;
+  };
   const today = new Date().toISOString().split("T")[0];
   const { status: passedStatus, startDate: passedStartDate, endDate: passedEndDate } = location.state || {};
   const hasBookingStatus = !!passedStatus;
@@ -433,8 +438,28 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 >
                   Pick Up Date
                 </p>
-
                 <div className="relative w-full">
+                  <div 
+                    className={`absolute z-10 inset-y-0 left-0 w-full flex items-center text-[14px] mt-1 ${hasBookingStatus ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    onClick={(e) => {
+                      if (hasBookingStatus) return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const input = e.currentTarget.nextElementSibling as HTMLInputElement;
+                      if (input && input.showPicker) {
+                        try { input.showPicker(); } catch (err) {}
+                      }
+                    }}
+                  >
+                    <span className={hasBookingStatus ? "text-[#8C8C8C] opacity-50" : "text-[#8C8C8C]"}>
+                      {checkIn ? formatUserDate(checkIn) : <span className="opacity-80 lowercase">dd-mm-yyyy</span>}
+                    </span>
+                    <img
+                      src={calendarIcon}
+                      alt="Calendar"
+                      className="absolute left-[95px] top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                    />
+                  </div>
                   <input
                     type="date"
                     value={checkIn}
@@ -445,27 +470,17 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                       setValidationError(null);
                     }}
                     className="
-      mt-1
-      w-full
-      bg-transparent
-      text-[14px]
-      text-[#8C8C8C]
-      focus:outline-none
-      appearance-none
-      pr-10
-      [&::-webkit-calendar-picker-indicator]:opacity-0
-      [&::-webkit-calendar-picker-indicator]:absolute
-      [&::-webkit-calendar-picker-indicator]:right-0
-      [&::-webkit-calendar-picker-indicator]:w-full
-      [&::-webkit-calendar-picker-indicator]:h-full
-      [&::-webkit-calendar-picker-indicator]:cursor-pointer
-    "
-                  />
-
-                  <img
-                    src={calendarIcon}
-                    alt="Calendar"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                      mt-1
+                      w-full
+                      bg-transparent
+                      text-[14px]
+                      focus:outline-none
+                      appearance-none
+                      pr-10
+                      opacity-0
+                      pointer-events-none
+                      disabled:cursor-not-allowed
+                    "
                   />
                 </div>
               </div>
@@ -484,8 +499,28 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                 >
                   Return Date
                 </p>
-
                 <div className="relative w-full">
+                  <div 
+                    className={`absolute z-10 inset-y-0 left-0 w-full flex items-center text-[14px] mt-1 ${hasBookingStatus || !checkIn ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    onClick={(e) => {
+                      if (hasBookingStatus || !checkIn) return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const input = e.currentTarget.nextElementSibling as HTMLInputElement;
+                      if (input && input.showPicker) {
+                        try { input.showPicker(); } catch (err) {}
+                      }
+                    }}
+                  >
+                    <span className={hasBookingStatus || !checkIn ? "text-[#8C8C8C] opacity-50" : "text-[#8C8C8C]"}>
+                      {checkOut ? formatUserDate(checkOut) : <span className="opacity-80 lowercase">dd-mm-yyyy</span>}
+                    </span>
+                    <img
+                      src={calendarIcon}
+                      alt="Calendar"
+                      className="absolute left-[95px] top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                    />
+                  </div>
                   <input
                     type="date"
                     value={checkOut}
@@ -496,29 +531,17 @@ export const StickyPricingCard: React.FC<StickyPricingCardProps> = ({
                       setValidationError(null);
                     }}
                     className="
-      mt-1
-      w-full
-      bg-transparent
-      text-[14px]
-      text-[#8C8C8C]
-      focus:outline-none
-      appearance-none
-      pr-10
-      disabled:opacity-50
-      disabled:cursor-not-allowed
-      [&::-webkit-calendar-picker-indicator]:opacity-0
-      [&::-webkit-calendar-picker-indicator]:absolute
-      [&::-webkit-calendar-picker-indicator]:right-0
-      [&::-webkit-calendar-picker-indicator]:w-full
-      [&::-webkit-calendar-picker-indicator]:h-full
-      [&::-webkit-calendar-picker-indicator]:cursor-pointer
-    "
-                  />
-
-                  <img
-                    src={calendarIcon}
-                    alt="Calendar"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                      mt-1
+                      w-full
+                      bg-transparent
+                      text-[14px]
+                      focus:outline-none
+                      appearance-none
+                      pr-10
+                      opacity-0
+                      pointer-events-none
+                      disabled:cursor-not-allowed
+                    "
                   />
                 </div>
               </div>
