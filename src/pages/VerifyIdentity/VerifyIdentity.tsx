@@ -237,7 +237,19 @@ const VerifyIdentity: React.FC = () => {
             type="file"
             accept="image/*,application/pdf"
             className="hidden"
-            onChange={(e) => setDrivingLicense(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const fileName = file.name.toLowerCase();
+                if (!fileName.includes("license") && !fileName.includes("licence")) {
+                  toast.error("upload license only");
+                  e.target.value = "";
+                  setDrivingLicense(null);
+                  return;
+                }
+              }
+              setDrivingLicense(file ?? null);
+            }}
           />
 
           <input
