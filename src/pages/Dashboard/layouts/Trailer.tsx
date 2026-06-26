@@ -399,8 +399,8 @@ const Trailer: React.FC = () => {
      w-full min-w-0 overflow-x-hidden scroll-smooth"
     >
       <div
-        className="max-w-container mx-auto px-4 sm:px-6
-       lg:px-10 py-5 lg:py-5 w-full min-w-0"
+        className="px-4 sm:px-10
+       py-5 lg:py-5 w-full min-w-0"
         style={{ paddingBottom: "5px" }}
       >
         <TrailerTitleSection
