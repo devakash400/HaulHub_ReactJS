@@ -198,7 +198,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   return (
     <div
       ref={ref}
-      className="relative flex items-center h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 gap-2 focus-within:border-[#4A9B3D] focus-within:ring-2 focus-within:ring-[#4A9B3D]/20 transition-all"
+      className={`relative flex items-center h-[52px] rounded-xl border border-[#D0D5DD] bg-white px-4 gap-2 focus-within:border-[#4A9B3D] focus-within:ring-2 focus-within:ring-[#4A9B3D]/20 transition-all ${open ? 'z-50' : ''}`}
     >
       {/* Flag + dial code button */}
       <button
@@ -587,7 +587,7 @@ const EditProfile: React.FC = () => {
 
   /* ── render ── */
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[#F9FAFB]">
+    <div className="min-h-screen w-full bg-[#F9FAFB] relative z-20 pb-20">
       {/* ── Page header ── */}
       <div className="w-full bg-white border-b border-[#E4E7EC] px-8 py-5 flex items-center gap-4">
         <button
@@ -790,7 +790,7 @@ const EditProfile: React.FC = () => {
                     {/* Country dropdown */}
                     <div ref={countryDropRef} className="col-span-2 lg:col-span-2">
                       <FieldLabel required>Country</FieldLabel>
-                      <div className="relative">
+                      <div className={`relative ${countryOpen ? 'z-50' : ''}`}>
                         <button
                           type="button"
                           onClick={() => { setCountrySearch(""); setCountryOpen((p) => !p); }}
