@@ -462,7 +462,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             : false;
 
         if (!exists) {
-          const msg = "This email is not registered. Please check or sign up.";
+          const msg = "Either this email is not registered or you selected wrong role. Please check or sign up.";
           setEmailError(msg);
           return;
         }
