@@ -407,21 +407,21 @@ const PreScreening: React.FC = () => {
     stepIndex === 3;
 
   return (
-    <div className="min-h-screen bg-[#F3F7FB]">
+    <div className="min-h-screen bg-[#F3F7FB] max-w-[100vw] overflow-x-hidden">
       <Navbar />
-      <div className="pt-[96px] pb-10">
-        <div className="w-full px-0 py-10">
+      <div className="pt-[96px] pb-10 w-full max-w-[100vw]">
+        <div className="w-full px-3 sm:px-0 py-6 sm:py-10 max-w-full">
           <div
-            className="overflow-hidden rounded-[32px]
+            className="overflow-hidden rounded-2xl sm:rounded-[32px]
 
            shadow-[0_24px_120px_rgba(15,23,42,0.08)]"
           >
-            <div className="bg-white px-6 py-8 sm:px-8 sm:py-10">
+            <div className="bg-white px-4 py-6 sm:px-8 sm:py-10">
               <div className="flex flex-col gap-2">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#1F8A3D]">
                   Pre-Screening
                 </p>
-                <h1 className="text-3xl font-semibold text-slate-900">
+                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">
                   Ready to complete your booking
                 </h1>
                 <p className="max-w-3xl text-sm text-slate-600">
@@ -430,16 +430,16 @@ const PreScreening: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="border-t border-slate-200 bg-slate-50 px-6 py-6 sm:px-8">
-              <div className="flex items-center gap-4 sm:gap-6">
+            <div className="border-t border-slate-200 bg-slate-50 px-4 py-4 sm:px-8 sm:py-6">
+              <div className="flex items-center gap-2 sm:gap-6 overflow-x-auto pb-2 sm:pb-0">
                 {stepDefinitions.map((step, index) => {
                   const completed = index < stepIndex;
                   const current = index === stepIndex;
                   return (
                     <React.Fragment key={step.label}>
-                      <div className="flex flex-col items-center gap-3 text-center">
+                      <div className="flex flex-col items-center gap-2 sm:gap-3 text-center min-w-[70px] sm:min-w-0">
                         <div
-                          className={`flex h-12 w-12 items-center justify-center rounded-full border text-sm font-semibold ${
+                          className={`flex shrink-0 h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-full border text-xs sm:text-sm font-semibold ${
                             completed
                               ? "bg-[#1F8A3D] text-white border-[#1F8A3D]"
                               : current
@@ -450,7 +450,7 @@ const PreScreening: React.FC = () => {
                           {completed ? "✓" : index + 1}
                         </div>
                         <p
-                          className={`text-xs font-semibold uppercase tracking-[0.22em] ${
+                          className={`text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-[0.22em] whitespace-nowrap ${
                             completed || current
                               ? "text-slate-900"
                               : "text-slate-500"
@@ -461,7 +461,7 @@ const PreScreening: React.FC = () => {
                       </div>
                       {index < stepDefinitions.length - 1 && (
                         <div
-                          className={`h-[2px] flex-1 rounded-full ${
+                          className={`h-[2px] min-w-[24px] sm:min-w-0 flex-1 rounded-full shrink-0 ${
                             index < stepIndex ? "bg-[#1F8A3D]" : "bg-slate-300"
                           }`}
                         />
@@ -471,13 +471,13 @@ const PreScreening: React.FC = () => {
                 })}
               </div>
             </div>
-            <main className="px-6 py-10 sm:px-10 sm:py-10">
-              <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-8 shadow-sm">
+            <main className="px-4 py-6 sm:px-10 sm:py-10">
+              <div className="rounded-2xl sm:rounded-[28px] border border-slate-200 bg-slate-50 p-4 sm:p-8 shadow-sm">
                 <div className="flex flex-col gap-2">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#1F8A3D]">
                     {currentStep.label}
                   </p>
-                  <h2 className="text-2xl font-semibold text-slate-900">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
                     {stepIndex === 0
                       ? "Confirm your pre-screening details"
                       : stepIndex === 1
@@ -495,7 +495,7 @@ const PreScreening: React.FC = () => {
                       return (
                         <div key={item.title}>
                           <label
-                            className={`group flex cursor-pointer flex-col rounded-[28px] border bg-white p-5 shadow-sm transition hover:border-[#1F8A3D] ${
+                            className={`group flex cursor-pointer flex-col rounded-2xl sm:rounded-[28px] border bg-white p-4 sm:p-5 shadow-sm transition hover:border-[#1F8A3D] ${
                               showError ? "border-red-300" : "border-slate-200"
                             }`}
                           >
@@ -544,7 +544,7 @@ const PreScreening: React.FC = () => {
                         </p>
                       </div>
                     )}
-                    <div className="rounded-3xl border border-[#D9D9D9] bg-white p-6">
+                    <div className="rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-white p-4 sm:p-6">
                       <p className="text-sm font-semibold text-slate-900 mb-4">
                         HaulHub Trailer Rental Liability Agreement
                       </p>
@@ -580,7 +580,7 @@ const PreScreening: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="rounded-3xl border border-[#D9D9D9] bg-white p-6">
+                    <div className="rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-white p-4 sm:p-6">
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between">
                           <div>
@@ -601,7 +601,7 @@ const PreScreening: React.FC = () => {
                           </button>
                         </div>
 
-                        <div className="rounded-[24px] border-2 border-dashed border-[#D9D9D9] bg-[#F8F8F8] p-6">
+                        <div className="rounded-2xl sm:rounded-[24px] border-2 border-dashed border-[#D9D9D9] bg-[#F8F8F8] p-4 sm:p-6">
                           <input
                             ref={fileInputRef}
                             type="file"
@@ -641,7 +641,7 @@ const PreScreening: React.FC = () => {
                           )}
                         </div>
 
-                        <label className="inline-flex items-center gap-3 rounded-2xl border border-[#D9D9D9] bg-white px-4 py-3">
+                        <label className="inline-flex items-start sm:items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-[#D9D9D9] bg-white px-3 py-3 sm:px-4 sm:py-3">
                           <input
                             type="checkbox"
                             checked={liabilityAccepted}
@@ -665,11 +665,11 @@ const PreScreening: React.FC = () => {
                       Please review the trailer condition photos before payment.
                     </p>
                     {photoLoading ? (
-                      <div className="rounded-3xl border border-[#D9D9D9] bg-white p-8 text-center text-sm text-slate-600">
+                      <div className="rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-white p-4 sm:p-8 text-center text-sm text-slate-600">
                         Loading pickup photos...
                       </div>
                     ) : photoError ? (
-                      <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+                      <div className="rounded-2xl sm:rounded-3xl border border-red-200 bg-red-50 p-4 sm:p-6 text-sm text-red-700">
                         {photoError}
                       </div>
                     ) : (
@@ -682,7 +682,7 @@ const PreScreening: React.FC = () => {
                         ].map((item) => (
                           <div
                             key={item.key}
-                            className="rounded-3xl overflow-hidden border border-[#D9D9D9] bg-white"
+                            className="rounded-2xl sm:rounded-3xl overflow-hidden border border-[#D9D9D9] bg-white"
                           >
                             <img
                               src={
@@ -702,7 +702,7 @@ const PreScreening: React.FC = () => {
                       </div>
                     )}
 
-                    <label className="inline-flex items-start gap-3 rounded-2xl border border-[#D9D9D9] bg-white px-4 py-4">
+                    <label className="inline-flex items-start gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-[#D9D9D9] bg-white px-3 py-3 sm:px-4 sm:py-4">
                       <input
                         type="checkbox"
                         checked={photosConfirmed}
@@ -719,7 +719,7 @@ const PreScreening: React.FC = () => {
 
                 {stepIndex === 3 && (
                   <div className="mt-8 space-y-6">
-                    <div className="grid gap-4 rounded-3xl border border-[#D9D9D9] bg-white p-6 sm:grid-cols-2">
+                    <div className="grid gap-4 rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-white p-4 sm:p-6 sm:grid-cols-2">
                       <div>
                         <p className="text-sm text-slate-500">Booking ID</p>
                         <p className="mt-2 text-lg font-semibold text-slate-900">
@@ -734,7 +734,7 @@ const PreScreening: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="rounded-3xl border border-[#D9D9D9] bg-white p-6">
+                    <div className="rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-white p-4 sm:p-6">
                       <p className="text-sm font-semibold text-slate-900">
                         Payment overview
                       </p>
@@ -754,11 +754,11 @@ const PreScreening: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="rounded-3xl border border-[#D9D9D9] bg-white p-6">
+                    <div className="rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-white p-4 sm:p-6">
                       <p className="text-sm font-semibold text-slate-900">
                         Payment method
                       </p>
-                      <div className="mt-4 rounded-3xl border border-[#D9D9D9] bg-[#F8F8F8] px-4 py-4">
+                      <div className="mt-4 rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-[#F8F8F8] px-3 py-3 sm:px-4 sm:py-4">
                         <p className="text-sm text-slate-900">
                           Credit / Debit Card
                         </p>
@@ -776,7 +776,7 @@ const PreScreening: React.FC = () => {
                   type="button"
                   onClick={goBack}
                   disabled={stepIndex === 0 || preScreeningSubmitting}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                  className="w-full rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-4 py-3 sm:px-6 sm:py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                 >
                   Back
                 </button>
@@ -785,7 +785,7 @@ const PreScreening: React.FC = () => {
                   type="button"
                   onClick={completeStep}
                   disabled={!canContinue || preScreeningSubmitting}
-                  className="w-full rounded-2xl bg-[#1F8A3D] px-6 py-4 text-sm font-semibold text-white transition hover:bg-[#16692d] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl sm:rounded-2xl bg-[#1F8A3D] px-4 py-3 sm:px-6 sm:py-4 text-sm font-semibold text-white transition hover:bg-[#16692d] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {preScreeningSubmitting
                     ? "Processing..."
