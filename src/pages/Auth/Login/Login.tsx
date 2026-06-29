@@ -17,6 +17,9 @@ import {
   checkEmail as checkEmailApi,
   checkPhone as checkPhoneApi,
   googleSso as googleSsoApi,
+  forgotPassword as forgotPasswordApi,
+  forgotPasswordVerifyOtp as forgotPasswordVerifyOtpApi,
+  resetPassword as resetPasswordApi,
 } from "../../../api/authApi.ts";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -329,8 +332,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
     } | null;
 
     // Map pathname to step state
+    const token = new URLSearchParams(location.search).get("token");
     if (pathname === "/reset-password") {
-      setStep("reset");
+      setStep(token ? "newPassword" : "reset");
     } else if (pathname === "/Newpassword") {
       setStep("newPassword");
     } else if (pathname === "/otp") {
@@ -858,6 +862,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
           setResetError("This email is not registered. Please check or sign up.");
           return;
         }
+
+        // Call the forgot password API to send the reset link/otp
+        await forgotPasswordApi({ email: resetEmail.trim() });
+        toast.success("OTP has been sent to your email.");
       } else if (isPhone) {
         const phoneWithCode = `${selectedCountry.dialCode}${phoneDigits}`;
         const res = await checkPhoneApi({
@@ -910,21 +918,34 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setOtpError(null);
   };
 
-  const handleVerifyOtp = () => {
-    if (otp.trim() !== STATIC_RESET_OTP) {
-      const msg = "Invalid OTP. Please try again.";
-      setOtpError(msg);
-      return;
-    }
+  const handleVerifyOtp = async () => {
+    if (otp.trim().length !== 6) return;
     setOtpError(null);
-    const currentState = location.state as Record<string, unknown> | null;
-    modalNavigate("/Newpassword", {
-      state: {
-        ...currentState,
-        resetEmail,
-        resetPhone,
-      },
-    });
+    setIsCheckingReset(true);
+    try {
+      const res = await forgotPasswordVerifyOtpApi({
+        email: resetEmail.trim() || email.trim(),
+        otp: otp.trim(),
+      });
+      
+      // Extract token from response (could be in data.token, token, or data.accessToken)
+      const token = res?.data?.token || res?.token || res?.data?.accessToken || res?.accessToken;
+      
+      const currentState = location.state as Record<string, unknown> | null;
+      modalNavigate("/Newpassword", {
+        state: {
+          ...currentState,
+          resetEmail,
+          resetPhone,
+          resetToken: token,
+        },
+      });
+    } catch (err) {
+      const msg = getApiErrorMessage(err) || "Invalid OTP. Please try again.";
+      setOtpError(msg);
+    } finally {
+      setIsCheckingReset(false);
+    }
   };
 
   const passwordsMatch = useMemo(
@@ -970,10 +991,33 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
   const isOtpValid = useMemo(() => otp.trim().length === 6, [otp]);
 
-  const handleNewPasswordContinue = () => {
+  const handleNewPasswordContinue = async () => {
     if (!canSetNewPassword) return;
-    toast.success("Password reset successfully");
-    onSuccess();
+    
+    // The token could be in the URL or passed via state from OTP verification
+    const stateToken = (location.state as any)?.resetToken;
+    const urlToken = new URLSearchParams(location.search).get("token");
+    const token = stateToken || urlToken;
+    
+    if (!token) {
+      toast.error("Reset token is missing. Please verify OTP again.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await resetPasswordApi({
+        token,
+        newPassword: newPassword,
+      });
+      toast.success("Password reset successfully");
+      onSuccess();
+    } catch (err) {
+      const msg = getApiErrorMessage(err) || "Failed to reset password. Please try again.";
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen || isAuthenticated) return null;
@@ -2116,15 +2160,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <input
                   value={otp}
                   onChange={(e) => {
-                    const onlyDigits = e.target.value
-                      .replace(/\D/g, "")
+                    const alphanumeric = e.target.value
+                      .replace(/[^a-zA-Z0-9]/g, "")
+                      .toUpperCase()
                       .slice(0, 6);
-                    setOtp(onlyDigits);
+                    setOtp(alphanumeric);
                     setOtpError(null);
                   }}
                   placeholder="Enter OTP"
                   maxLength={6}
-                  inputMode="numeric"
+                  inputMode="text"
                   className="w-full rounded-[5px] border border-black px-4 outline-none custom-placeholder placeholder:text-[#9B989E]"
                   style={{
                     height: "40px",
