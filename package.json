@@ -17,6 +17,8 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.576.0",
     "react": "^19.2.4",
+    "react-apple-login": "^1.1.6",
+    "react-apple-signin-auth": "^1.2.1",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.4",
     "react-redux": "^9.3.0",

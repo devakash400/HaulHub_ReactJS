@@ -139,8 +139,8 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
     return age;
   };
 
-  const isAgeAtLeast24 =
-    dateOfBirth.trim().length > 0 && getAgeFromDob(dateOfBirth) >= 24;
+  const isAgeAtLeast18 =
+    dateOfBirth.trim().length > 0 && getAgeFromDob(dateOfBirth) >= 18;
   const hasEmailSubmitError =
     typeof submitError === "string" && /email|email address/i.test(submitError);
   const hasPhoneSubmitError =
@@ -240,7 +240,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const isDateOfBirthValid =
     dateOfBirth.trim().length > 0 &&
     dateOfBirth <= todayIso &&
-    isAgeAtLeast24;
+    isAgeAtLeast18;
 
   const isFormValid =
     isFirstNameValid &&
@@ -256,14 +256,14 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
   const showDobAgeError =
     (dateOfBirthTouched || ageSubmitError) &&
     dateOfBirth.trim().length > 0 &&
-    !isAgeAtLeast24;
+    !isAgeAtLeast18;
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isAgeAtLeast24) {
+    if (!isAgeAtLeast18) {
       setAgeSubmitError(true);
       return;
     }
@@ -491,7 +491,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({
                   )}
                   {showDobAgeError && (
                     <p className="mt-1 text-xs text-red-600">
-                      You must be at least 24 years old
+                      You must be at least 18 years old
                     </p>
                   )}
                 </div>

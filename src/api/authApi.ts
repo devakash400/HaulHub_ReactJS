@@ -15,7 +15,7 @@ export type PhoneLoginPayload = {
 
 export type GoogleSsoPayload = {
   subId: string;
-  type: "google";
+  type: "google" | "apple";
   email: string;
   firstName: string;
   lastName: string;
@@ -60,6 +60,11 @@ export type ForgotPasswordPayload = {
 export type ResetPasswordPayload = {
   token: string;
   newPassword: string;
+};
+
+export type ForgotPasswordVerifyOtpPayload = {
+  email: string;
+  otp: string;
 };
 
 export type OtpLoginPayload = {
@@ -240,6 +245,11 @@ export const forgotPassword = async (payload: ForgotPasswordPayload) => {
 
 export const resetPassword = async (payload: ResetPasswordPayload) => {
   const res = await api.post("/api/auth/reset-password", payload);
+  return res.data;
+};
+
+export const forgotPasswordVerifyOtp = async (payload: ForgotPasswordVerifyOtpPayload) => {
+  const res = await api.post("/api/auth/forgot-password/verify-otp", payload);
   return res.data;
 };
 

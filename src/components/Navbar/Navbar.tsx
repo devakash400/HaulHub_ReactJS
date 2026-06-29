@@ -27,11 +27,17 @@ function profileInitial(
 ): string {
   if (!user) return "U";
   const first = user.firstName?.trim();
-  if (first) return first.charAt(0).toUpperCase();
   const last = user.lastName?.trim();
+  
+  if (first && last) {
+    return `${first.charAt(0).toUpperCase()}${last.charAt(0).toUpperCase()}`;
+  }
+  if (first) return first.charAt(0).toUpperCase();
   if (last) return last.charAt(0).toUpperCase();
+  
   const email = user.email?.trim();
   if (email) return email.charAt(0).toUpperCase();
+  
   return "U";
 }
 
@@ -39,6 +45,7 @@ const Navbar: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isSearchCompact, setIsSearchCompact] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -54,6 +61,10 @@ const Navbar: React.FC = () => {
     user?.profilePicture ?? undefined,
     "",
   );
+
+  useEffect(() => {
+    setImgError(false);
+  }, [profilePictureUrl]);
 
   const toggleDrawer = () => setIsDrawerOpen((p) => !p);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -84,6 +95,8 @@ const Navbar: React.FC = () => {
       if (urlQ !== navSearch) {
         setNavSearch(urlQ);
       }
+    } else {
+      setNavSearch("");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, location.search]);
@@ -293,7 +306,7 @@ const Navbar: React.FC = () => {
                         : "Profile"
                   }
                 >
-                  {profilePictureUrl ? (
+                  {profilePictureUrl && !imgError ? (
                     <img
                       src={profilePictureUrl}
                       alt={
@@ -304,6 +317,7 @@ const Navbar: React.FC = () => {
                             : "Profile photo"
                       }
                       className="h-full w-full object-cover"
+                      onError={() => setImgError(true)}
                     />
                   ) : (
                     profileInitial(user)
