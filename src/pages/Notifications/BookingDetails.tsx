@@ -405,12 +405,12 @@ const BookingDetails: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-100 py-8">
-      <div className="mx-auto w-full max-w-[1260px] px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="min-h-screen bg-slate-100 py-4 sm:py-8">
+      <div className="mx-auto w-full max-w-[1260px] px-2 sm:px-6 lg:px-8">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="h-14 w-14 shrink-0 rounded-full bg-indigo-500 text-white grid place-items-center text-xl font-semibold">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full bg-indigo-500 text-white grid place-items-center text-lg sm:text-xl font-semibold">
                 {getInitials(renterName)}
               </div>
               <div className="min-w-0">
@@ -419,7 +419,7 @@ const BookingDetails: React.FC = () => {
                     ? "Booking details"
                     : "Booking details"}
                 </p>
-                <h1 className="text-2xl font-semibold text-slate-900 break-words break-all">
+                <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 break-words break-all">
                   {renterName.length > nameTruncateLength && !isNameExpanded
                     ? `${renterName.substring(0, nameTruncateLength)}... `
                     : `${renterName} `}
@@ -469,7 +469,7 @@ const BookingDetails: React.FC = () => {
 
         <div className="mt-6 grid grid-cols-1 gap-6">
           <div className="space-y-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">
@@ -485,7 +485,7 @@ const BookingDetails: React.FC = () => {
               </div>
 
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                <div className="rounded-3xl bg-slate-50 p-4">
+                <div className="rounded-2xl sm:rounded-3xl bg-slate-50 p-3 sm:p-4">
                   <p className="text-xs text-slate-500">Start date</p>
                   <p className="mt-2 text-sm font-semibold text-slate-900">
                     {booking?.startDate
@@ -493,7 +493,7 @@ const BookingDetails: React.FC = () => {
                       : "-"}
                   </p>
                 </div>
-                <div className="rounded-3xl bg-slate-50 p-4">
+                <div className="rounded-2xl sm:rounded-3xl bg-slate-50 p-3 sm:p-4">
                   <p className="text-xs text-slate-500">End date</p>
                   <p className="mt-2 text-sm font-semibold text-slate-900">
                     {booking?.endDate
@@ -501,13 +501,13 @@ const BookingDetails: React.FC = () => {
                       : "-"}
                   </p>
                 </div>
-                <div className="rounded-3xl bg-slate-50 p-4">
+                <div className="rounded-2xl sm:rounded-3xl bg-slate-50 p-3 sm:p-4">
                   <p className="text-xs text-slate-500">Duration</p>
                   <p className="mt-2 text-sm font-semibold text-slate-900">
                     {getDuration()}
                   </p>
                 </div>
-                <div className="rounded-3xl bg-slate-50 p-4">
+                <div className="rounded-2xl sm:rounded-3xl bg-slate-50 p-3 sm:p-4">
                   <p className="text-xs text-slate-500">Trailer type</p>
                   <p className="mt-2 text-sm font-semibold text-slate-900">
                     {getTrailerType()}
@@ -517,7 +517,7 @@ const BookingDetails: React.FC = () => {
             </div>
 
             {isOwnerUser && (drivingLicenseUrl || passportUrl) && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-lg font-semibold text-slate-900">
@@ -530,7 +530,7 @@ const BookingDetails: React.FC = () => {
                 </div>
                 <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {drivingLicenseUrl && (
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <p className="text-xs text-slate-500">
@@ -587,7 +587,7 @@ const BookingDetails: React.FC = () => {
                     </div>
                   )}
                   {passportUrl && (
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <p className="text-xs text-slate-500">Proof of Insurance</p>
@@ -643,7 +643,7 @@ const BookingDetails: React.FC = () => {
             )}
 
             {showUploadSection && (
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-lg font-semibold text-slate-900">
@@ -673,12 +673,12 @@ const BookingDetails: React.FC = () => {
                     return (
                       <div
                         key={it.key}
-                        className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-center"
+                        className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-slate-50 p-3 sm:p-4 text-center"
                       >
                         <div className="text-sm font-semibold text-slate-900">
                           {it.label}
                         </div>
-                        <div className="mt-4 flex h-40 items-center justify-center rounded-3xl bg-white border border-dashed border-slate-200 overflow-hidden">
+                        <div className="mt-4 flex h-32 sm:h-40 items-center justify-center rounded-2xl sm:rounded-3xl bg-white border border-dashed border-slate-200 overflow-hidden">
                           {previewSrc ? (
                             <img
                               src={previewSrc}
@@ -741,7 +741,7 @@ const BookingDetails: React.FC = () => {
           </div>
 
           <aside className="space-y-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
               <div className="flex flex-col gap-4">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">
@@ -783,7 +783,7 @@ const BookingDetails: React.FC = () => {
                     </button>
 
                     {(drivingLicenseUrl || passportUrl) && (
-                      <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                      <label className="flex items-center gap-2 sm:gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 sm:px-4 text-sm text-slate-700">
                         <input
                           type="checkbox"
                           checked={verifiedDocs}
