@@ -84,6 +84,8 @@ const Navbar: React.FC = () => {
       if (urlQ !== navSearch) {
         setNavSearch(urlQ);
       }
+    } else {
+      setNavSearch("");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, location.search]);
