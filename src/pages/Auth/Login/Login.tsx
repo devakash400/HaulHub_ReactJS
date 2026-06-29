@@ -194,6 +194,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [confirmNewPasswordTouched, setConfirmNewPasswordTouched] =
     useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+  const [isAppleDevice, setIsAppleDevice] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsAppleDevice(
+        /Mac|iPod|iPhone|iPad/i.test(navigator.platform || "") ||
+        /Mac|iPod|iPhone|iPad/i.test(navigator.userAgent || "")
+      );
+    }
+  }, []);
 
   const isEmailFilled = email.trim().length > 0;
   const isEmailValid = useMemo(() => emailRegex.test(email.trim()), [email]);
@@ -1215,38 +1225,41 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   {isGoogleLoading ? "Connecting..." : "Continue with Google"}
                 </span>
               </button>
-              <button
-                type="button"
-                className="w-full mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
-                style={{
-                  height: "40px",
-                  background: "#FFFFFF",
-                  border: "1px solid #000000",
-                  borderRadius: "5px",
-                  opacity: 1,
-                }}
-              >
-                <img
-                  src={images.Apple}
-                  alt="Apple"
-                  className="w-[22px] h-[22px] object-contain"
-                />
-
-                <span
+              {isAppleDevice && (
+                <button
+                  type="button"
+                  className="w-full mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
                   style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 400,
-                    fontSize: "14px",
-                    fontStyle: "normal",
-                    lineHeight: "20px",
-                    letterSpacing: "0%",
-                    verticalAlign: "middle",
-                    color: "#000000",
+                    height: "40px",
+                    background: "#FFFFFF",
+                    border: "1px solid #000000",
+                    borderRadius: "5px",
+                    opacity: 1,
                   }}
                 >
-                  Continue with Apple
-                </span>
-              </button>
+                  <img
+                    src={images.Apple}
+                    alt="Apple"
+                    className="w-[22px] h-[22px] object-contain"
+                  />
+
+                  <span
+                    style={{
+                      fontFamily: "Lexend",
+                      fontWeight: 400,
+                      fontSize: "14px",
+                      fontStyle: "normal",
+                      lineHeight: "20px",
+                      letterSpacing: "0%",
+                      verticalAlign: "middle",
+                      color: "#000000",
+                    }}
+                  >
+                    Continue with Apple
+                  </span>
+                </button>
+              )}
+
               <button
                 type="button"
                 className="w-full mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
