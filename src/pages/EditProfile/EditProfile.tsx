@@ -346,7 +346,9 @@ const EditProfile: React.FC = () => {
   const [phoneCountry, setPhoneCountry] = useState<CountryOption>(DEFAULT_COUNTRY);
   const [phoneLocal, setPhoneLocal] = useState("");
 
-  /* emergency phone */
+  /* emergency contact */
+  const [ecName, setEcName] = useState("");
+  const [ecEmail, setEcEmail] = useState("");
   const [ecCountry, setEcCountry] = useState<CountryOption>(DEFAULT_COUNTRY);
   const [ecLocal, setEcLocal] = useState("");
 
@@ -438,10 +440,14 @@ const EditProfile: React.FC = () => {
 
       /* emergency contact */
       const ec = data.emergencyContact;
-      if (ec?.phoneNumber) {
-        const parsedEc = parsePhoneNumber(ec.phoneNumber);
-        setEcCountry(parsedEc.country);
-        setEcLocal(parsedEc.local);
+      if (ec) {
+        setEcName(ec.name?.trim() ?? "");
+        setEcEmail(ec.email?.trim() ?? "");
+        if (ec.phoneNumber) {
+          const parsedEc = parsePhoneNumber(ec.phoneNumber);
+          setEcCountry(parsedEc.country);
+          setEcLocal(parsedEc.local);
+        }
       }
 
       /* avatar */
@@ -553,12 +559,12 @@ const EditProfile: React.FC = () => {
         }
       ],
       ...(phoneNumber ? { phoneNumber } : {}),
-      ...(ecPhoneNumber
+      ...(ecPhoneNumber || ecName.trim() || ecEmail.trim()
         ? {
             emergencyContact: {
-              name: "",
-              email: "",
-              phoneNumber: ecPhoneNumber,
+              name: ecName.trim(),
+              email: ecEmail.trim(),
+              phoneNumber: ecPhoneNumber || "",
             },
           }
         : {}),
@@ -872,7 +878,33 @@ const EditProfile: React.FC = () => {
                       />
                     </div>
 
-                    {/* Emergency Contact */}
+                    {/* Emergency Contact Name */}
+                    <div className="col-span-1 lg:col-span-1">
+                      <FieldLabel htmlFor="ep-ecName">Emergency Contact Name</FieldLabel>
+                      <TextInput
+                        id="ep-ecName"
+                        type="text"
+                        value={ecName}
+                        onChange={(e) => setEcName(e.target.value)}
+                        placeholder="Enter contact name"
+                        autoComplete="name"
+                      />
+                    </div>
+
+                    {/* Emergency Contact Email */}
+                    <div className="col-span-1 lg:col-span-1">
+                      <FieldLabel htmlFor="ep-ecEmail">Emergency Contact Email</FieldLabel>
+                      <TextInput
+                        id="ep-ecEmail"
+                        type="email"
+                        value={ecEmail}
+                        onChange={(e) => setEcEmail(e.target.value)}
+                        placeholder="Enter contact email"
+                        autoComplete="email"
+                      />
+                    </div>
+
+                    {/* Emergency Contact Number */}
                     <div className="col-span-1 sm:col-span-2 lg:col-span-2">
                       <FieldLabel htmlFor="ep-ecPhone">Emergency Contact Number</FieldLabel>
                       <PhoneInput

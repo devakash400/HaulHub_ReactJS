@@ -17,11 +17,16 @@ import {
   checkEmail as checkEmailApi,
   checkPhone as checkPhoneApi,
   googleSso as googleSsoApi,
+  forgotPassword as forgotPasswordApi,
+  forgotPasswordVerifyOtp as forgotPasswordVerifyOtpApi,
+  resetPassword as resetPasswordApi,
 } from "../../../api/authApi.ts";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 import { DEFAULT_COUNTRY_CODE } from "../../../app/defaults.ts";
+import { appleAuthHelpers } from "react-apple-signin-auth";
+import { jwtDecode } from "jwt-decode";
 
 type LoginModalProps = {
   isOpen: boolean;
@@ -175,6 +180,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [isCheckingReset, setIsCheckingReset] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
 
   // Reset flow
   const [resetPhone, setResetPhone] = useState("");
@@ -194,6 +200,25 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [confirmNewPasswordTouched, setConfirmNewPasswordTouched] =
     useState(false);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+  const [isAppleDevice, setIsAppleDevice] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsAppleDevice(
+        /Mac|iPod|iPhone|iPad/i.test(navigator.platform || "") ||
+        /Mac|iPod|iPhone|iPad/i.test(navigator.userAgent || "")
+      );
+      
+      // Load Apple JS SDK if not already present
+      if (!document.getElementById("apple-auth-script")) {
+        const script = document.createElement("script");
+        script.id = "apple-auth-script";
+        script.src = "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }
+  }, []);
 
   const isEmailFilled = email.trim().length > 0;
   const isEmailValid = useMemo(() => emailRegex.test(email.trim()), [email]);
@@ -307,8 +332,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
     } | null;
 
     // Map pathname to step state
+    const token = new URLSearchParams(location.search).get("token");
     if (pathname === "/reset-password") {
-      setStep("reset");
+      setStep(token ? "newPassword" : "reset");
     } else if (pathname === "/Newpassword") {
       setStep("newPassword");
     } else if (pathname === "/otp") {
@@ -440,7 +466,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             : false;
 
         if (!exists) {
-          const msg = "This email is not registered. Please check or sign up.";
+          const msg = "Either this email is not registered or you selected wrong role. Please check or sign up.";
           setEmailError(msg);
           return;
         }
@@ -683,6 +709,102 @@ const LoginModal: React.FC<LoginModalProps> = ({
     },
   });
 
+  const handleAppleLogin = async () => {
+    try {
+      setIsAppleLoading(true);
+
+      // Load Apple JS SDK dynamically and wait for it
+      const loadAppleScript = () => {
+        return new Promise((resolve, reject) => {
+          if (typeof window !== "undefined" && (window as any).AppleID) {
+            return resolve((window as any).AppleID);
+          }
+          let script = document.getElementById("apple-auth-script") as HTMLScriptElement;
+          if (!script) {
+            script = document.createElement("script");
+            script.id = "apple-auth-script";
+            script.src = "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js";
+            document.body.appendChild(script);
+          }
+          
+          script.addEventListener("load", () => resolve((window as any).AppleID));
+          script.addEventListener("error", () => reject(new Error("Apple SDK failed to load from Apple's servers.")));
+        });
+      };
+
+      await loadAppleScript();
+
+      if (typeof window === "undefined" || !(window as any).AppleID) {
+        throw new Error("Apple Sign-In could not load. Please check your internet connection or disable any ad blockers.");
+      }
+      
+      // Initialize Apple SDK
+      (window as any).AppleID.auth.init({
+        clientId: "2R85XX6B4R",
+        redirectURI: window.location.origin,
+        scope: "email name",
+        usePopup: true,
+      });
+
+      // Attempt Sign In
+      const response = await (window as any).AppleID.auth.signIn();
+
+      if (response && response.authorization) {
+        const decodedToken: any = jwtDecode(response.authorization.id_token);
+        
+        const payload = {
+          subId: decodedToken.sub,
+          type: "apple" as const,
+          email: decodedToken.email || response.user?.email || "",
+          firstName: response.user?.name?.firstName || "",
+          lastName: response.user?.name?.lastName || "",
+          photo: "",
+          role: loginTrailor.toLowerCase() as "renter" | "owner",
+        };
+
+        const res = await googleSsoApi(payload);
+
+        if (res.success && res.data) {
+          const { user } = res.data;
+          dispatch(
+            loginSuccess({
+              user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                profilePicture: payload.photo,
+                trailor: loginTrailor,
+              },
+              accessToken: res.data.accessToken,
+              refreshToken: res.data.refreshToken,
+              userType: loginTrailor,
+            })
+          );
+
+          toast.success("Logged in successfully");
+          
+          if (res.data.isNewLoggedIn) {
+            navigate("/edit-profile");
+            onClose();
+          } else {
+            onSuccess();
+          }
+        } else {
+          toast.error("Failed to authenticate with Apple. Please try again.");
+        }
+      }
+    } catch (err: any) {
+      console.error(err);
+      if (err.error !== "popup_closed_by_user") {
+        const msg = err?.message || getApiErrorMessage(err) || "Apple authentication failed.";
+        toast.error(msg);
+      }
+    } finally {
+      setIsAppleLoading(false);
+    }
+  };
+
   /** Static forgot-password flow â€” no API; Continue opens OTP step. */
   // const handleResetContinue = () => {
   //   if (!resetCanContinue) return;
@@ -740,6 +862,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
           setResetError("This email is not registered. Please check or sign up.");
           return;
         }
+
+        // Call the forgot password API to send the reset link/otp
+        await forgotPasswordApi({ email: resetEmail.trim() });
+        toast.success("OTP has been sent to your email.");
       } else if (isPhone) {
         const phoneWithCode = `${selectedCountry.dialCode}${phoneDigits}`;
         const res = await checkPhoneApi({
@@ -792,21 +918,34 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setOtpError(null);
   };
 
-  const handleVerifyOtp = () => {
-    if (otp.trim() !== STATIC_RESET_OTP) {
-      const msg = "Invalid OTP. Please try again.";
-      setOtpError(msg);
-      return;
-    }
+  const handleVerifyOtp = async () => {
+    if (otp.trim().length !== 6) return;
     setOtpError(null);
-    const currentState = location.state as Record<string, unknown> | null;
-    modalNavigate("/Newpassword", {
-      state: {
-        ...currentState,
-        resetEmail,
-        resetPhone,
-      },
-    });
+    setIsCheckingReset(true);
+    try {
+      const res = await forgotPasswordVerifyOtpApi({
+        email: resetEmail.trim() || email.trim(),
+        otp: otp.trim(),
+      });
+      
+      // Extract token from response (could be in data.token, token, or data.accessToken)
+      const token = res?.data?.token || res?.token || res?.data?.accessToken || res?.accessToken;
+      
+      const currentState = location.state as Record<string, unknown> | null;
+      modalNavigate("/Newpassword", {
+        state: {
+          ...currentState,
+          resetEmail,
+          resetPhone,
+          resetToken: token,
+        },
+      });
+    } catch (err) {
+      const msg = getApiErrorMessage(err) || "Invalid OTP. Please try again.";
+      setOtpError(msg);
+    } finally {
+      setIsCheckingReset(false);
+    }
   };
 
   const passwordsMatch = useMemo(
@@ -852,10 +991,33 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
   const isOtpValid = useMemo(() => otp.trim().length === 6, [otp]);
 
-  const handleNewPasswordContinue = () => {
+  const handleNewPasswordContinue = async () => {
     if (!canSetNewPassword) return;
-    toast.success("Password reset successfully");
-    onSuccess();
+    
+    // The token could be in the URL or passed via state from OTP verification
+    const stateToken = (location.state as any)?.resetToken;
+    const urlToken = new URLSearchParams(location.search).get("token");
+    const token = stateToken || urlToken;
+    
+    if (!token) {
+      toast.error("Reset token is missing. Please verify OTP again.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await resetPasswordApi({
+        token,
+        newPassword: newPassword,
+      });
+      toast.success("Password reset successfully");
+      onSuccess();
+    } catch (err) {
+      const msg = getApiErrorMessage(err) || "Failed to reset password. Please try again.";
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen || isAuthenticated) return null;
@@ -1215,38 +1377,49 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   {isGoogleLoading ? "Connecting..." : "Continue with Google"}
                 </span>
               </button>
-              <button
-                type="button"
-                className="w-full mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
-                style={{
-                  height: "40px",
-                  background: "#FFFFFF",
-                  border: "1px solid #000000",
-                  borderRadius: "5px",
-                  opacity: 1,
-                }}
-              >
-                <img
-                  src={images.Apple}
-                  alt="Apple"
-                  className="w-[22px] h-[22px] object-contain"
-                />
-
-                <span
+              {isAppleDevice && (
+                <button
+                  type="button"
+                  onClick={() => handleAppleLogin()}
+                  disabled={isAppleLoading}
+                  className={`w-full mb-3 flex items-center justify-center gap-3 transition-colors ${
+                    isAppleLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer hover:border-[#389131]"
+                  }`}
                   style={{
-                    fontFamily: "Lexend",
-                    fontWeight: 400,
-                    fontSize: "14px",
-                    fontStyle: "normal",
-                    lineHeight: "20px",
-                    letterSpacing: "0%",
-                    verticalAlign: "middle",
-                    color: "#000000",
+                    height: "40px",
+                    background: "#FFFFFF",
+                    border: "1px solid #000000",
+                    borderRadius: "5px",
+                    opacity: isAppleLoading ? 0.7 : 1,
                   }}
                 >
-                  Continue with Apple
-                </span>
-              </button>
+                  {isAppleLoading ? (
+                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <img
+                      src={images.Apple}
+                      alt="Apple"
+                      className="w-[22px] h-[22px] object-contain"
+                    />
+                  )}
+
+                  <span
+                    style={{
+                      fontFamily: "Lexend",
+                      fontWeight: 400,
+                      fontSize: "14px",
+                      fontStyle: "normal",
+                      lineHeight: "20px",
+                      letterSpacing: "0%",
+                      verticalAlign: "middle",
+                      color: "#000000",
+                    }}
+                  >
+                    {isAppleLoading ? "Connecting..." : "Continue with Apple"}
+                  </span>
+                </button>
+              )}
+
               <button
                 type="button"
                 className="w-full mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
@@ -1987,15 +2160,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 <input
                   value={otp}
                   onChange={(e) => {
-                    const onlyDigits = e.target.value
-                      .replace(/\D/g, "")
+                    const alphanumeric = e.target.value
+                      .replace(/[^a-zA-Z0-9]/g, "")
+                      .toUpperCase()
                       .slice(0, 6);
-                    setOtp(onlyDigits);
+                    setOtp(alphanumeric);
                     setOtpError(null);
                   }}
                   placeholder="Enter OTP"
                   maxLength={6}
-                  inputMode="numeric"
+                  inputMode="text"
                   className="w-full rounded-[5px] border border-black px-4 outline-none custom-placeholder placeholder:text-[#9B989E]"
                   style={{
                     height: "40px",
