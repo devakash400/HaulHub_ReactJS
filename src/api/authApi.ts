@@ -15,7 +15,7 @@ export type PhoneLoginPayload = {
 
 export type GoogleSsoPayload = {
   subId: string;
-  type: "google";
+  type: "google" | "apple";
   email: string;
   firstName: string;
   lastName: string;

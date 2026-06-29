@@ -22,6 +22,8 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 import { DEFAULT_COUNTRY_CODE } from "../../../app/defaults.ts";
+import { appleAuthHelpers } from "react-apple-signin-auth";
+import { jwtDecode } from "jwt-decode";
 
 type LoginModalProps = {
   isOpen: boolean;
@@ -175,6 +177,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [isCheckingReset, setIsCheckingReset] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
 
   // Reset flow
   const [resetPhone, setResetPhone] = useState("");
@@ -202,6 +205,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
         /Mac|iPod|iPhone|iPad/i.test(navigator.platform || "") ||
         /Mac|iPod|iPhone|iPad/i.test(navigator.userAgent || "")
       );
+      
+      // Load Apple JS SDK if not already present
+      if (!document.getElementById("apple-auth-script")) {
+        const script = document.createElement("script");
+        script.id = "apple-auth-script";
+        script.src = "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
     }
   }, []);
 
@@ -692,6 +704,102 @@ const LoginModal: React.FC<LoginModalProps> = ({
       toast.error("Google login failed. Please try again.");
     },
   });
+
+  const handleAppleLogin = async () => {
+    try {
+      setIsAppleLoading(true);
+
+      // Load Apple JS SDK dynamically and wait for it
+      const loadAppleScript = () => {
+        return new Promise((resolve, reject) => {
+          if (typeof window !== "undefined" && (window as any).AppleID) {
+            return resolve((window as any).AppleID);
+          }
+          let script = document.getElementById("apple-auth-script") as HTMLScriptElement;
+          if (!script) {
+            script = document.createElement("script");
+            script.id = "apple-auth-script";
+            script.src = "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js";
+            document.body.appendChild(script);
+          }
+          
+          script.addEventListener("load", () => resolve((window as any).AppleID));
+          script.addEventListener("error", () => reject(new Error("Apple SDK failed to load from Apple's servers.")));
+        });
+      };
+
+      await loadAppleScript();
+
+      if (typeof window === "undefined" || !(window as any).AppleID) {
+        throw new Error("Apple Sign-In could not load. Please check your internet connection or disable any ad blockers.");
+      }
+      
+      // Initialize Apple SDK
+      (window as any).AppleID.auth.init({
+        clientId: "2R85XX6B4R",
+        redirectURI: window.location.origin,
+        scope: "email name",
+        usePopup: true,
+      });
+
+      // Attempt Sign In
+      const response = await (window as any).AppleID.auth.signIn();
+
+      if (response && response.authorization) {
+        const decodedToken: any = jwtDecode(response.authorization.id_token);
+        
+        const payload = {
+          subId: decodedToken.sub,
+          type: "apple" as const,
+          email: decodedToken.email || response.user?.email || "",
+          firstName: response.user?.name?.firstName || "",
+          lastName: response.user?.name?.lastName || "",
+          photo: "",
+          role: loginTrailor.toLowerCase() as "renter" | "owner",
+        };
+
+        const res = await googleSsoApi(payload);
+
+        if (res.success && res.data) {
+          const { user } = res.data;
+          dispatch(
+            loginSuccess({
+              user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                profilePicture: payload.photo,
+                trailor: loginTrailor,
+              },
+              accessToken: res.data.accessToken,
+              refreshToken: res.data.refreshToken,
+              userType: loginTrailor,
+            })
+          );
+
+          toast.success("Logged in successfully");
+          
+          if (res.data.isNewLoggedIn) {
+            navigate("/edit-profile");
+            onClose();
+          } else {
+            onSuccess();
+          }
+        } else {
+          toast.error("Failed to authenticate with Apple. Please try again.");
+        }
+      }
+    } catch (err: any) {
+      console.error(err);
+      if (err.error !== "popup_closed_by_user") {
+        const msg = err?.message || getApiErrorMessage(err) || "Apple authentication failed.";
+        toast.error(msg);
+      }
+    } finally {
+      setIsAppleLoading(false);
+    }
+  };
 
   /** Static forgot-password flow â€” no API; Continue opens OTP step. */
   // const handleResetContinue = () => {
@@ -1228,20 +1336,28 @@ const LoginModal: React.FC<LoginModalProps> = ({
               {isAppleDevice && (
                 <button
                   type="button"
-                  className="w-full mb-3 flex items-center justify-center gap-3 cursor-pointer transition-colors hover:border-[#389131]"
+                  onClick={() => handleAppleLogin()}
+                  disabled={isAppleLoading}
+                  className={`w-full mb-3 flex items-center justify-center gap-3 transition-colors ${
+                    isAppleLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer hover:border-[#389131]"
+                  }`}
                   style={{
                     height: "40px",
                     background: "#FFFFFF",
                     border: "1px solid #000000",
                     borderRadius: "5px",
-                    opacity: 1,
+                    opacity: isAppleLoading ? 0.7 : 1,
                   }}
                 >
-                  <img
-                    src={images.Apple}
-                    alt="Apple"
-                    className="w-[22px] h-[22px] object-contain"
-                  />
+                  {isAppleLoading ? (
+                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <img
+                      src={images.Apple}
+                      alt="Apple"
+                      className="w-[22px] h-[22px] object-contain"
+                    />
+                  )}
 
                   <span
                     style={{
@@ -1255,7 +1371,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                       color: "#000000",
                     }}
                   >
-                    Continue with Apple
+                    {isAppleLoading ? "Connecting..." : "Continue with Apple"}
                   </span>
                 </button>
               )}
