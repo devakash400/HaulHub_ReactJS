@@ -380,6 +380,15 @@ const PreScreening: React.FC = () => {
       return;
     }
     if (stepIndex === 3) {
+      try {
+        setPreScreeningSubmitting(true);
+        const { createPaymentIntent } = await import("../../../src/api/paymentApi.ts");
+        await createPaymentIntent(bookingId);
+      } catch (err) {
+        console.error("Payment intent creation failed:", err);
+      } finally {
+        setPreScreeningSubmitting(false);
+      }
       navigate("/payment-receipt", {
         state: {
           ...state,
