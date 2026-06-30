@@ -23,6 +23,7 @@ type ApiNotification = {
   type: string;
   title: string;
   message: string;
+  isRead?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -67,9 +68,26 @@ const Notifications: React.FC = () => {
       ...prev,
       [id]: !prev[id],
     }));
+    handleMarkAsRead(id);
   };
 
   const [truncateLength, setTruncateLength] = useState(80);
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    const notification = notifications.find(n => n._id === notificationId);
+    const isAlreadyRead = notification?.isRead || (notification as any)?.read || (notification as any)?.status === 'read';
+    if (isAlreadyRead) return;
+
+    // Optimistic update
+    setNotifications(prev => prev.map(n => n._id === notificationId ? { ...n, isRead: true, read: true, status: 'read', readAt: new Date().toISOString() } : n));
+    window.dispatchEvent(new Event("notificationRead"));
+
+    try {
+      await api.patch(`/api/notifications/${notificationId}/read`, {});
+    } catch (err) {
+      console.error("Failed to mark notification as read", err);
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -179,9 +197,11 @@ const Notifications: React.FC = () => {
     <div className="h-full w-full flex justify-center bg-[#F9F8F3] px-4 py-10">
       {/* 80% width main container, near top instead of perfectly centered */}
       <div className="w-full max-w-5xl md:w-[80%] bg-white rounded-2xl shadow-md border border-gray-200 p-6 sm:p-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">
-          Notifications
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Notifications
+          </h1>
+        </div>
 
         <div className="space-y-4">
           {loading && (
@@ -253,11 +273,20 @@ const Notifications: React.FC = () => {
                 /pre[\s-]?screening.*complete/i.test(notification.title) ||
                 /pre[\s-]?screening.*complete/i.test(notification.message);
 
+              const isNotificationRead = 
+                notification.isRead === true || 
+                (notification as any).read === true || 
+                (notification as any).status === 'read' ||
+                ((notification as any).readAt !== undefined && (notification as any).readAt !== null);
+
               return (
                 <div
                   key={notification._id}
-                  className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-5 shadow-sm"
+                  className={`rounded-2xl border ${!isNotificationRead ? 'border-[#389131] bg-[#F4FBF4]' : 'border-gray-200 bg-[#F9F8F3]'} p-5 shadow-sm relative`}
                 >
+                  {!isNotificationRead && (
+                    <span className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-[#389131]"></span>
+                  )}
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex flex-1 min-w-0 gap-4">
                       {imageUrl ? (
@@ -316,6 +345,7 @@ const Notifications: React.FC = () => {
                           </span>
                         ) : (
                           <Link
+                            onClick={() => handleMarkAsRead(notification._id)}
                             to={`/notifications/booking/${notification.bookingId}`}
                             state={{
                               renterFullName: notification.actorId?.fullName,
@@ -328,6 +358,7 @@ const Notifications: React.FC = () => {
                         )
                       ) : isPreScreeningCompleted && isOwner ? (
                         <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
                           to={`/pre-screening-complete/${notification.bookingId}`}
                           className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
@@ -335,6 +366,7 @@ const Notifications: React.FC = () => {
                         </Link>
                       ) : isBookingAcceptedByOwner && !isOwner ? (
                         <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
                           to={`/prescreening?bookingId=${encodeURIComponent(notification.bookingId)}`}
                           state={{
                             bookingId: notification.bookingId,
@@ -343,31 +375,41 @@ const Notifications: React.FC = () => {
                         >
                           Start Pre-Screening
                         </Link>
-                      ) : isPickupPhotosUploaded ? null : isBookingAccepted ? null : (
-                        <Link
-                          to={
-                            isBookingAcceptedByOwner
-                              ? "/booking"
-                              : isBookingReturned || isBookingUpdated
+                      ) : isPickupPhotosUploaded || isBookingAccepted ? (
+                          !isNotificationRead ? (
+                            <button
+                              onClick={() => handleMarkAsRead(notification._id)}
+                              className="rounded-lg bg-white border border-[#389131] px-4 py-2 text-sm font-semibold text-[#389131] transition-colors hover:bg-[#F4FBF4]"
+                            >
+                              Mark as read
+                            </button>
+                          ) : null
+                      ) : (
+                          <Link
+                            onClick={() => handleMarkAsRead(notification._id)}
+                            to={
+                              isBookingAcceptedByOwner
                                 ? "/booking"
-                                : isRequestSent
+                                : isBookingReturned || isBookingUpdated
                                   ? "/booking"
-                                  : `/booking/${notification.bookingId}`
-                          }
-                          className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
-                        >
-                          {isBookingAcceptedByOwner
-                            ? "View details"
-                            : isBookingReturned || isBookingUpdated
-                              ? isBookingReturned
-                                ? "View status"
-                                : "View bookings"
-                              : isRequestSent
-                                ? "View request status"
-                                : "View details"}
-                        </Link>
-                      )}
-                    </div>
+                                  : isRequestSent
+                                    ? "/booking"
+                                    : `/booking/${notification.bookingId}`
+                            }
+                            className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                          >
+                            {isBookingAcceptedByOwner
+                              ? "View details"
+                              : isBookingReturned || isBookingUpdated
+                                ? isBookingReturned
+                                  ? "View status"
+                                  : "View bookings"
+                                : isRequestSent
+                                  ? "View request status"
+                                  : "View details"}
+                          </Link>
+                        )}
+                      </div>
                   </div>
                 </div>
               );
