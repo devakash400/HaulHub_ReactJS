@@ -50,6 +50,7 @@ import { getUserProfile } from "./api/userApi.ts";
 import SearchResults from "./pages/SearchResults/SearchResults.tsx";
 import PersonalProfile from "./pages/PersonalProfile/PersonalProfile.tsx";
 import PaymentTerms from "./pages/PaymentTerms.tsx";
+import PickUpComplete from "./pages/PickUpComplete/PickUpComplete.tsx";
 
 type LocationState = {
   backgroundLocation?: Location;
@@ -150,6 +151,10 @@ const App: React.FC = () => {
           <Route
             path="/pre-screening-complete/:bookingId"
             element={<PreScreeningComplete />}
+          />
+          <Route
+            path="/pick-up-complete/:bookingId"
+            element={<PickUpComplete />}
           />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/verify-identity" element={<VerifyIdentity />} />

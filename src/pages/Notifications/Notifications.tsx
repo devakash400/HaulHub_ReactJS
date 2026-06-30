@@ -276,6 +276,12 @@ const Notifications: React.FC = () => {
                 /payment complet/i.test(notification.title) ||
                 /payment complet/i.test(notification.message) ||
                 /payment complet/i.test(notification.type);
+              const isReadyForPickup =
+                /ready for pick[\s-]?up/i.test(notification.title) ||
+                /ready for pick[\s-]?up/i.test(notification.message) ||
+                /pickup ready/i.test(notification.title) ||
+                /pickup ready/i.test(notification.message) ||
+                /ready for pick-up/i.test(notification.type);
 
               const isNotificationRead = 
                 notification.isRead === true || 
@@ -367,6 +373,14 @@ const Notifications: React.FC = () => {
                           className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
                           View & Approve
+                        </Link>
+                      ) : isReadyForPickup && isOwner ? (
+                        <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
+                          to={`/pick-up-complete/${notification.bookingId}`}
+                          className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          Mark Available
                         </Link>
                       ) : isBookingAcceptedByOwner && !isOwner ? (
                         <Link
