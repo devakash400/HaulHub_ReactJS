@@ -9,3 +9,19 @@ export const createPaymentIntent = async (bookingId: string) => {
     throw error;
   }
 };
+
+export const confirmPaymentIntent = async (payload: {
+  paymentIntentId: string;
+  cardNumber: string;
+  expMonth: number;
+  expYear: number;
+  cvc: string;
+}) => {
+  try {
+    const response = await api.post(`/api/payment/confirm-intent`, payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error confirming payment intent:", error);
+    throw error;
+  }
+};

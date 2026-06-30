@@ -10,7 +10,8 @@ import {
   ConditionPhotoImage,
 } from "../../../src/api/preScreeningApi.ts";
 import { uploadSignature } from "../../../src/api/uploadApi.ts";
-
+import { createPaymentIntent, confirmPaymentIntent } from "../../../src/api/paymentApi.ts";
+import CardPaymentModal from "../../components/Payment/CardPaymentModal.tsx";
 const stepDefinitions = [
   { label: "Pre-Screening" },
   { label: "Liability" },
@@ -154,7 +155,42 @@ const PreScreening: React.FC = () => {
   });
   const [photoError, setPhotoError] = useState<string>("");
   const [photoLoading, setPhotoLoading] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
 
+  const handlePaymentSubmit = async (cardData: { cardNumber: string; expMonth: number; expYear: number; cvc: string }) => {
+    if (!paymentIntentId) return;
+    
+    try {
+      setPreScreeningSubmitting(true);
+      const confirmResponse = await confirmPaymentIntent({
+        paymentIntentId,
+        ...cardData
+      });
+      console.log("Confirm Intent Response:", confirmResponse);
+      
+      if (confirmResponse?.success && confirmResponse?.data?.status === "succeeded") {
+        setIsPaymentModalOpen(false);
+        navigate("/payment-receipt", {
+          state: {
+            ...state,
+            bookingId,
+            dates: state.dates,
+            totalPrice: state.totalPrice,
+            liabilityAgreementSigned: true,
+          },
+        });
+      } else {
+        setApiError("Payment failed to process successfully.");
+      }
+    } catch (err) {
+      console.error("Payment confirmation flow failed:", err);
+      setApiError("Payment failed. Please check your card details and try again.");
+    } finally {
+      setPreScreeningSubmitting(false);
+    }
+  };
   useEffect(() => {
     const fetchPreScreeningStatus = async () => {
       const id = state.bookingId ?? bookingId;
@@ -382,22 +418,27 @@ const PreScreening: React.FC = () => {
     if (stepIndex === 3) {
       try {
         setPreScreeningSubmitting(true);
-        const { createPaymentIntent } = await import("../../../src/api/paymentApi.ts");
-        await createPaymentIntent(bookingId);
+        setApiError("");
+        const response = await createPaymentIntent(bookingId);
+        console.log("Payment Intent Response:", response);
+
+        const newPaymentIntentId = response?.data?.paymentIntentId;
+        const amount = response?.data?.amount;
+        if (newPaymentIntentId) {
+          setPaymentIntentId(newPaymentIntentId);
+          setPaymentAmount(amount || 0);
+          setIsPaymentModalOpen(true);
+        } else {
+          console.warn("No paymentIntentId found in response");
+          setApiError("Failed to initialize payment.");
+        }
       } catch (err) {
-        console.error("Payment intent creation failed:", err);
+        console.error("Payment intent flow failed:", err);
+        setApiError("Failed to initialize payment. Please try again.");
       } finally {
         setPreScreeningSubmitting(false);
       }
-      navigate("/payment-receipt", {
-        state: {
-          ...state,
-          bookingId,
-          dates: state.dates,
-          totalPrice: state.totalPrice,
-          liabilityAgreementSigned: true,
-        },
-      });
+      return;
     }
   };
 
@@ -728,6 +769,14 @@ const PreScreening: React.FC = () => {
 
                 {stepIndex === 3 && (
                   <div className="mt-8 space-y-6">
+                    {apiError && (
+                      <div className="rounded-2xl bg-red-50 border border-red-200 p-4">
+                        <p className="text-sm text-red-700 font-medium">
+                          <span className="font-bold">❌ Error:</span>{" "}
+                          {apiError}
+                        </p>
+                      </div>
+                    )}
                     <div className="grid gap-4 rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-white p-4 sm:p-6 sm:grid-cols-2">
                       <div>
                         <p className="text-sm text-slate-500">Booking ID</p>
@@ -810,6 +859,13 @@ const PreScreening: React.FC = () => {
         </div>
       </div>
       <BottomBar />
+      <CardPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onSubmit={handlePaymentSubmit}
+        isProcessing={preScreeningSubmitting}
+        amount={paymentAmount}
+      />
     </div>
   );
 };
