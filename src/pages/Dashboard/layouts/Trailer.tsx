@@ -276,7 +276,11 @@ const Trailer: React.FC = () => {
   }
 
   const typeLabel = getTrailerTypeLabel(trailer.type);
-  const locationText = `${typeLabel} – ${trailer.location}`;
+  const locObj = trailer.location;
+  const locString = typeof locObj === 'string' 
+    ? locObj 
+    : [locObj?.address, locObj?.city, locObj?.state].filter(Boolean).join(", ") || "Location on request";
+  const locationText = `${typeLabel} – ${locString}`;
   const trailerLink =
     typeof window !== "undefined"
       ? `${window.location.origin}/trailer/${id}`

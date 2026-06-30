@@ -22,7 +22,7 @@ export type TrailerDetail = {
   title: string;
   model?: string;
   images: string[];
-  location: string;
+  location: any;
   specs: string;
   rating: number;
   reviewCount: number;
