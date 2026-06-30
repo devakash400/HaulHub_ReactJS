@@ -272,6 +272,10 @@ const Notifications: React.FC = () => {
                 /pre[\s-]?screening completed/i.test(notification.message) ||
                 /pre[\s-]?screening.*complete/i.test(notification.title) ||
                 /pre[\s-]?screening.*complete/i.test(notification.message);
+              const isPaymentCompleted =
+                /payment complet/i.test(notification.title) ||
+                /payment complet/i.test(notification.message) ||
+                /payment complet/i.test(notification.type);
 
               const isNotificationRead = 
                 notification.isRead === true || 
@@ -356,7 +360,7 @@ const Notifications: React.FC = () => {
                             View details
                           </Link>
                         )
-                      ) : isPreScreeningCompleted && isOwner ? (
+                      ) : isPaymentCompleted && isOwner ? (
                         <Link
                           onClick={() => handleMarkAsRead(notification._id)}
                           to={`/pre-screening-complete/${notification.bookingId}`}
@@ -375,7 +379,7 @@ const Notifications: React.FC = () => {
                         >
                           Start Pre-Screening
                         </Link>
-                      ) : isPickupPhotosUploaded || isBookingAccepted ? (
+                      ) : isPickupPhotosUploaded || isBookingAccepted || isPreScreeningCompleted ? (
                           !isNotificationRead ? (
                             <button
                               onClick={() => handleMarkAsRead(notification._id)}
