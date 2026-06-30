@@ -84,6 +84,7 @@ const LoadingCategorySection: React.FC<{ title: string }> = ({ title }) => (
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const [addTrailerOpen, setAddTrailerOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [renterListings, setRenterListings] = useState<{
     gooseneck: TrailerListItem[];
     bumperPull: TrailerListItem[];
@@ -176,7 +177,7 @@ const Home: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [isOwner]);
+  }, [isOwner, refreshTrigger]);
 
   const gooseneckItems = getGooseneckListItems();
   const ownerTrailerCards =
@@ -620,7 +621,10 @@ const Home: React.FC = () => {
       <AddTrailerModal
         isOpen={addTrailerOpen}
         onClose={() => setAddTrailerOpen(false)}
-        onSuccess={() => setAddTrailerOpen(false)}
+        onSuccess={() => {
+          setAddTrailerOpen(false);
+          setRefreshTrigger((prev) => prev + 1);
+        }}
       />
     </div>
   );

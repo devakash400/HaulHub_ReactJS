@@ -15,6 +15,7 @@ import { RootState } from "../../store";
 import { logout } from "../../store/authSlice.ts";
 import { clearWishlist } from "../../store/wishlistSlice.ts";
 import { logout as logoutApi } from "../../api/authApi.ts";
+import { getNotifications } from "../../api/notificationsApi.ts";
 import { LogoutConfirmModal } from "../Auth/LogoutConfirmModal.tsx";
 
 function profileInitial(
@@ -46,6 +47,7 @@ const Navbar: React.FC = () => {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isSearchCompact, setIsSearchCompact] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -65,6 +67,29 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     setImgError(false);
   }, [profilePictureUrl]);
+
+  useEffect(() => {
+    const fetchUnread = () => {
+      if (isAuthenticated) {
+        getNotifications(1, 1, true)
+          .then((res) => {
+            if (res.data?.success) {
+              setUnreadCount(res.data.data.unreadCount || 0);
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to fetch notifications unread count", err);
+          });
+      } else {
+        setUnreadCount(0);
+      }
+    };
+
+    fetchUnread();
+
+    window.addEventListener("notificationRead", fetchUnread);
+    return () => window.removeEventListener("notificationRead", fetchUnread);
+  }, [isAuthenticated, isDrawerOpen]);
 
   const toggleDrawer = () => setIsDrawerOpen((p) => !p);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -446,9 +471,14 @@ const Navbar: React.FC = () => {
                               >
                                 <Link
                                   to="/notifications"
-                                  className="text-inherit no-underline block w-full"
+                                  className="text-inherit no-underline flex items-center justify-between w-full"
                                 >
-                                  Notifications
+                                  <span>Notifications</span>
+                                  {unreadCount > 0 && (
+                                    <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full h-5 px-2">
+                                      {unreadCount}
+                                    </span>
+                                  )}
                                 </Link>
                               </li>
                               <li
@@ -466,8 +496,13 @@ const Navbar: React.FC = () => {
                                 className="w-full rounded-[14px] bg-transparent px-5 py-4 transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] hover:text-[#111827] cursor-pointer"
                                 onClick={() => handleProtectedDrawerNavigate("/notifications")}
                               >
-                                <span className="text-inherit no-underline block w-full">
-                                  Notifications
+                                <span className="text-inherit no-underline flex items-center justify-between w-full">
+                                  <span>Notifications</span>
+                                  {unreadCount > 0 && (
+                                    <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full h-5 px-2">
+                                      {unreadCount}
+                                    </span>
+                                  )}
                                 </span>
                               </li>
                               <li
@@ -496,7 +531,14 @@ const Navbar: React.FC = () => {
                             className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
-                            <Link to="/notifications">Notification</Link>
+                            <Link to="/notifications" className="flex items-center justify-between w-full">
+                              <span>Notification</span>
+                              {unreadCount > 0 && (
+                                <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full h-5 px-2">
+                                  {unreadCount}
+                                </span>
+                              )}
+                            </Link>
                           </li>
                           <li
                             className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
@@ -533,7 +575,14 @@ const Navbar: React.FC = () => {
                               handleProtectedDrawerNavigate("/notifications")
                             }
                           >
-                            <span>Notifications</span>
+                            <span className="flex items-center justify-between w-full">
+                              <span>Notifications</span>
+                              {unreadCount > 0 && (
+                                <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full h-5 px-2">
+                                  {unreadCount}
+                                </span>
+                              )}
+                            </span>
                           </li>
                           <li
                             className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
@@ -577,7 +626,14 @@ const Navbar: React.FC = () => {
                             className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             onClick={handleDrawerLinkRowClick}
                           >
-                            <Link to="/notifications">Notifications</Link>
+                            <Link to="/notifications" className="flex items-center justify-between w-full">
+                              <span>Notifications</span>
+                              {unreadCount > 0 && (
+                                <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full h-5 px-2">
+                                  {unreadCount}
+                                </span>
+                              )}
+                            </Link>
                           </li>
                           <li
                             className="w-full rounded-[14px] bg-transparent px-5 py-4 text-[#111827] transition-all duration-300 hover:bg-white hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
@@ -666,9 +722,14 @@ const Navbar: React.FC = () => {
                               >
                                 <Link
                                   to="/notifications"
-                                  className="text-inherit no-underline cursor-pointer block w-full"
+                                  className="text-inherit no-underline flex items-center justify-between w-full"
                                 >
-                                  Notifications
+                                  <span>Notifications</span>
+                                  {unreadCount > 0 && (
+                                    <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full h-5 px-2">
+                                      {unreadCount}
+                                    </span>
+                                  )}
                                 </Link>
                               </li>
                               <li
@@ -706,7 +767,14 @@ const Navbar: React.FC = () => {
                             className="px-5 py-3 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
-                            <Link to="/notifications">Notification</Link>
+                            <Link to="/notifications" className="flex items-center justify-between w-full">
+                              <span>Notification</span>
+                              {unreadCount > 0 && (
+                                <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full h-5 px-2">
+                                  {unreadCount}
+                                </span>
+                              )}
+                            </Link>
                           </li>
                           <li
                             className="px-5 py-3 cursor-pointer whitespace-nowrap text-neutral-900 transition-colors hover:bg-gray-100 hover:text-[#389131]"
@@ -779,7 +847,14 @@ const Navbar: React.FC = () => {
                             className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"
                             onClick={handleDrawerLinkRowClick}
                           >
-                            <Link to="/notifications">Notifications</Link>
+                            <Link to="/notifications" className="flex items-center justify-between w-full">
+                              <span>Notifications</span>
+                              {unreadCount > 0 && (
+                                <span className="ml-2 inline-flex items-center justify-center bg-red-500 text-white text-[11px] font-bold rounded-full h-5 px-2">
+                                  {unreadCount}
+                                </span>
+                              )}
+                            </Link>
                           </li>
                           <li
                             className="px-7 py-3 cursor-pointer whitespace-nowrap transition-colors hover:bg-gray-100 hover:text-[#389131]"

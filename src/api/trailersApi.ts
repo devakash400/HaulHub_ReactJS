@@ -444,11 +444,9 @@ export function mapApiTrailerDetailToTrailerDetail(
   const type = apiTrailerTypeToUIType(data.trailerType);
   const title = (data.title || data.name || "Trailer").trim();
   const loc = data.location;
-  const location =
-    loc?.city && loc?.state
-      ? `${loc.city}, ${loc.state}`
-      : [loc?.address, loc?.city, loc?.state].filter(Boolean).join(", ") ||
-      "Location on request";
+  const location = loc
+    ? [loc.address, loc.city, loc.state, loc.zipCode].filter(Boolean).join(", ") || "Location on request"
+    : "Location on request";
 
   const specParts = [data.model, data.dimensions, data.hitchType].filter(
     Boolean,

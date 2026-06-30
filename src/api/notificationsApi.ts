@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./api.ts";
 
 export type ApiNotification = {
   _id: string;
@@ -17,6 +17,7 @@ export type ApiNotification = {
   type: string;
   title: string;
   message: string;
+  isRead?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -44,4 +45,12 @@ export const getNotifications = async (
       unreadOnly,
     },
   });
+};
+
+export const markNotificationRead = async (notificationId: string) => {
+  return api.patch(`/api/notifications/${notificationId}/read`);
+};
+
+export const markAllNotificationsRead = async () => {
+  return api.patch(`/api/notifications/read-all`);
 };
