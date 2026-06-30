@@ -45,6 +45,11 @@ export async function getMyBookings(): Promise<unknown[]> {
   return res.data;
 }
 
+export async function getBookingById(bookingId: string): Promise<any> {
+  const res = await api.get(`/api/bookings/${bookingId}`);
+  return res.data;
+}
+
 export async function returnBooking(bookingId: string) {
   const res = await api.post(`/api/bookings/${bookingId}/return`);
   return res.data;

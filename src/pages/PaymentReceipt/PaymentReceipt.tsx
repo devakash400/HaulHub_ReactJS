@@ -1,10 +1,12 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getBookingById } from "../../api/bookingsApi.ts";
 
 type PaymentReceiptState = {
   bookingId?: string;
   dates?: string;
   totalPrice?: string;
+  rentalFee?: number;
   identityVerification?: unknown;
   liabilityAgreementSigned?: boolean;
 };
@@ -38,11 +40,62 @@ const PaymentReceipt: React.FC = () => {
   const location = useLocation();
   const state = (location.state ?? {}) as PaymentReceiptState;
 
+  const searchParams = new URLSearchParams(location.search);
+  const queryBookingId = searchParams.get("bookingId");
+  const bookingId = state.bookingId || queryBookingId;
+
+  const [bookingDetails, setBookingDetails] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchBooking = async () => {
+      if (!bookingId) return;
+      try {
+        const response = await getBookingById(bookingId);
+        if (response?.success && response?.data) {
+          setBookingDetails(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch booking details:", err);
+      }
+    };
+    void fetchBooking();
+  }, [bookingId]);
+
   const paidOn = useMemo(() => formatPaidOn(new Date()), []);
-  const subtotal = useMemo(() => asMoney(state.totalPrice), [state.totalPrice]);
-  const tax = useMemo(() => Number((subtotal * 0.18).toFixed(2)), [subtotal]);
-  const totalDue = useMemo(() => Number((subtotal + tax).toFixed(2)), [subtotal, tax]);
-  const amountPay = useMemo(() => Number((totalDue - 3).toFixed(2)), [totalDue]);
+  
+  const displayDates = useMemo(() => {
+    if (bookingDetails?.startDate && bookingDetails?.endDate) {
+      const start = new Date(bookingDetails.startDate);
+      const end = new Date(bookingDetails.endDate);
+      const startStr = `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      const endStr = `${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      return `${startStr} - ${endStr}`.toUpperCase();
+    }
+    return state.dates ?? "FEBRUARY 18-MARCH 18,2026";
+  }, [bookingDetails, state.dates]);
+
+  const { subtotal, tax, totalDue, amountPay } = useMemo(() => {
+    let numericPrice = 20;
+    
+    if (bookingDetails?.totalPrice != null) {
+      numericPrice = Number(bookingDetails.totalPrice);
+    } else if (state.rentalFee != null) {
+      numericPrice = Number(state.rentalFee);
+    } else if (state.totalPrice) {
+      numericPrice = asMoney(state.totalPrice);
+    }
+
+    const calculatedTax = Number((numericPrice * 0.18).toFixed(2));
+    const calculatedTotal = Number((numericPrice + calculatedTax).toFixed(2));
+    const finalPay = Number((calculatedTotal - 3).toFixed(2));
+
+    return {
+      subtotal: numericPrice,
+      tax: calculatedTax,
+      totalDue: calculatedTotal,
+      amountPay: finalPay
+    };
+  }, [bookingDetails, state]);
 
   const handleContinue = () => {
     navigate("/request-to-book", {
@@ -87,13 +140,13 @@ const PaymentReceipt: React.FC = () => {
                   <div className="p-3 border-b border-gray-200 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold text-gray-900 uppercase">
-                        {state.dates ?? "FEBRUARY 18-MARCH 18,2026"}
+                        {displayDates}
                       </p>
                       <p className="text-xs text-gray-900 mt-1">HaulHub Rental</p>
                       <p className="text-xs text-gray-600">Qty 1</p>
-                      {state.bookingId && (
+                      {bookingId && (
                         <p className="text-[11px] text-gray-600 mt-1">
-                          Booking: #{state.bookingId}
+                          Booking: #{bookingId}
                         </p>
                       )}
                     </div>

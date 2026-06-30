@@ -10,7 +10,9 @@ import {
   ConditionPhotoImage,
 } from "../../../src/api/preScreeningApi.ts";
 import { uploadSignature } from "../../../src/api/uploadApi.ts";
-
+import { createPaymentIntent, confirmPaymentIntent } from "../../../src/api/paymentApi.ts";
+import { getBookingById } from "../../../src/api/bookingsApi.ts";
+import CardPaymentModal from "../../components/Payment/CardPaymentModal.tsx";
 const stepDefinitions = [
   { label: "Pre-Screening" },
   { label: "Liability" },
@@ -154,7 +156,90 @@ const PreScreening: React.FC = () => {
   });
   const [photoError, setPhotoError] = useState<string>("");
   const [photoLoading, setPhotoLoading] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [bookingDetails, setBookingDetails] = useState<any>(null);
 
+  useEffect(() => {
+    const fetchBooking = async () => {
+      const id = state.bookingId ?? bookingId;
+      if (!id) return;
+      try {
+        const response = await getBookingById(id);
+        if (response?.success && response?.data) {
+          setBookingDetails(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch booking details:", err);
+      }
+    };
+    void fetchBooking();
+  }, [bookingId, state.bookingId]);
+
+  const displayDates = useMemo(() => {
+    if (bookingDetails?.startDate && bookingDetails?.endDate) {
+      const start = new Date(bookingDetails.startDate);
+      const end = new Date(bookingDetails.endDate);
+      const startStr = `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      const endStr = `${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      return `${startStr} - ${endStr}`.toUpperCase();
+    }
+    return state.dates ?? "TBA";
+  }, [bookingDetails, state.dates]);
+
+  const { rentalFee, taxAmount, totalAmount } = useMemo(() => {
+    let numericPrice = 20;
+    if (bookingDetails?.totalPrice != null) {
+      numericPrice = Number(bookingDetails.totalPrice);
+    } else if (state.totalPrice) {
+      numericPrice = Number(state.totalPrice.replace(/[^0-9.]/g, ""));
+    }
+    
+    // Assume the given price is the rental fee
+    const tax = Number((numericPrice * 0.18).toFixed(2));
+    const total = Number((numericPrice + tax).toFixed(2));
+    
+    return {
+      rentalFee: numericPrice,
+      taxAmount: tax,
+      totalAmount: total
+    };
+  }, [bookingDetails, state.totalPrice]);
+
+  const handlePaymentSubmit = async (cardData: { cardNumber: string; expMonth: number; expYear: number; cvc: string }) => {
+    if (!paymentIntentId) return;
+    
+    try {
+      setPreScreeningSubmitting(true);
+      const confirmResponse = await confirmPaymentIntent({
+        paymentIntentId,
+        ...cardData
+      });
+      console.log("Confirm Intent Response:", confirmResponse);
+      
+      if (confirmResponse?.success && confirmResponse?.data?.status === "succeeded") {
+        setIsPaymentModalOpen(false);
+        navigate("/payment-receipt", {
+          state: {
+            ...state,
+            bookingId,
+            dates: displayDates,
+            totalPrice: state.totalPrice,
+            rentalFee: rentalFee,
+            liabilityAgreementSigned: true,
+          },
+        });
+      } else {
+        setApiError("Payment failed to process successfully.");
+      }
+    } catch (err) {
+      console.error("Payment confirmation flow failed:", err);
+      setApiError("Payment failed. Please check your card details and try again.");
+    } finally {
+      setPreScreeningSubmitting(false);
+    }
+  };
   useEffect(() => {
     const fetchPreScreeningStatus = async () => {
       const id = state.bookingId ?? bookingId;
@@ -380,15 +465,29 @@ const PreScreening: React.FC = () => {
       return;
     }
     if (stepIndex === 3) {
-      navigate("/payment-receipt", {
-        state: {
-          ...state,
-          bookingId,
-          dates: state.dates,
-          totalPrice: state.totalPrice,
-          liabilityAgreementSigned: true,
-        },
-      });
+      try {
+        setPreScreeningSubmitting(true);
+        setApiError("");
+        const response = await createPaymentIntent(bookingId);
+        console.log("Payment Intent Response:", response);
+
+        const newPaymentIntentId = response?.data?.paymentIntentId;
+        const amount = response?.data?.amount;
+        if (newPaymentIntentId) {
+          setPaymentIntentId(newPaymentIntentId);
+          setPaymentAmount(amount || 0);
+          setIsPaymentModalOpen(true);
+        } else {
+          console.warn("No paymentIntentId found in response");
+          setApiError("Failed to initialize payment.");
+        }
+      } catch (err) {
+        console.error("Payment intent flow failed:", err);
+        setApiError("Failed to initialize payment. Please try again.");
+      } finally {
+        setPreScreeningSubmitting(false);
+      }
+      return;
     }
   };
 
@@ -719,6 +818,14 @@ const PreScreening: React.FC = () => {
 
                 {stepIndex === 3 && (
                   <div className="mt-8 space-y-6">
+                    {apiError && (
+                      <div className="rounded-2xl bg-red-50 border border-red-200 p-4">
+                        <p className="text-sm text-red-700 font-medium">
+                          <span className="font-bold">❌ Error:</span>{" "}
+                          {apiError}
+                        </p>
+                      </div>
+                    )}
                     <div className="grid gap-4 rounded-2xl sm:rounded-3xl border border-[#D9D9D9] bg-white p-4 sm:p-6 sm:grid-cols-2">
                       <div>
                         <p className="text-sm text-slate-500">Booking ID</p>
@@ -729,7 +836,7 @@ const PreScreening: React.FC = () => {
                       <div>
                         <p className="text-sm text-slate-500">Rental Dates</p>
                         <p className="mt-2 text-lg font-semibold text-slate-900">
-                          {state.dates ?? "TBA"}
+                          {displayDates}
                         </p>
                       </div>
                     </div>
@@ -741,15 +848,15 @@ const PreScreening: React.FC = () => {
                       <div className="mt-4 space-y-3 text-sm text-slate-600">
                         <div className="flex items-center justify-between">
                           <span>Rental fee</span>
-                          <span>{state.totalPrice ?? "$20.00"}</span>
+                          <span>${rentalFee.toFixed(2)}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span>Taxes & fees</span>
-                          <span>{state.totalPrice ? "$3.60" : "$2.00"}</span>
+                          <span>${taxAmount.toFixed(2)}</span>
                         </div>
                         <div className="border-t border-[#E5E7EB] pt-3 flex items-center justify-between text-base font-semibold text-slate-900">
                           <span>Total</span>
-                          <span>{state.totalPrice ?? "$22.00"}</span>
+                          <span>${totalAmount.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -801,6 +908,13 @@ const PreScreening: React.FC = () => {
         </div>
       </div>
       <BottomBar />
+      <CardPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onSubmit={handlePaymentSubmit}
+        isProcessing={preScreeningSubmitting}
+        amount={paymentAmount}
+      />
     </div>
   );
 };

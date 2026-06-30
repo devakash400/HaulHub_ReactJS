@@ -49,6 +49,7 @@ import { updateUser } from "./store/authSlice.ts";
 import { getUserProfile } from "./api/userApi.ts";
 import SearchResults from "./pages/SearchResults/SearchResults.tsx";
 import PersonalProfile from "./pages/PersonalProfile/PersonalProfile.tsx";
+import PaymentTerms from "./pages/PaymentTerms.tsx";
 
 type LocationState = {
   backgroundLocation?: Location;
@@ -164,6 +165,7 @@ const App: React.FC = () => {
           <Route path="/get-help" element={<GetHelp />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/payment-terms" element={<PaymentTerms />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route
             path="*"
