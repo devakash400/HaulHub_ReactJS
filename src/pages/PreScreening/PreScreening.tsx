@@ -11,6 +11,7 @@ import {
 } from "../../../src/api/preScreeningApi.ts";
 import { uploadSignature } from "../../../src/api/uploadApi.ts";
 import { createPaymentIntent, confirmPaymentIntent } from "../../../src/api/paymentApi.ts";
+import { getBookingById } from "../../../src/api/bookingsApi.ts";
 import CardPaymentModal from "../../components/Payment/CardPaymentModal.tsx";
 const stepDefinitions = [
   { label: "Pre-Screening" },
@@ -158,6 +159,53 @@ const PreScreening: React.FC = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [bookingDetails, setBookingDetails] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchBooking = async () => {
+      const id = state.bookingId ?? bookingId;
+      if (!id) return;
+      try {
+        const response = await getBookingById(id);
+        if (response?.success && response?.data) {
+          setBookingDetails(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch booking details:", err);
+      }
+    };
+    void fetchBooking();
+  }, [bookingId, state.bookingId]);
+
+  const displayDates = useMemo(() => {
+    if (bookingDetails?.startDate && bookingDetails?.endDate) {
+      const start = new Date(bookingDetails.startDate);
+      const end = new Date(bookingDetails.endDate);
+      const startStr = `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      const endStr = `${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      return `${startStr} - ${endStr}`.toUpperCase();
+    }
+    return state.dates ?? "TBA";
+  }, [bookingDetails, state.dates]);
+
+  const { rentalFee, taxAmount, totalAmount } = useMemo(() => {
+    let numericPrice = 20;
+    if (bookingDetails?.totalPrice != null) {
+      numericPrice = Number(bookingDetails.totalPrice);
+    } else if (state.totalPrice) {
+      numericPrice = Number(state.totalPrice.replace(/[^0-9.]/g, ""));
+    }
+    
+    // Assume the given price is the rental fee
+    const tax = Number((numericPrice * 0.18).toFixed(2));
+    const total = Number((numericPrice + tax).toFixed(2));
+    
+    return {
+      rentalFee: numericPrice,
+      taxAmount: tax,
+      totalAmount: total
+    };
+  }, [bookingDetails, state.totalPrice]);
 
   const handlePaymentSubmit = async (cardData: { cardNumber: string; expMonth: number; expYear: number; cvc: string }) => {
     if (!paymentIntentId) return;
@@ -176,8 +224,9 @@ const PreScreening: React.FC = () => {
           state: {
             ...state,
             bookingId,
-            dates: state.dates,
+            dates: displayDates,
             totalPrice: state.totalPrice,
+            rentalFee: rentalFee,
             liabilityAgreementSigned: true,
           },
         });
@@ -787,7 +836,7 @@ const PreScreening: React.FC = () => {
                       <div>
                         <p className="text-sm text-slate-500">Rental Dates</p>
                         <p className="mt-2 text-lg font-semibold text-slate-900">
-                          {state.dates ?? "TBA"}
+                          {displayDates}
                         </p>
                       </div>
                     </div>
@@ -799,15 +848,15 @@ const PreScreening: React.FC = () => {
                       <div className="mt-4 space-y-3 text-sm text-slate-600">
                         <div className="flex items-center justify-between">
                           <span>Rental fee</span>
-                          <span>{state.totalPrice ?? "$20.00"}</span>
+                          <span>${rentalFee.toFixed(2)}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span>Taxes & fees</span>
-                          <span>{state.totalPrice ? "$3.60" : "$2.00"}</span>
+                          <span>${taxAmount.toFixed(2)}</span>
                         </div>
                         <div className="border-t border-[#E5E7EB] pt-3 flex items-center justify-between text-base font-semibold text-slate-900">
                           <span>Total</span>
-                          <span>{state.totalPrice ?? "$22.00"}</span>
+                          <span>${totalAmount.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
