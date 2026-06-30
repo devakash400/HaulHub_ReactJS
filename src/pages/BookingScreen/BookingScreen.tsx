@@ -49,7 +49,9 @@ export type BookingStatus =
   | "pre-screening"
   | "owner_photos_uploaded"
   | "waiting_for_pickup_approval"
-  | "pre_screening_completed";
+  | "pre_screening_completed"
+  | "payment_completed"
+  | "pickup_ready";
 export type FilterStatus =
   | "all"
   | "pending"
@@ -57,7 +59,9 @@ export type FilterStatus =
   | "rejected"
   | "active"
   | "overdue"
-  | "return";
+  | "return"
+  | "payment_completed"
+  | "pickup_ready";
 
 export type BookingItem = {
   id: string;
@@ -112,6 +116,14 @@ const statusStyles: Record<string, { label: string; className: string }> = {
     label: "Waiting for Pickup Approval",
     className: "bg-blue-100 text-blue-800",
   },
+  payment_completed: {
+    label: "Payment Completed",
+    className: "bg-[#389131] text-white",
+  },
+  pickup_ready: {
+    label: "Pickup Ready",
+    className: "bg-blue-100 text-blue-800",
+  },
 };
 
 const FILTER_LABELS: Record<FilterStatus, string> = {
@@ -122,6 +134,8 @@ const FILTER_LABELS: Record<FilterStatus, string> = {
   active: "Active",
   overdue: "Overdue",
   return: "Returned",
+  payment_completed: "Payment Completed",
+  pickup_ready: "Pickup Ready",
 };
 
 const BookingScreen: React.FC = () => {
@@ -327,8 +341,8 @@ const BookingScreen: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white w-full min-w-0 overflow-x-hidden">
-      <main className="flex-1 min-h-0 min-w-0 overflow-y-auto max-w-3xl mx-auto w-full px-4 sm:px-6 py-4">
+    <div className="h-full flex flex-col bg-white w-full min-w-0">
+      <main className="flex-1 min-h-0 min-w-0 max-w-3xl mx-auto w-full px-4 sm:px-6 py-4">
         {/* Page title */}
         <h1 className="text-xl sm:text-2xl font-bold text-black text-center mb-4 mt-2">
           Your Booked Trailers
@@ -348,7 +362,7 @@ const BookingScreen: React.FC = () => {
               />
             </button>
             {filterOpen && (
-              <div className="absolute right-0 top-full mt-1 py-2 w-48 rounded-lg bg-white border border-gray-200 shadow-lg z-20">
+              <div className="absolute right-0 top-full mt-1 py-2 w-48 rounded-lg bg-white border border-gray-200 shadow-lg z-50">
                 {(Object.keys(FILTER_LABELS) as FilterStatus[]).map(
                   (status) => (
                     <button
