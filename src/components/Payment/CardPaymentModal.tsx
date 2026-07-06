@@ -105,7 +105,7 @@ const CardPaymentModal: React.FC<CardPaymentModalProps> = ({
             disabled={isProcessing}
             className="mt-6 w-full rounded-xl bg-[#1F8A3D] p-4 text-sm font-semibold text-white transition hover:bg-[#16692d] disabled:opacity-50"
           >
-            {isProcessing ? 'Processing...' : `Pay $${(amount / 100).toFixed(2)}`}
+            {isProcessing ? 'Processing...' : `Pay $${(amount / 110).toFixed(2)}`}
           </button>
         </form>
       </div>
