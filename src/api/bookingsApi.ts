@@ -45,6 +45,11 @@ export async function getMyBookings(): Promise<unknown[]> {
   return res.data;
 }
 
+export async function getRenterBookingHistory(): Promise<any> {
+  const res = await api.get("/api/bookings/renter/history");
+  return res.data;
+}
+
 export async function getBookingById(bookingId: string): Promise<any> {
   const res = await api.get(`/api/bookings/${bookingId}`);
   return res.data;
