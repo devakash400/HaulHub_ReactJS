@@ -252,13 +252,22 @@ const PaymentReceipt: React.FC = () => {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleContinue}
-          className="mt-8 w-full bg-[#389131] text-white py-3.5 rounded-md text-sm font-semibold hover:opacity-90"
-        >
-          Continue
-        </button>
+        <div className="mt-8 grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => navigate("/booking")}
+            className="w-full bg-[#389131] text-white py-3.5 rounded-md text-sm font-semibold hover:opacity-90 text-center"
+          >
+            Go to Bookings
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/notifications")}
+            className="w-full bg-[#389131] text-white py-3.5 rounded-md text-sm font-semibold hover:opacity-90 text-center"
+          >
+            Go to Notifications
+          </button>
+        </div>
       </main>
     </div>
   );
