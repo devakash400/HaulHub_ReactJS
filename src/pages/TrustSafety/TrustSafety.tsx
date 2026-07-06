@@ -53,8 +53,11 @@ const GUIDELINES = [
 
 const TrustSafety: React.FC = () => {
   return (
-    <main style={{fontFamily:'Lexend'}} className="min-h-screen w-full min-w-0 
-    overflow-x-hidden bg-[#F6F1E8] font-sans">
+    <main
+      style={{ fontFamily: "Lexend" }}
+      className="min-h-screen w-full min-w-0 
+    overflow-x-hidden bg-[#F6F1E8] font-sans"
+    >
       {/* Hero */}
       <section className="relative w-full min-h-[45vh] overflow-hidden">
         <img
@@ -76,9 +79,11 @@ const TrustSafety: React.FC = () => {
 
       <div className="mx-auto w-full">
         {/* Intro */}
-        <section className="py-10 sm:px-10 sm:py-14">
-          <p className="max-w-2xl font-lexend font-light 
-text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]">
+        <section className="py-10 px-4 sm:px-10 sm:py-14">
+          <p
+            className="max-w-2xl font-lexend font-light
+    text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]"
+          >
             HaulHub is built to keep renters and trailer owners safe. From
             secure payments and refundable deposits to reviews and clear
             guidelines, we work to make every rental transparent and
@@ -88,9 +93,9 @@ text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]">
 
         {/* Trust pillars - grid */}
         <section className="px-6 py-10 sm:px-10 sm:py-14 border-t border-neutral-200">
-        <h2 className="mb-8 font-normal text-[32px] leading-none tracking-normal text-black">
-  How We Protect You
-</h2>
+          <h2 className="mb-8 font-normal text-[32px] leading-none tracking-normal text-black">
+            How We Protect You
+          </h2>
           <div className="grid gap-8 sm:grid-cols-2">
             {TRUST_PILLARS.map((item) => {
               const Icon = item.icon;
@@ -120,28 +125,29 @@ text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]">
 
         {/* Safety guidelines */}
         <section className="border-t border-neutral-200 px-6 py-10 sm:px-10 sm:py-14">
-        <h2 className="mb-8 font-normal text-[32px] leading-none tracking-normal text-black">
-        Safety guidelines
-
-</h2>  
-<p className="mb-6 font-light text-[28px] leading-none tracking-[0.01em] 
-">
-  Following these practices helps keep everyone safe and ensures a
-  smooth rental experience.
-</p>
+          <h2 className="mb-8 font-normal text-[32px] leading-none tracking-normal text-black">
+            Safety guidelines
+          </h2>
+          <p
+            className="mb-6 font-light text-[28px] leading-none tracking-[0.01em] 
+"
+          >
+            Following these practices helps keep everyone safe and ensures a
+            smooth rental experience.
+          </p>
           <ul className="space-y-3">
-  {GUIDELINES.map((guideline, i) => (
-    <li
-      key={i}
-      className="flex items-start gap-3 font-light text-[25px] leading-none tracking-[0.01em] text-black"
-    >
-      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#389131]/15 text-[#389131]">
-        <CheckCircle2 className="h-4 w-4" aria-hidden />
-      </span>
-      {guideline}
-    </li>
-  ))}
-</ul>
+            {GUIDELINES.map((guideline, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-3 font-light text-[25px] leading-none tracking-[0.01em] text-black"
+              >
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#389131]/15 text-[#389131]">
+                  <CheckCircle2 className="h-4 w-4" aria-hidden />
+                </span>
+                {guideline}
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* Deposits & photos */}
@@ -167,10 +173,9 @@ text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]">
 
         {/* Reporting */}
         <section className="border-t border-neutral-200 px-6 py-10 sm:px-10 sm:py-14">
-        <h2 className="mb-8 font-normal text-[32px] leading-none tracking-normal text-black">
-        Report an issue
-
-</h2>   
+          <h2 className="mb-8 font-normal text-[32px] leading-none tracking-normal text-black">
+            Report an issue
+          </h2>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch">
             <div className="flex flex-1 gap-4 rounded-xl border border-neutral-200 bg-white/60 p-6 shadow-sm">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-700">
@@ -196,8 +201,8 @@ text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]">
                   General support
                 </h3>
                 <p className="mt-2 text-base leading-relaxed text-neutral-700">
-                  For questions about your booking, payments, or how things work,
-                  our team is here to help.
+                  For questions about your booking, payments, or how things
+                  work, our team is here to help.
                 </p>
               </div>
             </div>
@@ -211,8 +216,8 @@ text-[25px] leading-[120%] tracking-[0.01em] text-[#000000]">
               Need help or have questions?
             </h2>
             <p className="mx-auto mt-3 max-w-md text-base text-neutral-300">
-              Reach out anytime for support, to report an issue, or to learn more
-              about how we keep the marketplace safe.
+              Reach out anytime for support, to report an issue, or to learn
+              more about how we keep the marketplace safe.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link

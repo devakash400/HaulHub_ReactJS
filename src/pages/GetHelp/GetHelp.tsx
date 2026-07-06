@@ -85,12 +85,15 @@ const GetHelp: React.FC = () => {
       : FAQ_ITEMS.filter(
           (item) =>
             item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.answer.toLowerCase().includes(searchQuery.toLowerCase())
+            item.answer.toLowerCase().includes(searchQuery.toLowerCase()),
         );
 
   return (
-    <main style={{fontFamily:"Lexend"}} className="min-h-screen w-full min-w-0 
-    overflow-x-hidden bg-[#F6F1E8] font-sans">
+    <main
+      style={{ fontFamily: "Lexend" }}
+      className="min-h-screen w-full min-w-0 
+    overflow-x-hidden bg-[#F6F1E8] font-sans"
+    >
       {/* Hero */}
       <section className="relative w-full min-h-[40vh] overflow-hidden">
         <img
@@ -111,29 +114,11 @@ const GetHelp: React.FC = () => {
       </section>
 
       <div className="mx-auto max-w-full">
-        {/* Search */}
-        <section className="px-6 pt-10 sm:px-10 sm:pt-14">
-          <div className="relative">
-            <Search
-              className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
-              aria-hidden
-            />
-            <input
-              type="search"
-              placeholder="Search for help (e.g. booking, payment, cancel)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-neutral-200 bg-white py-3.5 pl-12 pr-4 text-neutral-800 placeholder:text-gray-500 focus:border-[#389131] focus:outline-none focus:ring-2 focus:ring-[#389131]/20"
-              aria-label="Search help articles"
-            />
-          </div>
-        </section>
-
         {/* Help categories */}
         <section className="px-6 py-10 sm:px-10 sm:py-14">
-        <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
-  Browse by topic
-</h2>
+          <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
+            Browse by topic
+          </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {HELP_CATEGORIES.map((cat) => {
               const Icon = cat.icon;
@@ -155,12 +140,17 @@ const GetHelp: React.FC = () => {
                     <Icon className="h-5 w-5" aria-hidden />
                   </span>
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-neutral-900">{cat.title}</h3>
+                    <h3 className="font-semibold text-neutral-900">
+                      {cat.title}
+                    </h3>
                     <p className="mt-1 text-sm text-neutral-600 line-clamp-2">
                       {cat.description}
                     </p>
                   </div>
-                  <ArrowRight className="h-5 w-5 shrink-0 text-gray-400 self-center" aria-hidden />
+                  <ArrowRight
+                    className="h-5 w-5 shrink-0 text-gray-400 self-center"
+                    aria-hidden
+                  />
                 </Link>
               );
             })}
@@ -169,14 +159,17 @@ const GetHelp: React.FC = () => {
 
         {/* FAQ */}
         <section className="border-t border-neutral-200 px-6 py-10 sm:px-10 sm:py-14">
-        <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
-        Frequently asked questions
-</h2>  
+          <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
+            Frequently asked questions
+          </h2>
           <div className="space-y-2">
             {filteredFaq.length === 0 ? (
               <p className="rounded-xl border border-neutral-200 bg-white/60 px-5 py-8 text-center text-neutral-600">
                 No results for “{searchQuery}”. Try different keywords or{" "}
-                <Link to="/contact" className="text-[#389131] font-medium hover:underline">
+                <Link
+                  to="/contact"
+                  className="text-[#389131] font-medium hover:underline"
+                >
                   contact us
                 </Link>
                 .
@@ -217,29 +210,31 @@ const GetHelp: React.FC = () => {
 
         {/* Quick links */}
         <section className="border-t border-neutral-200 px-6 py-10 sm:px-10 sm:py-14">
-         <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
-          Quick links
-</h2> 
+          <h2 className="mb-6 font-normal text-[32px] leading-none tracking-normal text-black">
+            Quick links
+          </h2>
           <div className="flex flex-wrap gap-4">
             <Link
               to="/how-it-works"
-              className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-neutral-800 no-underline transition hover:border-[#389131]/40 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
+              className="inline-flex w-[200px] items-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-neutral-800 no-underline transition hover:border-[#389131]/40 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
             >
-              <FileText className="h-5 w-5 text-[#389131]" aria-hidden />
+              <FileText className="h-5 w-5 text-[#389131]" />
               How it works
             </Link>
+
             <Link
               to="/trust-safety"
-              className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-neutral-800 no-underline transition hover:border-[#389131]/40 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
+              className="inline-flex w-[200px] items-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-neutral-800 no-underline transition hover:border-[#389131]/40 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
             >
-              <Shield className="h-5 w-5 text-[#389131]" aria-hidden />
+              <Shield className="h-5 w-5 text-[#389131]" />
               Trust & safety
             </Link>
+
             <Link
               to="/contact"
-              className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-neutral-800 no-underline transition hover:border-[#389131]/40 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
+              className="inline-flex w-[200px] items-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-neutral-800 no-underline transition hover:border-[#389131]/40 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2"
             >
-              <Mail className="h-5 w-5 text-[#389131]" aria-hidden />
+              <Mail className="h-5 w-5 text-[#389131]" />
               Contact us
             </Link>
           </div>

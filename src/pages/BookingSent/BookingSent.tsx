@@ -7,7 +7,11 @@ const formatDateString = (dateStr: string) => {
   return String(dateStr).replace(dateRegex, (match, year, month, day) => {
     const d = new Date(Number(year), Number(month) - 1, Number(day));
     if (!isNaN(d.getTime())) {
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
     }
     return match;
   });
@@ -20,10 +24,10 @@ const BookingSent: React.FC = () => {
   const state = (location.state ?? {}) as Record<string, unknown>;
 
   return (
-    <div className="min-h-screen bg-[#f6f8f7] ">
+    <div className="bg-[#f6f8f7]">
       <div className="w-full mx-auto">
         {/* Main Card */}
-        <div className="bg-white rounded-[28px] shadow-md p-8 md:p-14">
+        <div className="bg-white shadow-md p-8 md:p-14">
           {/* Success Icon */}
           <div className="flex justify-center">
             <div className="w-[90px] h-[90px] rounded-full bg-[#EAF7EE] flex items-center justify-center">
@@ -63,21 +67,26 @@ const BookingSent: React.FC = () => {
             >
               The owner will review and respond shortly.
             </p>
-            <p className="text-gray-500 text-lg"></p>
           </div>
 
           {/* Details Card */}
           <div className="max-w-3xl mx-auto mt-12 border border-gray-200 rounded-2xl p-8 bg-[#fafafa]">
             <div className="flex justify-between items-center py-4 border-b gap-4 md:gap-0">
-              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">Dates</span>
+              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">
+                Dates
+              </span>
 
               <span className="font-semibold text-lg text-right md:text-left">
-                {formatDateString(String(state.dates || "2026-05-14 - 2026-05-26"))}
+                {formatDateString(
+                  String(state.dates || "2026-05-14 - 2026-05-26"),
+                )}
               </span>
             </div>
 
             <div className="flex justify-between items-center py-4 border-b gap-4 md:gap-0">
-              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">Total Price</span>
+              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">
+                Total Price
+              </span>
 
               <span className="font-semibold text-lg text-right md:text-left">
                 {String(state.totalPrice || "320")}
@@ -85,7 +94,9 @@ const BookingSent: React.FC = () => {
             </div>
 
             <div className="flex justify-between items-center pt-4 gap-4 md:gap-0">
-              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">Status</span>
+              <span className="text-gray-500 text-lg whitespace-nowrap md:whitespace-normal">
+                Status
+              </span>
 
               <span className="px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700 whitespace-nowrap md:whitespace-normal text-right md:text-left">
                 Pending Confirmation
