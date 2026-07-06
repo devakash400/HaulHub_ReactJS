@@ -288,7 +288,7 @@ const Profile: React.FC = () => {
     {
       label: "Transaction History",
       icon: transactionicon,
-      onClick: () => navigate("/booking"),
+      onClick: () => navigate("/transaction-history"),
     },
     {
       label: "Log Out",
@@ -315,7 +315,7 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       className="w-full bg-white overflow-x-hidden flex flex-col min-h-[calc(100vh-160px)]"
       style={{
         boxShadow: "0px 4px 4px 0px rgba(0,0,0,0.25)",
@@ -405,7 +405,7 @@ const Profile: React.FC = () => {
               <Camera className="w-5 h-5 text-white" />
             </button> */}
 
-                        {/* <button
+            {/* <button
               type="button"
               onClick={() => navigate("/edit-profile")}
               disabled={uploadingPhoto}

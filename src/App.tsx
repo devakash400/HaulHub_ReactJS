@@ -50,6 +50,8 @@ import { getUserProfile } from "./api/userApi.ts";
 import SearchResults from "./pages/SearchResults/SearchResults.tsx";
 import PersonalProfile from "./pages/PersonalProfile/PersonalProfile.tsx";
 import PaymentTerms from "./pages/PaymentTerms.tsx";
+import PickUpComplete from "./pages/PickUpComplete/PickUpComplete.tsx";
+import TransactionHistory from "./pages/TrasactionHistory/TransactionHistory.tsx";
 
 type LocationState = {
   backgroundLocation?: Location;
@@ -125,6 +127,7 @@ const App: React.FC = () => {
           />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/personal-profile" element={<PersonalProfile />} />
+          <Route path="/transaction-history" element={<TransactionHistory />} />
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/about" element={<About />} />
@@ -135,7 +138,7 @@ const App: React.FC = () => {
             path="/trailor-condition-after"
             element={<TrailorConditionAfter />}
           />
-          <Route path="/return" element={<Return />} />
+          <Route path="/return/:id" element={<Return />} />
           <Route path="/owner/truck/:id" element={<OwnerTruckDescription />} />
           <Route
             path="/owner/view-more-trucks"
@@ -150,6 +153,10 @@ const App: React.FC = () => {
           <Route
             path="/pre-screening-complete/:bookingId"
             element={<PreScreeningComplete />}
+          />
+          <Route
+            path="/pick-up-complete/:bookingId"
+            element={<PickUpComplete />}
           />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/verify-identity" element={<VerifyIdentity />} />

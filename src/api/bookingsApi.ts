@@ -45,6 +45,16 @@ export async function getMyBookings(): Promise<unknown[]> {
   return res.data;
 }
 
+export async function getRenterBookingHistory(): Promise<any> {
+  const res = await api.get("/api/bookings/renter/history");
+  return res.data;
+}
+
+export async function getOwnerManageBookings(): Promise<any> {
+  const res = await api.get("/api/bookings/owner/manage");
+  return res.data;
+}
+
 export async function getBookingById(bookingId: string): Promise<any> {
   const res = await api.get(`/api/bookings/${bookingId}`);
   return res.data;
@@ -57,6 +67,42 @@ export async function returnBooking(bookingId: string) {
 
 export async function markReadyForPickup(bookingId: string) {
   const res = await api.post(`/api/bookings/${bookingId}/ready-for-pickup`);
+  return res.data;
+}
+
+export type ReturnRequestPayload = {
+  condition: "no_damage" | "minor_scratch" | "damage_note";
+  note?: string;
+  photos: File[];
+};
+
+export async function requestReturn(bookingId: string, payload: ReturnRequestPayload) {
+  const formData = new FormData();
+  formData.append("condition", payload.condition);
+  if (payload.note) {
+    formData.append("note", payload.note);
+  }
+  if (Array.isArray(payload.photos)) {
+    payload.photos.forEach((file) => {
+      formData.append("photos", file);
+    });
+  }
+
+  const res = await api.post(`/api/bookings/${bookingId}/return-request`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+}
+
+export type AcceptReturnPayload = {
+  penaltyAmount?: number;
+  penaltyReason?: string;
+};
+
+export async function acceptReturnBooking(bookingId: string, payload?: AcceptReturnPayload) {
+  const res = await api.post(`/api/bookings/${bookingId}/return-accept`, payload);
   return res.data;
 }
 

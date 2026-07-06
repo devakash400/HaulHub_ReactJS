@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { getBookingById } from "../../api/bookingsApi.ts";
+import { fetchTrailerById } from "../../api/trailersApi.ts";
+import { RootState } from "../../store";
 
 type PaymentReceiptState = {
   bookingId?: string;
@@ -40,6 +43,8 @@ const PaymentReceipt: React.FC = () => {
   const location = useLocation();
   const state = (location.state ?? {}) as PaymentReceiptState;
 
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+
   const searchParams = new URLSearchParams(location.search);
   const queryBookingId = searchParams.get("bookingId");
   const bookingId = state.bookingId || queryBookingId;
@@ -74,6 +79,65 @@ const PaymentReceipt: React.FC = () => {
     return state.dates ?? "FEBRUARY 18-MARCH 18,2026";
   }, [bookingDetails, state.dates]);
 
+  const [ownerName, setOwnerName] = useState("Owner");
+
+  useEffect(() => {
+    const resolveOwner = async () => {
+      if (!bookingDetails?.trailerId) return;
+      
+      const trailer = bookingDetails.trailerId;
+      const tid = typeof trailer === "object" ? trailer._id : trailer;
+      if (!tid) return;
+
+      try {
+        const trailerData = await fetchTrailerById(tid);
+        const owner = trailerData?.ownerId;
+        if (owner && typeof owner === "object" && owner.fullName) {
+          setOwnerName(owner.fullName);
+        }
+      } catch (err) {
+        console.error("Failed to fetch trailer owner name:", err);
+      }
+    };
+
+    if (bookingDetails) {
+      const owner = bookingDetails.trailerId?.ownerId;
+      if (owner && typeof owner === "object" && owner.fullName) {
+        setOwnerName(owner.fullName);
+      } else {
+        void resolveOwner();
+      }
+    }
+  }, [bookingDetails]);
+
+  const renterName = useMemo(() => {
+    const renter = bookingDetails?.userId || bookingDetails?.user || bookingDetails?.renter || bookingDetails?.renterId;
+    if (renter && typeof renter === "object") {
+      if (renter.fullName) return renter.fullName;
+      if (renter.firstName || renter.lastName) {
+        return [renter.firstName, renter.lastName].filter(Boolean).join(" ");
+      }
+    }
+    if (bookingDetails?.renterName) return bookingDetails.renterName;
+
+    if (currentUser?.firstName || currentUser?.lastName) {
+      return [currentUser.firstName, currentUser.lastName].filter(Boolean).join(" ");
+    }
+    if (currentUser?.email) return currentUser.email;
+
+    return "Renter";
+  }, [bookingDetails, currentUser]);
+
+  const invoiceNumber = useMemo(() => {
+    if (bookingDetails?.paymentIntentId) {
+      return bookingDetails.paymentIntentId;
+    }
+    if (bookingId) {
+      return `INV-${bookingId}`;
+    }
+    return "#****-***-****";
+  }, [bookingDetails, bookingId]);
+
   const { subtotal, tax, totalDue, amountPay } = useMemo(() => {
     let numericPrice = 20;
     
@@ -85,15 +149,15 @@ const PaymentReceipt: React.FC = () => {
       numericPrice = asMoney(state.totalPrice);
     }
 
-    const calculatedTax = Number((numericPrice * 0.18).toFixed(2));
-    const calculatedTotal = Number((numericPrice + calculatedTax).toFixed(2));
-    const finalPay = Number((calculatedTotal - 3).toFixed(2));
+    // const calculatedTax = Number((numericPrice * 0.18).toFixed(2));
+    // const calculatedTotal = Number((numericPrice + calculatedTax).toFixed(2));
+    // const finalPay = Number((calculatedTotal - 3).toFixed(2));
 
     return {
       subtotal: numericPrice,
-      tax: calculatedTax,
-      totalDue: calculatedTotal,
-      amountPay: finalPay
+      tax: 0,
+      totalDue: numericPrice,
+      amountPay: numericPrice
     };
   }, [bookingDetails, state]);
 
@@ -123,11 +187,11 @@ const PaymentReceipt: React.FC = () => {
                 <div className="mt-2 border border-gray-200 rounded-md p-3">
                   <div className="grid grid-cols-3 gap-2 text-xs text-gray-900">
                     <div className="text-gray-600">To</div>
-                    <div className="col-span-2 font-medium">John</div>
+                    <div className="col-span-2 font-medium">{ownerName}</div>
                     <div className="text-gray-600">From</div>
-                    <div className="col-span-2 font-medium">Cursor</div>
+                    <div className="col-span-2 font-medium">{renterName}</div>
                     <div className="text-gray-600">Invoice</div>
-                    <div className="col-span-2 font-medium">#****-***-****</div>
+                    <div className="col-span-2 font-medium">{invoiceNumber}</div>
                   </div>
                 </div>
               </div>
@@ -169,10 +233,10 @@ const PaymentReceipt: React.FC = () => {
                       <span>Total excluding tax</span>
                       <span className="font-semibold">${subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex items-center justify-between border border-gray-200 rounded-md p-2">
+                    {/* <div className="flex items-center justify-between border border-gray-200 rounded-md p-2">
                       <span>GST - Usa (18%)</span>
                       <span className="font-semibold">${tax.toFixed(2)}</span>
-                    </div>
+                    </div> */}
                     <div className="flex items-center justify-between border border-gray-200 rounded-md p-2">
                       <span>Total due</span>
                       <span className="font-semibold">${totalDue.toFixed(2)}</span>
@@ -188,13 +252,22 @@ const PaymentReceipt: React.FC = () => {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleContinue}
-          className="mt-8 w-full bg-[#389131] text-white py-3.5 rounded-md text-sm font-semibold hover:opacity-90"
-        >
-          Continue
-        </button>
+        <div className="mt-8 grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => navigate("/booking")}
+            className="w-full bg-[#389131] text-white py-3.5 rounded-md text-sm font-semibold hover:opacity-90 text-center"
+          >
+            Go to Bookings
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/notifications")}
+            className="w-full bg-[#389131] text-white py-3.5 rounded-md text-sm font-semibold hover:opacity-90 text-center"
+          >
+            Go to Notifications
+          </button>
+        </div>
       </main>
     </div>
   );

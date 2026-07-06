@@ -194,9 +194,9 @@ const Notifications: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="h-full w-full flex justify-center bg-[#F9F8F3] px-4 py-10">
+    <div className="h-full w-full flex justify-center bg-[#F9F8F3] px-2 py-6 min-[400px]:px-4 min-[400px]:py-10">
       {/* 80% width main container, near top instead of perfectly centered */}
-      <div className="w-full max-w-5xl md:w-[80%] bg-white rounded-2xl shadow-md border border-gray-200 p-6 sm:p-8">
+      <div className="w-full max-w-5xl md:w-[80%] bg-white rounded-2xl shadow-md border border-gray-200 p-3 min-[400px]:p-6 sm:p-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">
             Notifications
@@ -220,7 +220,7 @@ const Notifications: React.FC = () => {
             // <div className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-6 text-center text-sm text-gray-600">
             //   No notifications available.
             // </div>
-            <EmptyState line="No notifications available."/>
+            <EmptyState line="No notifications available." />
           )}
 
           {!loading &&
@@ -276,40 +276,46 @@ const Notifications: React.FC = () => {
                 /payment complet/i.test(notification.title) ||
                 /payment complet/i.test(notification.message) ||
                 /payment complet/i.test(notification.type);
+              const isReadyForPickup =
+                /ready for pick[\s-]?up/i.test(notification.title) ||
+                /ready for pick[\s-]?up/i.test(notification.message) ||
+                /pickup ready/i.test(notification.title) ||
+                /pickup ready/i.test(notification.message) ||
+                /ready for pick-up/i.test(notification.type);
 
-              const isNotificationRead = 
-                notification.isRead === true || 
-                (notification as any).read === true || 
+              const isNotificationRead =
+                notification.isRead === true ||
+                (notification as any).read === true ||
                 (notification as any).status === 'read' ||
                 ((notification as any).readAt !== undefined && (notification as any).readAt !== null);
 
               return (
                 <div
                   key={notification._id}
-                  className={`rounded-2xl border ${!isNotificationRead ? 'border-[#389131] bg-[#F4FBF4]' : 'border-gray-200 bg-[#F9F8F3]'} p-5 shadow-sm relative`}
+                  className={`rounded-2xl border ${!isNotificationRead ? 'border-[#389131] bg-[#F4FBF4]' : 'border-gray-200 bg-[#F9F8F3]'} p-3 min-[400px]:p-5 shadow-sm relative`}
                 >
                   {!isNotificationRead && (
-                    <span className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-[#389131]"></span>
+                    <span className="absolute top-3 right-3 min-[400px]:top-5 min-[400px]:right-5 h-2.5 w-2.5 rounded-full bg-[#389131]"></span>
                   )}
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex flex-1 min-w-0 gap-4">
+                    <div className="flex flex-1 min-w-0 gap-3 min-[400px]:gap-4">
                       {imageUrl ? (
                         <img
                           src={imageUrl}
                           alt={notification.trailerId?.title ?? ""}
-                          className="h-20 w-28 shrink-0 rounded-2xl object-cover"
+                          className="h-14 w-20 min-[400px]:h-20 min-[400px]:w-28 shrink-0 rounded-xl min-[400px]:rounded-2xl object-cover"
                         />
                       ) : (
-                        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-2xl bg-gray-200 text-sm text-gray-500">
+                        <div className="flex h-14 w-20 min-[400px]:h-20 min-[400px]:w-28 shrink-0 items-center justify-center rounded-xl min-[400px]:rounded-2xl bg-gray-200 text-xs min-[400px]:text-sm text-gray-500">
                           No image
                         </div>
                       )}
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-base font-semibold text-gray-900 break-words">
+                        <p className="text-sm min-[400px]:text-base font-semibold text-gray-900 break-words">
                           {notification.title}
                         </p>
-                        <p className="mt-1 text-sm text-gray-700 break-words">
+                        <p className="mt-1 text-xs min-[400px]:text-sm text-gray-700 break-words">
                           {notification.message.length > truncateLength && !expandedMessages[notification._id]
                             ? `${notification.message.substring(0, truncateLength)}... `
                             : `${notification.message} `}
@@ -324,26 +330,27 @@ const Notifications: React.FC = () => {
                             </button>
                           )}
                         </p>
-                        <p className="mt-2 text-xs font-medium text-gray-500 break-words">
+                        <p className="mt-1.5 text-[10px] min-[400px]:text-xs font-medium text-gray-500 break-words">
                           Booking ID: {notification.bookingId}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 flex-col items-start gap-3 text-right sm:items-end">
-                      <span className="inline-flex max-w-full items-center rounded-full bg-[#E7F6E6] px-3 py-1 text-xs font-semibold text-[#2F7A29] break-words text-left">
-                        <span className="truncate">{notification.title}</span>
-                      </span>
-                      <p className="text-xs text-gray-500">{createdAt}</p>
+                    <div className="flex shrink-0 flex-col items-start gap-2.5 sm:gap-3 sm:items-end">
+                      <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-end sm:gap-1.5">
+                        <span className="inline-flex max-w-full items-center rounded-full bg-[#E7F6E6] px-2.5 py-0.5 min-[400px]:px-3 min-[400px]:py-1 text-[10px] min-[400px]:text-xs font-semibold text-[#2F7A29] break-words text-left">
+                          <span className="truncate">{notification.title}</span>
+                        </span>
+                        <p className="text-[10px] min-[400px]:text-xs text-gray-500">{createdAt}</p>
+                      </div>
                       {isOwner && isNewRentalRequest ? (
                         processedRequests[notification.bookingId] ? (
                           <span
-                            className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${
-                              processedRequests[notification.bookingId] ===
-                              "Accepted"
+                            className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold ${processedRequests[notification.bookingId] ===
+                                "Accepted"
                                 ? "bg-[#E7F6E6] text-[#2F7A29]"
                                 : "bg-[#FEE2E2] text-[#991B1B]"
-                            }`}
+                              }`}
                           >
                             {processedRequests[notification.bookingId]}
                           </span>
@@ -355,7 +362,7 @@ const Notifications: React.FC = () => {
                               renterFullName: notification.actorId?.fullName,
                               renterEmail: undefined,
                             }}
-                            className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                            className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                           >
                             View details
                           </Link>
@@ -364,9 +371,17 @@ const Notifications: React.FC = () => {
                         <Link
                           onClick={() => handleMarkAsRead(notification._id)}
                           to={`/pre-screening-complete/${notification.bookingId}`}
-                          className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                          className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
                           View & Approve
+                        </Link>
+                      ) : isReadyForPickup && isOwner ? (
+                        <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
+                          to={`/pick-up-complete/${notification.bookingId}`}
+                          className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          Mark Active
                         </Link>
                       ) : isBookingAcceptedByOwner && !isOwner ? (
                         <Link
@@ -375,45 +390,45 @@ const Notifications: React.FC = () => {
                           state={{
                             bookingId: notification.bookingId,
                           }}
-                          className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                          className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
                           Start Pre-Screening
                         </Link>
                       ) : isPickupPhotosUploaded || isBookingAccepted || isPreScreeningCompleted ? (
-                          !isNotificationRead ? (
-                            <button
-                              onClick={() => handleMarkAsRead(notification._id)}
-                              className="rounded-lg bg-white border border-[#389131] px-4 py-2 text-sm font-semibold text-[#389131] transition-colors hover:bg-[#F4FBF4]"
-                            >
-                              Mark as read
-                            </button>
-                          ) : null
-                      ) : (
-                          <Link
+                        !isNotificationRead ? (
+                          <button
                             onClick={() => handleMarkAsRead(notification._id)}
-                            to={
-                              isBookingAcceptedByOwner
-                                ? "/booking"
-                                : isBookingReturned || isBookingUpdated
-                                  ? "/booking"
-                                  : isRequestSent
-                                    ? "/booking"
-                                    : `/booking/${notification.bookingId}`
-                            }
-                            className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                            className="rounded-lg bg-white border border-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-[#389131] transition-colors hover:bg-[#F4FBF4]"
                           >
-                            {isBookingAcceptedByOwner
-                              ? "View details"
+                            Mark as read
+                          </button>
+                        ) : null
+                      ) : (
+                        <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
+                          to={
+                            isBookingAcceptedByOwner
+                              ? "/booking"
                               : isBookingReturned || isBookingUpdated
-                                ? isBookingReturned
-                                  ? "View status"
-                                  : "View bookings"
+                                ? "/booking"
                                 : isRequestSent
-                                  ? "View request status"
-                                  : "View details"}
-                          </Link>
-                        )}
-                      </div>
+                                  ? "/booking"
+                                  : `/booking/${notification.bookingId}`
+                          }
+                          className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          {isBookingAcceptedByOwner
+                            ? "View details"
+                            : isBookingReturned || isBookingUpdated
+                              ? isBookingReturned
+                                ? "View status"
+                                : "View bookings"
+                              : isRequestSent
+                                ? "View request status"
+                                : "View details"}
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

@@ -13,11 +13,11 @@ function getBookingDateText(createdAtString?: string) {
   if (!createdAtString) return null;
   const createdAt = new Date(createdAtString);
   const now = new Date();
-  
+
   // Set times to midnight to calculate calendar days difference accurately
   const createdDate = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
   const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
+
   const diffTime = nowDate.getTime() - createdDate.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
@@ -49,7 +49,9 @@ export type BookingStatus =
   | "pre-screening"
   | "owner_photos_uploaded"
   | "waiting_for_pickup_approval"
-  | "pre_screening_completed";
+  | "pre_screening_completed"
+  | "payment_completed"
+  | "pickup_ready";
 export type FilterStatus =
   | "all"
   | "pending"
@@ -57,7 +59,9 @@ export type FilterStatus =
   | "rejected"
   | "active"
   | "overdue"
-  | "return";
+  | "return"
+  | "payment_completed"
+  | "pickup_ready";
 
 export type BookingItem = {
   id: string;
@@ -112,6 +116,14 @@ const statusStyles: Record<string, { label: string; className: string }> = {
     label: "Waiting for Pickup Approval",
     className: "bg-blue-100 text-blue-800",
   },
+  payment_completed: {
+    label: "Payment Completed",
+    className: "bg-[#389131] text-white",
+  },
+  pickup_ready: {
+    label: "Pickup Ready",
+    className: "bg-blue-100 text-blue-800",
+  },
 };
 
 const FILTER_LABELS: Record<FilterStatus, string> = {
@@ -122,6 +134,8 @@ const FILTER_LABELS: Record<FilterStatus, string> = {
   active: "Active",
   overdue: "Overdue",
   return: "Returned",
+  payment_completed: "Payment Completed",
+  pickup_ready: "Pickup Ready",
 };
 
 const BookingScreen: React.FC = () => {
@@ -288,8 +302,8 @@ const BookingScreen: React.FC = () => {
       console.error("Return booking error:", err);
       setReturnError(
         err?.response?.data?.message ||
-          err?.message ||
-          "Unable to return the trailer. Please try again.",
+        err?.message ||
+        "Unable to return the trailer. Please try again.",
       );
     } finally {
       setReturnSubmitting((prev) => ({ ...prev, [bookingId]: false }));
@@ -318,8 +332,8 @@ const BookingScreen: React.FC = () => {
       console.error("Review submit error:", err);
       setReviewError(
         err?.response?.data?.message ||
-          err?.message ||
-          "Unable to submit review.",
+        err?.message ||
+        "Unable to submit review.",
       );
     } finally {
       setReviewSubmitting(false);
@@ -327,8 +341,8 @@ const BookingScreen: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white w-full min-w-0 overflow-x-hidden">
-      <main className="flex-1 min-h-0 min-w-0 overflow-y-auto max-w-3xl mx-auto w-full px-4 sm:px-6 py-4">
+    <div className="h-full flex flex-col bg-white w-full min-w-0">
+      <main className="flex-1 min-h-0 min-w-0 max-w-3xl mx-auto w-full px-4 sm:px-6 py-4">
         {/* Page title */}
         <h1 className="text-xl sm:text-2xl font-bold text-black text-center mb-4 mt-2">
           Your Booked Trailers
@@ -348,18 +362,17 @@ const BookingScreen: React.FC = () => {
               />
             </button>
             {filterOpen && (
-              <div className="absolute right-0 top-full mt-1 py-2 w-48 rounded-lg bg-white border border-gray-200 shadow-lg z-20">
+              <div className="absolute right-0 top-full mt-1 py-2 w-48 rounded-lg bg-white border border-gray-200 shadow-lg z-50">
                 {(Object.keys(FILTER_LABELS) as FilterStatus[]).map(
                   (status) => (
                     <button
                       key={status}
                       type="button"
                       onClick={() => handleFilterSelect(status)}
-                      className={`block w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 hover:text-[#389131] ${
-                        filterStatus === status
+                      className={`block w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 hover:text-[#389131] ${filterStatus === status
                           ? "bg-gray-100 font-medium text-gray-900"
                           : "text-gray-700"
-                      }`}
+                        }`}
                     >
                       {FILTER_LABELS[status]}
                     </button>
@@ -409,11 +422,10 @@ const BookingScreen: React.FC = () => {
                         className="rounded-full p-2"
                       >
                         <Star
-                          className={`w-6 h-6 ${
-                            value <= reviewRating
+                          className={`w-6 h-6 ${value <= reviewRating
                               ? "text-yellow-400"
                               : "text-gray-300"
-                          }`}
+                            }`}
                         />
                       </button>
                     ))}
@@ -580,7 +592,8 @@ const BookingScreen: React.FC = () => {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleReturnBooking(booking._id);
+                            // handleReturnBooking(booking._id);
+                            navigate(`/return/${booking._id}`)
                           }}
                           disabled={isReturnLoading}
                           className="px-3 py-1.5 rounded-lg bg-[#F97316] text-white text-xs sm:text-sm font-medium hover:bg-[#dd6b14] disabled:cursor-not-allowed disabled:opacity-60"
