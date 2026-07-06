@@ -99,7 +99,7 @@ const PreScreeningComplete: React.FC = () => {
 
       setSuccessMessage("✓ Marked as ready for pickup! Renter will be notified.");
       setTimeout(() => {
-        navigate("/booking");
+        navigate("/notifications");
       }, 2000);
     } catch (err) {
       // eslint-disable-next-line no-console
