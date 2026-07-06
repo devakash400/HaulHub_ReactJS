@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronLeft, CheckCircle, AlertCircle } from "lucide-react";
 import api from "../../api/api.ts";
-import { markReadyForPickup } from "../../api/bookingsApi.ts";
 
 type BookingDetail = {
   _id: string;
@@ -20,6 +19,11 @@ type BookingDetail = {
   endDate: string;
   totalPrice?: number;
   status?: string;
+  trailerId?: {
+    _id: string;
+    title: string;
+    images?: string[];
+  };
 };
 
 type PreScreeningDetail = {
@@ -33,7 +37,7 @@ type PreScreeningDetail = {
   createdAt: string;
 };
 
-const PreScreeningComplete: React.FC = () => {
+const PickUpComplete: React.FC = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
 
@@ -87,24 +91,27 @@ const PreScreeningComplete: React.FC = () => {
     void fetchDetails();
   }, [bookingId]);
 
-  const handleReadyForPickup = async () => {
-    if (!bookingId) return;
+  const handleConfirmPickup = async () => {
+    const trailerId = booking?.trailer?._id || booking?.trailerId?._id;
+    if (!bookingId || !trailerId) return;
 
     try {
       setSubmitting(true);
       setError(null);
       setSuccessMessage(null);
 
-      await markReadyForPickup(bookingId);
+      await api.patch(`/api/bookings/${bookingId}/status`, {
+        status: "in_use",
+      });
 
-      setSuccessMessage("✓ Marked as ready for pickup! Renter will be notified.");
+      setSuccessMessage("✓ Pick up confirmed! Trailer is now with the renter.");
       setTimeout(() => {
-        navigate("/notifications");
+        navigate("/booking");
       }, 2000);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Ready for pickup error:", err);
-      setError("Unable to mark as ready for pickup. Please try again.");
+      console.error("Pickup confirmation error:", err);
+      setError("Unable to process the request. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -148,8 +155,8 @@ const PreScreeningComplete: React.FC = () => {
     );
   }
 
-  const trailerImage = booking?.trailer?.images?.[0];
-  const trailerTitle = booking?.trailer?.title || "Trailer";
+  const trailerImage = booking?.trailer?.images?.[0] || booking?.trailerId?.images?.[0];
+  const trailerTitle = booking?.trailer?.title || booking?.trailerId?.title || "Trailer";
   const renterName = booking?.renter?.fullName || "Renter";
   const renterEmail = booking?.renter?.email || "N/A";
 
@@ -268,17 +275,17 @@ const PreScreeningComplete: React.FC = () => {
             </div>
           )}
 
-          {/* Ready for Pickup Button */}
+          {/* Confirm Pickup Button */}
           <div className="mt-8 pt-8 border-t border-gray-200">
             <button
-              onClick={handleReadyForPickup}
+              onClick={handleConfirmPickup}
               disabled={submitting || !booking || !preScreening}
               className="w-full py-3 px-4 rounded-lg bg-[#389131] text-white font-semibold hover:bg-[#2f7a29] disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {submitting ? "Processing..." : "Ready for Pickup"}
+              {submitting ? "Processing..." : "Confirm Renter Pick Up"}
             </button>
             <p className="text-xs text-gray-600 text-center mt-3">
-              Once marked as ready, the renter will be notified to proceed with pickup
+              Confirm that the renter has picked up the trailer. This will mark it as unavailable.
             </p>
           </div>
         </div>
@@ -287,4 +294,4 @@ const PreScreeningComplete: React.FC = () => {
   );
 };
 
-export default PreScreeningComplete;
+export default PickUpComplete;

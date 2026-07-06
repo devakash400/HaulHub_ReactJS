@@ -195,21 +195,21 @@ const PreScreening: React.FC = () => {
     } else if (state.totalPrice) {
       numericPrice = Number(state.totalPrice.replace(/[^0-9.]/g, ""));
     }
-    
+
     // Assume the given price is the rental fee
-    const tax = Number((numericPrice * 0.18).toFixed(2));
-    const total = Number((numericPrice + tax).toFixed(2));
-    
+    // const tax = Number((numericPrice * 0.18).toFixed(2));
+    // const total = Number((numericPrice + tax).toFixed(2));
+
     return {
       rentalFee: numericPrice,
-      taxAmount: tax,
-      totalAmount: total
+      taxAmount: 0, // tax
+      totalAmount: numericPrice // total
     };
   }, [bookingDetails, state.totalPrice]);
 
   const handlePaymentSubmit = async (cardData: { cardNumber: string; expMonth: number; expYear: number; cvc: string }) => {
     if (!paymentIntentId) return;
-    
+
     try {
       setPreScreeningSubmitting(true);
       const confirmResponse = await confirmPaymentIntent({
@@ -217,7 +217,7 @@ const PreScreening: React.FC = () => {
         ...cardData
       });
       console.log("Confirm Intent Response:", confirmResponse);
-      
+
       if (confirmResponse?.success && confirmResponse?.data?.status === "succeeded") {
         setIsPaymentModalOpen(false);
         navigate("/payment-receipt", {
@@ -313,7 +313,7 @@ const PreScreening: React.FC = () => {
 
         const latestRecord = pickupRecords.reduce((latest, record) =>
           new Date(record.updatedAt).valueOf() >
-          new Date(latest.updatedAt).valueOf()
+            new Date(latest.updatedAt).valueOf()
             ? record
             : latest,
         );
@@ -324,7 +324,7 @@ const PreScreening: React.FC = () => {
             if (
               !existing ||
               new Date(image.uploadedAt).valueOf() >
-                new Date(existing.uploadedAt).valueOf()
+              new Date(existing.uploadedAt).valueOf()
             ) {
               acc[image.label] = image;
             }
@@ -538,31 +538,28 @@ const PreScreening: React.FC = () => {
                     <React.Fragment key={step.label}>
                       <div className="flex flex-col items-center gap-2 sm:gap-3 text-center min-w-[70px] sm:min-w-0">
                         <div
-                          className={`flex shrink-0 h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-full border text-xs sm:text-sm font-semibold ${
-                            completed
-                              ? "bg-[#1F8A3D] text-white border-[#1F8A3D]"
-                              : current
-                                ? "bg-white text-slate-900 border-slate-300"
-                                : "bg-white text-slate-500 border-slate-200"
-                          }`}
+                          className={`flex shrink-0 h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-full border text-xs sm:text-sm font-semibold ${completed
+                            ? "bg-[#1F8A3D] text-white border-[#1F8A3D]"
+                            : current
+                              ? "bg-white text-slate-900 border-slate-300"
+                              : "bg-white text-slate-500 border-slate-200"
+                            }`}
                         >
                           {completed ? "✓" : index + 1}
                         </div>
                         <p
-                          className={`text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-[0.22em] whitespace-nowrap ${
-                            completed || current
-                              ? "text-slate-900"
-                              : "text-slate-500"
-                          }`}
+                          className={`text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-[0.22em] whitespace-nowrap ${completed || current
+                            ? "text-slate-900"
+                            : "text-slate-500"
+                            }`}
                         >
                           {step.label}
                         </p>
                       </div>
                       {index < stepDefinitions.length - 1 && (
                         <div
-                          className={`h-[2px] min-w-[24px] sm:min-w-0 flex-1 rounded-full shrink-0 ${
-                            index < stepIndex ? "bg-[#1F8A3D]" : "bg-slate-300"
-                          }`}
+                          className={`h-[2px] min-w-[24px] sm:min-w-0 flex-1 rounded-full shrink-0 ${index < stepIndex ? "bg-[#1F8A3D]" : "bg-slate-300"
+                            }`}
                         />
                       )}
                     </React.Fragment>
@@ -594,9 +591,8 @@ const PreScreening: React.FC = () => {
                       return (
                         <div key={item.title}>
                           <label
-                            className={`group flex cursor-pointer flex-col rounded-2xl sm:rounded-[28px] border bg-white p-4 sm:p-5 shadow-sm transition hover:border-[#1F8A3D] ${
-                              showError ? "border-red-300" : "border-slate-200"
-                            }`}
+                            className={`group flex cursor-pointer flex-col rounded-2xl sm:rounded-[28px] border bg-white p-4 sm:p-5 shadow-sm transition hover:border-[#1F8A3D] ${showError ? "border-red-300" : "border-slate-200"
+                              }`}
                           >
                             <div className="flex items-start gap-4">
                               <input
@@ -850,10 +846,10 @@ const PreScreening: React.FC = () => {
                           <span>Rental fee</span>
                           <span>${rentalFee.toFixed(2)}</span>
                         </div>
-                        <div className="flex items-center justify-between">
+                        {/* <div className="flex items-center justify-between">
                           <span>Taxes & fees</span>
                           <span>${taxAmount.toFixed(2)}</span>
-                        </div>
+                        </div> */}
                         <div className="border-t border-[#E5E7EB] pt-3 flex items-center justify-between text-base font-semibold text-slate-900">
                           <span>Total</span>
                           <span>${totalAmount.toFixed(2)}</span>
