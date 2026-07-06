@@ -50,8 +50,11 @@ export async function getRenterBookingHistory(): Promise<any> {
   return res.data;
 }
 
-export async function getOwnerManageBookings(): Promise<any> {
-  const res = await api.get("/api/bookings/owner/manage");
+export async function getOwnerManageBookings(trailerId?: string): Promise<any> {
+  const url = trailerId
+    ? `/api/owner/manage-bookings?trailerId=${encodeURIComponent(trailerId)}`
+    : "/api/owner/manage-bookings";
+  const res = await api.get(url);
   return res.data;
 }
 
