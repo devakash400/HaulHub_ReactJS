@@ -74,12 +74,27 @@ const Notifications: React.FC = () => {
   const [truncateLength, setTruncateLength] = useState(80);
 
   const handleMarkAsRead = async (notificationId: string) => {
-    const notification = notifications.find(n => n._id === notificationId);
-    const isAlreadyRead = notification?.isRead || (notification as any)?.read || (notification as any)?.status === 'read';
+    const notification = notifications.find((n) => n._id === notificationId);
+    const isAlreadyRead =
+      notification?.isRead ||
+      (notification as any)?.read ||
+      (notification as any)?.status === "read";
     if (isAlreadyRead) return;
 
     // Optimistic update
-    setNotifications(prev => prev.map(n => n._id === notificationId ? { ...n, isRead: true, read: true, status: 'read', readAt: new Date().toISOString() } : n));
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n._id === notificationId
+          ? {
+              ...n,
+              isRead: true,
+              read: true,
+              status: "read",
+              readAt: new Date().toISOString(),
+            }
+          : n,
+      ),
+    );
     window.dispatchEvent(new Event("notificationRead"));
 
     try {
@@ -220,7 +235,7 @@ const Notifications: React.FC = () => {
             // <div className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-6 text-center text-sm text-gray-600">
             //   No notifications available.
             // </div>
-            <EmptyState line="No notifications available."/>
+            <EmptyState line="No notifications available." />
           )}
 
           {!loading &&
@@ -277,30 +292,31 @@ const Notifications: React.FC = () => {
                 /payment complet/i.test(notification.message) ||
                 /payment complet/i.test(notification.type);
 
-              const isNotificationRead = 
-                notification.isRead === true || 
-                (notification as any).read === true || 
-                (notification as any).status === 'read' ||
-                ((notification as any).readAt !== undefined && (notification as any).readAt !== null);
+              const isNotificationRead =
+                notification.isRead === true ||
+                (notification as any).read === true ||
+                (notification as any).status === "read" ||
+                ((notification as any).readAt !== undefined &&
+                  (notification as any).readAt !== null);
 
               return (
                 <div
                   key={notification._id}
-                  className={`rounded-2xl border ${!isNotificationRead ? 'border-[#389131] bg-[#F4FBF4]' : 'border-gray-200 bg-[#F9F8F3]'} p-5 shadow-sm relative`}
+                  className={`rounded-2xl border ${!isNotificationRead ? "border-[#389131] bg-[#F4FBF4]" : "border-gray-200 bg-[#F9F8F3]"} p-5 shadow-sm relative overflow-hidden`}
                 >
                   {!isNotificationRead && (
                     <span className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-[#389131]"></span>
                   )}
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex flex-1 min-w-0 gap-4">
+                    <div className="flex flex-col sm:flex-row flex-1 min-w-0 gap-4">
                       {imageUrl ? (
                         <img
                           src={imageUrl}
                           alt={notification.trailerId?.title ?? ""}
-                          className="h-20 w-28 shrink-0 rounded-2xl object-cover"
+                          className="h-20 w-full max-w-full rounded-2xl object-cover sm:w-28"
                         />
                       ) : (
-                        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-2xl bg-gray-200 text-sm text-gray-500">
+                        <div className="flex h-20 w-full max-w-full items-center justify-center rounded-2xl bg-gray-200 text-sm text-gray-500 sm:w-28">
                           No image
                         </div>
                       )}
@@ -310,7 +326,8 @@ const Notifications: React.FC = () => {
                           {notification.title}
                         </p>
                         <p className="mt-1 text-sm text-gray-700 break-words">
-                          {notification.message.length > truncateLength && !expandedMessages[notification._id]
+                          {notification.message.length > truncateLength &&
+                          !expandedMessages[notification._id]
                             ? `${notification.message.substring(0, truncateLength)}... `
                             : `${notification.message} `}
                           {notification.message.length > truncateLength && (
@@ -320,7 +337,9 @@ const Notifications: React.FC = () => {
                               }
                               className="text-[#389131] hover:underline font-medium focus:outline-none"
                             >
-                              {expandedMessages[notification._id] ? "Show less" : "Show more"}
+                              {expandedMessages[notification._id]
+                                ? "Show less"
+                                : "Show more"}
                             </button>
                           )}
                         </p>
@@ -330,7 +349,7 @@ const Notifications: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 flex-col items-start gap-3 text-right sm:items-end">
+                    <div className="flex shrink-0 w-full flex-col items-start gap-3 text-left sm:w-auto sm:items-end sm:text-right">
                       <span className="inline-flex max-w-full items-center rounded-full bg-[#E7F6E6] px-3 py-1 text-xs font-semibold text-[#2F7A29] break-words text-left">
                         <span className="truncate">{notification.title}</span>
                       </span>
@@ -379,41 +398,43 @@ const Notifications: React.FC = () => {
                         >
                           Start Pre-Screening
                         </Link>
-                      ) : isPickupPhotosUploaded || isBookingAccepted || isPreScreeningCompleted ? (
-                          !isNotificationRead ? (
-                            <button
-                              onClick={() => handleMarkAsRead(notification._id)}
-                              className="rounded-lg bg-white border border-[#389131] px-4 py-2 text-sm font-semibold text-[#389131] transition-colors hover:bg-[#F4FBF4]"
-                            >
-                              Mark as read
-                            </button>
-                          ) : null
-                      ) : (
-                          <Link
+                      ) : isPickupPhotosUploaded ||
+                        isBookingAccepted ||
+                        isPreScreeningCompleted ? (
+                        !isNotificationRead ? (
+                          <button
                             onClick={() => handleMarkAsRead(notification._id)}
-                            to={
-                              isBookingAcceptedByOwner
-                                ? "/booking"
-                                : isBookingReturned || isBookingUpdated
-                                  ? "/booking"
-                                  : isRequestSent
-                                    ? "/booking"
-                                    : `/booking/${notification.bookingId}`
-                            }
-                            className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                            className="rounded-lg bg-white border border-[#389131] px-4 py-2 text-sm font-semibold text-[#389131] transition-colors hover:bg-[#F4FBF4]"
                           >
-                            {isBookingAcceptedByOwner
-                              ? "View details"
+                            Mark as read
+                          </button>
+                        ) : null
+                      ) : (
+                        <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
+                          to={
+                            isBookingAcceptedByOwner
+                              ? "/booking"
                               : isBookingReturned || isBookingUpdated
-                                ? isBookingReturned
-                                  ? "View status"
-                                  : "View bookings"
+                                ? "/booking"
                                 : isRequestSent
-                                  ? "View request status"
-                                  : "View details"}
-                          </Link>
-                        )}
-                      </div>
+                                  ? "/booking"
+                                  : `/booking/${notification.bookingId}`
+                          }
+                          className="rounded-lg bg-[#389131] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          {isBookingAcceptedByOwner
+                            ? "View details"
+                            : isBookingReturned || isBookingUpdated
+                              ? isBookingReturned
+                                ? "View status"
+                                : "View bookings"
+                              : isRequestSent
+                                ? "View request status"
+                                : "View details"}
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
