@@ -220,7 +220,7 @@ const Notifications: React.FC = () => {
             // <div className="rounded-2xl border border-gray-200 bg-[#F9F8F3] p-6 text-center text-sm text-gray-600">
             //   No notifications available.
             // </div>
-            <EmptyState line="No notifications available."/>
+            <EmptyState line="No notifications available." />
           )}
 
           {!loading &&
@@ -283,9 +283,9 @@ const Notifications: React.FC = () => {
                 /pickup ready/i.test(notification.message) ||
                 /ready for pick-up/i.test(notification.type);
 
-              const isNotificationRead = 
-                notification.isRead === true || 
-                (notification as any).read === true || 
+              const isNotificationRead =
+                notification.isRead === true ||
+                (notification as any).read === true ||
                 (notification as any).status === 'read' ||
                 ((notification as any).readAt !== undefined && (notification as any).readAt !== null);
 
@@ -346,12 +346,11 @@ const Notifications: React.FC = () => {
                       {isOwner && isNewRentalRequest ? (
                         processedRequests[notification.bookingId] ? (
                           <span
-                            className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold ${
-                              processedRequests[notification.bookingId] ===
-                              "Accepted"
+                            className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold ${processedRequests[notification.bookingId] ===
+                                "Accepted"
                                 ? "bg-[#E7F6E6] text-[#2F7A29]"
                                 : "bg-[#FEE2E2] text-[#991B1B]"
-                            }`}
+                              }`}
                           >
                             {processedRequests[notification.bookingId]}
                           </span>
@@ -382,7 +381,7 @@ const Notifications: React.FC = () => {
                           to={`/pick-up-complete/${notification.bookingId}`}
                           className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
-                          Mark Available
+                          Mark Active
                         </Link>
                       ) : isBookingAcceptedByOwner && !isOwner ? (
                         <Link
@@ -396,40 +395,40 @@ const Notifications: React.FC = () => {
                           Start Pre-Screening
                         </Link>
                       ) : isPickupPhotosUploaded || isBookingAccepted || isPreScreeningCompleted ? (
-                          !isNotificationRead ? (
-                            <button
-                              onClick={() => handleMarkAsRead(notification._id)}
-                              className="rounded-lg bg-white border border-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-[#389131] transition-colors hover:bg-[#F4FBF4]"
-                            >
-                              Mark as read
-                            </button>
-                          ) : null
-                      ) : (
-                          <Link
+                        !isNotificationRead ? (
+                          <button
                             onClick={() => handleMarkAsRead(notification._id)}
-                            to={
-                              isBookingAcceptedByOwner
-                                ? "/booking"
-                                : isBookingReturned || isBookingUpdated
-                                  ? "/booking"
-                                  : isRequestSent
-                                    ? "/booking"
-                                    : `/booking/${notification.bookingId}`
-                            }
-                            className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                            className="rounded-lg bg-white border border-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-[#389131] transition-colors hover:bg-[#F4FBF4]"
                           >
-                            {isBookingAcceptedByOwner
-                              ? "View details"
+                            Mark as read
+                          </button>
+                        ) : null
+                      ) : (
+                        <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
+                          to={
+                            isBookingAcceptedByOwner
+                              ? "/booking"
                               : isBookingReturned || isBookingUpdated
-                                ? isBookingReturned
-                                  ? "View status"
-                                  : "View bookings"
+                                ? "/booking"
                                 : isRequestSent
-                                  ? "View request status"
-                                  : "View details"}
-                          </Link>
-                        )}
-                      </div>
+                                  ? "/booking"
+                                  : `/booking/${notification.bookingId}`
+                          }
+                          className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          {isBookingAcceptedByOwner
+                            ? "View details"
+                            : isBookingReturned || isBookingUpdated
+                              ? isBookingReturned
+                                ? "View status"
+                                : "View bookings"
+                              : isRequestSent
+                                ? "View request status"
+                                : "View details"}
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
