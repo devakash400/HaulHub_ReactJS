@@ -26,8 +26,8 @@ const transactionStatusBadgeClass: Record<TransactionStatus, string> = {
     canceled: "bg-rose-50 text-rose-700 border-rose-200/50",
 };
 
-const transactionCardClass =
-    "flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:border-gray-200 transition-all duration-300 w-full";
+const transactionRowClass =
+    "flex items-center justify-between p-5 hover:bg-gray-50/40 transition-colors duration-200 w-full";
 
 const AVATAR_COLORS = ["#F4A4C8", "#8FD99A", "#C4A8F4", "#B8E6C8", "#FFD59A", "#A8E6CF", "#DED2F9"];
 
@@ -57,19 +57,19 @@ const formatDate = (dateStr?: string) => {
     try {
         const dateObj = new Date(dateStr);
         if (isNaN(dateObj.getTime())) return dateStr;
-        
+
         const day = String(dateObj.getDate()).padStart(2, '0');
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const month = months[dateObj.getMonth()];
         const year = dateObj.getFullYear();
-        
+
         let hours = dateObj.getHours();
         const minutes = String(dateObj.getMinutes()).padStart(2, '0');
         const ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12;
         hours = hours ? hours : 12; // the hour '0' should be '12'
         const strTime = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
-        
+
         return `${day} ${month} ${year} ${strTime}`;
     } catch {
         return dateStr;
@@ -87,14 +87,14 @@ const TransactionHistory: React.FC = () => {
         try {
             const response = await getRenterBookingHistory();
             console.log("Renter booking history response:", response);
-            
+
             const rawTransactions = response?.transactions || response?.data?.transactions || [];
-            
+
             const mapped: TransactionItem[] = rawTransactions.map((txn: any, index: number) => {
                 const title = txn.title || "Booking Transaction";
                 const amountVal = txn.amount ?? 0;
                 const currencyVal = txn.currency || "USD";
-                
+
                 return {
                     id: txn.id || txn.transactionId || String(index),
                     name: title,
@@ -106,7 +106,7 @@ const TransactionHistory: React.FC = () => {
                     avatarColor: getAvatarColor(index),
                 };
             });
-            
+
             setTransactions(mapped);
         } catch (err: any) {
             console.error("Failed to fetch renter booking history:", err);
@@ -162,9 +162,9 @@ const TransactionHistory: React.FC = () => {
         );
     } else {
         content = (
-            <div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-col w-full rounded-2xl border border-[#D9D9D9] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden divide-y divide-[#D9D9D9]">
                 {transactions.map((txn) => (
-                    <div key={txn.id} className={transactionCardClass}>
+                    <div key={txn.id} className={transactionRowClass}>
                         <div className="flex min-w-0 flex-1 items-center gap-4">
                             <span
                                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[16px] font-bold text-gray-800 shadow-sm"
@@ -212,7 +212,7 @@ const TransactionHistory: React.FC = () => {
             }}
         >
             <div className="w-full max-w-[640px] flex flex-col">
-                <header className="mb-8 text-center sm:text-left">
+                <header className="text-center sm:text-left">
                     <h1 className="font-['Lexend'] text-[28px] sm:text-[32px] font-semibold tracking-tight text-gray-900">
                         Transaction History
                     </h1>
@@ -220,6 +220,7 @@ const TransactionHistory: React.FC = () => {
                         View and track your trailer rental payments and transactions.
                     </p>
                 </header>
+                <div className="border-t border-[#D9D9D9] my-6 w-full" />
                 {content}
             </div>
         </div>
