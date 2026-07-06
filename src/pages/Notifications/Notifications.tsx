@@ -86,12 +86,12 @@ const Notifications: React.FC = () => {
       prev.map((n) =>
         n._id === notificationId
           ? {
-            ...n,
-            isRead: true,
-            read: true,
-            status: "read",
-            readAt: new Date().toISOString(),
-          }
+              ...n,
+              isRead: true,
+              read: true,
+              status: "read",
+              readAt: new Date().toISOString(),
+            }
           : n,
       ),
     );
@@ -275,6 +275,13 @@ const Notifications: React.FC = () => {
               const isBookingUpdated =
                 /your booking for .* was updated/i.test(notification.title) ||
                 /your booking for .* was updated/i.test(notification.message);
+              const isReturnRequested =
+                /return request/i.test(notification.title) ||
+                /return request/i.test(notification.message) ||
+                /return requested/i.test(notification.title) ||
+                /return requested/i.test(notification.message) ||
+                /requested return/i.test(notification.title) ||
+                /requested return/i.test(notification.message);
               const isPickupPhotosUploaded =
                 /pickup condition photos?/i.test(notification.title) ||
                 /pickup condition photos?/i.test(notification.message) ||
@@ -301,13 +308,14 @@ const Notifications: React.FC = () => {
               const isNotificationRead =
                 notification.isRead === true ||
                 (notification as any).read === true ||
-                (notification as any).status === 'read' ||
-                ((notification as any).readAt !== undefined && (notification as any).readAt !== null);
+                (notification as any).status === "read" ||
+                ((notification as any).readAt !== undefined &&
+                  (notification as any).readAt !== null);
 
               return (
                 <div
                   key={notification._id}
-                  className={`rounded-2xl border ${!isNotificationRead ? 'border-[#389131] bg-[#F4FBF4]' : 'border-gray-200 bg-[#F9F8F3]'} p-3 min-[400px]:p-5 shadow-sm relative`}
+                  className={`rounded-2xl border ${!isNotificationRead ? "border-[#389131] bg-[#F4FBF4]" : "border-gray-200 bg-[#F9F8F3]"} p-3 min-[400px]:p-5 shadow-sm relative`}
                 >
                   {!isNotificationRead && (
                     <span className="absolute top-3 right-3 min-[400px]:top-5 min-[400px]:right-5 h-2.5 w-2.5 rounded-full bg-[#389131]"></span>
@@ -331,7 +339,8 @@ const Notifications: React.FC = () => {
                           {notification.title}
                         </p>
                         <p className="mt-1 text-xs min-[400px]:text-sm text-gray-700 break-words">
-                          {notification.message.length > truncateLength && !expandedMessages[notification._id]
+                          {notification.message.length > truncateLength &&
+                          !expandedMessages[notification._id]
                             ? `${notification.message.substring(0, truncateLength)}... `
                             : `${notification.message} `}
                           {notification.message.length > truncateLength && (
@@ -358,16 +367,19 @@ const Notifications: React.FC = () => {
                         <span className="inline-flex max-w-full items-center rounded-full bg-[#E7F6E6] px-2.5 py-0.5 min-[400px]:px-3 min-[400px]:py-1 text-[10px] min-[400px]:text-xs font-semibold text-[#2F7A29] break-words text-left">
                           <span className="truncate">{notification.title}</span>
                         </span>
-                        <p className="text-[10px] min-[400px]:text-xs text-gray-500">{createdAt}</p>
+                        <p className="text-[10px] min-[400px]:text-xs text-gray-500">
+                          {createdAt}
+                        </p>
                       </div>
                       {isOwner && isNewRentalRequest ? (
                         processedRequests[notification.bookingId] ? (
                           <span
-                            className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold ${processedRequests[notification.bookingId] ===
+                            className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold ${
+                              processedRequests[notification.bookingId] ===
                               "Accepted"
-                              ? "bg-[#E7F6E6] text-[#2F7A29]"
-                              : "bg-[#FEE2E2] text-[#991B1B]"
-                              }`}
+                                ? "bg-[#E7F6E6] text-[#2F7A29]"
+                                : "bg-[#FEE2E2] text-[#991B1B]"
+                            }`}
                           >
                             {processedRequests[notification.bookingId]}
                           </span>
@@ -384,15 +396,15 @@ const Notifications: React.FC = () => {
                             View details
                           </Link>
                         )
-                      ) : isPaymentCompleted && isOwner ? (
+                      ) : isReturnRequested && isOwner ? (
                         <Link
                           onClick={() => handleMarkAsRead(notification._id)}
-                          to={`/pre-screening-complete/${notification.bookingId}`}
+                          to={`/return-accept/${notification.bookingId}`}
                           className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
                           View & Approve
                         </Link>
-                      ) : isReadyForPickup && isOwner ? (
+                      ) : isPaymentCompleted && isOwner ? (
                         <Link
                           onClick={() => handleMarkAsRead(notification._id)}
                           to={`/pick-up-complete/${notification.bookingId}`}
@@ -411,7 +423,9 @@ const Notifications: React.FC = () => {
                         >
                           Start Pre-Screening
                         </Link>
-                      ) : isPickupPhotosUploaded || isBookingAccepted || isPreScreeningCompleted ? (
+                      ) : isPickupPhotosUploaded ||
+                        isBookingAccepted ||
+                        isPreScreeningCompleted ? (
                         !isNotificationRead ? (
                           <button
                             onClick={() => handleMarkAsRead(notification._id)}

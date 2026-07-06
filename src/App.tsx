@@ -1,6 +1,12 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Routes, Route, useLocation, useNavigate, type Location } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+  type Location,
+} from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar.tsx";
 import BottomBar from "./components/BottomBar/BottomBar.tsx";
 import Home from "./pages/Dashboard/Home.tsx";
@@ -35,6 +41,7 @@ import BookingRequestAction from "./pages/BookingRequestAction.tsx";
 import TrailorCondition from "./pages/TrailorCondition/TrailorCondition.tsx";
 import TrailorConditionAfter from "./pages/TrailorCondition/TrailorConditionAfter.tsx";
 import Return from "./pages/Return/Return.tsx";
+import ReturnAccept from "./pages/Return/ReturnAccept.tsx";
 import OwnerTruckDescription from "./pages/OwnerTruckDescription/OwnerTruckDescription.tsx";
 import OwnerViewMoreTrucks from "./pages/OwnerViewMoreTrucks/OwnerViewMoreTrucks.tsx";
 import LoginPage from "./pages/Auth/Login/LoginPage.tsx";
@@ -74,7 +81,7 @@ const App: React.FC = () => {
     effectivePathname === "/liability-agreement";
   const contentTopPadding = hideNavFooter
     ? ""
-    : (effectivePathname === "/" || effectivePathname === "/search")
+    : effectivePathname === "/" || effectivePathname === "/search"
       ? "pt-[110px] sm:pt-[81px]"
       : "pt-[64px] sm:pt-[81px]";
 
@@ -86,17 +93,29 @@ const App: React.FC = () => {
       try {
         const profile = await getUserProfile();
         if (profile) {
-          const first = profile.firstName?.trim() || profile.legalName?.trim() || (profile.fullName ? profile.fullName.trim().split(" ")[0] : undefined);
-          const parts = profile.fullName ? profile.fullName.trim().split(" ") : [];
-          const last = profile.lastName?.trim() || profile.preferredFirstName?.trim() || (parts.length > 1 ? parts.slice(1).join(" ") : undefined);
+          const first =
+            profile.firstName?.trim() ||
+            profile.legalName?.trim() ||
+            (profile.fullName
+              ? profile.fullName.trim().split(" ")[0]
+              : undefined);
+          const parts = profile.fullName
+            ? profile.fullName.trim().split(" ")
+            : [];
+          const last =
+            profile.lastName?.trim() ||
+            profile.preferredFirstName?.trim() ||
+            (parts.length > 1 ? parts.slice(1).join(" ") : undefined);
 
-          dispatch(updateUser({
-            firstName: first,
-            lastName: last,
-            email: profile.email,
-            profilePicture: profile.profilePicture,
-            phoneNumber: profile.phoneNumber
-          }));
+          dispatch(
+            updateUser({
+              firstName: first,
+              lastName: last,
+              email: profile.email,
+              profilePicture: profile.profilePicture,
+              phoneNumber: profile.phoneNumber,
+            }),
+          );
         }
       } catch {
         // silently ignore if fetch fails
@@ -139,6 +158,7 @@ const App: React.FC = () => {
             element={<TrailorConditionAfter />}
           />
           <Route path="/return/:id" element={<Return />} />
+          <Route path="/return-accept/:bookingId" element={<ReturnAccept />} />
           <Route path="/owner/truck/:id" element={<OwnerTruckDescription />} />
           <Route
             path="/owner/view-more-trucks"

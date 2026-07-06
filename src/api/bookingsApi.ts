@@ -106,6 +106,11 @@ export async function acceptReturnBooking(bookingId: string, payload?: AcceptRet
   return res.data;
 }
 
+export async function getReturnReviewPhotos(bookingId: string) {
+  const res = await api.get(`/api/condition-photos/${bookingId}/return-review`);
+  return res.data?.data ?? null;
+}
+
 export function getBookingErrorMessage(err: unknown): string {
   if (err instanceof AxiosError) {
     const data = err.response?.data as
