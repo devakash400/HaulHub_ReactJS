@@ -74,12 +74,27 @@ const Notifications: React.FC = () => {
   const [truncateLength, setTruncateLength] = useState(80);
 
   const handleMarkAsRead = async (notificationId: string) => {
-    const notification = notifications.find(n => n._id === notificationId);
-    const isAlreadyRead = notification?.isRead || (notification as any)?.read || (notification as any)?.status === 'read';
+    const notification = notifications.find((n) => n._id === notificationId);
+    const isAlreadyRead =
+      notification?.isRead ||
+      (notification as any)?.read ||
+      (notification as any)?.status === "read";
     if (isAlreadyRead) return;
 
     // Optimistic update
-    setNotifications(prev => prev.map(n => n._id === notificationId ? { ...n, isRead: true, read: true, status: 'read', readAt: new Date().toISOString() } : n));
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n._id === notificationId
+          ? {
+            ...n,
+            isRead: true,
+            read: true,
+            status: "read",
+            readAt: new Date().toISOString(),
+          }
+          : n,
+      ),
+    );
     window.dispatchEvent(new Event("notificationRead"));
 
     try {
@@ -326,7 +341,9 @@ const Notifications: React.FC = () => {
                               }
                               className="text-[#389131] hover:underline font-medium focus:outline-none"
                             >
-                              {expandedMessages[notification._id] ? "Show less" : "Show more"}
+                              {expandedMessages[notification._id]
+                                ? "Show less"
+                                : "Show more"}
                             </button>
                           )}
                         </p>
@@ -347,9 +364,9 @@ const Notifications: React.FC = () => {
                         processedRequests[notification.bookingId] ? (
                           <span
                             className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold ${processedRequests[notification.bookingId] ===
-                                "Accepted"
-                                ? "bg-[#E7F6E6] text-[#2F7A29]"
-                                : "bg-[#FEE2E2] text-[#991B1B]"
+                              "Accepted"
+                              ? "bg-[#E7F6E6] text-[#2F7A29]"
+                              : "bg-[#FEE2E2] text-[#991B1B]"
                               }`}
                           >
                             {processedRequests[notification.bookingId]}
