@@ -50,8 +50,11 @@ export async function getRenterBookingHistory(): Promise<any> {
   return res.data;
 }
 
-export async function getOwnerManageBookings(): Promise<any> {
-  const res = await api.get("/api/bookings/owner/manage");
+export async function getOwnerManageBookings(trailerId?: string): Promise<any> {
+  const url = trailerId
+    ? `/api/owner/manage-bookings?trailerId=${encodeURIComponent(trailerId)}`
+    : "/api/owner/manage-bookings";
+  const res = await api.get(url);
   return res.data;
 }
 
@@ -104,6 +107,11 @@ export type AcceptReturnPayload = {
 export async function acceptReturnBooking(bookingId: string, payload?: AcceptReturnPayload) {
   const res = await api.post(`/api/bookings/${bookingId}/return-accept`, payload);
   return res.data;
+}
+
+export async function getReturnReviewPhotos(bookingId: string) {
+  const res = await api.get(`/api/condition-photos/${bookingId}/return-review`);
+  return res.data?.data ?? null;
 }
 
 export function getBookingErrorMessage(err: unknown): string {

@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { RateTrailerModal } from "../../components/TrailerDetails/RateTrailerModal.tsx";
 import { images } from "../../assets/images/index.ts";
 import { getBookingById, requestReturn } from "../../api/bookingsApi.ts";
 import { resolveMediaUrl } from "../../api/media.ts";
-import uploadProfilePhoto from "../../api/uploadApi.ts";
 
 const TRAILER_DESCRIPTION_FALLBACK =
   "A gooseneck Trailer is attached to the truck via a ball and hitch in the bed of the truck as opposed to other types of trailers that are attached to the bumper";
@@ -19,17 +17,19 @@ const Return: React.FC = () => {
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [rateModalOpen, setRateModalOpen] = useState(false);
-
   // Return request form state
-  const [condition, setCondition] = useState<"no_damage" | "minor_scratch" | "damage_note">("no_damage");
+  const [condition, setCondition] = useState<
+    "no_damage" | "minor_scratch" | "damage_note"
+  >("no_damage");
   const [note, setNote] = useState("");
-  const [photos, setPhotos] = useState<{ file: File; previewUrl: string }[]>([]);
+  const [photos, setPhotos] = useState<{ file: File; previewUrl: string }[]>(
+    [],
+  );
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [submittingRequest, setSubmittingRequest] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const bookingId = id ?? state.bookingId ?? "#TR-2026-45821";
+  const bookingId = id ?? state.bookingId ?? "";
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -87,15 +87,17 @@ const Return: React.FC = () => {
   const submitReturnRequest = async () => {
     setSubmittingRequest(true);
     try {
-      if (id) {
-        await requestReturn(id, {
-          condition: note.trim() ? "damage_note" : "no_damage",
-          note: note.trim() || undefined,
-          photos: photos.map((p) => p.file),
-        });
-        toast.success("Return request submitted successfully!");
-        navigate("/booking");
+      if (!bookingId) {
+        throw new Error("Missing booking ID for return request");
       }
+
+      await requestReturn(bookingId, {
+        condition,
+        note: note.trim() || undefined,
+        photos: photos.map((p) => p.file),
+      });
+      toast.success("Return request submitted successfully!");
+      navigate("/booking");
     } catch (err) {
       console.error("Failed to submit return request:", err);
       toast.error("Failed to process return request. Please try again.");
@@ -104,23 +106,13 @@ const Return: React.FC = () => {
     }
   };
 
-  const handleSubmitAttempt = (e: React.FormEvent) => {
+  const handleSubmitAttempt = async (e: React.FormEvent) => {
     e.preventDefault();
     if (photos.length === 0) {
       toast.error("Please select at least one current condition photo.");
       return;
     }
-    // Open rating modal first
-    setRateModalOpen(true);
-  };
-
-  const handleRateSubmit = async (rating: number) => {
-    setRateModalOpen(false);
     await submitReturnRequest();
-  };
-
-  const handleRateCancel = () => {
-    setRateModalOpen(false);
   };
 
   if (loading) {
@@ -138,7 +130,9 @@ const Return: React.FC = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans">
         <div className="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">
-          <p className="text-red-600 text-lg font-semibold">{error || "Booking not found"}</p>
+          <p className="text-red-600 text-lg font-semibold">
+            {error || "Booking not found"}
+          </p>
           <button
             onClick={() => navigate("/booking")}
             className="mt-4 px-4 py-2 bg-[#389131] text-white rounded-lg"
@@ -150,10 +144,13 @@ const Return: React.FC = () => {
     );
   }
 
-  const rawImg = booking.trailerId?.images?.[0] || booking.trailerId?.profilePicture;
+  const rawImg =
+    booking.trailerId?.images?.[0] || booking.trailerId?.profilePicture;
   const trailerImage = rawImg ? resolveMediaUrl(rawImg) : images.Catimg;
-  const trailerModel = booking.trailerId?.model || booking.trailerId?.title || "Trailer";
-  const trailerDesc = booking.trailerId?.description || TRAILER_DESCRIPTION_FALLBACK;
+  const trailerModel =
+    booking.trailerId?.model || booking.trailerId?.title || "Trailer";
+  const trailerDesc =
+    booking.trailerId?.description || TRAILER_DESCRIPTION_FALLBACK;
   const priceDisplay = booking.trailerId?.pricePerDay
     ? `$${booking.trailerId.pricePerDay.toLocaleString()}/day`
     : booking.totalPrice
@@ -163,9 +160,13 @@ const Return: React.FC = () => {
   return (
     <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-gray-100 font-sans">
       <main className="mx-auto max-w-[640px] px-4 py-6 sm:px-6 sm:py-8">
-        <form onSubmit={handleSubmitAttempt} className="space-y-0 overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-lg">
+        <form
+          onSubmit={handleSubmitAttempt}
+          className="space-y-0 overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-lg"
+        >
           <div className="border-b border-gray-200/80 px-4 py-3 text-sm text-gray-600 sm:px-6">
-            Booking ID: <span className="font-semibold text-gray-900">{bookingId}</span>
+            Booking ID:{" "}
+            <span className="font-semibold text-gray-900">{bookingId}</span>
           </div>
           {/* Trailer header: image, description, model, price */}
           <div className="relative">
@@ -191,7 +192,6 @@ const Return: React.FC = () => {
               Return Request Details:
             </h2>
 
-            {/*
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Current Trailer Condition:
@@ -206,8 +206,6 @@ const Return: React.FC = () => {
                 <option value="damage_note">Damage Note / Other Dents</option>
               </select>
             </div>
-            */}
-
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Additional Notes (Optional):
@@ -237,13 +235,18 @@ const Return: React.FC = () => {
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#389131] px-4 py-4 text-white font-medium transition-colors hover:bg-[#2d7326] disabled:opacity-50"
               >
                 <span className="text-lg">📷</span>
-                {uploadingPhotos ? "Uploading Photos..." : "Upload Current Condition Photos"}
+                {uploadingPhotos
+                  ? "Uploading Photos..."
+                  : "Upload Current Condition Photos"}
               </button>
 
               {photos.length > 0 && (
                 <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
                   {photos.map(({ previewUrl }, index) => (
-                    <div key={previewUrl} className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-100 border border-gray-200">
+                    <div
+                      key={previewUrl}
+                      className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-100 border border-gray-200"
+                    >
                       <img
                         src={previewUrl}
                         alt={`Condition ${index + 1}`}
@@ -271,17 +274,12 @@ const Return: React.FC = () => {
               disabled={uploadingPhotos || submittingRequest}
               className="w-full rounded-lg bg-[#389131] py-3.5 text-base font-semibold text-white transition-colors hover:bg-[#2d7326] focus:outline-none focus:ring-2 focus:ring-[#389131] focus:ring-offset-2 disabled:opacity-50"
             >
-              {submittingRequest ? "Submitting Request..." : "Submit Return Request"}
+              {submittingRequest
+                ? "Submitting Request..."
+                : "Submit Return Request"}
             </button>
           </div>
         </form>
-        <RateTrailerModal
-          isOpen={rateModalOpen}
-          bookingId={id}
-          trailerId={booking?.trailerId?._id || (typeof booking?.trailerId === "string" ? booking.trailerId : undefined)}
-          onClose={handleRateCancel}
-          onSubmit={handleRateSubmit}
-        />
       </main>
     </div>
   );
