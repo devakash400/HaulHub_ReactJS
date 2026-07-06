@@ -13,11 +13,11 @@ function getBookingDateText(createdAtString?: string) {
   if (!createdAtString) return null;
   const createdAt = new Date(createdAtString);
   const now = new Date();
-  
+
   // Set times to midnight to calculate calendar days difference accurately
   const createdDate = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
   const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
+
   const diffTime = nowDate.getTime() - createdDate.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
@@ -302,8 +302,8 @@ const BookingScreen: React.FC = () => {
       console.error("Return booking error:", err);
       setReturnError(
         err?.response?.data?.message ||
-          err?.message ||
-          "Unable to return the trailer. Please try again.",
+        err?.message ||
+        "Unable to return the trailer. Please try again.",
       );
     } finally {
       setReturnSubmitting((prev) => ({ ...prev, [bookingId]: false }));
@@ -332,8 +332,8 @@ const BookingScreen: React.FC = () => {
       console.error("Review submit error:", err);
       setReviewError(
         err?.response?.data?.message ||
-          err?.message ||
-          "Unable to submit review.",
+        err?.message ||
+        "Unable to submit review.",
       );
     } finally {
       setReviewSubmitting(false);
@@ -369,11 +369,10 @@ const BookingScreen: React.FC = () => {
                       key={status}
                       type="button"
                       onClick={() => handleFilterSelect(status)}
-                      className={`block w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 hover:text-[#389131] ${
-                        filterStatus === status
+                      className={`block w-full text-left px-4 py-2 text-sm transition-colors hover:bg-gray-100 hover:text-[#389131] ${filterStatus === status
                           ? "bg-gray-100 font-medium text-gray-900"
                           : "text-gray-700"
-                      }`}
+                        }`}
                     >
                       {FILTER_LABELS[status]}
                     </button>
@@ -423,11 +422,10 @@ const BookingScreen: React.FC = () => {
                         className="rounded-full p-2"
                       >
                         <Star
-                          className={`w-6 h-6 ${
-                            value <= reviewRating
+                          className={`w-6 h-6 ${value <= reviewRating
                               ? "text-yellow-400"
                               : "text-gray-300"
-                          }`}
+                            }`}
                         />
                       </button>
                     ))}
@@ -594,7 +592,8 @@ const BookingScreen: React.FC = () => {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleReturnBooking(booking._id);
+                            // handleReturnBooking(booking._id);
+                            navigate(`/return/${booking._id}`)
                           }}
                           disabled={isReturnLoading}
                           className="px-3 py-1.5 rounded-lg bg-[#F97316] text-white text-xs sm:text-sm font-medium hover:bg-[#dd6b14] disabled:cursor-not-allowed disabled:opacity-60"
