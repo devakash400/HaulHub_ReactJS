@@ -12,6 +12,7 @@ import {
   setTrailerUnavailability,
   updateTrailer,
 } from "../../api/trailersApi.ts";
+import { getOwnerManageBookings } from "../../api/bookingsApi.ts";
 import { toast } from "react-toastify";
 import { X, ChevronRight } from "lucide-react";
 
@@ -63,6 +64,51 @@ const statusClassMap: Record<BookingStatus, string> = {
   Completed: "bg-[#F3F4F6] text-[#374151]",
 };
 
+const mapBookingStatus = (status?: string): BookingStatus => {
+  const s = String(status || "").toLowerCase();
+  if (["active", "in_use", "overdue", "return"].includes(s)) {
+    return "Ongoing";
+  }
+  if (["completed", "returned", "rejected"].includes(s)) {
+    return "Completed";
+  }
+  return "Upcoming";
+};
+
+const getRenterName = (renterId?: any) => {
+  if (!renterId) return "Unknown Renter";
+  if (typeof renterId === "string") return renterId;
+  const first = renterId.firstName || "";
+  const last = renterId.lastName || "";
+  const full = renterId.fullName || "";
+  if (full.trim()) return full.trim();
+  if (first || last) return `${first} ${last}`.trim();
+  return renterId.email || "Unknown Renter";
+};
+
+const formatBookingDates = (start?: string, end?: string) => {
+  if (!start || !end) return "N/A";
+  try {
+    const sDate = new Date(start);
+    const eDate = new Date(end);
+    if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) return `${start} - ${end}`;
+
+    const formatDayMonth = (d: Date) => {
+      const day = String(d.getDate()).padStart(2, '0');
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return `${day} ${monthNames[d.getMonth()]}`;
+    };
+    return `${formatDayMonth(sDate)} - ${formatDayMonth(eDate)}`;
+  } catch {
+    return `${start} - ${end}`;
+  }
+};
+
+const formatBookingAmount = (totalPrice?: number) => {
+  if (totalPrice === undefined || totalPrice === null) return "N/A";
+  return `$${Number(totalPrice).toFixed(2)}`;
+};
+
 const OwnerTruckDescription: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
@@ -87,6 +133,8 @@ const OwnerTruckDescription: React.FC = () => {
   const [draftDetails, setDraftDetails] = useState<EditableTruckDetails | null>(
     null,
   );
+  const [bookings, setBookings] = useState<OwnerBooking[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollMax, setScrollMax] = useState(0);
@@ -147,6 +195,69 @@ const OwnerTruckDescription: React.FC = () => {
       cancelled = true;
     };
   }, [id, isNumericId, parsedId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchBookings = async () => {
+      setBookingsLoading(true);
+      try {
+        const res = await getOwnerManageBookings();
+        console.log("the raw manage", res);
+
+        if (cancelled) return;
+
+        let rawBookings: any[] = [];
+        if (Array.isArray(res)) {
+          rawBookings = res;
+        } else if (res && Array.isArray(res.bookings)) {
+          rawBookings = res.bookings;
+        } else if (res && Array.isArray(res.data)) {
+          rawBookings = res.data;
+        } else if (res && Array.isArray(res.results)) {
+          rawBookings = res.results;
+        }
+
+        const relevant = rawBookings.filter((b: any) => {
+          if (!b) return false;
+          const bTrailerId = typeof b.trailerId === "object" && b.trailerId !== null
+            ? String(b.trailerId._id || b.trailerId.id || "")
+            : String(b.trailerId || "");
+
+          const bTrailer = typeof b.trailer === "object" && b.trailer !== null
+            ? String(b.trailer._id || b.trailer.id || "")
+            : String(b.trailer || "");
+
+          return bTrailerId === id || bTrailer === id || String(b._id) === id || String(b.id) === id;
+        });
+
+        const mapped: OwnerBooking[] = relevant.map((b: any, index: number) => {
+          return {
+            id: b.bookingId || b.id || b._id || `#BK-${String(index).padStart(5, '0')}`,
+            renterName: getRenterName(b.renterId || b.renter),
+            dates: formatBookingDates(b.startDate || b.bookingStartDate, b.endDate || b.bookingEndDate),
+            amount: formatBookingAmount(b.totalPrice || b.amount),
+            status: mapBookingStatus(b.status),
+          };
+        });
+
+        setBookings(mapped);
+      } catch (err) {
+        console.error("Failed to load owner bookings:", err);
+      } finally {
+        if (!cancelled) {
+          setBookingsLoading(false);
+        }
+      }
+    };
+
+    if (id) {
+      void fetchBookings();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   useEffect(() => {
     const updateScrollMax = () => {
@@ -276,13 +387,13 @@ const OwnerTruckDescription: React.FC = () => {
     setTrailer((prev) =>
       prev
         ? {
-            ...prev,
-            title: draftDetails.title,
-            location: draftDetails.location,
-            specs: draftDetails.specs,
-            price: draftDetails.price,
-            type: draftDetails.type as TrailerType,
-          }
+          ...prev,
+          title: draftDetails.title,
+          location: draftDetails.location,
+          specs: draftDetails.specs,
+          price: draftDetails.price,
+          type: draftDetails.type as TrailerType,
+        }
         : prev,
     );
     setIsEditOpen(false);
@@ -355,13 +466,12 @@ const OwnerTruckDescription: React.FC = () => {
                 <div className="rounded-xl bg-[#F8FAFC] p-3">
                   <p className="text-xs text-gray-500">Status</p>
                   <p
-                    className={`text-base font-semibold ${
-                      isTruckBooked
+                    className={`text-base font-semibold ${isTruckBooked
                         ? "text-[#6B7280]"
                         : isAvailable
                           ? "text-[#2F7A29]"
                           : "text-[#B42318]"
-                    }`}
+                      }`}
                   >
                     {isTruckBooked
                       ? "Booked"
@@ -411,13 +521,12 @@ const OwnerTruckDescription: React.FC = () => {
                         : "Trailer marked available.",
                     );
                   }}
-                  className={`w-full sm:w-auto text-center rounded-lg px-4 py-2 text-sm font-semibold text-white ${
-                    isTruckBooked
+                  className={`w-full sm:w-auto text-center rounded-lg px-4 py-2 text-sm font-semibold text-white ${isTruckBooked
                       ? "cursor-not-allowed"
                       : isAvailable
                         ? "bg-[#B42318] hover:bg-[#912018]"
                         : "bg-[#389131] hover:bg-[#2f7a29]"
-                  }`}
+                    }`}
                   style={{
                     backgroundColor: isTruckBooked ? "#929191" : undefined,
                   }}
@@ -429,11 +538,10 @@ const OwnerTruckDescription: React.FC = () => {
                 <button
                   type="button"
                   onClick={openEditModal}
-                  className={`w-full sm:w-auto text-center rounded-lg border px-4 py-2 text-sm font-semibold ${
-                    isTruckBooked
+                  className={`w-full sm:w-auto text-center rounded-lg border px-4 py-2 text-sm font-semibold ${isTruckBooked
                       ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                       : "border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   {isTruckBooked
                     ? "Edit Disabled (Booked)"
@@ -488,8 +596,8 @@ const OwnerTruckDescription: React.FC = () => {
             </button>
           </div>
 
-          <div 
-            className="overflow-x-auto pb-2 w-full scrollbar-hide" 
+          <div
+            className="overflow-x-auto pb-2 w-full scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: "touch" }}
             ref={scrollContainerRef}
             onScroll={handleTableScroll}
@@ -510,42 +618,58 @@ const OwnerTruckDescription: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {demoBookings.map((booking) => (
-                  <tr key={booking.id} className="bg-[#F9FAFB]">
-                    <td className="rounded-l-lg px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-                      {booking.id}
-                    </td>
-                    <td className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
-                      {booking.renterName}
-                    </td>
-                    <td className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
-                      {booking.dates}
-                    </td>
-                    <td className="px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-                      {booking.amount}
-                    </td>
-                    <td className="rounded-r-lg px-3 py-3 whitespace-nowrap">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          statusClassMap[booking.status]
-                        }`}
-                      >
-                        {booking.status}
-                      </span>
+                {bookingsLoading ? (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center text-sm text-gray-500">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#389131] border-t-transparent" />
+                        <p className="mt-2">Loading bookings...</p>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : bookings.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center text-sm text-gray-500">
+                      No bookings found for this trailer.
+                    </td>
+                  </tr>
+                ) : (
+                  bookings.map((booking) => (
+                    <tr key={booking.id} className="bg-[#F9FAFB]">
+                      <td className="rounded-l-lg px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
+                        {booking.id}
+                      </td>
+                      <td className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
+                        {booking.renterName}
+                      </td>
+                      <td className="px-3 py-3 text-sm text-gray-700 whitespace-nowrap">
+                        {booking.dates}
+                      </td>
+                      <td className="px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
+                        {booking.amount}
+                      </td>
+                      <td className="rounded-r-lg px-3 py-3 whitespace-nowrap">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClassMap[booking.status]
+                            }`}
+                        >
+                          {booking.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           {scrollMax > 0 && (
             <div className="mt-1 sm:hidden w-full px-1 flex flex-col gap-1 relative z-20">
-              <input 
-                type="range" 
-                min="0" 
-                max={scrollMax} 
-                value={scrollLeft} 
+              <input
+                type="range"
+                min="0"
+                max={scrollMax}
+                value={scrollLeft}
                 onChange={handleSliderChange}
                 className="custom-scrollbar-range"
               />
@@ -666,18 +790,16 @@ const OwnerTruckDescription: React.FC = () => {
 
       {/* Animated photo gallery modal */}
       <div
-        className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-4 transition-all duration-300 ${
-          isPhotosOpen
+        className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-4 transition-all duration-300 ${isPhotosOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
-        }`}
+          }`}
       >
         <div
-          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] min-w-0 ${
-            isPhotosOpen
+          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] min-w-0 ${isPhotosOpen
               ? "translate-y-0 sm:scale-100 opacity-100"
               : "translate-y-full sm:translate-y-6 scale-100 sm:scale-95 opacity-0"
-          }`}
+            }`}
         >
           <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -720,11 +842,10 @@ const OwnerTruckDescription: React.FC = () => {
                         key={`${imageUrl}-${imageIndex}`}
                         type="button"
                         onClick={() => setSelectedPhotoIndex(imageIndex)}
-                        className={`relative min-w-[70px] sm:min-w-[100px] overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 transition-all duration-150 ${
-                          selectedPhotoIndex === imageIndex
+                        className={`relative min-w-[70px] sm:min-w-[100px] overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 transition-all duration-150 ${selectedPhotoIndex === imageIndex
                             ? "ring-2 ring-[#389131]/40"
                             : "hover:border-[#389131]"
-                        }`}
+                          }`}
                       >
                         <img
                           src={imageUrl}
