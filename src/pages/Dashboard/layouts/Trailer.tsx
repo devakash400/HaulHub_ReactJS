@@ -9,7 +9,7 @@ import {
 } from "../../../assets/data/trailers.ts";
 import {
   resolveTrailerForRoute,
-  fetchTrailerReviews,
+  fetchTrailerReviewsWithStats,
 } from "../../../api/trailersApi.ts";
 import { API_BASE_URL } from "../../../api/api.ts";
 import { resolveMediaUrl } from "../../../api/media.ts";
@@ -230,10 +230,25 @@ const Trailer: React.FC = () => {
     }
     let cancelled = false;
     void (async () => {
-      const result = await fetchTrailerReviews(id);
+      const result = await fetchTrailerReviewsWithStats(id);
       if (cancelled) return;
       if (result) {
-        setBackendReviews(result.map(mapApiReview));
+        setBackendReviews(result.reviews.map(mapApiReview));
+        setTrailer((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            rating: result.averageRating || prev.rating,
+            reviewCount: result.totalRatings || prev.reviewCount,
+            guestFavouriteRating: result.averageRating || prev.guestFavouriteRating,
+            ratingDescription: result.totalRatings > 0
+              ? `Based on ${result.totalRatings} review${result.totalRatings === 1 ? "" : "s"}.`
+              : prev.ratingDescription,
+            guestFavouriteDescription: result.totalRatings > 0
+              ? "This trailer is in the top listings based on renter ratings, performance, and reliability."
+              : prev.guestFavouriteDescription,
+          };
+        });
       } else if (trailer?.reviews?.length) {
         setBackendReviews(trailer.reviews);
       } else {

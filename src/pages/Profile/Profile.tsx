@@ -66,6 +66,9 @@ const Profile: React.FC = () => {
   );
 
   const user = useSelector((state: RootState) => state.auth.user);
+  const userType = useSelector((state: RootState) => state.auth.userType);
+
+  const isOwner = user?.trailor === "Owner" || userType === "Owner";
 
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
@@ -297,6 +300,10 @@ const Profile: React.FC = () => {
     },
   ] as const;
 
+  const filteredMenuItems = menuItems.filter(
+    (item) => !(item.label === "Transaction History" && isOwner),
+  );
+
   const handleLogout = async () => {
     try {
       await logoutApi();
@@ -466,7 +473,7 @@ const Profile: React.FC = () => {
         {/* Menu Items */}
         <nav className="px-3 pt-6">
           <ul className="space-y-3">
-            {menuItems.map((item) => {
+            {filteredMenuItems.map((item) => {
               const Icon = item.icon as any;
 
               return (
