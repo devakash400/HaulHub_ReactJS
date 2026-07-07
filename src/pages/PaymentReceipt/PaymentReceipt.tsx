@@ -191,7 +191,7 @@ const PaymentReceipt: React.FC = () => {
                     <div className="text-gray-600">From</div>
                     <div className="col-span-2 font-medium">{renterName}</div>
                     <div className="text-gray-600">Invoice</div>
-                    <div className="col-span-2 font-medium">{invoiceNumber}</div>
+                    <div className="col-span-2 font-medium break-all">{invoiceNumber}</div>
                   </div>
                 </div>
               </div>
