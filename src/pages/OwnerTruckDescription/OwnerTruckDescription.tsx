@@ -152,6 +152,7 @@ const OwnerTruckDescription: React.FC = () => {
   );
   const [bookings, setBookings] = useState<OwnerBooking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
+  const [showAllBookings, setShowAllBookings] = useState(false);
   const [earnings, setEarnings] = useState({
     thisMonth: "$0.00",
     totalEarnings: "$0.00",
@@ -443,6 +444,8 @@ const OwnerTruckDescription: React.FC = () => {
     toast.success("Truck details updated");
   };
 
+  const displayedBookings = showAllBookings ? bookings : bookings.slice(0, 3);
+
   return (
     <div className="min-h-screen bg-[#F9F8F3] w-full min-w-0 overflow-x-hidden scroll-smooth">
       <div
@@ -634,12 +637,15 @@ const OwnerTruckDescription: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900">
               Manage Bookings
             </h2>
-            <button
-              type="button"
-              className="w-full sm:w-auto text-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
-            >
-              View All Bookings
-            </button>
+            {bookings.length > 3 && (
+              <button
+                type="button"
+                onClick={() => setShowAllBookings(!showAllBookings)}
+                className="w-full sm:w-auto text-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+              >
+                {showAllBookings ? "Show Less" : "View All Bookings"}
+              </button>
+            )}
           </div>
 
           <div
@@ -690,7 +696,7 @@ const OwnerTruckDescription: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  bookings.map((booking) => (
+                  displayedBookings.map((booking) => (
                     <tr key={booking.id} className="bg-[#F9FAFB]">
                       <td className="rounded-l-lg px-3 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                         {booking.id}
