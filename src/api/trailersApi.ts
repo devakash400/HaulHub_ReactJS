@@ -266,7 +266,13 @@ export type ApiTrailerReview = {
 
 type TrailerReviewsResponse = {
   success: boolean;
-  data: ApiTrailerReview[];
+  data:
+    | ApiTrailerReview[]
+    | {
+        reviews: ApiTrailerReview[];
+        averageRating?: number;
+        totalRatings?: number;
+      };
 };
 
 export async function fetchTrailerReviews(
@@ -277,8 +283,64 @@ export async function fetchTrailerReviews(
       `/api/reviews/trailer/${encodeURIComponent(trailerId)}`,
     );
     const body = res.data;
-    if (!body?.success || !Array.isArray(body.data)) return null;
-    return body.data;
+    if (!body?.success || !body.data) return null;
+    
+    if (Array.isArray(body.data)) {
+      return body.data;
+    }
+    
+    if (
+      typeof body.data === "object" &&
+      "reviews" in body.data &&
+      Array.isArray(body.data.reviews)
+    ) {
+      return body.data.reviews;
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
+}export type TrailerReviewsWithStats = {
+  reviews: ApiTrailerReview[];
+  averageRating: number;
+  totalRatings: number;
+};
+
+export async function fetchTrailerReviewsWithStats(
+  trailerId: string,
+): Promise<TrailerReviewsWithStats | null> {
+  try {
+    const res = await api.get<TrailerReviewsResponse>(
+      `/api/reviews/trailer/${encodeURIComponent(trailerId)}`,
+    );
+    const body = res.data;
+    if (!body?.success || !body.data) return null;
+
+    let reviews: ApiTrailerReview[] = [];
+    let averageRating = 0;
+    let totalRatings = 0;
+
+    if (Array.isArray(body.data)) {
+      reviews = body.data;
+      totalRatings = reviews.length;
+      if (totalRatings > 0) {
+        const sum = reviews.reduce((acc, r) => acc + (r.rating || 0), 0);
+        averageRating = Number((sum / totalRatings).toFixed(1));
+      }
+    } else if (typeof body.data === "object") {
+      reviews = Array.isArray(body.data.reviews) ? body.data.reviews : [];
+      averageRating =
+        typeof body.data.averageRating === "number"
+          ? body.data.averageRating
+          : 0;
+      totalRatings =
+        typeof body.data.totalRatings === "number"
+          ? body.data.totalRatings
+          : reviews.length;
+    }
+
+    return { reviews, averageRating, totalRatings };
   } catch {
     return null;
   }
