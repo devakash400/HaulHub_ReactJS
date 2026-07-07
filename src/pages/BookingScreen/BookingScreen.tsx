@@ -7,6 +7,8 @@ import {
   fetchTrailerReviews,
 } from "../../api/trailersApi.ts";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 import EmptyState from "../../components/common/EmptyState.tsx";
 
 function getBookingDateText(createdAtString?: string) {
@@ -164,6 +166,11 @@ const BookingScreen: React.FC = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const filterDropdownRef = useRef<HTMLDivElement>(null);
+
+  const user = useSelector((state: RootState) => state.auth.user);
+  const userType = useSelector((state: RootState) => state.auth.userType);
+  const isOwner = user?.trailor === "Owner" || userType === "Owner";
+  const isRenter = !isOwner;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -587,7 +594,7 @@ const BookingScreen: React.FC = () => {
                       >
                         {status.label}
                       </span>
-                      {isReturnable && (
+                      {isRenter && isReturnable && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -621,7 +628,7 @@ const BookingScreen: React.FC = () => {
                           Start Pre-Screening
                         </button>
                       )}
-                      {isReturnedBooking &&
+                      {isRenter && isReturnedBooking &&
                         (alreadyReviewed ? (
                           <span className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs sm:text-sm font-medium text-green-700">
                             <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
