@@ -92,7 +92,7 @@ const ReturnAccept: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F8F3] px-4 py-10">
+      <div className="w-full flex items-center justify-center bg-[#F9F8F3] px-4 py-20">
         <div className="rounded-2xl bg-white p-6 shadow-md text-center">
           <p className="text-gray-600">Loading return approval details...</p>
         </div>
@@ -101,9 +101,9 @@ const ReturnAccept: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-[#F9F8F3] font-sans px-4 py-10">
-      <div className="mx-auto w-full max-w-4xl rounded-3xl bg-white p-6 shadow-md sm:p-8">
-        <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="w-full min-w-0 overflow-x-hidden bg-[#F9F8F3] font-sans px-4 py-6 sm:py-10">
+      <div className="mx-auto w-full max-w-4xl rounded-3xl bg-white p-4 sm:p-8 shadow-md">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
               Return Request Review
@@ -113,7 +113,7 @@ const ReturnAccept: React.FC = () => {
               return request.
             </p>
           </div>
-          <span className="rounded-full bg-[#E7F6E6] px-3 py-1 text-sm font-semibold text-[#2F7A29]">
+          <span className="self-start rounded-full bg-[#E7F6E6] px-3 py-1 text-sm font-semibold text-[#2F7A29] sm:self-auto">
             Booking ID: {bookingId}
           </span>
         </div>
@@ -124,8 +124,8 @@ const ReturnAccept: React.FC = () => {
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-4 rounded-3xl border border-gray-200 bg-[#F9FAF7] p-5">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-4 rounded-3xl border border-gray-200 bg-[#F9FAF7] p-4 sm:p-5">
             <h2 className="text-lg font-semibold text-gray-900">
               Before photos
             </h2>
@@ -136,7 +136,7 @@ const ReturnAccept: React.FC = () => {
                     key={`before-${index}`}
                     src={src}
                     alt={`Before photo ${index + 1}`}
-                    className="h-40 w-full rounded-2xl object-cover"
+                    className="h-28 sm:h-40 w-full rounded-2xl object-cover shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer"
                   />
                 ))}
               </div>
@@ -147,7 +147,7 @@ const ReturnAccept: React.FC = () => {
             )}
           </div>
 
-          <div className="space-y-4 rounded-3xl border border-gray-200 bg-[#F9FAF7] p-5">
+          <div className="space-y-4 rounded-3xl border border-gray-200 bg-[#F9FAF7] p-4 sm:p-5">
             <h2 className="text-lg font-semibold text-gray-900">
               After photos
             </h2>
@@ -158,7 +158,7 @@ const ReturnAccept: React.FC = () => {
                     key={`after-${index}`}
                     src={src}
                     alt={`After photo ${index + 1}`}
-                    className="h-40 w-full rounded-2xl object-cover"
+                    className="h-28 sm:h-40 w-full rounded-2xl object-cover shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer"
                   />
                 ))}
               </div>
@@ -170,7 +170,7 @@ const ReturnAccept: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl border border-gray-200 bg-[#fff] p-5 shadow-sm">
+        <div className="mt-6 rounded-3xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
           <h2 className="text-lg font-semibold text-gray-900">
             Return request details
           </h2>
@@ -198,7 +198,7 @@ const ReturnAccept: React.FC = () => {
             type="button"
             onClick={handleReject}
             disabled={submitting}
-            className="inline-flex h-[52px] items-center justify-center rounded-2xl border border-red-200 bg-white px-5 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+            className="inline-flex h-[52px] items-center justify-center rounded-2xl border border-red-200 bg-white px-5 text-sm font-semibold text-red-700 transition-all duration-200 hover:bg-red-50 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
           >
             Reject
           </button>
@@ -206,7 +206,7 @@ const ReturnAccept: React.FC = () => {
             type="button"
             onClick={handleAccept}
             disabled={submitting}
-            className="inline-flex h-[52px] items-center justify-center rounded-2xl bg-[#389131] px-5 text-sm font-semibold text-white transition hover:bg-[#2d7326] disabled:opacity-50"
+            className="inline-flex h-[52px] items-center justify-center rounded-2xl bg-[#389131] px-5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#2d7326] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
           >
             {submitting ? "Processing..." : "Accept Return"}
           </button>

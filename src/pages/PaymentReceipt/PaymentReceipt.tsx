@@ -171,8 +171,8 @@ const PaymentReceipt: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf7f0] w-full min-w-0 overflow-x-hidden">
-      <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-10">
+    <div className="bg-[#faf7f0] w-full min-w-0 overflow-x-hidden">
+      <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
         <div className="bg-white rounded-xl border border-gray-900/70 shadow-sm overflow-hidden">
           <div className="p-6 sm:p-8">
             <h1 className="text-center text-xl sm:text-2xl font-semibold text-gray-900">
