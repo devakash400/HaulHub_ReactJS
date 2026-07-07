@@ -407,6 +407,14 @@ const Notifications: React.FC = () => {
                       ) : isPaymentCompleted && isOwner ? (
                         <Link
                           onClick={() => handleMarkAsRead(notification._id)}
+                          to={`/pre-screening-complete/${notification.bookingId}`}
+                          className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          Ready for Pickup
+                        </Link>
+                      ) : isReadyForPickup && isOwner ? (
+                        <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
                           to={`/pick-up-complete/${notification.bookingId}`}
                           className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
