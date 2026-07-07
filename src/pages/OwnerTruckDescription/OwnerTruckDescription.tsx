@@ -431,13 +431,13 @@ const OwnerTruckDescription: React.FC = () => {
     setTrailer((prev) =>
       prev
         ? {
-            ...prev,
-            title: draftDetails.title,
-            location: draftDetails.location,
-            specs: draftDetails.specs,
-            price: draftDetails.price,
-            type: draftDetails.type as TrailerType,
-          }
+          ...prev,
+          title: draftDetails.title,
+          location: draftDetails.location,
+          specs: draftDetails.specs,
+          price: draftDetails.price,
+          type: draftDetails.type as TrailerType,
+        }
         : prev,
     );
     setIsEditOpen(false);
@@ -512,13 +512,12 @@ const OwnerTruckDescription: React.FC = () => {
                 <div className="rounded-xl bg-[#F8FAFC] p-3">
                   <p className="text-xs text-gray-500">Status</p>
                   <p
-                    className={`text-base font-semibold ${
-                      isTruckBooked
+                    className={`text-base font-semibold ${isTruckBooked
                         ? "text-[#6B7280]"
                         : isAvailable
                           ? "text-[#2F7A29]"
                           : "text-[#B42318]"
-                    }`}
+                      }`}
                   >
                     {isTruckBooked
                       ? "Booked"
@@ -568,13 +567,12 @@ const OwnerTruckDescription: React.FC = () => {
                         : "Trailer marked available.",
                     );
                   }}
-                  className={`w-full sm:w-auto text-center rounded-lg px-4 py-2 text-sm font-semibold text-white ${
-                    isTruckBooked
+                  className={`w-full sm:w-auto text-center rounded-lg px-4 py-2 text-sm font-semibold text-white ${isTruckBooked
                       ? "cursor-not-allowed"
                       : isAvailable
                         ? "bg-[#B42318] hover:bg-[#912018]"
                         : "bg-[#389131] hover:bg-[#2f7a29]"
-                  }`}
+                    }`}
                   style={{
                     backgroundColor: isTruckBooked ? "#929191" : undefined,
                   }}
@@ -586,11 +584,10 @@ const OwnerTruckDescription: React.FC = () => {
                 <button
                   type="button"
                   onClick={openEditModal}
-                  className={`w-full sm:w-auto text-center rounded-lg border px-4 py-2 text-sm font-semibold ${
-                    isTruckBooked
+                  className={`w-full sm:w-auto text-center rounded-lg border px-4 py-2 text-sm font-semibold ${isTruckBooked
                       ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
                       : "border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   {isTruckBooked
                     ? "Edit Disabled (Booked)"
@@ -624,12 +621,12 @@ const OwnerTruckDescription: React.FC = () => {
               {earnings.totalEarnings}
             </p>
           </div>
-          <div className="rounded-2xl border border-gray-200 bg-white p-5">
+          {/* <div className="rounded-2xl border border-gray-200 bg-white p-5">
             <p className="text-sm text-gray-500">Pending Payout</p>
             <p className="mt-1 text-2xl font-semibold text-gray-900">
               {earnings.pendingPayout}
             </p>
-          </div>
+          </div> */}
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
@@ -712,9 +709,8 @@ const OwnerTruckDescription: React.FC = () => {
                       </td>
                       <td className="rounded-r-lg px-3 py-3 whitespace-nowrap">
                         <span
-                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                            statusClassMap[booking.status]
-                          }`}
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClassMap[booking.status]
+                            }`}
                         >
                           {booking.status}
                         </span>
@@ -853,18 +849,16 @@ const OwnerTruckDescription: React.FC = () => {
 
       {/* Animated photo gallery modal */}
       <div
-        className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-4 transition-all duration-300 ${
-          isPhotosOpen
+        className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-4 transition-all duration-300 ${isPhotosOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
-        }`}
+          }`}
       >
         <div
-          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] min-w-0 ${
-            isPhotosOpen
+          className={`w-full max-w-6xl flex flex-col overflow-hidden rounded-t-[32px] sm:rounded-3xl border-t sm:border border-gray-200 bg-white shadow-2xl transition-all duration-300 max-h-[90vh] sm:max-h-[calc(100vh-80px)] min-w-0 ${isPhotosOpen
               ? "translate-y-0 sm:scale-100 opacity-100"
               : "translate-y-full sm:translate-y-6 scale-100 sm:scale-95 opacity-0"
-          }`}
+            }`}
         >
           <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -907,11 +901,10 @@ const OwnerTruckDescription: React.FC = () => {
                         key={`${imageUrl}-${imageIndex}`}
                         type="button"
                         onClick={() => setSelectedPhotoIndex(imageIndex)}
-                        className={`relative min-w-[70px] sm:min-w-[100px] overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 transition-all duration-150 ${
-                          selectedPhotoIndex === imageIndex
+                        className={`relative min-w-[70px] sm:min-w-[100px] overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 transition-all duration-150 ${selectedPhotoIndex === imageIndex
                             ? "ring-2 ring-[#389131]/40"
                             : "hover:border-[#389131]"
-                        }`}
+                          }`}
                       >
                         <img
                           src={imageUrl}
