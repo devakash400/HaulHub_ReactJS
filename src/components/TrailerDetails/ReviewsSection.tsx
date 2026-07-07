@@ -258,19 +258,22 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       {/* Reviews Grid */}
       <div className="px-10 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
         {displayReviews.map((review, i) => (
-          <div key={i}>
+          <div key={i} className={i >= 3 ? "hidden md:block" : ""}>
             {/* Top - Avatar and Name with Date/Context on right */}
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-start gap-3">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div className="flex items-center gap-3">
                 {/* Avatar */}
                 <div
                   className="
-    w-[59px] h-[59px]
+    w-[48px] h-[48px]
     rounded-full
     overflow-hidden
-    bg-gray-200
+    bg-[#EBFFE9]
+    border border-[#389131]/20
     shrink-0
-
+    flex
+    items-center
+    justify-center
   "
                 >
                   {review.avatar ? (
@@ -284,10 +287,10 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                       className="
                         w-full h-full
                         flex items-center justify-center
-                        text-sm font-semibold
+                        text-base font-semibold text-[#389131]
                       "
                     >
-                      {review.name.charAt(0)}
+                      {review.name.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
@@ -297,13 +300,12 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                   <h4
                     style={{
                       fontFamily: "Lexend",
-                      fontWeight: 400,
-                      fontSize: "24px",
-                      lineHeight: "100%",
+                      fontWeight: 500,
+                      fontSize: "16px",
+                      lineHeight: "120%",
                       letterSpacing: "0%",
                       color: "#000000",
                       margin: 0,
-                      marginTop: "20px",
                     }}
                   >
                     {review.name}
@@ -311,8 +313,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                 </div>
               </div>
 
-              {/* Date/Duration on right */}
-              <p className="text-[11px] text-[#8A8A8A] leading-none whitespace-nowrap text-right">
+              {/* Date/Duration on right (hidden on mobile, visible from sm) */}
+              <p className="text-[11px] text-[#8A8A8A] leading-none whitespace-nowrap text-right hidden sm:block">
                 {review.context}
               </p>
             </div>
@@ -366,14 +368,17 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       </div>
 
       {/* Button */}
-      <div
-        style={{ paddingBottom: "20px" }}
-        className="px-10 flex justify-end mt-8"
-      >
-        <button
-          type="button"
-          onClick={onShowAll}
-          className="
+      {reviews.length > 3 && (
+        <div
+          style={{ paddingBottom: "20px" }}
+          className={`px-10 justify-end mt-8 ${
+            reviews.length <= 6 ? "flex md:hidden" : "flex"
+          }`}
+        >
+          <button
+            type="button"
+            onClick={onShowAll}
+            className="
     w-[160px]
     h-[49px]
     rounded-[9px]
@@ -386,21 +391,22 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     justify-center
     gap-[10px]
   "
-          style={{
-            paddingTop: "14px",
-            paddingRight: "8px",
-            paddingBottom: "14px",
-            paddingLeft: "8px",
-            fontFamily: "Lexend",
-            fontWeight: 500,
-            fontSize: "16px",
-            lineHeight: "100%",
-            letterSpacing: "0%",
-          }}
-        >
-          Show all reviews
-        </button>
-      </div>
+            style={{
+              paddingTop: "14px",
+              paddingRight: "8px",
+              paddingBottom: "14px",
+              paddingLeft: "8px",
+              fontFamily: "Lexend",
+              fontWeight: 500,
+              fontSize: "16px",
+              lineHeight: "100%",
+              letterSpacing: "0%",
+            }}
+          >
+            Show all reviews
+          </button>
+        </div>
+      )}
     </section>
   );
 };

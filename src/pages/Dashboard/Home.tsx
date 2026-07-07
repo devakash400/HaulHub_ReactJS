@@ -506,11 +506,16 @@ const Home: React.FC = () => {
                 })}
               </div>
 
-              <div className="mt-2 sm:mt-6 md:mt-8 mb-0 sm:mb-4 flex justify-end px-2 sm:px-3 pt-1 sm:pt-2">
-                <button
-                  type="button"
-                  onClick={() => navigate("/owner/view-more-trucks")}
-                  className="
+              {ownerTrailerCards.length > 4 && (
+                <div
+                  className={`mt-2 sm:mt-6 md:mt-8 mb-0 sm:mb-4 justify-end px-2 sm:px-3 pt-1 sm:pt-2 ${
+                    ownerTrailerCards.length === 5 ? "hidden lg:flex" : "flex"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => navigate("/owner/view-more-trucks")}
+                    className="
     w-[80px]
     h-[25px]
     rounded-[2px]
@@ -524,10 +529,11 @@ const Home: React.FC = () => {
     hover:bg-[#DDF2DA]
     transition-colors
   "
-                >
-                  View More
-                </button>
-              </div>
+                  >
+                    View More
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </RevealBlock>
