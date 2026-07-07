@@ -5,6 +5,7 @@ import useModalNavigate from "../../hooks/useModalNavigate.ts";
 import { RootState } from "../../store";
 import api from "../../api/api.ts";
 import EmptyState from "../../components/common/EmptyState.tsx";
+import { getMyBookings } from "../../api/bookingsApi.ts";
 
 type ApiNotification = {
   _id: string;
@@ -61,6 +62,49 @@ const Notifications: React.FC = () => {
   const [expandedMessages, setExpandedMessages] = useState<
     Record<string, boolean>
   >({});
+  const [bookingStatuses, setBookingStatuses] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!isAuthenticated || isOwner) return;
+
+    const fetchBookingStatuses = async () => {
+      try {
+        const res = await getMyBookings();
+        let bookingsArr: any[] = [];
+        
+        let responseData: any = res;
+        if (res && typeof res === "object" && "data" in res) {
+          responseData = res.data;
+        }
+
+        if (Array.isArray(responseData)) {
+          bookingsArr = responseData;
+        } else if (responseData && Array.isArray(responseData.bookings)) {
+          bookingsArr = responseData.bookings;
+        } else if (responseData && Array.isArray(responseData.data)) {
+          bookingsArr = responseData.data;
+        } else if (responseData && Array.isArray(responseData.results)) {
+          bookingsArr = responseData.results;
+        }
+
+        const statusMap: Record<string, string> = {};
+        bookingsArr.forEach((b: any) => {
+          if (b && b._id) {
+            statusMap[b._id] = String(b.status || "").toLowerCase();
+          } else if (b && b.id) {
+            statusMap[b.id] = String(b.status || "").toLowerCase();
+          } else if (b && b.bookingId) {
+            statusMap[b.bookingId] = String(b.status || "").toLowerCase();
+          }
+        });
+        setBookingStatuses(statusMap);
+      } catch (err) {
+        console.error("Failed to load booking statuses", err);
+      }
+    };
+
+    void fetchBookingStatuses();
+  }, [isAuthenticated, isOwner]);
 
   const toggleMessageExpand = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -274,7 +318,11 @@ const Notifications: React.FC = () => {
                 /returned/i.test(notification.message);
               const isBookingUpdated =
                 /your booking for .* was updated/i.test(notification.title) ||
-                /your booking for .* was updated/i.test(notification.message);
+                /your booking for .* was updated/i.test(notification.message) ||
+                /the booking for .* was updated/i.test(notification.title) ||
+                /the booking for .* was updated/i.test(notification.message) ||
+                /booking status updated/i.test(notification.title) ||
+                /booking status updated/i.test(notification.message);
               const isReturnRequested =
                 /return request/i.test(notification.title) ||
                 /return request/i.test(notification.message) ||
@@ -294,6 +342,10 @@ const Notifications: React.FC = () => {
                 /pre[\s-]?screening completed/i.test(notification.message) ||
                 /pre[\s-]?screening.*complete/i.test(notification.title) ||
                 /pre[\s-]?screening.*complete/i.test(notification.message);
+              const isPreScreeningStarted =
+                /pre[\s-]?screening started/i.test(notification.title) ||
+                /pre[\s-]?screening started/i.test(notification.message) ||
+                /pre[\s-]?screening started/i.test(notification.type);
               const isPaymentCompleted =
                 /payment complet/i.test(notification.title) ||
                 /payment complet/i.test(notification.message) ||
@@ -312,7 +364,7 @@ const Notifications: React.FC = () => {
                 ((notification as any).readAt !== undefined &&
                   (notification as any).readAt !== null);
 
-              return (
+               return (
                 <div
                   key={notification._id}
                   className={`rounded-2xl border ${!isNotificationRead ? "border-[#389131] bg-[#F4FBF4]" : "border-gray-200 bg-[#F9F8F3]"} p-3 min-[400px]:p-5 shadow-sm relative`}
@@ -404,6 +456,14 @@ const Notifications: React.FC = () => {
                         >
                           View & Approve
                         </Link>
+                      ) : isReturnRequested && !isOwner ? (
+                        <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
+                          to="/booking"
+                          className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          View bookings
+                        </Link>
                       ) : isPaymentCompleted && isOwner ? (
                         <Link
                           onClick={() => handleMarkAsRead(notification._id)}
@@ -411,6 +471,14 @@ const Notifications: React.FC = () => {
                           className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
                           Ready for Pickup
+                        </Link>
+                      ) : isPaymentCompleted && !isOwner ? (
+                        <Link
+                          onClick={() => handleMarkAsRead(notification._id)}
+                          to={`/payment-receipt?bookingId=${notification.bookingId}`}
+                          className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                        >
+                          View Receipt
                         </Link>
                       ) : isReadyForPickup && isOwner ? (
                         <Link
@@ -420,20 +488,39 @@ const Notifications: React.FC = () => {
                         >
                           Mark Active
                         </Link>
-                      ) : isBookingAcceptedByOwner && !isOwner ? (
+                      ) : isReadyForPickup && !isOwner ? (
                         <Link
                           onClick={() => handleMarkAsRead(notification._id)}
-                          to={`/prescreening?bookingId=${encodeURIComponent(notification.bookingId)}`}
-                          state={{
-                            bookingId: notification.bookingId,
-                          }}
+                          to="/booking"
                           className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
                         >
-                          Start Pre-Screening
+                          View bookings
                         </Link>
+                      ) : isBookingAcceptedByOwner && !isOwner ? (
+                        bookingStatuses[notification.bookingId] === "return" ||
+                        bookingStatuses[notification.bookingId] === "returned" ? (
+                          <button
+                            disabled
+                            className="rounded-lg bg-gray-300 px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-gray-500 cursor-not-allowed"
+                          >
+                            Start Pre-Screening
+                          </button>
+                        ) : (
+                          <Link
+                            onClick={() => handleMarkAsRead(notification._id)}
+                            to={`/prescreening?bookingId=${encodeURIComponent(notification.bookingId)}`}
+                            state={{
+                              bookingId: notification.bookingId,
+                            }}
+                            className="rounded-lg bg-[#389131] px-3 py-1.5 text-xs min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm font-semibold text-white transition-colors hover:bg-[#2f7a29]"
+                          >
+                            Start Pre-Screening
+                          </Link>
+                        )
                       ) : isPickupPhotosUploaded ||
                         isBookingAccepted ||
-                        isPreScreeningCompleted ? (
+                        isPreScreeningCompleted ||
+                        isPreScreeningStarted ? (
                         !isNotificationRead ? (
                           <button
                             onClick={() => handleMarkAsRead(notification._id)}
